@@ -280,6 +280,7 @@ h3.sect{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(-
       <div id="dim" class="hidden"><div id="dialog"></div></div>
     </div>
     <div id="homebar" onclick="goHome()"><b></b></div>
+  <div id="dbg" onclick="this.remove()" style="position:fixed;left:8px;bottom:8px;z-index:99;background:rgba(0,0,0,.55);color:#8fe6b8;font:10px/1.5 ui-monospace,Menlo,monospace;padding:5px 8px;border-radius:8px"></div>
   </div>
 </div>
 <div id="deskcap">TyNet phone · PWA draft · fake numbers, no save attached</div>
@@ -511,6 +512,10 @@ function tick(){const d=new Date();const t=d.toLocaleTimeString('en-US',{hour:'n
   document.getElementById('sb-time').textContent=t;document.getElementById('lk-time').textContent=t;
   document.getElementById('lk-date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
 tick();setInterval(tick,20000);
+function dbg(){const e=document.getElementById('dbg');if(!e)return;
+ const sa=getComputedStyle(document.documentElement).getPropertyValue('--sat')||'';
+ e.textContent='inner '+window.innerWidth+'x'+window.innerHeight+' · screen '+screen.width+'x'+screen.height+' · dpr '+devicePixelRatio+' · standalone '+(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches);}
+dbg();addEventListener('resize',dbg);setInterval(dbg,3000);
 drawHome();
 </script>
 </body>
