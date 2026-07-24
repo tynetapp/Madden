@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TyNet">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -24,12 +23,12 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-html{height:100%;background:#020604}body{height:100%;background:#020604;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);overflow:hidden}
+html{height:100%;background:#000}body{height:100%;background:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 /* ===== desk frame on wide screens; fullscreen on phones ===== */
 #desk{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
-#frame{position:fixed;inset:0;background:#020604;overflow:hidden}
+#frame{position:fixed;inset:0;background:#000;overflow:hidden}
 #deskcap{display:none;color:#4c5560;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 @media (min-width:520px) and (min-height:900px){
   body{background:radial-gradient(1200px 700px at 50% 20%,#161b20,#08090b)}
@@ -45,7 +44,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 #screen{position:absolute;inset:0;padding-top:env(safe-area-inset-top,14px);background:
   radial-gradient(80% 55% at 78% -8%,rgba(47,208,140,.28),transparent 60%),
   radial-gradient(70% 50% at 8% 108%,rgba(31,111,214,.20),transparent 60%),
-  linear-gradient(160deg,var(--wall2),var(--wall1) 55%,#020604);
+  linear-gradient(160deg,var(--wall2),var(--wall1) 55%,#010302 82%,#000);
   display:flex;flex-direction:column}
 #statusbar{display:none;height:54px;flex:0 0 auto;justify-content:space-between;align-items:flex-end;padding:0 28px 6px;font-size:14px;font-weight:600;z-index:55}
 #sb-right{display:flex;gap:6px;align-items:center}
@@ -512,7 +511,7 @@ function tick(){const d=new Date();const t=d.toLocaleTimeString('en-US',{hour:'n
   document.getElementById('sb-time').textContent=t;document.getElementById('lk-time').textContent=t;
   document.getElementById('lk-date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
 tick();setInterval(tick,20000);
-function dbg(){const e=document.getElementById('dbg');if(!e)return;
+function dbg(){const e=document.getElementById('dbg');if(!e)return;if(location.hash!=='#debug'){e.style.display='none';return}e.style.display='block';
  const sa=getComputedStyle(document.documentElement).getPropertyValue('--sat')||'';
  e.textContent='inner '+window.innerWidth+'x'+window.innerHeight+' · screen '+screen.width+'x'+screen.height+' · dpr '+devicePixelRatio+' · standalone '+(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches);}
 dbg();addEventListener('resize',dbg);setInterval(dbg,3000);

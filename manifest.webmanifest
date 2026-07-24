@@ -1,7 +1,7 @@
 {
   "name": "TyNet",
   "short_name": "TyNet",
-  "display": "standalone",
+  "display": "fullscreen",
   "start_url": ".",
   "background_color": "#020604",
   "theme_color": "#020604",
