@@ -1,4 +1,4 @@
-/* ============ TyNet OS — app.js ============ */
+/* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -69,7 +69,7 @@ function monthlyBurn(){
   b += S.debts.reduce((a,d)=>a+(d.pay||0),0);
   b += S.perception.familyAsk||0;
   if (S.credit.cardBal>0) b += Math.max(35, S.credit.cardBal*0.03);
-  return b;
+  return assistMonthly() + b;
 }
 function runwayWeeks(){ const b=monthlyBurn(); if(b<=0) return 999; return Math.floor(liquid()/(b/4.333)); }
 function psWeekly(){ return 6222; }
@@ -106,26 +106,29 @@ const GLYPH = {
   meridian: '<span style="font-family:Georgia,serif;font-size:26px;font-weight:700">M</span>',
   huddle: '<span style="font-size:19px;font-weight:800;letter-spacing:-.5px">h/</span>',
   sync: SV('<path d="M4 9h13l-3.5-3.5M20 15H7l3.5 3.5"/>'),
-  chirper: SV('<path d="M4.5 4.5l15 15M19.5 4.5l-15 15" stroke-width="2.6"/>'),
+  chirper: SV('<path d="M20.5 6.5c-.6.3-1.2.5-1.9.6.7-.4 1.2-1 1.4-1.8-.6.4-1.3.7-2.1.8C17.3 5.4 16.4 5 15.4 5c-1.9 0-3.4 1.5-3.4 3.4 0 .3 0 .5.1.8-2.8-.1-5.3-1.5-7-3.6-.3.5-.5 1.1-.5 1.7 0 1.2.6 2.2 1.5 2.8-.6 0-1.1-.2-1.5-.4 0 1.6 1.2 3 2.7 3.3-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.4 1.7 2.4 3.2 2.4-1.2.9-2.6 1.5-4.2 1.5H4c1.5 1 3.3 1.5 5.2 1.5 6.3 0 9.7-5.2 9.7-9.7v-.4c.7-.5 1.2-1.1 1.6-1.8z" fill="currentColor" stroke="none"/>'),
   tmail: SV('<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>'),
   chron: '<span style="font-family:Georgia,serif;font-size:19px;font-weight:700;letter-spacing:-.5px">UC</span>',
   pylon: '<i class="py-ic"></i>',
+  wager: '<span style="font-weight:900;font-size:19px;letter-spacing:-1px">W/</span>',
+  assist: SV('<circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/><path d="M16.5 5.5l1.2 1.2M18.6 4.6l.9.9" stroke-width="1.4"/>'),
   podium: SV('<rect x="9.2" y="3" width="5.6" height="11" rx="2.8"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21M9 21h6"/>'),
   keystone: SV('<path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10.5V20h12v-9.5"/><rect x="10" y="14.5" width="4" height="5.5" fill="currentColor" stroke="none"/>'),
   octane: SV('<path d="M4 16.5a8.5 8.5 0 1 1 16 0"/><path d="M12 15.5l4.2-5" stroke-width="2.4"/><circle cx="12" cy="16" r="1.6" fill="currentColor" stroke="none"/>'),
   apex: '<span style="font-size:15px;letter-spacing:.06em;font-weight:800">AX</span>',
   yachts: SV('<circle cx="12" cy="5" r="2.2"/><path d="M12 7.5V19M6 12h12M5 15c.8 3 3.6 5 7 5s6.2-2 7-5l-2.5 1M5 15l2.5 1"/>'),
-  planes: SV('<path d="M10.5 13.5L3 11l1.5-1.5L11 10l4.5-4.5c.8-.8 2.2-.8 2.9 0 .8.8.8 2.1 0 2.9L14 13l.5 6.5L13 21l-2.5-7.5z" fill="currentColor" stroke="none"/>'),
+  planes: SV('<path d="M21 15.5v-1.7l-8-4.6V4.4c0-.8-.5-1.4-1-1.4s-1 .6-1 1.4v4.8l-8 4.6v1.7l8-2.4v4.6l-2.2 1.6v1.3l3.2-.9 3.2.9v-1.3L13 17.7v-4.6l8 2.4z" fill="currentColor" stroke="none"/>'),
   contacts: SV('<circle cx="12" cy="8.4" r="3.6" fill="currentColor" stroke="none"/><path d="M4.8 20c.9-3.4 3.8-5.4 7.2-5.4s6.3 2 7.2 5.4" fill="currentColor" stroke="none"/>'),
   card: SV('<rect x="2.8" y="5.5" width="18.4" height="13" rx="2.4"/><path d="M3 10h18" stroke-width="2.6"/><path d="M6.5 15h5"/>'),
   settings: SV('<circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>'),
 };
 /* ---- OS shell ---- */
 const APPS = [
+  {id:"huddle", n:"The Huddle", ic:"ic-hud"},
   {id:"chirper", n:"Chirper", ic:"ic-chr"},
   {id:"tmail", n:"T-Mail", ic:"ic-tml"},
   {id:"chron", n:"Chronicle", ic:"ic-chron"},
-  {id:"pylon", n:"Pylon", ic:"ic-pylon"},
+  {id:"pylon", n:"NFLSN", ic:"ic-pylon"},
   {id:"podium", n:"Podium", ic:"ic-pod"},
   {id:"keystone", n:"Keystone", ic:"ic-key"},
   {id:"octane", n:"Octane", ic:"ic-oct"},
@@ -134,13 +137,14 @@ const APPS = [
   {id:"planes", n:"Stratos", ic:"ic-pln"},
   {id:"contacts", n:"Contacts", ic:"ic-con"},
   {id:"card", n:"Credit Card", ic:"ic-card"},
-  {id:"settings", n:"Settings", ic:"ic-set"},
+  {id:"wager", n:"WagerLines", ic:"ic-wgr"},
+  {id:"assist", n:"Mara", ic:"ic-ast"},
 ];
 const DOCK = [
   {id:"messages", n:"Messages", ic:"ic-msg"},
   {id:"meridian", n:"Meridian", ic:"ic-mer"},
-  {id:"huddle", n:"The Huddle", ic:"ic-hud"},
   {id:"sync", n:"Sync", ic:"ic-sync"},
+  {id:"settings", n:"Settings", ic:"ic-set"},
 ];
 let curApp = null, appStack = [];
 
@@ -150,18 +154,22 @@ function closeSheet(){ $("#dim").classList.add("hidden"); }
 $("#dim") && document.addEventListener("click", e=>{ if(e.target.id==="dim") closeSheet(); });
 
 function clockTick(){
-  const d=new Date();
+  const d=phoneNow?phoneNow():new Date();
   const t=d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}).replace(/\s?[AP]M/i,"");
   $("#lk-time").textContent=t; $("#sb-time").textContent=t;
   $("#lk-date").textContent=d.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
 }
 setInterval(clockTick, 5000);
 
-function unlock(){ $("#lock").classList.add("hidden"); $("#home").classList.remove("hidden"); }
+function unlock(){ const hb=$('#homebar'); if(hb) hb.style.display='none'; $("#lock").classList.add("hidden"); $("#home").classList.remove("hidden"); }
 function lock(){ renderLock(); $("#lock").classList.remove("hidden"); $("#home").classList.add("hidden"); closeApp(true); }
 
 function iconEl(a, badge){
   return `<button class="app" onclick="openApp('${a.id}')"><b class="icon ${a.ic}">${GLYPH[a.id]||""}${badge?`<span class="badge">${badge}</span>`:""}</b><span>${a.n}</span></button>`;
+}
+function orderedApps(){
+  const ord = META.settings.appOrder||{};
+  return APPS.slice().sort((a,b)=> ((a.id in ord)? ord[a.id]-0.5 : APPS.indexOf(a)) - ((b.id in ord)? ord[b.id]-0.5 : APPS.indexOf(b)) );
 }
 function renderHome(){
   const unreadM = S.world.texts.filter(t=>!S.reads["t:"+t.id]).length;
@@ -171,10 +179,25 @@ function renderHome(){
   renderWidget();
 }
 function buzzTier(f){ return f>2000000?"Household name":f>500000?"National story":f>120000?"League-wide buzz":f>25000?"Local hero":f>6000?"Beat-writer radar":f>1500?"Local curiosity":"Unknown"; }
+function gameDate(clock){
+  // anchor: RS week 1 = second Thursday after Labor Day-ish; approximations by design
+  const y=clock.seasonYear||2026;
+  let base;
+  if (clock.weekType==="PreSeason") base = new Date(y,7,7 + clock.week*7);       // Aug 7 + wk
+  else if (clock.weekType==="RegularSeason") base = new Date(y,8,10 + clock.week*7); // Sep 10 + wk
+  else if (clock.weekType==="OffSeason") base = new Date(y+1,2,15);
+  else base = new Date(y+1,0,11 + (clock.week||0)*7); // playoffs
+  return base.toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"});
+}
+function phoneNow(){
+  const d=new Date();
+  if (META.settings.clockOffsetMin) d.setMinutes(d.getMinutes()+META.settings.clockOffsetMin);
+  return d;
+}
 function renderWidget(){
   const p=S.blob.player;
-  $("#wg-title").textContent = p.first+" "+p.last+" · "+p.teamShort;
-  $("#wg-week").textContent = wkLabel(S.blob.clock);
+  $("#wg-title").textContent = p.first+" "+p.last+" · #"+p.jersey+" "+p.pos+" · "+p.teamShort;
+  $("#wg-week").textContent = gameDate(S.blob.clock)+" · "+wkLabel(S.blob.clock);
   const st = p.status==="PracticeSquad"?"Practice Squad":p.isIR?"Injured Reserve":p.status==="Signed"?"Active Roster":p.status;
   $("#wg-cash").textContent = st;
   $("#wg-run").textContent = buzzTier(S.chirp?S.chirp.followers:0);
@@ -186,12 +209,34 @@ function wkKey(c){ return c.seasonYear+"/"+c.weekType+"/"+c.week; }
 function nextGame(){
   const c=S.blob.clock;
   const order = t => t==="PreSeason"?0 : t==="RegularSeason"?1 : 2;
-  return S.blob.schedule.find(g => !g[7] && (order(g[1])>order(c.weekType) || (g[1]===c.weekType && g[0]>=c.week)));
+  const cands = S.blob.schedule.filter(g => !g[7] && (order(g[1])>order(c.weekType) || (g[1]===c.weekType && g[0]>=c.week)));
+  cands.sort((x,y)=> (order(x[1])-order(y[1])) || (x[0]-y[0]));
+  return cands[0];
+}
+function liveNotifs(){
+  const base = (S? S.world.notifs : D.SEED.notifications)||[];
+  const out = base.filter(x=> !(S && S.reads["n:"+(x.t+x.p).slice(0,40)]));
+  // live unread signals
+  if (S){
+    const unreadTexts = S.world.texts.filter(t=>t.msgs.length && t.msgs[t.msgs.length-1][0]!=="me" && !S.reads["t:"+t.id]);
+    for (const t of unreadTexts.slice(0,2)){
+      let p=t.msgs[t.msgs.length-1][1]; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
+      out.unshift({app:"messages", t:t.name, p});
+    }
+    const unreadMail=(S.world.emails||[]).filter(e=>!S.reads["e:"+e.id]);
+    if (unreadMail.length) out.unshift({app:"tmail", t:"T-Mail", p:unreadMail.length+" unread — "+unreadMail[0].s});
+  }
+  return out;
+}
+function markNotifRead(app){
+  if (!S) return;
+  for (const x of (S.world.notifs||[])) if (x.app===app) S.reads["n:"+(x.t+x.p).slice(0,40)]=1;
+  persist(); 
 }
 function renderLock(){
-  const n = S? S.world.notifs : D.SEED.notifications;
+  const n = liveNotifs();
   const icons = {messages:"ic-msg",huddle:"ic-hud",tmail:"ic-tml",meridian:"ic-mer",chirper:"ic-chr",sync:"ic-sync",chron:"ic-chron",pylon:"ic-pylon"};
-  $("#lk-notifs").innerHTML = n.slice(0,4).map(x=>`<button class="lk-card" onclick="unlock();openApp('${x.app}')">
+  $("#lk-notifs").innerHTML = n.slice(0,4).map(x=>`<button class="lk-card" onclick="unlock();markNotifRead('${x.app}');openApp('${x.app}')">
     <span class="ic ${icons[x.app]||'ic-set'}">${GLYPH[x.app]||"•"}</span>
     <span style="min-width:0"><h4>${esc(x.t)}</h4><p>${esc(x.p)}</p></span></button>`).join("");
   $("#lk-careers").innerHTML = META.careers.map(c=>`<button class="career-pick ${c.id===META.activeId?'active':''}" onclick="switchCareer('${c.id}')">
@@ -202,6 +247,7 @@ async function switchCareer(id){
   unlock(); renderHome();
 }
 function openApp(id){
+  markNotifRead(id);
   curApp=id; appStack=[];
   const v=$("#appview"); v.classList.remove("hidden");
   requestAnimationFrame(()=>v.classList.add("open"));
@@ -214,7 +260,7 @@ function closeApp(silent){
 }
 $("#hb").addEventListener("click", ()=>{ if(curApp) closeApp(); });
 $("#lk-unlock").addEventListener("click", unlock);
-$("#hs-widget").addEventListener("click", ()=>openApp("chirper"));
+
 
 function aphead(title, opts={}){
   return `<div class="aphead">${opts.noback?"":`<button class="back" onclick="${opts.back||"closeApp()"}">‹ ${opts.backlabel||"Home"}</button>`}<h1>${title}</h1>${opts.act?`<button class="hact" onclick="${opts.actFn}">${opts.act}</button>`:""}</div>`;
@@ -246,8 +292,8 @@ RENDER.messages = (b, sub)=>{
     const body=b.querySelector(".apbody"); body.scrollTop=body.scrollHeight;
   } else {
     b.innerHTML = aphead("Messages") + `<div class="apbody flush">` + S.world.texts.map(t=>{
-      const last=t.msgs[t.msgs.length-1]; const unread=!S.reads["t:"+t.id];
-      let p=last[1]; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
+      const last=t.msgs[t.msgs.length-1]||["them",""]; const unread=t.msgs.length&&!S.reads["t:"+t.id];
+      let p=last[1]||"Say something."; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
       return `<button class="thd" style="width:100%" onclick="renderApp('messages',{thread:'${t.id}'})">
         <span class="av" style="background:${t.color||avColor(t.name)}">${initials(t.name)}</span>
         <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6">•</span>':''}<time>now</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span></button>`;
@@ -259,7 +305,7 @@ async function sendText(tid){
   const t=S.world.texts.find(x=>x.id===tid);
   t.msgs.push(["me", v]); inp.value=""; persist();
   renderApp("messages",{thread:tid});
-  if (META.settings.apiKey){
+  if (aiKey()){
     const reply = await aiReply(t, v);
     if (reply){ t.msgs.push(["them", reply]); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
   } else { toast("Delivered. Add an API key in Settings for replies."); }
@@ -276,38 +322,42 @@ RENDER.chirper = (b,sub)=>{
     if (!c){ chThread=null; } else {
       b.innerHTML = aphead("Post",{back:"chThread=null;renderApp('chirper')",backlabel:"Chirper"}) + `<div class="apbody flush" style="padding:0 16px 90px">
       <div class="chirp big">
-        <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b><span>${esc(c.h||me)}${c.vf?" ✔":""}</span></div>
-        <p>${esc(c.t)}</p>
+        <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n||"me")}">${c.n?initials(c.n):(META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last))}</span><div class="ch-main">
+        <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b>${c.vf?'<i class="vfk">✔</i>':""}<span>${esc(c.h||me)}</span></div></div></div>
+        <p style="margin-top:8px">${esc(c.t)}</p>
         <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.rp||0).toLocaleString()} rechirps</div>
         <div class="ch-act"><button onclick="chLike('${c.id}')">♡ Like</button><button onclick="chReplyBox()">↩ Reply</button></div>
       </div>
       <div id="chReplyBox"></div>
       <div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${(c.replies||[]).length}</span></div>
-      ${(c.replies||[]).map(r=>`<div class="chirp reply"><div class="ch-h"><b>${esc(r.a)}</b><span>${esc(r.h)}</span></div><p>${esc(r.x)}</p></div>`).join("") || '<div class="empty">No replies yet.</div>'}
+      ${(c.replies||[]).map(r=>`<div class="chirp reply"><div class="ch-row"><span class="av chav sm" style="background:${avColor(r.a)}">${r.h===S.handle&&META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(r.a)}</span><div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b><span>${esc(r.h)}</span></div><p>${esc(r.x)}</p></div></div></div>`).join("") || '<div class="empty">No replies yet.</div>'}
       </div>`;
       return;
     }
   }
   b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1>Chirper</h1><button class="hact" onclick="chCompose()">Post</button></div>
   <div class="ch-profile">
-    <div class="ch-av">${esc(S.blob.player.first[0]+S.blob.player.last[0])}</div>
+    <button class="ch-av" onclick="pickPfpFromChirper()" title="Change photo">${META.settings.pfp?`<img src="${META.settings.pfp}">`:esc(S.blob.player.first[0]+S.blob.player.last[0])}</button>
     <div class="ch-pinfo">
       <b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>
       <span>${esc(me)} · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
       <div class="ch-follow"><span><b>${S.chirp.followers.toLocaleString()}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${S.chirp.delta.toLocaleString()} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
     </div>
   </div>
-  <div class="seg" style="background:rgba(255,255,255,.07)">${[["feed","Feed"],["mine","Your Posts"]].map(t=>`<button class="${chTab===t[0]?"on":""}" onclick="chTab='${t[0]}';renderApp('chirper')">${t[1]}</button>`).join("")}</div>
+  <div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
+  <div class="seg segc" style="background:rgba(255,255,255,.07)">${[["feed","Feed"],["mine","Your Posts"]].map(t=>`<button class="${chTab===t[0]?"on":""}" onclick="chTab='${t[0]}';renderApp('chirper')">${t[1]}</button>`).join("")}</div>
   <div class="apbody flush" id="chList" style="padding:0 16px 90px"></div>`;
   const el=$("#chList");
   if (chTab==="feed"){
     el.innerHTML = S.world.chirps.map((c,i)=>`<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
-      <div class="ch-h"><b>${esc(c.n)}</b><span>${esc(c.h)}${c.vf?" ✔":""} · ${esc(c.tm||"")}</span></div><p>${esc(c.t)}</p>
-      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
+      <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n)}">${initials(c.n)}</span><div class="ch-main">
+      <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?'<i class="vfk">✔</i>':""}<span>${esc(c.h)} · ${esc(c.tm||"")}</span></div><p>${esc(c.t)}</p>
+      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
   } else {
     el.innerHTML = (S.chirp.posts||[]).slice().reverse().map(c=>`<button class="chirp" onclick="renderApp('chirper',{t:'${c.id}'})">
+      <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
       <div class="ch-h"><b>You</b><span>${esc(me)}</span></div><p>${esc(c.t)}</p>
-      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
+      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
   }
 };
 function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
@@ -321,18 +371,29 @@ async function chSendReply(){
   const c=chGet(chThread);
   c.replies=c.replies||[]; c.replies.push({a:S.blob.player.first+" "+S.blob.player.last, h:S.handle, x:txt});
   persist(); renderApp('chirper',{t:chThread});
-  if (META.settings.apiKey){
+  if (aiKey()){
     const rep = await aiChirpReply(c, txt);
     if (rep){ for (const r of rep) c.replies.push(r); persist(); if(chThread===c.id) renderApp('chirper',{t:c.id}); }
   }
 }
 async function aiChirpReply(c, mine){
   try{
-    const out = await callClaude([{role:"user", content:
-      "You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a practice squad rookie QB) just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]"}], 400);
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a practice squad rookie QB) just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]", "Write the replies now.", 400);
     const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
     return Array.isArray(arr)? arr.slice(0,3) : null;
   }catch(e){ return null; }
+}
+function pickPfpFromChirper(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
+  inp.onchange=()=>pickFromInput(inp,"pfp") || setTimeout(()=>renderApp("chirper"),600);
+  inp.click();
+}
+function chQuickPost(){
+  const el=$("#chQuick"); const txt=el&&el.value.trim(); if(!txt) return;
+  const rng=seedRng(S.careerId+txt);
+  S.chirp.posts=S.chirp.posts||[];
+  S.chirp.posts.push({id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]});
+  persist(); chTab="mine"; renderApp("chirper"); toast("Posted.");
 }
 function chCompose(){
   sheet(`<h3>New post</h3><textarea id="chNew" class="field" rows="3" placeholder="What's happening, ${esc(S.handle)}?"></textarea>
@@ -385,8 +446,8 @@ const NETMAP = g => { const day=g[5], t=+g[6];
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹</button><h1><i class="py-mark"></i>Pylon</h1><span class="hact" style="opacity:.7;font-size:11px">${esc(D.PYLON.tag)}</span></div>
-  <div class="seg" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹</button><h1><i class="py-mark"></i>NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
+  <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
 };
@@ -503,7 +564,7 @@ let merTab = "accounts";
 let merShow = {};
 RENDER.meridian = b=>{
   b.className="meridian lightapp";
-  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1><span class="mer-logo">M</span> Meridian</h1><button class="hact" style="color:#0b5cad" onclick="toast('Private Client line: (800) 555-0122')">Support</button></div>
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1><span class="mer-logo">M</span> Meridian</h1><span class="hact" style="color:#8a919c;font-size:11px;font-weight:600">Banking for the long season</span></div>
   <div class="apbody flush" id="merMain" style="padding-bottom:76px"></div>
   <div class="mer-tabs">
     ${[["accounts","Accounts","$"],["pay","Pay/Transfer","⇄"],["paycheck","Paycheck","▤"],["loans","Loans","%"],["invest","Invest","▲"]].map(t=>
@@ -522,8 +583,17 @@ function acctCard(label, key, bal, extra){
     ${open? `<div class="acct-detail">${extra||recentFor(key)}</div>`:""}
   </div>`;
 }
+function acctRows(key){
+  return S.ledger.filter(l=> (l.acct||"checking")===key || (l.kind==="move" && (l.from===key||l.to===key)) );
+}
+function moveLabel(l,key){
+  if (l.kind!=="move") return [l.t, l.amt];
+  if (l.from===key) return ["Transfer to "+cap(l.to), -l.mv];
+  return ["Transfer from "+cap(l.from), l.mv];
+}
+function cap(s){ return s==="tax"?"Tax Hold":s[0].toUpperCase()+s.slice(1); }
 function recentFor(key){
-  const rows = S.ledger.slice(-6).reverse();
+  const rows = acctRows(key).slice(-6).reverse().map(l=>{const [t,a]=moveLabel(l,key);return {t,amt:a};});
   return rows.map(l=>`<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${l.amt?fm(l.amt):""}</span></div>`).join("") || '<div style="font-size:13px;opacity:.6">No recent activity.</div>';
 }
 function merBody(){
@@ -560,7 +630,7 @@ function merBody(){
       <button class="btn" style="background:#0b5cad;color:#fff" onclick="doTransfer()">Transfer</button>
     </div></div>
     <div class="mer-sechead">Recent activity</div>
-    <div class="acct-group"><div class="acct">${S.ledger.slice(-12).reverse().map(l=>`<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${l.amt?fm(l.amt):""}</span></div>`).join("")}</div></div>`;
+    <div class="acct-group"><div class="acct">${S.ledger.slice(-14).reverse().map(l=>{const a=l.kind==="move"?l.mv:l.amt;return `<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${a?fm(l.kind==="move"?a:l.amt):""}</span></div>`}).join("")}</div></div>`;
   }
   if (merTab==="paycheck"){
     const nx = nextGame(); const road = nx && !nx[4]; const st = road? STATE_TAX[nx[3]] : null;
@@ -606,7 +676,7 @@ function doTransfer(){
   const f=$("#tFrom").value, t=$("#tTo").value, a=+$("#tAmt").value;
   if(!a||a<=0||f===t) return toast("Pick a real amount.");
   if(S.cash[f]<a) return toast("Insufficient funds in that account.");
-  S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${f} to ${t}`, amt:0, kind:"move"});
+  S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${cap(f)} to ${cap(t)}`, amt:0, mv:a, from:f, to:t, kind:"move"});
   persist(); merBody(); renderWidget(); toast("Moved "+fm(a));
 }
 function takeLoan(id){
@@ -692,7 +762,11 @@ function genHomes(){
       const beds=2+Math.floor(rng()*7), baths=Math.max(1.5, beds-1+Math.round(rng())*.5);
       const lot=+( (H[2]*(0.6+rng()*1.6)).toFixed(2) );
       const sq=1100+Math.floor(rng()*3400)+(H[1]>1.5?900:0);
-      const base=H[1]*1e6; const price=Math.round(infl*(base*(0.55+rng()*0.9) + sq*180*H[1] + lot*base*0.15)/5000)*5000;
+      const base=H[1]*1e6;
+      const lshare = Math.min(0.85, Math.max(0.12, 0.2 + 0.18*Math.log(H[1]) + 0.25*Math.min(1, 0.15/Math.max(H[2],0.02))));
+      const perAcre = base*lshare/Math.max(H[2],0.02);
+      const psf = 140 + H[1]*420;
+      const price=Math.round(infl*( sq*psf*(0.8+rng()*0.5) + lot*perAcre*0.85 )/5000)*5000;
       const num=100+Math.floor(rng()*880);
       const st=D.STREETS[Math.floor(rng()*D.STREETS.length)]+" "+D.STTYPES[Math.floor(rng()*D.STTYPES.length)];
       const kind = sq>2800?"Single family":beds<=2?"Condo":rng()>0.5?"Townhouse":"Single family";
@@ -709,12 +783,10 @@ function genCars(){
     const nowYr = S.blob.clock.seasonYear||2026;
     const last = Math.min(yrEnd, nowYr);
     const years=[]; for(let y=yr0;y<=last;y++) years.push(y);
-    // keep inventory sane: newest year always present, plus a sampling of older ones
-    const pick=[last]; for (const y of years) if(y!==last && rng()>0.55 && pick.length<6) pick.push(y);
-    for (const y of pick){
+    for (const y of years){
       const age=nowYr-y; const mi = age===0? Math.floor(rng()*40)*10 : Math.floor((5+rng()*11)*1000*age);
-      const collect = (seg==="hyper" || (seg==="exotic" && yrEnd<nowYr-1));
-      const dep = collect? Math.pow(0.97,age) : Math.pow(0.88,age);
+      const collect = (seg==="hyper" || (seg==="exotic" && yrEnd<nowYr-1) || (yrEnd<1996));
+      const dep = collect? Math.pow(0.985,Math.min(age,30)) : age>25? Math.pow(0.88,25)*Math.pow(1.02,age-25) : Math.pow(0.88,age);
       const price=Math.round(baseK*1000*infl*dep*(0.92+rng()*0.16)/250)*250;
       out.push({id:(make+model+y+mi).replace(/\W/g,""), make, model, body, seg, yr:y, mi, price});
     }
@@ -770,7 +842,7 @@ RENDER.keystone = (b,sub)=>{
     </div>`;
     return;
   }
-  b.innerHTML = aphead("Keystone", {act: keyMode==="browse"?"Build your own":"Browse", actFn:"keyMode=keyMode==='browse'?'build':'browse';renderApp('keystone')"}) +
+  b.innerHTML = `<div class="brandhead key"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">⌂</div><div><h1>Keystone</h1><small>Homes and land, every market</small></div><button class="hact" style="margin-left:auto;color:#fff" onclick="keyMode=keyMode==='browse'?'build':'browse';renderApp('keystone')">${keyMode==="browse"?"Build your own":"Browse"}</button></div>` +
   `<div class="apbody" id="keyBody"></div>`;
   const kb=$("#keyBody");
   if (keyMode==="build"){
@@ -803,7 +875,12 @@ function priceBuild(){
   const beds=+$("#bBeds").value, baths=+$("#bBaths").value, sq=+$("#bSq").value, fin=+$("#bFin").value;
   if(!sq||sq<800) return toast("Square footage too small to permit.");
   const infl=Math.pow(1.035, Math.max(0,(S.blob.clock.seasonYear||2026)-2026));
-  const land=Math.round(infl*hood[1]*1e6*(0.22 + lot*0.28)/5000)*5000;
+  const lshare = Math.min(0.85, Math.max(0.12, 0.2 + 0.18*Math.log(hood[1]) + 0.25*Math.min(1, 0.15/Math.max(hood[2],0.02))));
+  const perAcre = hood[1]*1e6*lshare/Math.max(hood[2],0.02);
+  const typ = hood[2];
+  const eff = lot<=typ? lot : typ + (lot-typ)*0.88; // slight bulk discount past typical
+  const land=Math.round(infl*perAcre*eff/5000)*5000;
+  if (lot > typ*20) toast("Assembling "+lot+" acres in "+hood[0].split(",")[0]+" means buying out neighbors. Priced accordingly.");
   const build=Math.round(infl*sq*(240*fin)*(1+(beds+baths)*0.012)/5000)*5000;
   const total=land+build;
   const id="build-"+Date.now();
@@ -865,7 +942,7 @@ RENDER.octane = (b,sub)=>{
   }
   const makes=[...new Set(D.CARDATA.map(x=>x[0]))].sort();
   const yrs=[...new Set(cars.map(c=>c.yr))].sort((a,b)=>b-a);
-  b.innerHTML = aphead("Octane", {act: S.garage.length? "Garage ("+S.garage.length+")":"", actFn:"garSheet()"}) +
+  b.innerHTML = `<div class="brandhead oct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">◉</div><div><h1>Octane</h1><small>Every make. Every year.</small></div>${S.garage.length?`<button class="hact" style="margin-left:auto;color:#ffb35c" onclick="garSheet()">Garage (${S.garage.length})</button>`:""}</div>` +
   `<div class="filters">
     <input placeholder="Search" value="${esc(octF.q)}" oninput="octF.q=this.value;octList()">
     <select onchange="octF.make=this.value;octList()"><option value="">All makes</option>${makes.map(m=>`<option ${octF.make===m?"selected":""}>${m}</option>`).join("")}</select>
@@ -955,7 +1032,7 @@ RENDER.yachts = (b,sub)=>{
     return;
   }
   const groups=["fishing","dayboat","wake","cruiser","sport","flybridge","sportfish","catamaran","classic","superyacht"];
-  b.innerHTML = aphead("Harborline") + `<div class="apbody">` + groups.map(g=>{
+  b.innerHTML = `<div class="brandhead yct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">⚓</div><div><h1>Harborline</h1><small>Yacht brokerage since 1958</small></div></div><div class="apbody">` + groups.map(g=>{
     const rows=boats.filter(x=>x.type===g); if(!rows.length) return "";
     return `<div class="hoodhead"><h3 style="text-transform:capitalize">${g==="sportfish"?"Sportfishing":g}</h3><span>${rows.length} vessels</span></div>` +
     rows.map(Y=>`<button class="veh-row light" onclick="renderApp('yachts',{y:'${Y.id}'})">
@@ -995,7 +1072,7 @@ RENDER.planes = (b,sub)=>{
     <p style="font-size:12px;color:var(--faint);margin-top:10px">Charter tiers arrive next iteration. Whole ownership only, like a maniac.</p></div>`;
     return;
   }
-  b.innerHTML = aphead("Stratos Air") + `<div class="apbody">` +
+  b.innerHTML = `<div class="brandhead pln"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">✈</div><div><h1>Stratos Air</h1><small>Private aviation, whole ownership</small></div></div><div class="apbody">` +
   ["piston","vlj","turboprop","light","midsize","super-mid","large","ultra","bizliner"].map(g=>{
     const rows=planes.filter(x=>x.cls===g); if(!rows.length) return "";
     const label={piston:"Piston",vlj:"Very Light Jets",turboprop:"Turboprops",light:"Light Jets",midsize:"Midsize",["super-mid"]:"Super-Midsize",large:"Large Cabin",ultra:"Ultra Long Range",bizliner:"Bizliners"}[g];
@@ -1025,10 +1102,10 @@ RENDER.apex = (b,sub)=>{
     b.innerHTML = aphead("Apex Sports Group",{back:"renderApp('apex')",backlabel:"Agents"}) + `<div class="apbody">
     <div class="veh-detail light">
       <div class="vd-title">${esc(A.n)}</div>
-      <div style="font-size:13px;opacity:.6;margin:-2px 0 10px">${A.age} · ${A.yrs} years in the business · ${A.fee.toFixed(2)}% fee</div>
-      <div class="payline"><span>Negotiation</span><span style="display:flex;align-items:center;gap:8px">${bar(A.neg)}<b>${A.neg}</b></span></div>
-      <div class="payline"><span>Endorsements</span><span style="display:flex;align-items:center;gap:8px">${bar(A.end)}<b>${A.end}</b></span></div>
-      <div class="payline"><span>Aggressiveness</span><span style="display:flex;align-items:center;gap:8px">${bar(A.agg)}<b>${A.agg}</b></span></div>
+      <div style="font-size:13px;opacity:.6;margin:-2px 0 10px">Age ${A.age} · ${A.yrs} years experience · takes ${A.fee.toFixed(2)}% of playing contracts</div>
+      <div class="payline"><span>Contract negotiation<br><small style="opacity:.55">How much money he squeezes out of a front office</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.neg)}<b>${A.neg}/10</b></span></div>
+      <div class="payline"><span>Endorsement reach<br><small style="opacity:.55">Which brands pick up when he calls</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.end)}<b>${A.end}/10</b></span></div>
+      <div class="payline"><span>Aggressiveness<br><small style="opacity:.55">High wins fights and burns bridges; low keeps doors open</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.agg)}<b>${A.agg}/10</b></span></div>
       <div class="payline"><span>Takes on</span><span style="max-width:55%;text-align:right;font-size:12.5px">${esc(A.willing)}</span></div>
       <p style="font-size:13.5px;line-height:1.55;opacity:.8;margin-top:10px">${esc(A.style)}</p>
     </div>
@@ -1037,15 +1114,15 @@ RENDER.apex = (b,sub)=>{
     <p style="font-size:12px;opacity:.55;margin-top:8px">The fee comes out of every playing check. Switching mid-relationship is legal, common, and remembered.</p></div>`;
     return;
   }
-  b.innerHTML = aphead("Apex Sports Group") + `<div class="apbody">
+  b.innerHTML = `<div class="brandhead apx"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">AX</div><div><h1>Apex Sports Group</h1><small>Representation for the whole career</small></div></div><div class="apbody">
     <div class="hoodhead"><h3>${S.agent? "Your representation" : "Choose your representation"}</h3></div>
     ${S.agent? `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:19px">${esc(S.agent.n)}</div>
       <div style="font-size:13px;opacity:.6">${S.agent.fee.toFixed(2)}% of playing contracts · negotiating ${S.agent.neg}/10 · endorsements ${S.agent.end}/10</div></div>` :
       `<p style="font-size:13.5px;line-height:1.55;opacity:.75;margin-bottom:14px">Twelve agents at Apex have your camp tape. Every one of them takes a different cut, negotiates differently, and opens different doors. Nothing moves on contracts or endorsements until you pick one.</p>`}
-    <div class="hoodhead"><h3>The roster</h3><span>12 agents</span></div>
+    <div class="hoodhead"><h3>The Roster</h3><span>12 agents at Apex</span></div>
     ${D.AGENTS.map(A=>`<button class="veh-row light" onclick="renderApp('apex',{a:'${A.id}'})">
-      <span class="vr-l"><b>${esc(A.n)} ${S.agent&&S.agent.id===A.id?"· ✓ yours":""}</b><small>neg ${A.neg} · endorse ${A.end} · aggr ${A.agg} · ${A.fee.toFixed(2)}%</small></span>
-      <span class="vr-r" style="font-size:12px;opacity:.6">${A.yrs} yrs</span></button>`).join("")}
+      <span class="vr-l"><b>${esc(A.n)} ${S.agent&&S.agent.id===A.id?"· ✓ yours":""}</b><small>Negotiation ${A.neg}/10 · Endorsements ${A.end}/10 · Fee ${A.fee.toFixed(2)}%</small></span>
+      <span class="vr-r" style="font-size:12px;opacity:.6">${A.yrs} years experience</span></button>`).join("")}
     <div class="hoodhead" style="margin-top:16px"><h3>Endorsement pipeline</h3><span>updates at sync</span></div>
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Crestline Automotive — regional ambassador</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · requires active-roster status.${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
@@ -1072,16 +1149,21 @@ function signAgent(id){
 }
 /* Contacts */
 RENDER.contacts = b=>{
-  b.className="settings";
-  const roster=S.blob.roster.slice(0,16);
-  const world=[["Dre Holloway","Agent — Apex","#6b5b2a"],["Mom","Family","#5a3a56"],["Meridian Private Client","Bank","#134534"],["Marcus Ellery","United Chronicle","#1160a8"],["Equipment Room","Team ops","#31404f"]];
+  b.className="settings darkapp";
+  const roster=S.blob.roster;
+  const world=[["Mom","Family","#5a3a56","mom"],["Mara Quinn","Personal assistant","#7a4a2e","mara"],[(S.agent?S.agent.n:"Apex Front Desk"),"Agent — Apex","#6b5b2a","agent"],["Marcus Ellery","United Chronicle","#1160a8","ellery"],["Equipment Room","Team ops","#31404f","equip"]];
   b.innerHTML = aphead("Contacts") + `<div class="apbody flush">
   <div class="hoodhead" style="padding:0 16px;color:var(--ink)"><h3>Your world</h3></div>` +
-  world.map(w=>`<div class="contact"><span class="av" style="background:${w[2]}">${initials(w[0])}</span><div><h4>${esc(w[0])}</h4><p>${esc(w[1])}</p></div></div>`).join("") +
-  `<div class="hoodhead" style="padding:0 16px;color:var(--ink)"><h3>Locker room</h3></div>` +
-  roster.map(r=>`<div class="contact"><span class="av" style="background:${avColor(r[0]+r[1])}">${initials(r[0]+" "+r[1])}</span><div><h4>${esc(r[0]+" "+r[1])}</h4><p>${esc(r[2])} · #${r[4]}${r[5]==="PracticeSquad"?" · PS":""}</p></div></div>`).join("") + `</div>`;
+  world.map(w=>`<button class="contact" style="width:100%;text-align:left" onclick="textContact('${w[3]}','${esc(w[0]).replace(/'/g,"\\'")}','${w[2]}')"><span class="av" style="background:${w[2]}">${initials(w[0])}</span><div><h4>${esc(w[0])}</h4><p>${esc(w[1])}</p></div></button>`).join("") +
+  `<div class="hoodhead" style="padding:0 16px;color:var(--ink)"><h3>Locker room · ${roster.length}</h3></div>` +
+  roster.map(r=>{const nm=r[0]+" "+r[1]; const id="p"+(r[0]+r[1]).replace(/\W/g,"").toLowerCase();
+   return `<button class="contact" style="width:100%;text-align:left" onclick="textContact('${id}','${esc(nm).replace(/'/g,"\\'")}','${avColor(nm)}')"><span class="av" style="background:${avColor(nm)}">${initials(nm)}</span><div><h4>${esc(nm)}</h4><p>${esc(r[2])} · #${r[4]}${r[5]==="PracticeSquad"?" · PS":""}</p></div></button>`;}).join("") + `</div>`;
 };
-
+function textContact(id, name, color){
+  let t=S.world.texts.find(x=>x.id===id);
+  if (!t){ t={id, name, color, msgs:[]}; S.world.texts.unshift(t); persist(); }
+  openApp("messages"); renderApp("messages",{thread:id});
+}
 /* Card */
 RENDER.card = b=>{
   b.className="cardapp";
@@ -1098,7 +1180,7 @@ RENDER.card = b=>{
       <button class="btn sm" style="background:rgba(207,214,223,.15);color:#cfd6df" onclick="payCard(${S.credit.cardBal})">Pay in full</button></div>`:
       `<div style="font-size:13px;color:var(--dim);margin-top:6px">Zero balance. Spend anywhere in-world and it lands here; autopay pulls the minimum monthly.</div>`}</div>
   <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Statement</h4>` +
-  (S.cardTx.length? S.cardTx.slice(-12).reverse().map(t=>`<div class="payline"><span>${esc(t.n)}</span><span>${fm(t.amt)}</span></div>`).join("") : `<div style="font-size:13px;color:var(--dim)">No activity. Every in-world storefront takes the card next iteration; this cycle it covers the rookie dinner when it comes.</div>`) + `</div></div>`;
+  (S.cardTx.length? S.cardTx.slice(-12).reverse().map(t=>`<div class="payline"><span>${esc(t.n)}</span><span>${fm(t.amt)}</span></div>`).join("") : `<div style="font-size:13px;color:var(--dim)">No activity.</div>`) + `</div></div>`;
 };
 function payCard(amt){
   amt=Math.min(amt, S.credit.cardBal);
@@ -1107,90 +1189,283 @@ function payCard(amt){
   S.ledger.push({t:"Card payment", amt:-amt, kind:"spend"});
   persist(); renderApp("card"); renderWidget(); toast("Payment posted.");
 }
+/* WagerLines — the book */
+function teamPower(name){
+  // power rating from league record if present, else seeded
+  let w=0,l=0;
+  if (S.blob.league){ for(const g of S.blob.league.games){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)) continue;
+    if(g.h===name){ g.hs>g.as?w++:l++; } if(g.a===name){ g.as>g.hs?w++:l++; } } }
+  const base = seedRng("pow"+name+(S.blob.clock.seasonYear||2026))()*6-3;
+  return base + (w+l>0 ? (w-l)*1.1 : 0);
+}
+function gameLines(list){
+  return list.map(g=>{
+    const rng=seedRng(S.careerId+"|line|"+g.h+g.a+g.w);
+    let spread = (teamPower(g.h)-teamPower(g.a)) + 1.8; // home edge
+    spread = Math.round(spread*2)/2;
+    const total = Math.round((41 + rng()*10 + Math.abs(spread)*0.3)*2)/2;
+    const mlH = spread<=0? Math.round(100+Math.abs(spread)*38) : -Math.round(100+spread*38);
+    return {...g, spread, total, mlH, mlA: mlH>0? -Math.round(mlH*0.9) : Math.round(Math.abs(mlH)*0.84)};
+  });
+}
+RENDER.wager = b=>{
+  b.className="wager darkapp";
+  const wkNow=S.blob.clock.week, tp=S.blob.clock.weekType;
+  let games;
+  if (S.blob.league && S.blob.league.games.length){
+    games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow && !(g.played||g.hs+g.as>0));
+    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow+ (tp==="PreSeason"?0:0)+0);
+    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow);
+  } else {
+    const n=nextGame();
+    games = n? [{w:n[0], t:n[1], h:n[4]?S.blob.player.team:n[3], a:n[4]?n[3]:S.blob.player.team, hs:0, as:0}] : [];
+  }
+  const lines = gameLines(games);
+  const mine = S.blob.player.team;
+  b.innerHTML = `<div class="brandhead wgr"><div class="bh-mark">W/</div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
+  <div class="apbody">
+  <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${lines.length} games</span></div>
+  ${lines.map((g,i)=>`<div class="veh-detail" style="margin-bottom:10px;${(g.h===mine||g.a===mine)?"border-color:rgba(127,212,160,.4)":""}">
+    <div class="payline" style="border:none;padding:2px 0"><span><b>${esc(g.a)}</b> at <b>${esc(g.h)}</b>${(g.h===mine||g.a===mine)?' <span style="color:#7fd4a0;font-size:11px">YOUR GAME</span>':""}</span></div>
+    <div class="payline"><span>Spread</span><span>${g.spread===0? "PK (pick em)" : esc(g.h)+" "+(g.spread>0?"-":"+")+Math.abs(g.spread).toFixed(1)}</span></div>
+    <div class="payline"><span>Total</span><span>O/U ${g.total.toFixed(1)}</span></div>
+    <div class="payline"><span>Moneyline</span><span>${esc(g.h)} ${g.mlH>0?"+":""}${g.mlH} · ${esc(g.a)} ${g.mlA>0?"+":""}${g.mlA}</span></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="betSheet(${i},'h')">${esc(g.h)}</button>
+      <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="betSheet(${i},'a')">${esc(g.a)}</button>
+    </div></div>`).join("") || '<div class="empty">No lines this week. Books are closed.</div>'}
+  ${S.bets && S.bets.length? `<div class="hoodhead" style="color:var(--ink)"><h3>Open tickets</h3></div>
+   ${S.bets.map(bt=>`<div class="veh-detail" style="margin-bottom:8px"><div class="payline" style="border:none"><span>${esc(bt.label)}</span><span>${fm(bt.stake)}${bt.settled? (bt.won?' <b style="color:#7fd4a0">WON '+fm(bt.pay)+'</b>':' <b style="color:#ff9d94">LOST</b>'):""}</span></div></div>`).join("")}`:""}
+  <p style="font-size:11px;color:var(--faint);margin-top:14px">Lines are the book's opinion of your world, generated from real records in the save. Tickets settle when the week's results sync in. League policy on players betting is a story mechanic for another day.</p>
+  </div>`;
+  window._wlines = lines;
+};
+function betSheet(i, side){
+  const g=window._wlines[i];
+  const team = side==="h"? g.h : g.a;
+  const line = side==="h"? (g.spread>0?"-":"+")+Math.abs(g.spread).toFixed(1) : (g.spread>0?"+":"-")+Math.abs(g.spread).toFixed(1);
+  sheet(`<h3>${esc(team)} ${line}</h3><p class="sp">Against the spread, standard -110. Stake comes out of checking now; pays at sync when the result is in.</p>
+  <input class="field" type="number" id="betAmt" placeholder="Stake ($)">
+  <button class="btn" style="background:#2b6b4f;color:#fff" onclick="placeBet(${i},'${side}')">Place bet</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+}
+function placeBet(i, side){
+  const g=window._wlines[i]; const amt=+$("#betAmt").value;
+  if(!amt||amt<10) return toast("Minimum $10.");
+  if(S.cash.checking<amt) return toast("Stake exceeds checking.");
+  S.cash.checking-=amt;
+  S.bets=S.bets||[];
+  const team = side==="h"? g.h : g.a;
+  const line = side==="h"? -g.spread : g.spread;
+  S.bets.push({w:g.w, t:g.t, h:g.h, a:g.a, side, line, stake:amt, label:team+" "+(line>0?"+":"")+line.toFixed(1)+" vs "+(side==="h"?g.a:g.h), settled:false});
+  S.ledger.push({t:"WagerLines stake — "+team, amt:-amt, kind:"spend"});
+  persist(); closeSheet(); renderApp("wager"); toast("Ticket booked.");
+}
+function settleBets(){
+  if (!S.bets || !S.blob.league) return;
+  for (const bt of S.bets){
+    if (bt.settled) continue;
+    const g = S.blob.league.games.find(x=>x.t===bt.t && x.w===bt.w && x.h===bt.h && x.a===bt.a && (x.played||x.hs+x.as>0));
+    if (!g) continue;
+    const margin = g.hs - g.as; // home margin
+    const cover = bt.side==="h" ? (margin + bt.line > 0) : (-margin + bt.line > 0);
+    bt.settled=true; bt.won=cover;
+    if (cover){ bt.pay=Math.round(bt.stake*(1+100/110)); S.cash.checking+=bt.pay;
+      S.ledger.push({t:"WagerLines payout — "+bt.label, amt:bt.pay, kind:"income"}); }
+  }
+}
+
+/* Mara — personal assistant */
+RENDER.assist = b=>{
+  b.className="assist darkapp";
+  S.assistTiers = S.assistTiers || D.ASSIST.cats.map(_=>0);
+  const total = D.ASSIST.cats.reduce((a,c,i)=>a+c[1][S.assistTiers[i]][1],0);
+  b.innerHTML = `<div class="brandhead ast"><div class="bh-mark">MQ</div><div><h1>Mara Quinn</h1><small>${esc(D.ASSIST.title)}</small></div></div>
+  <div class="apbody">
+  <p style="font-size:13px;color:var(--faint);line-height:1.55;margin-bottom:12px">I track how you actually live so the bank account stops being a surprise. Pick a lane per category; it lands in your monthly burn and Meridian sees it immediately. Text me from Messages if something changes.</p>
+  ${D.ASSIST.cats.map((c,i)=>`<div class="hoodhead" style="color:var(--ink)"><h3>${esc(c[0])}</h3><span style="color:var(--faint)">${fm(c[1][S.assistTiers[i]][1])}/mo</span></div>
+  <select class="field" onchange="setAssist(${i},+this.value)">${c[1].map((t,n)=>`<option value="${n}" ${S.assistTiers[i]===n?"selected":""}>${esc(t[0])} · ${t[1]?fm(t[1])+"/mo":"free"}</option>`).join("")}</select>`).join("")}
+  <div class="veh-detail" style="margin-top:14px">
+    <div class="payline"><span>Lifestyle total</span><span>${fm(total)}/mo</span></div>
+    <div class="payline"><span>Fixed bills</span><span>${fm(S.bills.reduce((a,x)=>a+x.amt,0))}/mo</span></div>
+    <div class="payline tot"><span>Total monthly burn</span><span>${fm(monthlyBurn())}/mo</span></div>
+  </div>
+  </div>`;
+};
+function setAssist(i, v){
+  S.assistTiers[i]=v; persist(); renderApp("assist"); renderWidget();
+  toast("Noted. "+D.ASSIST.cats[i][1][v][0]+".");
+}
+function assistMonthly(){
+  if (!S.assistTiers) return 0;
+  return D.ASSIST.cats.reduce((a,c,i)=>a+c[1][S.assistTiers[i]||0][1],0);
+}
+
+/* Podium — podcasts */
+RENDER.podium = b=>{
+  b.className="podium darkapp";
+  const P=S.world.podium;
+  b.innerHTML = `<div class="brandhead pod"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">🎙</div><div><h1>Podium</h1><small>${esc(P.show)} · ${esc(P.hosts)}</small></div></div>
+  <div class="apbody">
+  <div class="hoodhead" style="color:var(--ink)"><h3>Episodes</h3></div>
+  ${P.eps.map(e=>`<div class="veh-detail" style="margin-bottom:10px">
+    <div class="vd-title" style="font-size:16px;line-height:1.3">${esc(e.t)}</div>
+    <div style="font-size:12px;opacity:.55;margin:4px 0 8px">${esc(e.dur||"")}${e.link?` · <a href="${esc(e.link)}" target="_blank" style="color:#9db8ff">listen ↗</a>`:""}</div>
+    <p style="font-size:13px;line-height:1.5;opacity:.8">${esc(e.d)}</p>
+    ${e.script?`<button class="btn sm" style="background:rgba(255,255,255,.1);margin-top:8px" onclick="showScript('${e.id}')">Read the brief</button>`:""}
+  </div>`).join("")}
+  <div class="hoodhead" style="color:var(--ink);margin-top:16px"><h3>Make this week's episode</h3></div>
+  <div class="veh-detail">
+    <p style="font-size:13px;line-height:1.55;opacity:.8">The pipeline: 1) Generate the episode brief here (uses your AI engine). 2) Open <b>notebooklm.google.com</b>, new notebook, paste the brief as a source. 3) Hit Audio Overview; two hosts argue about your week for ten minutes. 4) Paste the share link back here so the episode lives in the feed.</p>
+    <button class="btn" style="background:#4a3a76;color:#fff;margin-top:10px" onclick="genEpisodeBrief()">Generate episode brief</button>
+    <input class="field" id="epLink" placeholder="Paste NotebookLM share link" style="margin-top:8px">
+    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="attachEpLink()">Attach link to latest episode</button>
+    <label class="flabel" style="margin-top:12px">Google API key (for future direct NotebookLM automation)</label>
+    <input class="field" type="password" placeholder="AIza..." value="${esc((META.settings.keys&&META.settings.keys.google)||"")}" onchange="META.settings.keys=META.settings.keys||{};META.settings.keys.google=this.value.trim();saveMeta();toast('Google key saved.')">
+  </div>
+  </div>`;
+};
+function showScript(id){
+  const e=S.world.podium.eps.find(x=>x.id===id);
+  window._brief=e.script;
+  sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(e.script)}</div>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="navigator.clipboard.writeText(window._brief).then(()=>toast('Copied for NotebookLM.'))">Copy brief</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
+}
+async function genEpisodeBrief(){
+  if (!aiKey()) return toast("Add an API key first (Settings).");
+  toast("Writing the brief…");
+  try{
+    const last = S.blob.schedule.filter(g=>g[7]).pop();
+    const out = await callAI(
+      "You write a detailed podcast episode brief for a fictional NFL talk show called "+S.world.podium.show+" hosted by "+S.world.podium.hosts+". League-wide stories first; the player's storyline earns a segment near the end, proportionate to his actual profile. Grounded, specific, funny in places. No em dashes. 600-900 words, formatted as segment blocks with timestamps.",
+      worldFacts(S.blob, last)+"\nWrite this week's episode brief now.", 3000);
+    const ep={id:"ep"+Date.now(), t:"Ep. "+(41+S.world.podium.eps.length)+", "+wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out};
+    S.world.podium.eps.unshift(ep); persist(); renderApp("podium"); toast("Brief ready. Feed it to NotebookLM.");
+  }catch(e){ toast("Generation failed: "+e.message); }
+}
+function attachEpLink(){
+  const v=$("#epLink").value.trim(); if(!v) return;
+  S.world.podium.eps[0].link=v; persist(); renderApp("podium"); toast("Episode linked.");
+}
 /* Settings */
+const COLLEGE_TIERS = {elite:["Ohio State","Michigan","Alabama","Georgia","Texas","Oregon","Notre Dame","USC","Penn State","LSU","Clemson","Florida State","Oklahoma","Tennessee","Ole Miss"], mid:["Louisville","Iowa","Kansas State","Utah","UCF","Boise State","Memphis","Tulane","Appalachian State","Toledo","Marshall","San Diego State"], small:["Howard","Monmouth","Villanova","North Dakota State","Montana","Yale","Fordham","Lehigh","Grambling State","Jackson State"]};
+function collegePrestige(name){
+  if(!name) return "unknown";
+  if(COLLEGE_TIERS.elite.some(c=>name.includes(c))) return "blue blood";
+  if(COLLEGE_TIERS.small.some(c=>name.includes(c))) return "small school";
+  return "mid-tier";
+}
+function autoReputation(){
+  const p=S.blob.player, pc=S.perception;
+  if (p.yearsPro>=6) return "Established veteran";
+  if (p.yearsPro>=2) return "Known quantity";
+  const d=pc.draft||"Undrafted free agent";
+  if (d==="First rounder") return "Polarizing and watched";
+  if (d==="Day 2 pick") return "Hyped and doubted";
+  if (d==="Day 3 pick"||d==="Seventh round flier") return "Camp curiosity";
+  return "Complete unknown";
+}
+function startingCash(pc){
+  const draft={"First rounder":900000,"Day 2 pick":220000,"Day 3 pick":60000,"Seventh round flier":22000,"Undrafted free agent":4000}[pc.draft||"Undrafted free agent"];
+  const famM={"Single parent household":0.6,"Both parents, tight money":0.8,"Middle class, stable":1.1,"Family is comfortable":1.6,"It's complicated":0.9}[pc.family||"Single parent household"];
+  const nil={"blue blood":45000,"mid-tier":12000,"small school":2000,"unknown":5000}[collegePrestige(pc.collegeName)]||5000;
+  return Math.round((draft*famM+nil)/250)*250;
+}
 RENDER.settings = b=>{
   b.className="settings darkapp";
   const pc = S.perception;
   const dd = (id,opts,cur)=>`<select id="${id}" class="field" onchange="savePerception()">${opts.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
-  const debtTotal = pc.debtTotal||0;
-  const shares = pc.debtShares || D.DEBTCATS.map((_,i)=>i===0?100:0);
+  const prov = META.settings.provider||"anthropic";
   b.innerHTML = aphead("Settings") + `<div class="apbody">
-  <div class="hoodhead" style="color:var(--ink)"><h3>World perception</h3></div>
-  <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:12px">Who the world thinks you are. Feeds every article, chirp, and text the world generates. Money facts still come only from the save.</p>
+  <div class="hoodhead" style="color:var(--ink)"><h3>Initial information</h3></div>
+  <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:12px">Who you were before the league. The world's perception is dynamic from here: it moves with your play, your posts, and your results. Money facts still come only from the save.</p>
   <label class="flabel">Hometown state</label>${dd("pcState", D.STATES, pc.state||"NJ")}
-  <label class="flabel">Where you grew up</label>${dd("pcGrew", ["Big city","Suburbs","Small town","Rural","Military family, moved a lot"], pc.grew||"Small town")}
+  <label class="flabel">Where you grew up (town, area, whatever you want the world to know)</label>
+  <input class="field" id="pcGrew" value="${esc(pc.grew||"")}" placeholder="e.g. Toms River, small town off the parkway" onchange="savePerception()">
   <label class="flabel">High school profile</label>${dd("pcHS", ["Unranked nobody","Local standout","State champion","National recruit"], pc.hs||"Local standout")}
-  <label class="flabel">College path</label>${dd("pcCol", ["Walk-on","Mid-major starter","Power conference backup","Power conference starter","Transfer portal journeyman","FCS star"], pc.college||"Mid-major starter")}
+  <label class="flabel">College</label>
+  <input class="field" id="pcColName" value="${esc(pc.collegeName||"")}" placeholder="School name (auto-fills from the save at next sync)" onchange="savePerception()">
+  <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px">Prestige is read automatically: ${esc(collegePrestige(pc.collegeName))}.</div>
+  <label class="flabel">College career</label>${dd("pcCol", ["Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"], pc.college||"Career backup")}
+  <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
+  <label class="flabel">Monthly support you send home ($)</label>
+  <input class="field" id="pcAsk" type="number" min="0" step="50" value="${pc.familyAsk||0}" onchange="savePerception()">
   <label class="flabel">Draft story</label>${dd("pcDraft", ["Undrafted free agent","Seventh round flier","Day 3 pick","Day 2 pick","First rounder"], pc.draft||"Undrafted free agent")}
-  <label class="flabel">Family situation</label>${dd("pcFam", ["Single mother household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single mother household")}
-  <label class="flabel">Monthly support you send home</label>${dd("pcAsk", ["$0","$250","$500","$1,000","$2,000","$4,000"], "$"+(pc.familyAsk||0).toLocaleString())}
-  <label class="flabel">Public reputation</label>${dd("pcRep", ["Complete unknown","Camp curiosity","Fan favorite underdog","Polarizing","Hyped and doubted"], pc.rep||"Complete unknown")}
+  <label class="flabel">Public reputation (set by the league, not by you)</label>
+  <div class="field" style="opacity:.75">${esc(autoReputation())}</div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Debt you brought with you</h3></div>
-  <label class="flabel">Total debt</label>
-  <select id="pcDebtTotal" class="field" onchange="savePerception()">${[0,2000,5000,10000,20000,35000,60000,100000].map(v=>`<option value="${v}" ${v===debtTotal?"selected":""}>${v===0?"None":"$"+v.toLocaleString()}</option>`).join("")}</select>
-  <div id="debtSliders" ${debtTotal===0?'style="display:none"':""}>
-  <p style="font-size:12px;color:var(--faint);margin:4px 0 10px">Split it across categories. Sliders auto-balance to 100%.</p>
-  ${D.DEBTCATS.map((c,i)=>`<div class="dslid"><label>${c} <b id="ds-v${i}">${shares[i]}%</b></label>
-    <input type="range" min="0" max="100" value="${shares[i]}" oninput="debtSlide(${i}, +this.value)"></div>`).join("")}
-  </div>
+  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Fill in what you actually owe. Credit card debt lands on the Meridian Credit card. Starting bank balance is seeded automatically from your profile (draft money, NIL, family) on new careers.</p>
+  ${D.DEBTCATS.map((c,i)=>`<label class="flabel">${c} ($)</label>
+   <input class="field" type="number" min="0" step="100" id="pcDebt${i}" value="${(pc.debtAmts&&pc.debtAmts[i])||0}" onchange="savePerception()">`).join("")}
+  <div style="font-size:12px;color:var(--faint)">Profile-seeded starting balance for this background: <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply to this career</button>`:" (locked once weeks are applied)"}</div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>AI world engine</h3></div>
-  <label class="flabel">Anthropic API key (Claude generates your world)</label>
-  <input class="field" id="setKey" type="password" placeholder="sk-ant-..." value="${esc(META.settings.apiKey||"")}" onchange="META.settings.apiKey=this.value.trim();saveMeta();toast('Claude key saved.')">
-  <label class="flabel">Google API key (NotebookLM pipeline, future)</label>
-  <input class="field" id="setGKey" type="password" placeholder="AIza..." value="${esc(META.settings.googleKey||"")}" onchange="META.settings.googleKey=this.value.trim();saveMeta();toast('Google key saved.')">
+  <label class="flabel">Provider</label>
+  <select class="field" onchange="META.settings.provider=this.value;saveMeta();renderApp('settings')">${Object.keys(D.AI).map(k=>`<option value="${k}" ${prov===k?"selected":""}>${D.AI[k].label}</option>`).join("")}</select>
   <label class="flabel">Model</label>
-  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${["claude-sonnet-4-6","claude-haiku-4-5-20251001","claude-opus-4-8"].map(m=>`<option ${META.settings.model===m?"selected":""}>${m}</option>`).join("")}</select>
+  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${D.AI[prov].models.map(m=>`<option ${META.settings.model===m?"selected":""}>${m}</option>`).join("")}</select>
+  <label class="flabel">${D.AI[prov].label} API key</label>
+  <input class="field" type="password" placeholder="${D.AI[prov].keyHint}" value="${esc((META.settings.keys&&META.settings.keys[prov])||"")}" onchange="META.settings.keys=META.settings.keys||{};META.settings.keys['${prov}']=this.value.trim();saveMeta();toast('Key saved.')">
   <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">Auto-generate week content on sync
   <input type="checkbox" ${META.settings.autogen?"checked":""} onchange="META.settings.autogen=this.checked;saveMeta()"></label>
+  <p style="font-size:11.5px;color:var(--faint)">Podcast generation and the NotebookLM pipeline live in the Podium app.</p>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Phone</h3></div>
+  <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">App theme
+  <select class="field" style="width:auto;margin:0" onchange="META.settings.theme=this.value;saveMeta();applyTheme()"><option value="dark" ${META.settings.theme!=="light"?"selected":""}>Dark</option><option value="light" ${META.settings.theme==="light"?"selected":""}>Light</option></select></label>
+  <label class="flabel">Phone clock</label>
+  <select class="field" onchange="META.settings.clockOffsetMin=+this.value;saveMeta();clockTick()">
+    ${[["0","Real time"],["-360","Evening mode (-6h)"],["-480","Game night (-8h)"],["240","+4h"],["480","+8h"],["720","+12h"]].map(o=>`<option value="${o[0]}" ${String(META.settings.clockOffsetMin||0)===o[0]?"selected":""}>${o[1]}</option>`).join("")}
+  </select>
   <label class="flabel">Wallpaper</label>
   <input class="field" type="file" accept="image/*" onchange="setWallpaper(this)">
   <button class="btn" style="background:rgba(255,255,255,.08)" onclick="META.settings.wallpaper=null;saveMeta();applyWallpaper();toast('Wallpaper reset.')">Reset wallpaper</button>
-  <label class="flabel">Profile photo</label>
+  <label class="flabel">Profile photo (used on Chirper)</label>
   <input class="field" type="file" accept="image/*" onchange="setPfp(this)">
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Home screen order</h3></div>
+  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Pick a slot number for each app. Saved on this phone; survives updates and refreshes.</p>
+  ${APPS.map((a,i)=>{const cur=(META.settings.appOrder&&META.settings.appOrder[a.id])??i;return `<label class="flabel" style="display:flex;justify-content:space-between;align-items:center">${a.n}
+   <select class="field" style="width:76px;margin:0" onchange="META.settings.appOrder=META.settings.appOrder||{};META.settings.appOrder['${a.id}']=+this.value;saveMeta();renderHome()">${APPS.map((_,n)=>`<option value="${n}" ${cur===n?"selected":""}>#${n+1}</option>`).join("")}</select></label>`}).join("")}
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Career</h3></div>
   <button class="btn" style="background:rgba(255,255,255,.08)" onclick="location.hash='#debug';location.reload()">Debug readout</button>
   <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="resetCareer()">Reset this career</button>
   </div>`;
 };
-function debtSlide(idx, val){
-  const shares = S.perception.debtShares || D.DEBTCATS.map((_,i)=>i===0?100:0);
-  shares[idx]=val;
-  const others = shares.reduce((a,v,i)=>i===idx?a:a+v,0);
-  const rem = 100-val;
-  if (others>0){ let acc=0; shares.forEach((v,i)=>{ if(i!==idx){ shares[i]=Math.round(v/others*rem); acc+=shares[i]; }});
-    const drift = rem-acc; for(let i=shares.length-1;i>=0;i--){ if(i!==idx){shares[i]+=drift;break;} }
-  } else { shares.forEach((v,i)=>{ if(i!==idx) shares[i]=Math.round(rem/(shares.length-1)); }); }
-  shares.forEach((v,i)=>{ const el=$("#ds-v"+i); if(el) el.textContent=Math.max(0,v)+"%"; const rg=$$("#debtSliders input[type=range]")[i]; if(rg&&i!==idx) rg.value=Math.max(0,v); });
-  S.perception.debtShares=shares.map(v=>Math.max(0,v));
-  savePerception(false);
+function applySeedCash(){
+  const target=startingCash(S.perception);
+  S.cash.checking=target;
+  S.ledger=S.ledger.filter(l=>l.kind!=="seed");
+  S.ledger.push({t:"Starting balance (profile seed)", amt:target, kind:"seed"});
+  persist(); toast("Starting balance set to "+fm(target)+"."); renderApp("settings"); renderWidget();
 }
-function savePerception(rerender=true){
+function savePerception(){
   const pc=S.perception;
   const gv=id=>{const el=$("#"+id);return el?el.value:null;};
-  pc.state=gv("pcState")||pc.state; pc.grew=gv("pcGrew")||pc.grew; pc.hs=gv("pcHS")||pc.hs;
+  pc.state=gv("pcState")||pc.state; pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
+  pc.collegeName=gv("pcColName")??pc.collegeName;
   pc.college=gv("pcCol")||pc.college; pc.draft=gv("pcDraft")||pc.draft; pc.family=gv("pcFam")||pc.family;
-  pc.rep=gv("pcRep")||pc.rep;
-  const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=+ask.replace(/[^0-9]/g,"");
-  const dt=gv("pcDebtTotal"); if(dt!==null) pc.debtTotal=+dt;
+  const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=Math.max(0,+ask||0);
+  pc.debtAmts = D.DEBTCATS.map((_,i)=> Math.max(0, +(gv("pcDebt"+i)||0)) );
+  pc.rep = autoReputation();
+  // rebuild legacy debts; credit card debt goes to the card, not a loan row
   S.debts = S.debts.filter(d=>d.kind!=="legacy");
-  if (pc.debtTotal>0){
-    const shares=pc.debtShares||D.DEBTCATS.map((_,i)=>i===0?100:0);
-    const aprs=[5.5,24.9,0,7.9,11.5,0];
-    D.DEBTCATS.forEach((c,i)=>{
-      const bal=Math.round(pc.debtTotal*(shares[i]||0)/100);
-      if (bal>=250){
-        const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
-        S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
-      }
-    });
-  }
+  const aprs=[5.5,0,0,7.9,11.5,0];
+  D.DEBTCATS.forEach((c,i)=>{
+    const bal=pc.debtAmts[i]||0;
+    if (i===1){ S.credit.cardBal = bal; return; } // credit cards -> card page
+    if (bal>=250){
+      const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
+      S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
+    }
+  });
   persist();
-  if (rerender && $("#pcDebtTotal")){ const show=+$("#pcDebtTotal").value>0; const el=$("#debtSliders"); if(el) el.style.display=show?"":"none"; }
+}
+function applyTheme(){
+  document.body.dataset.theme = META.settings.theme==="light" ? "light" : "dark";
 }
 function pickImage(kind){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
@@ -1222,6 +1497,11 @@ function applyWallpaper(){
 }
 
 function saveMeta(){ persist(); }
+function aiKey(){ const p=META.settings.provider||"anthropic";
+  if (!META.settings.keys) META.settings.keys={};
+  if (!META.settings.keys.anthropic && META.settings["api"+"Key"]) META.settings.keys.anthropic = META.settings["api"+"Key"]; // migrate v1.1 stored key
+  if (!META.settings.keys.google && META.settings.googleKey) META.settings.keys.google = META.settings.googleKey;
+  return META.settings.keys[p] || ""; }
 function setWallpaper(inp){ pickFromInput(inp, "wall"); }
 function setPfp(inp){ pickFromInput(inp, "pfp"); }
 function pickFromInput(inp, kind){
@@ -1268,7 +1548,7 @@ RENDER.sync = b=>{
 async function decodeCode(code){
   code=code.trim();
   if (code.startsWith("TYNETB.")) return {backup:true, data: JSON.parse(await inflate(code.slice(7)))};
-  if (!code.startsWith("TYNET1.")) throw new Error("Not a TyNet code.");
+  if (!code.startsWith("TYNET1.")) throw new Error("Not a TyPhone code.");
   return {blob: JSON.parse(await inflate(code.slice(7)))};
 }
 async function inflate(b64u){
@@ -1283,6 +1563,15 @@ async function deflateStr(str){
   return btoa(String.fromCharCode(...new Uint8Array(out))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 const NFL_DIVS = {"Bills":"AFC East","Dolphins":"AFC East","Patriots":"AFC East","Jets":"AFC East","Ravens":"AFC North","Bengals":"AFC North","Browns":"AFC North","Steelers":"AFC North","Texans":"AFC South","Colts":"AFC South","Jaguars":"AFC South","Titans":"AFC South","Broncos":"AFC West","Chiefs":"AFC West","Raiders":"AFC West","Chargers":"AFC West","Cowboys":"NFC East","Giants":"NFC East","Eagles":"NFC East","Commanders":"NFC East","Bears":"NFC North","Lions":"NFC North","Packers":"NFC North","Vikings":"NFC North","Falcons":"NFC South","Panthers":"NFC South","Saints":"NFC South","Buccaneers":"NFC South","Cardinals":"NFC West","Rams":"NFC West","49ers":"NFC West","Seahawks":"NFC West"};
+function autoFromSave(blob){
+  const p=blob.player; if(!p) return;
+  const pc=S? S.perception : null; if(!pc) return;
+  if (p.college && !pc.collegeName) pc.collegeName = p.college;
+  if (p.draftRound!=null){
+    pc.draft = p.draftRound>=63||p.draftRound<1 ? "Undrafted free agent" : p.draftRound===1? "First rounder" : p.draftRound<=3? "Day 2 pick" : p.draftRound<=6? "Day 3 pick" : "Seventh round flier";
+  }
+  pc.rep = (typeof autoReputation==="function")? autoReputation() : pc.rep;
+}
 function normalizeLeague(blob){
   const L=blob.league; if(!L) return;
   if (Array.isArray(L.teams) && typeof L.teams[0]==="string"){
@@ -1319,7 +1608,7 @@ async function applyCode(fromHash){
   try { dec = await decodeCode(raw); } catch(e){ return toast("Code didn't decode: "+e.message); }
   if (dec.backup){ return restoreSheet(dec.data); }
   const blob=dec.blob;
-  normalizeLeague(blob);
+  normalizeLeague(blob); autoFromSave(blob);
   if (!S || blob.careerId!==S.careerId){ return newCareerSheet(blob); }
   const k=wkKey(blob.clock);
   if (S.appliedWeeks.includes(k)) return toast("That week is already applied. Codes work once.");
@@ -1405,7 +1694,7 @@ async function advanceTo(blob){
   toast("Synced to "+wkLabel(newC));
   closeSheet(); renderHome(); if(curApp) renderApp(curApp);
   // eager generation
-  if (META.settings.apiKey && META.settings.autogen){ generateWeek(blob, last).catch(e=>toast("Generation failed: "+e.message)); }
+  if (aiKey() && META.settings.autogen){ generateWeek(blob, last).catch(e=>toast("Generation failed: "+e.message)); }
   else if (last){ placeholderWeek(blob, last); }
 }
 function deposit(label, amt){ S.cash.checking+=amt; S.ledger.push({t:label, amt, kind:"income"}); }
@@ -1429,26 +1718,65 @@ function cardCycle(w){
 function placeholderWeek(blob, last){
   const won=last[7][0]>last[7][1];
   S.world.chirps.unshift({n:"Jets Videos",h:"@snyjets",vf:1,av:"#1a7a41",t:"FINAL: "+(last[4]?"Jets "+last[7][0]+", "+last[3]+" "+last[7][1] : last[3]+" "+last[7][1]+", Jets "+last[7][0])+".", li:800+((last[7][0]*37)%900), rp:120, tm:"1h"});
+  S.world.huddle.unshift({id:"pw"+wkKey(blob.clock).replace(/\W/g,""), flair:"DISCUSSION", u:"weekly_bot", tm:"5h", up:77,
+    h:"Weekly practice squad + roster watch: who's trending",
+    b:"Recurring thread. Elevations, injuries, snap counts, and whatever the coaches say that means the opposite.", cmts:[
+    {u:"depth_chart_dan",tm:"4h",up:52,t:"reminder that elevations are capped at three per player. every one they burn is information"},
+    {u:"FlightBoysZn",tm:"3h",up:29,t:"the QB room math is getting funnier every week"},
+    {u:"casual_since_2015",tm:"2h",up:-8,t:"can someone explain why we keep four quarterbacks like i'm five"}]});
   S.world.huddle.unshift({id:"pg"+wkKey(blob.clock).replace(/\W/g,""), flair:"GAME THREAD", u:"AutoModerator", tm:"3h", up:won?400:150,
     h:"Post-Game Thread: "+(last[4]?"Jets ":"")+(won?"win ":"fall ")+last[7][0]+"-"+last[7][1]+(last[4]?" vs ":" at ")+last[3],
-    b:"Add an API key in Settings and the world writes itself every sync — article, threads, texts, all of it. This is the placeholder economy.", cmts:[
+    b:"Final from "+(last[4]?"home":"the road")+". Score updates synced from the save. Full write-ups, quotes, and box context arrive when an API key is in Settings; until then the thread runs on vibes.", cmts:[
     {u:"FlightBoysZn",tm:"2h",up:won?220:80,t:won?"WE ARE SO BACK":"it's august for the soul all year with this team"},
-    {u:"stat_daddy_nyj",tm:"2h",up:60,t:"box score breakdown when the full feed generates. bones of a "+(won?"real win":"rough one")+" here"}]});
+    {u:"stat_daddy_nyj",tm:"2h",up:64,t:"early read from the broadcast: "+(won?"o-line held up in the second half and the score says the rest":"tackling was optional in the third quarter and it snowballed"),r:[
+      {u:"CoachTapeAndCoffee",tm:"1h",up:41,t:"charting it tonight. early numbers "+(won?"support the eye test":"are uglier than the score")},
+      {u:"gang_green_therapy",tm:"55m",up:-12,t:"we do not need charts to know what we watched"}]},
+    {u:"MetLifeParkingLot",tm:"2h",up:won?95:12,t:won?"road trips hit different when you win. drive home was a party":"18 dollars for a beer to watch that"},
+    {u:"jerseyshoreQBclub",tm:"1h",up:33,t:"any word on which QBs got the late reps? asking for reasons",r:[
+      {u:"PS_Insider_Burner",tm:"49m",up:88,t:"you know exactly why you're asking. and yes."}]},
+    {u:"tannenbaum_truther",tm:"1h",up:-31,t:"fire everyone. every single person in the building. the janitor too"}]});
   persist();
 }
 /* ---- AI generation (user's own key, phone-side) ---- */
-async function callClaude(system, user, maxTokens){
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json", "x-api-key":META.settings.apiKey,
-      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-    body: JSON.stringify({ model: META.settings.model||"claude-sonnet-4-6", max_tokens: maxTokens||8000,
-      system, messages:[{role:"user", content:user}] })
+async function callAI(system, user, maxTokens){
+  const prov = META.settings.provider||"anthropic";
+  const model = META.settings.model || D.AI[prov].models[0];
+  if (!D.AI[prov].models.includes(model)) {/* model from another provider selected */ }
+  if (prov==="anthropic"){
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "x-api-key":aiKey(),
+        "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+      body: JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-4-6", max_tokens: maxTokens||8000,
+        system, messages:[{role:"user", content:user}] })
+    });
+    if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+    const data=await r.json();
+    return data.content.filter(x=>x.type==="text").map(x=>x.text).join("\n");
+  }
+  if (prov==="openai"){
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+aiKey() },
+      body: JSON.stringify({ model: D.AI.openai.models.includes(model)?model:"gpt-5.6-terra", max_tokens: maxTokens||8000,
+        messages:[{role:"system",content:system},{role:"user",content:user}] })
+    });
+    if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+    const data=await r.json();
+    return data.choices[0].message.content;
+  }
+  // google
+  const gm = D.AI.google.models.includes(model)?model:"gemini-3.6-flash";
+  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+gm+":generateContent?key="+encodeURIComponent(aiKey()), {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ system_instruction:{parts:[{text:system}]}, contents:[{role:"user",parts:[{text:user}]}],
+      generationConfig:{ maxOutputTokens: maxTokens||8000 } })
   });
   if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
   const data=await r.json();
-  return data.content.filter(x=>x.type==="text").map(x=>x.text).join("\n");
+  return (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("\n");
 }
+const callClaude = callAI; // legacy alias
 function worldFacts(blob, last){
   const p=blob.player; const per=S.perception;
   return `PLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
@@ -1481,15 +1809,20 @@ async function generateWeek(blob, last){
   persist(); toast("The world caught up."); if(curApp) renderApp(curApp);
 }
 async function aiReply(thread, userMsg){
+  if (!thread.persona){
+    const r = S.blob.roster.find(x=> (x[0]+" "+x[1])===thread.name);
+    if (r) thread.persona = thread.name+" is a "+r[2]+" on the "+S.blob.player.team+", jersey #"+r[4]+", overall talent "+r[3]+"/99"+(r[5]==="PracticeSquad"?", also on the practice squad":"")+". A teammate texting casually.";
+    if (thread.id==="mara") thread.persona = "Mara Quinn, the player's sharp personal assistant from Apex client services. Practical, dry, keeps his spending honest.";
+  }
   try{
-    const sys=`You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Stay perfectly in character based on the conversation so far. Reply with ONLY the text message content, under 40 words, lowercase texting style unless the character wouldn't. No em dashes.`;
+    const sys=`You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). ${thread.persona? thread.persona+" ":""}Stay perfectly in character based on the conversation so far. Reply with ONLY the text message content, under 40 words, lowercase texting style unless the character wouldn't. No em dashes.`;
     const hist=thread.msgs.map(m=>(m[0]==="me"?"THEM: ":"YOU: ")+m[1]).join("\n");
     return await callClaude(sys, hist+"\nTHEM: "+userMsg+"\nYour reply:", 200);
   }catch(e){ toast("Reply failed: "+e.message); return null; }
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.0.0";
+const VER="v1.2.0";
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{
@@ -1509,6 +1842,8 @@ if (location.hash==="#debug"){
   const upd=()=>{d.textContent=`inner ${innerWidth}x${innerHeight} dpr ${devicePixelRatio} vv ${visualViewport?visualViewport.width.toFixed(0)+"x"+visualViewport.height.toFixed(0):"-"} standalone ${navigator.standalone}`};
   upd(); addEventListener("resize",upd); document.body.appendChild(d);
 }
+function setVH(){ document.documentElement.style.setProperty("--vh", (window.innerHeight*0.01)+"px"); }
+setVH(); window.addEventListener("resize", setVH); window.addEventListener("orientationchange", ()=>setTimeout(setVH,300));
 (async function boot(){
   await idb.open();
   META = await idb.get("meta");
@@ -1524,7 +1859,8 @@ if (location.hash==="#debug"){
     S = await idb.get("career/"+META.activeId);
     if (!S){ S=newCareerState(D.BLOB); META.activeId=D.BLOB.careerId; }
   }
-  applyWallpaper();
+  if (S && S.blob) { normalizeLeague(S.blob); autoFromSave(S.blob); persist(); }
+  applyWallpaper(); applyTheme();
   clockTick(); renderLock(); renderHome();
   // QR path: #sync=CODE
   const m=location.hash.match(/^#sync=(.+)/);

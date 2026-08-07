@@ -1,5 +1,5 @@
 /* TyNet service worker — polite auto-updates */
-const VER = "tynet-v1.1.0";
+const VER = "typhone-v1.2.0";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
 self.addEventListener("install", e=>{
   e.waitUntil(caches.open(VER).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));

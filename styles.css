@@ -98,13 +98,13 @@ input,select,textarea{font:inherit;color:inherit}
 .wg{flex:1;min-width:0}
 .wg small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
 .wg b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.5}
-#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px;justify-items:center}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 10px;justify-items:center}
 .app{width:100%;display:flex;flex-direction:column;align-items:center;gap:5px}
-.icon{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;position:relative;box-shadow:0 6px 14px rgba(0,0,0,.35)}
-.icon svg{display:block}
+.icon{width:78px;height:78px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;position:relative;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+#grid .icon svg, #dock .icon svg{display:block;width:38px;height:38px}
 .lk-card .ic svg{width:19px;height:19px}
 .lk-card .ic span{font-size:12px!important}
-.app span{font-size:10.5px;color:var(--ink);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.app span{font-size:11.5px;color:var(--ink);text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .badge{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:10px;background:#f4453b;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 #dock{margin-top:auto;margin-bottom:8px;background:rgba(255,255,255,.10);backdrop-filter:blur(28px);border-radius:26px;padding:11px;display:flex;justify-content:space-around}
 #dock .app > span{display:none}
@@ -538,3 +538,61 @@ label.flabel{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;t
 
 .ic-chron span{color:#2a2214!important;text-shadow:none!important}
 .py-ic{display:block;width:22px;height:30px;background:linear-gradient(180deg,#ff8a2a,#f96b00);border-radius:5px 5px 3px 3px;transform:perspective(40px) rotateX(8deg);box-shadow:inset 0 -6px 0 rgba(0,0,0,.25)}
+
+/* ===== v1.2 ===== */
+/* brand mastheads */
+.brandhead{ display:flex; align-items:center; gap:12px; padding:calc(env(safe-area-inset-top, 0px) + 54px) 16px 14px; position:sticky; top:0; z-index:5; }
+.brandhead h1{ font-size:20px; font-weight:800; letter-spacing:-.3px; margin:0; }
+.brandhead small{ display:block; font-size:11px; opacity:.7; margin-top:1px; }
+.brandhead .back{ background:none; border:none; color:inherit; font-size:26px; padding:0 4px 2px 0; }
+.bh-mark{ width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:17px; background:rgba(255,255,255,.15); flex:none; }
+.brandhead.pln{ background:linear-gradient(160deg,#0e2233,#123a52); color:#dff0fb; }
+.brandhead.yct{ background:linear-gradient(160deg,#0c2a26,#12433c); color:#dcf5ee; }
+.brandhead.apx{ background:linear-gradient(160deg,#231a08,#3d2e0d); color:#f5e8c8; }
+.brandhead.key{ background:linear-gradient(160deg,#1b1430,#2c2152); color:#e6ddfb; }
+.brandhead.oct{ background:linear-gradient(160deg,#1c1206,#3a2408); color:#ffe2bd; }
+.brandhead.pod{ background:linear-gradient(160deg,#241432,#3c2154); color:#efdffb; }
+.brandhead.wgr{ background:linear-gradient(160deg,#07200f,#0e3a1c); color:#d9f5e0; }
+.brandhead.ast{ background:linear-gradient(160deg,#2a160c,#472613); color:#fbe6d8; }
+
+/* centered seg tabs */
+.seg.segc{ display:grid; grid-auto-flow:column; grid-auto-columns:1fr; }
+.seg.segc button{ text-align:center; }
+
+/* chirper layout */
+.ch-row{ display:flex; gap:10px; align-items:flex-start; }
+.ch-main{ min-width:0; flex:1; }
+.chav{ width:38px; height:38px; border-radius:50%; flex:none; font-size:13px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; overflow:hidden; }
+.chav.sm{ width:30px; height:30px; font-size:11px; }
+.chav img{ width:100%; height:100%; object-fit:cover; }
+.vfk{ font-style:normal; color:#1d9bf0; font-size:12px; margin:0 4px 0 2px; }
+.ch-compose{ display:flex; gap:8px; align-items:center; padding:10px 16px; }
+.ch-compose input{ flex:1; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:9px 14px; color:inherit; font-size:14px; min-width:0; }
+.ch-compose button{ background:#1d9bf0; color:#fff; border:none; border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; }
+.ch-av{ border:none; }
+.ch-av img{ width:100%; height:100%; border-radius:50%; object-fit:cover; }
+
+/* new icon glyph tiles */
+.ic-wgr{ background:linear-gradient(160deg,#0e3a1c,#1d6b36); color:#eafff1; }
+.ic-ast{ background:linear-gradient(160deg,#5c3117,#8a4a22); color:#ffeadb; }
+
+/* wager */
+.wager .btn.sm{ flex:1; font-size:12.5px; padding:8px 6px; }
+
+/* ===== light theme (#22): all dark apps flip ===== */
+body[data-theme=light] .darkapp{ background:#f3f4f6 !important; color:#15181d !important; }
+body[data-theme=light] .darkapp .apbody, body[data-theme=light] .darkapp .aphead{ color:#15181d; }
+body[data-theme=light] .darkapp .aphead{ background:rgba(243,244,246,.92); }
+body[data-theme=light] .darkapp .veh-detail, body[data-theme=light] .darkapp .chirp,
+body[data-theme=light] .darkapp .thd, body[data-theme=light] .darkapp .post,
+body[data-theme=light] .darkapp .contact, body[data-theme=light] .darkapp .lot,
+body[data-theme=light] .darkapp .scorecard, body[data-theme=light] .darkapp .veh-row{ background:#ffffff; border-color:#e2e4e9; color:#15181d; }
+body[data-theme=light] .darkapp .field, body[data-theme=light] .darkapp select.field, body[data-theme=light] .darkapp input.field{ background:#ffffff; border-color:#d6d9e0; color:#15181d; }
+body[data-theme=light] .darkapp .seg{ background:#e6e8ee !important; }
+body[data-theme=light] .darkapp .seg button{ color:#3c424d; }
+body[data-theme=light] .darkapp .seg button.on{ background:#ffffff; color:#111; }
+body[data-theme=light] .darkapp .payline{ border-color:#eceef2; }
+body[data-theme=light] .darkapp .ch-compose input{ background:#fff; border-color:#d6d9e0; color:#111; }
+body[data-theme=light] .darkapp{ --ink:#15181d; --faint:#5b6270; }
+body[data-theme=light] .darkapp .hoodhead h3{ color:#15181d; }
+body[data-theme=light] .darkapp .btn[style*="rgba(255,255,255"]{ background:#e6e8ee !important; color:#23272e !important; }
