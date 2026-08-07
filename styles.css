@@ -86,7 +86,8 @@ input,select,textarea{font:inherit;color:inherit}
 .career-pick h4{font-size:15px;font-weight:700}
 .career-pick p{font-size:12px;color:var(--dim)}
 .career-pick .go{font-size:12px;font-weight:700;color:var(--ok)}
-#lk-unlock{margin-bottom:16px;font-size:13px;color:var(--faint);padding:10px 24px}
+#lk-unlock{margin-bottom:2px;font-size:13px;color:var(--faint);padding:10px 24px}
+#lk-ver{margin-bottom:10px;font-size:10px;letter-spacing:.04em;color:var(--faint);opacity:.7;font-variant-numeric:tabular-nums}
 
 /* ===== homescreen ===== */
 #home{padding:6px 20px 0}
@@ -131,7 +132,7 @@ input,select,textarea{font:inherit;color:inherit}
 .ic-card{background:linear-gradient(160deg,#2a2d33,#131519);color:#cfd6df}
 
 /* ===== app shell ===== */
-.aphead{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:14px 16px 12px;padding-top:calc(env(safe-area-inset-top,14px));position:relative;z-index:5}
+.aphead{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px 10px;position:relative;z-index:5}
 .aphead .back{font-size:15px;font-weight:600;opacity:.85;padding:4px 6px 4px 0}
 .aphead h1{font-size:19px;font-weight:800;letter-spacing:-.01em;flex:1}
 .aphead .hact{font-size:13px;font-weight:700;opacity:.85}
@@ -541,7 +542,7 @@ label.flabel{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;t
 
 /* ===== v1.2 ===== */
 /* brand mastheads */
-.brandhead{ display:flex; align-items:center; gap:12px; padding:calc(env(safe-area-inset-top, 0px) + 54px) 16px 14px; position:sticky; top:0; z-index:5; }
+.brandhead{ display:flex; align-items:center; gap:12px; padding:14px 16px 12px; position:sticky; top:0; z-index:5; }
 .brandhead h1{ font-size:20px; font-weight:800; letter-spacing:-.3px; margin:0; }
 .brandhead small{ display:block; font-size:11px; opacity:.7; margin-top:1px; }
 .brandhead .back{ background:none; border:none; color:inherit; font-size:26px; padding:0 4px 2px 0; }
@@ -683,7 +684,7 @@ body[data-theme=dark] .chron .morelink{ color:#d8cfb6; border-bottom-color:#3a33
 body[data-theme=dark] .chron .morelink small{ color:#9c9276; }
 
 /* ---- brandhead: compact, one row, no wasted space (Ty's report) ---- */
-.brandhead{ padding:calc(env(safe-area-inset-top, 0px) + 46px) 14px 10px; gap:10px; }
+.brandhead{ padding:14px 14px 10px; gap:10px; }
 .brandhead h1{ font-size:17px; }
 .brandhead > div{ min-width:0; }
 .brandhead small{ font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -695,3 +696,25 @@ body[data-theme=dark] .chron .morelink small{ color:#9c9276; }
 .calday.today{ box-shadow:0 0 0 1.5px #7fd4a0 inset; }
 .calday .tdy{ display:inline-block; font-style:normal; font-size:8.5px; font-weight:800; letter-spacing:.08em; color:#04170d; background:#7fd4a0; border-radius:999px; padding:2px 6px; margin-left:6px; vertical-align:2px; }
 body[data-theme=light] .darkapp .calday.today{ box-shadow:0 0 0 1.5px #1f9d5b inset; }
+
+/* ============ v1.3.5 — contrast sweep (Ty: letters white, not gray, on dark) ============ */
+/* Meridian dark: payline rows were #3a4048 on #181b20 (near-invisible) */
+body[data-theme=dark] .meridian .payline{ color:#e6e8ee; border-bottom-color:#242830; }
+body[data-theme=dark] .meridian .payline.neg span:last-child{ color:#ff9d94; }
+body[data-theme=dark] .meridian .acct-more{ color:#57c98a; }
+body[data-theme=dark] .meridian .mer-link{ color:#6db3f2; }
+body[data-theme=dark] .meridian .mer-tabs button.on{ color:#6db3f2; }
+body[data-theme=dark] .meridian .acct-num, body[data-theme=dark] .meridian .acct-sub{ color:#9aa3b0; }
+/* all light-branded apps dark: back pill was dark blue #0b5cad on near-black */
+body[data-theme=dark] .lightapp .aphead .back{ color:#6db3f2; }
+/* Chronicle dark: section kicker was dark brick on dark newsprint */
+body[data-theme=dark] .chron .kick{ color:#e0876f; }
+/* aphead taglines (inline gray): readable in both themes */
+.meridian .aphead .hact{ color:#6a7280 !important; }
+body[data-theme=dark] .meridian .aphead .hact{ color:#9aa3b0 !important; }
+/* light theme: bright greens/oranges/reds meant for dark backgrounds go deep on white */
+body[data-theme=light] .darkapp [style*="color:#7fd4a0"]{ color:#1f9d5b !important; }
+body[data-theme=light] .darkapp [style*="color:#ff9d94"]{ color:#c0392b !important; }
+body[data-theme=light] .darkapp .calday.pay .cd-ev{ color:#1f9d5b; }
+body[data-theme=light] .darkapp .calday.game .cd-ev{ color:#b26a1f; }
+body[data-theme=light] .meridian .payline.tot span:last-child{ color:#178a52; }

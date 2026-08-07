@@ -1,9 +1,12 @@
 /* TyNet service worker — polite auto-updates */
-const VER = "typhone-v1.3.4";
+const VER = "typhone-v1.3.5";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
-const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // scanner lib: cached on first use
+const EXTRAS = ["./jsqr.min.js"]; // best-effort: never allowed to block install if missing
+const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use
 self.addEventListener("install", e=>{
-  e.waitUntil(caches.open(VER).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
+  e.waitUntil(caches.open(VER).then(c=>
+    c.addAll(ASSETS).then(()=>Promise.allSettled(EXTRAS.map(u=>c.add(u))))
+  ).then(()=>self.skipWaiting()));
 });
 self.addEventListener("activate", e=>{
   e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VER).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));

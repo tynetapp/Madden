@@ -294,7 +294,7 @@ function liveNotifs(includeSeen){
       out.unshift({app:"messages", t:t.name, p, key:"n:messages:"+t.id});
     }
     const unreadMail=(S.world.emails||[]).filter(e=>!S.reads["e:"+e.id] && !S.notifSeen.mail.includes(e.id));
-    if (unreadMail.length) out.unshift({app:"tmail", t:"T-Mail", p:unreadMail.length+" unread — "+unreadMail[0].s, key:"n:tmail:batch"});
+    if (unreadMail.length) out.unshift({app:"tmail", t:"T-Mail", p:unreadMail.length+" unread — "+(unreadMail[0].subj||unreadMail[0].s||""), key:"n:tmail:batch"});
   }
   return includeSeen? out : out.filter(x=> !(S && S.reads[x.key]));
 }
@@ -1931,10 +1931,11 @@ function parseScanned(t){
 }
 async function ensureJsQR(){
   if (window.jsQR) return;
-  await new Promise((res,rej)=>{ const s=document.createElement("script");
-    s.src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js";
-    s.onload=res; s.onerror=()=>rej(new Error("Scanner library didn't load. Check connection once; it caches after that."));
-    document.head.appendChild(s); });
+  const load=src=>new Promise((res,rej)=>{ const s=document.createElement("script");
+    s.src=src; s.onload=res; s.onerror=()=>rej(new Error("load failed")); document.head.appendChild(s); });
+  try{ await load("jsqr.min.js"); if (window.jsQR) return; }catch(e){}
+  try{ await load("https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"); }
+  catch(e){ throw new Error("Scanner library didn't load. Make sure jsqr.min.js is uploaded to phone/ in the repo."); }
 }
 async function scanSheet(){
   try{ await ensureJsQR(); }catch(e){ return toast(e.message); }
@@ -2375,7 +2376,8 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.3.4";
+const VER="v1.3.5";
+{ const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{
