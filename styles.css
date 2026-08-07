@@ -97,10 +97,10 @@ input,select,textarea{font:inherit;color:inherit}
 #hs-widget .row{display:flex;gap:14px;margin-top:10px}
 .wg{flex:1;min-width:0}
 .wg small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
-.wg b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.wg b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.5}
 #grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px;justify-items:center}
 .app{width:100%;display:flex;flex-direction:column;align-items:center;gap:5px}
-.icon{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;position:relative;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.icon{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;position:relative;box-shadow:0 6px 14px rgba(0,0,0,.35)}
 .icon svg{display:block}
 .lk-card .ic svg{width:19px;height:19px}
 .lk-card .ic span{font-size:12px!important}
@@ -427,3 +427,114 @@ label.flabel{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;t
 @media (prefers-reduced-motion: reduce){
   *{transition:none!important;animation:none!important}
 }
+
+/* ---- v1.1 ---- */
+.ic-key{background:#1d5fd0!important;color:#fff!important}
+.ic-tml{background:linear-gradient(135deg,#fff,#eef1f6)!important;color:#c93a2e!important}
+.ic-yct{background:#0d2b45!important;color:#dff3ff!important}
+.ic-chron{background:#f3ecdd!important;color:#231d12!important}
+.ic-chron span{font-size:17px!important;font-weight:800}
+.ic-apx{background:#5a4a20!important;color:#f0e6c8!important}
+.ic-pylon{background:#101318!important;color:#e8edf3!important}
+.ic-card{background:#23262c!important;color:#dfe4ea!important}
+
+/* bigger labels to match icon bump */
+.icon-wrap small{font-size:11.5px}
+
+/* light app base */
+.lightapp{background:#f2f3f5;color:#16191d}
+.lightapp .aphead{background:#f2f3f5;border-bottom:1px solid #e2e4e8}
+.lightapp .aphead h1{color:#16191d}
+.lightapp .aphead .back{color:#0b5cad}
+.lightapp .field{background:#fff;border:1px solid #d8dce2;color:#16191d}
+.lightapp .flabel{color:#5a6472}
+.darkapp{background:var(--bg,#0f1114)}
+
+/* Meridian real-bank */
+.meridian{--mer:#0b5cad}
+.mer-logo{display:inline-flex;width:24px;height:24px;border-radius:6px;background:#0b5cad;color:#fff;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-right:2px}
+.mer-sechead{font-size:19px;font-weight:700;padding:16px 16px 8px;color:#16191d;display:flex;justify-content:space-between;align-items:center}
+.mer-sechead span{font-size:12px;color:#7a828d}
+.acct-group{background:#fff;border-radius:16px;margin:0 12px 6px;box-shadow:0 1px 3px rgba(20,30,50,.06)}
+.acct{padding:16px;border-bottom:1px solid #edeff2}
+.acct:last-child{border-bottom:none}
+.acct-top{display:flex;justify-content:space-between;align-items:center}
+.acct-name{font-size:16.5px;font-weight:600;color:#16191d}
+.acct-num{font-size:13px;color:#8a919c;font-weight:400;letter-spacing:.5px}
+.acct-sub{font-size:12.5px;color:#8a919c;margin-top:8px}
+.acct-bal{font-size:27px;font-weight:750;color:#111;letter-spacing:-.4px;margin:2px 0 8px;font-variant-numeric:tabular-nums}
+.acct-more{background:none;border:none;color:#1c7a3d;font-size:14px;font-weight:600;padding:0}
+.acct-detail{margin-top:10px;border-top:1px solid #edeff2;padding-top:8px}
+.mer-link{background:none;border:none;color:#0b5cad;font-weight:600;font-size:13px;padding:0}
+.meridian .payline{display:flex;justify-content:space-between;padding:7px 0;font-size:13.5px;color:#3a4048;border-bottom:1px solid #f0f2f4}
+.meridian .payline:last-child{border-bottom:none}
+.meridian .payline.neg span:last-child{color:#b3423a}
+.meridian .payline.tot{font-weight:700;color:#111;border-top:2px solid #e2e4e8}
+.mer-tabs{position:absolute;left:0;right:0;bottom:0;display:flex;background:#fafbfc;border-top:1px solid #e2e4e8;padding:6px 0 calc(env(safe-area-inset-bottom,8px) + 4px)}
+.mer-tabs button{flex:1;background:none;border:none;color:#6a7280;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0}
+.mer-tabs button i{font-style:normal;font-size:17px;line-height:1}
+.mer-tabs button.on{color:#0b5cad;font-weight:700}
+
+/* vehicle/property text rows */
+.veh-row{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;margin-bottom:8px;color:inherit}
+.veh-row.light{background:#fff;border:1px solid #e4e6ea;box-shadow:0 1px 2px rgba(20,30,50,.05)}
+.vr-l{display:flex;flex-direction:column;gap:2px;min-width:0;padding-right:10px}
+.vr-l b{font-size:14.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vr-l small{font-size:11.5px;opacity:.6}
+.vr-r{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.oct-make{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin:16px 2px 8px}
+.oct-count{font-size:11.5px;opacity:.5;padding:6px 18px 2px}
+.veh-detail{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+.veh-detail.light{background:#fff;border:1px solid #e4e6ea;color:#16191d}
+.vd-title{font-size:22px;font-weight:750;line-height:1.15}
+.vd-price{font-size:26px;font-weight:800;margin:8px 0 10px;font-variant-numeric:tabular-nums}
+.veh-detail .payline{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px;border-bottom:1px solid rgba(127,127,127,.15)}
+.veh-detail .payline.tot{font-weight:750;border-bottom:none}
+
+/* credit card fit */
+.thecard{width:calc(100% - 32px);max-width:calc(100% - 32px);box-sizing:border-box;margin:6px 16px;padding:16px}
+.thecard .num{letter-spacing:2.5px;font-size:17px}
+
+/* chirper */
+.ch-profile{display:flex;gap:12px;align-items:center;padding:14px 16px 10px}
+.ch-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#2b6b4f,#173a2b);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#e7f5ec;flex:none}
+.ch-pinfo{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ch-pinfo b{font-size:16.5px}
+.ch-pinfo>span{font-size:12.5px;color:var(--faint)}
+.ch-follow{display:flex;gap:14px;font-size:12.5px;color:var(--faint);margin-top:3px}
+.ch-follow b{color:var(--ink);font-weight:750}
+.ch-follow i{font-style:normal;font-size:11px;margin-left:4px}
+.chirp{display:block;width:100%;text-align:left;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;margin:8px 0;color:inherit}
+.chirp p{font-size:14px;line-height:1.45;margin:5px 0 0}
+.chirp.big p{font-size:16.5px}
+.chirp.reply{margin-left:14px;background:rgba(255,255,255,.03)}
+.ch-h{display:flex;gap:7px;align-items:baseline}
+.ch-h b{font-size:13.5px}
+.ch-h span{font-size:12px;color:var(--faint)}
+.ch-meta{font-size:11.5px;color:var(--faint);margin-top:7px}
+.ch-act{display:flex;gap:10px;margin-top:10px}
+.ch-act button{background:rgba(255,255,255,.08);border:none;color:var(--ink);border-radius:999px;padding:7px 14px;font-size:12.5px}
+.chirper{--ch-acc:#2b6b4f}
+
+/* pylon */
+.pylon-head h1{display:flex;align-items:center;gap:8px}
+.py-mark{display:inline-block;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:16px solid #ff7a1a}
+.stnd tr.you td{color:#7fd4a0;font-weight:750}
+
+/* apex agent bars */
+.agbar{display:inline-block;width:84px;height:6px;border-radius:99px;background:rgba(0,0,0,.1);overflow:hidden;vertical-align:middle}
+.agbar i{display:block;height:100%;background:#8a6d1f;border-radius:99px}
+.apex{--apx-acc:#8a6d1f}
+
+/* debt sliders */
+.dslid{margin-bottom:10px}
+.dslid label{display:flex;justify-content:space-between;font-size:13px;color:var(--faint);margin-bottom:4px}
+.dslid input[type=range]{width:100%}
+.hoodhead{display:flex;justify-content:space-between;align-items:baseline;margin:14px 2px 8px}
+.hoodhead h3{font-size:16px;font-weight:750;margin:0}
+.hoodhead span{font-size:11.5px;opacity:.55}
+.yachts{--yct-acc:#0d2b45}
+.planes{--pln-acc:#d8e6f5}
+
+.ic-chron span{color:#2a2214!important;text-shadow:none!important}
+.py-ic{display:block;width:22px;height:30px;background:linear-gradient(180deg,#ff8a2a,#f96b00);border-radius:5px 5px 3px 3px;transform:perspective(40px) rotateX(8deg);box-shadow:inset 0 -6px 0 rgba(0,0,0,.25)}

@@ -45,7 +45,7 @@ function newCareerState(blob){
       {id:"train", n:"Training & recovery", amt:600, cat:"career"}
     ],
     ledger: [ {t:"Camp stipend — Meridian deposit", amt:1750, wk:"PS1", kind:"income"} ],
-    deals: [], perception: { draft:"Undrafted", stars:2, hs:"Unranked", college:"Juco, no tape", hometown:"", family:"Paycheck to paycheck", familyAsk:0, debtAmt:0, debtKind:"None", story:"" },
+    deals: [], perception: { draft:"Undrafted free agent", state:"NJ", grew:"Small town", hs:"Local standout", college:"Mid-major starter", family:"Single mother household", rep:"Complete unknown", familyAsk:0, debtTotal:0, debtShares:null },
     world: { texts: structuredClone(D.SEED.texts), emails: structuredClone(D.SEED.emails),
              articles: [Object.assign({wk:"Preseason Wk 1"}, structuredClone(D.SEED.article))],
              earlier: structuredClone(D.SEED.earlier),
@@ -53,6 +53,10 @@ function newCareerState(blob){
              podium: structuredClone(D.SEED.podium), clips: [], espnExtra: structuredClone(D.SEED.espnExtra),
              notifs: structuredClone(D.SEED.notifications) },
     votes: {}, reads: {}, cardTx: [], handle: "@"+(p.first+p.last).toLowerCase(),
+    agent: null,
+    chirp: { followers: 842, following: 63, delta: 0, posts: [] },
+    last4: String(1000 + Math.floor(seedRng(blob.careerId+"card")()*9000)),
+    acctNums: { checking: String(1000+Math.floor(seedRng(blob.careerId+"a1")()*9000)), savings: String(1000+Math.floor(seedRng(blob.careerId+"a2")()*9000)), tax: String(1000+Math.floor(seedRng(blob.careerId+"a3")()*9000)) },
   };
 }
 function seedPrices(cid){ const px={}; const rng=seedRng(cid+"px0");
@@ -77,7 +81,8 @@ function checkLines(status, road, oppState){
   const fed = -Math.round(gross*0.35); lines.push(["Federal withholding", fed]);
   const st = -Math.round(gross*0.0897); lines.push(["New Jersey state", st]);
   let jock=0; if(road && oppState){ jock = -Math.round(gross*0.35*(oppState.rate)); if(jock) lines.push(["Jock tax — "+oppState.n, jock]); }
-  const agent = -Math.round(gross*0.03); lines.push(["Agent fee (3%) — Apex", agent]);
+  const feePct = (S && S.agent) ? S.agent.fee : 3.0;
+  const agent = -Math.round(gross*feePct/100); lines.push(["Agent fee ("+feePct+"%) — "+((S&&S.agent)?S.agent.n.split(" ").pop():"Apex"), agent]);
   const dues = -117; lines.push(["NFLPA dues", dues]);
   const net = gross+fed+st+jock+agent+dues;
   return {gross, net, lines};
@@ -104,14 +109,13 @@ const GLYPH = {
   chirper: SV('<path d="M4.5 4.5l15 15M19.5 4.5l-15 15" stroke-width="2.6"/>'),
   tmail: SV('<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>'),
   chron: '<span style="font-family:Georgia,serif;font-size:19px;font-weight:700;letter-spacing:-.5px">UC</span>',
-  espn: '<span style="font-style:italic;font-size:12px;letter-spacing:-.3px">ESPN</span>',
+  pylon: '<i class="py-ic"></i>',
   podium: SV('<rect x="9.2" y="3" width="5.6" height="11" rx="2.8"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21M9 21h6"/>'),
   keystone: SV('<path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10.5V20h12v-9.5"/><rect x="10" y="14.5" width="4" height="5.5" fill="currentColor" stroke="none"/>'),
   octane: SV('<path d="M4 16.5a8.5 8.5 0 1 1 16 0"/><path d="M12 15.5l4.2-5" stroke-width="2.4"/><circle cx="12" cy="16" r="1.6" fill="currentColor" stroke="none"/>'),
   apex: '<span style="font-size:15px;letter-spacing:.06em;font-weight:800">AX</span>',
   yachts: SV('<circle cx="12" cy="5" r="2.2"/><path d="M12 7.5V19M6 12h12M5 15c.8 3 3.6 5 7 5s6.2-2 7-5l-2.5 1M5 15l2.5 1"/>'),
   planes: SV('<path d="M10.5 13.5L3 11l1.5-1.5L11 10l4.5-4.5c.8-.8 2.2-.8 2.9 0 .8.8.8 2.1 0 2.9L14 13l.5 6.5L13 21l-2.5-7.5z" fill="currentColor" stroke="none"/>'),
-  clip: SV('<path d="M8 5.8v12.4c0 .9 1 1.5 1.8 1L19 13c.8-.5.8-1.6 0-2.1L9.8 4.8C9 4.3 8 4.9 8 5.8z" fill="currentColor" stroke="none"/>'),
   contacts: SV('<circle cx="12" cy="8.4" r="3.6" fill="currentColor" stroke="none"/><path d="M4.8 20c.9-3.4 3.8-5.4 7.2-5.4s6.3 2 7.2 5.4" fill="currentColor" stroke="none"/>'),
   card: SV('<rect x="2.8" y="5.5" width="18.4" height="13" rx="2.4"/><path d="M3 10h18" stroke-width="2.6"/><path d="M6.5 15h5"/>'),
   settings: SV('<circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>'),
@@ -121,16 +125,15 @@ const APPS = [
   {id:"chirper", n:"Chirper", ic:"ic-chr"},
   {id:"tmail", n:"T-Mail", ic:"ic-tml"},
   {id:"chron", n:"Chronicle", ic:"ic-chron"},
-  {id:"espn", n:"ESPN", ic:"ic-espn"},
+  {id:"pylon", n:"Pylon", ic:"ic-pylon"},
   {id:"podium", n:"Podium", ic:"ic-pod"},
   {id:"keystone", n:"Keystone", ic:"ic-key"},
   {id:"octane", n:"Octane", ic:"ic-oct"},
   {id:"apex", n:"Apex", ic:"ic-apx"},
   {id:"yachts", n:"Harborline", ic:"ic-yct"},
   {id:"planes", n:"Stratos", ic:"ic-pln"},
-  {id:"clip", n:"ClipHouse", ic:"ic-clip"},
   {id:"contacts", n:"Contacts", ic:"ic-con"},
-  {id:"card", n:"Card", ic:"ic-card"},
+  {id:"card", n:"Credit Card", ic:"ic-card"},
   {id:"settings", n:"Settings", ic:"ic-set"},
 ];
 const DOCK = [
@@ -167,12 +170,14 @@ function renderHome(){
   $("#dock").innerHTML = DOCK.map(a=>iconEl(a, a.id==="messages"&&unreadM?unreadM:null)).join("");
   renderWidget();
 }
+function buzzTier(f){ return f>2000000?"Household name":f>500000?"National story":f>120000?"League-wide buzz":f>25000?"Local hero":f>6000?"Beat-writer radar":f>1500?"Local curiosity":"Unknown"; }
 function renderWidget(){
   const p=S.blob.player;
   $("#wg-title").textContent = p.first+" "+p.last+" · "+p.teamShort;
   $("#wg-week").textContent = wkLabel(S.blob.clock);
-  $("#wg-cash").textContent = fm(S.cash.checking);
-  const rw = runwayWeeks(); $("#wg-run").textContent = rw>200?"∞":(rw+(rw===1?" wk":" wks"));
+  const st = p.status==="PracticeSquad"?"Practice Squad":p.isIR?"Injured Reserve":p.status==="Signed"?"Active Roster":p.status;
+  $("#wg-cash").textContent = st;
+  $("#wg-run").textContent = buzzTier(S.chirp?S.chirp.followers:0);
   const nx = nextGame();
   $("#wg-next").textContent = nx ? (nx[4]?"vs ":"@ ")+nx[3] : "—";
 }
@@ -185,7 +190,7 @@ function nextGame(){
 }
 function renderLock(){
   const n = S? S.world.notifs : D.SEED.notifications;
-  const icons = {messages:"ic-msg",huddle:"ic-hud",tmail:"ic-tml",meridian:"ic-mer",chirper:"ic-chr",sync:"ic-sync",chron:"ic-chron",espn:"ic-espn"};
+  const icons = {messages:"ic-msg",huddle:"ic-hud",tmail:"ic-tml",meridian:"ic-mer",chirper:"ic-chr",sync:"ic-sync",chron:"ic-chron",pylon:"ic-pylon"};
   $("#lk-notifs").innerHTML = n.slice(0,4).map(x=>`<button class="lk-card" onclick="unlock();openApp('${x.app}')">
     <span class="ic ${icons[x.app]||'ic-set'}">${GLYPH[x.app]||"•"}</span>
     <span style="min-width:0"><h4>${esc(x.t)}</h4><p>${esc(x.p)}</p></span></button>`).join("");
@@ -209,7 +214,7 @@ function closeApp(silent){
 }
 $("#hb").addEventListener("click", ()=>{ if(curApp) closeApp(); });
 $("#lk-unlock").addEventListener("click", unlock);
-$("#hs-widget").addEventListener("click", ()=>openApp("meridian"));
+$("#hs-widget").addEventListener("click", ()=>openApp("chirper"));
 
 function aphead(title, opts={}){
   return `<div class="aphead">${opts.noback?"":`<button class="back" onclick="${opts.back||"closeApp()"}">‹ ${opts.backlabel||"Home"}</button>`}<h1>${title}</h1>${opts.act?`<button class="hact" onclick="${opts.actFn}">${opts.act}</button>`:""}</div>`;
@@ -261,15 +266,86 @@ async function sendText(tid){
 }
 
 /* Chirper */
-RENDER.chirper = b=>{
-  b.className="chirper";
-  b.innerHTML = aphead("Chirper") + `<div class="apbody flush">` + S.world.chirps.map(c=>`
-    <div class="chirp"><span class="av" style="background:${c.av||avColor(c.n)}">${initials(c.n)}</span>
-    <div class="bx"><h4>${esc(c.n)} ${c.vf?'<span class="vf">✓</span>':''} <span class="hnd">${esc(c.h)} · ${esc(c.tm||"")}</span></h4>
-    <p>${esc(c.t)}</p>
-    <div class="acts"><span>💬 ${(c.rp/4|0)||3}</span><span>🔁 ${c.rp||0}</span><span>♥ ${c.li||0}</span><span>↗</span></div></div></div>`).join("") + `</div>`;
+let chTab="feed"; let chThread=null;
+RENDER.chirper = (b,sub)=>{
+  b.className="chirper darkapp";
+  if (sub && sub.t!==undefined){ chThread=sub.t; }
+  const me = S.handle;
+  if (chThread!==null){
+    const c = chGet(chThread);
+    if (!c){ chThread=null; } else {
+      b.innerHTML = aphead("Post",{back:"chThread=null;renderApp('chirper')",backlabel:"Chirper"}) + `<div class="apbody flush" style="padding:0 16px 90px">
+      <div class="chirp big">
+        <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b><span>${esc(c.h||me)}${c.vf?" ✔":""}</span></div>
+        <p>${esc(c.t)}</p>
+        <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.rp||0).toLocaleString()} rechirps</div>
+        <div class="ch-act"><button onclick="chLike('${c.id}')">♡ Like</button><button onclick="chReplyBox()">↩ Reply</button></div>
+      </div>
+      <div id="chReplyBox"></div>
+      <div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${(c.replies||[]).length}</span></div>
+      ${(c.replies||[]).map(r=>`<div class="chirp reply"><div class="ch-h"><b>${esc(r.a)}</b><span>${esc(r.h)}</span></div><p>${esc(r.x)}</p></div>`).join("") || '<div class="empty">No replies yet.</div>'}
+      </div>`;
+      return;
+    }
+  }
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1>Chirper</h1><button class="hact" onclick="chCompose()">Post</button></div>
+  <div class="ch-profile">
+    <div class="ch-av">${esc(S.blob.player.first[0]+S.blob.player.last[0])}</div>
+    <div class="ch-pinfo">
+      <b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>
+      <span>${esc(me)} · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
+      <div class="ch-follow"><span><b>${S.chirp.followers.toLocaleString()}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${S.chirp.delta.toLocaleString()} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
+    </div>
+  </div>
+  <div class="seg" style="background:rgba(255,255,255,.07)">${[["feed","Feed"],["mine","Your Posts"]].map(t=>`<button class="${chTab===t[0]?"on":""}" onclick="chTab='${t[0]}';renderApp('chirper')">${t[1]}</button>`).join("")}</div>
+  <div class="apbody flush" id="chList" style="padding:0 16px 90px"></div>`;
+  const el=$("#chList");
+  if (chTab==="feed"){
+    el.innerHTML = S.world.chirps.map((c,i)=>`<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
+      <div class="ch-h"><b>${esc(c.n)}</b><span>${esc(c.h)}${c.vf?" ✔":""} · ${esc(c.tm||"")}</span></div><p>${esc(c.t)}</p>
+      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
+  } else {
+    el.innerHTML = (S.chirp.posts||[]).slice().reverse().map(c=>`<button class="chirp" onclick="renderApp('chirper',{t:'${c.id}'})">
+      <div class="ch-h"><b>You</b><span>${esc(me)}</span></div><p>${esc(c.t)}</p>
+      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
+  }
 };
-
+function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
+function chLike(id){ const c=chGet(id); if(c){c.li=(c.li||0)+1; persist(); renderApp('chirper',{t:id});} }
+function chReplyBox(){
+  $("#chReplyBox").innerHTML = `<div class="chirp" style="border-style:dashed"><textarea id="chRTxt" class="field" style="margin:0 0 8px" rows="2" placeholder="Reply as ${esc(S.handle)}"></textarea>
+  <button class="btn sm" style="background:var(--ch-acc);color:#fff" onclick="chSendReply()">Reply</button></div>`;
+}
+async function chSendReply(){
+  const txt=$("#chRTxt").value.trim(); if(!txt) return;
+  const c=chGet(chThread);
+  c.replies=c.replies||[]; c.replies.push({a:S.blob.player.first+" "+S.blob.player.last, h:S.handle, x:txt});
+  persist(); renderApp('chirper',{t:chThread});
+  if (META.settings.apiKey){
+    const rep = await aiChirpReply(c, txt);
+    if (rep){ for (const r of rep) c.replies.push(r); persist(); if(chThread===c.id) renderApp('chirper',{t:c.id}); }
+  }
+}
+async function aiChirpReply(c, mine){
+  try{
+    const out = await callClaude([{role:"user", content:
+      "You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a practice squad rookie QB) just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]"}], 400);
+    const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
+    return Array.isArray(arr)? arr.slice(0,3) : null;
+  }catch(e){ return null; }
+}
+function chCompose(){
+  sheet(`<h3>New post</h3><textarea id="chNew" class="field" rows="3" placeholder="What's happening, ${esc(S.handle)}?"></textarea>
+  <button class="btn" style="background:var(--ch-acc);color:#fff" onclick="chPost()">Post</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+}
+function chPost(){
+  const txt=$("#chNew").value.trim(); if(!txt) return;
+  S.chirp.posts=S.chirp.posts||[];
+  const rng=seedRng(S.careerId+txt);
+  S.chirp.posts.push({id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]});
+  closeSheet(); persist(); chTab="mine"; renderApp('chirper'); toast("Posted.");
+}
 /* T-Mail */
 RENDER.tmail = (b, sub)=>{
   b.className="tmail lightapp";
@@ -301,36 +377,89 @@ RENDER.chron = (b, sub)=>{
   `</div></div>`;
 };
 
-/* ESPN */
+/* Pylon — the sports network */
 const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
   if (day==="Sunday"){ if (t>=1200) return "NBC"; return ["CBS","FOX"][g[0]%2]; } return "CBS"; };
-RENDER.espn = b=>{
+let pyTab="scores";
+RENDER.pylon = b=>{
   b.className="espn";
-  const played = S.blob.schedule.filter(g=>g[7]);
-  const upcoming = S.blob.schedule.filter(g=>!g[7]).slice(0,3);
-  const T=S.blob.player.team;
-  const gcard = g=>{ const us=T, them=g[3], home=g[4];
-    const sc=g[7]; const w = sc && sc[0]>sc[1];
-    const rowA = home? [them, sc?sc[1]:null, !w] : [us, sc?sc[0]:null, w];
-    const rowH = home? [us, sc?sc[0]:null, w] : [them, sc?sc[1]:null, !w];
-    const status = sc? "FINAL · "+(g[1]==="PreSeason"?"PRE":"")+" WK "+(g[0]+1) : g[5].slice(0,3).toUpperCase()+" · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1);
-    return `<div class="scorecard"><div class="st"><span>${status}</span><span class="net ${NETMAP(g)}">${NETMAP(g)==="PRIME"?"Prime Video":NETMAP(g)==="PCOCK"?"Peacock":NETMAP(g)}</span></div>
-      <div class="tm ${sc?(rowA[2]?"win":"lose"):""}"><span>${esc(rowA[0])}</span><b>${rowA[1]??""}</b></div>
-      <div class="tm ${sc?(rowH[2]?"win":"lose"):""}"><span>${esc(rowH[0])}${home?"":" (H)"}</span><b>${rowH[1]??""}</b></div></div>`; };
-  const rec = played.filter(g=>g[1]==="RegularSeason").reduce((a,g)=>{g[7][0]>g[7][1]?a[0]++:a[1]++;return a},[0,0]);
-  b.innerHTML = aphead("ESPN") + `<div class="apbody">
-    <div class="hoodhead" style="color:#fff"><h3>${esc(T)} · Scores</h3><span style="color:#8b939c">${rec[0]}-${rec[1]}</span></div>` +
-    played.map(gcard).join("") + upcoming.map(gcard).join("") +
-    `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>AFC East</h3><span style="color:#8b939c">${S.blob.clock.seasonYear}</span></div>
-    <table class="stnd"><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th></tr>` +
-    ["Bills","Dolphins","Patriots","Jets"].map(t=>{
-      const you=t===T; const w=you?rec[0]:0, l=you?rec[1]:0;
-      return `<tr class="${you?"you":""}"><td>${t}</td><td>${w}</td><td>${l}</td><td>${(w+l)?(w/(w+l)).toFixed(3).slice(1):".000"}</td></tr>`;}).join("") +
-    `</table><p style="font-size:11.5px;color:#5c6570;margin-top:10px">Standings populate as league results sync from the desktop reader.</p></div>`;
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹</button><h1><i class="py-mark"></i>Pylon</h1><span class="hact" style="opacity:.7;font-size:11px">${esc(D.PYLON.tag)}</span></div>
+  <div class="seg" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
+  <div class="apbody" id="pyMain"></div>`;
+  pyBody();
 };
-
+function pyGo(t){ pyTab=t; pyBody(); $$(".espn .seg button").forEach((x,i)=>x.classList.toggle("on", ["scores","standings","me","leaders"][i]===t)); }
+function pyBody(){
+  const m=$("#pyMain"); if(!m) return;
+  const T=S.blob.player.team;
+  const gcard = g=>{ const them=g[3], home=g[4];
+    const sc=g[7]; const w = sc && sc[0]>sc[1];
+    const rowA = home? [them, sc?sc[1]:null, sc&&!w] : [T, sc?sc[0]:null, w];
+    const rowH = home? [T, sc?sc[0]:null, w] : [them, sc?sc[1]:null, sc&&!w];
+    const status = sc? "FINAL · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1) : g[5].slice(0,3).toUpperCase()+" · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1);
+    return `<div class="scorecard"><div class="st"><span>${status}</span><span class="net ${NETMAP(g)}">${NETMAP(g)==="PRIME"?"Prime Video":NETMAP(g)}</span></div>
+      <div class="tm ${sc?(rowA[2]?"win":"lose"):""}"><span>${esc(rowA[0])}</span><b>${rowA[1]??""}</b></div>
+      <div class="tm ${sc?(rowH[2]?"win":"lose"):""}"><span>${esc(rowH[0])}</span><b>${rowH[1]??""}</b></div></div>`; };
+  if (pyTab==="scores"){
+    const played = S.blob.schedule.filter(g=>g[7]);
+    const upcoming = S.blob.schedule.filter(g=>!g[7]).slice(0,3);
+    let leagueHtml = "";
+    if (S.blob.league && S.blob.league.games && S.blob.league.games.length){
+      const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
+      const recent = S.blob.league.games.filter(g=>g.t===tp && g.w>=wkNow-1 && (g.played||g.hs+g.as>0)).slice(0,24);
+      leagueHtml = `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>Around the league</h3><span style="color:#8b939c">wk ${wkNow}</span></div>` +
+        recent.map(g=>`<div class="scorecard"><div class="st"><span>FINAL · WK ${g.w+1}</span></div>
+        <div class="tm ${g.as>g.hs?"win":"lose"}"><span>${esc(g.a)}</span><b>${g.as}</b></div>
+        <div class="tm ${g.hs>g.as?"win":"lose"}"><span>${esc(g.h)}</span><b>${g.hs}</b></div></div>`).join("");
+    } else {
+      leagueHtml = `<p style="font-size:12px;color:#5c6570;margin-top:14px">League-wide scores arrive with your next desktop sync (extractor v2 reads every game in the save).</p>`;
+    }
+    m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${esc(T)}</h3><span style="color:#8b939c">${wkLabel(S.blob.clock)}</span></div>` +
+      played.map(gcard).join("") + upcoming.map(gcard).join("") + leagueHtml;
+  }
+  if (pyTab==="standings"){
+    if (S.blob.league && S.blob.league.teams){
+      const recs={}; for (const t of S.blob.league.teams) recs[t.n]={w:0,l:0,ti:0,div:t.d};
+      for (const g of (S.blob.league.games||[])){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)) continue;
+        if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} else {recs[g.h].ti++;recs[g.a].ti++;} }
+      const divs={}; for(const n in recs){ (divs[recs[n].div]=divs[recs[n].div]||[]).push([n,recs[n]]); }
+      m.innerHTML = Object.keys(divs).sort().map(d=>`<div class="hoodhead" style="color:#fff"><h3>${esc(d)}</h3></div>
+        <table class="stnd"><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th></tr>` +
+        divs[d].sort((a,b)=> (b[1].w/(b[1].w+b[1].l||1)) - (a[1].w/(a[1].w+a[1].l||1)) ).map(x=>
+          `<tr class="${x[0]===T?"you":""}"><td>${esc(x[0])}</td><td>${x[1].w}</td><td>${x[1].l}</td><td>${(x[1].w+x[1].l)?(x[1].w/(x[1].w+x[1].l)).toFixed(3).replace(/^0/,""):".000"}</td></tr>`).join("") + `</table>`).join("");
+    } else {
+      const played = S.blob.schedule.filter(g=>g[7]&&g[1]==="RegularSeason");
+      const rec = played.reduce((a,g)=>{g[7][0]>g[7][1]?a[0]++:a[1]++;return a},[0,0]);
+      m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${esc(T)}</h3></div>
+      <table class="stnd"><tr><th>Team</th><th>W</th><th>L</th></tr><tr class="you"><td>${esc(T)}</td><td>${rec[0]}</td><td>${rec[1]}</td></tr></table>
+      <p style="font-size:12px;color:#5c6570;margin-top:12px">Full league standings arrive with your next desktop sync.</p>`;
+    }
+  }
+  if (pyTab==="me"){
+    const p=S.blob.player;
+    const stats = (S.blob.seasonStats||[]).find(s=>s.table&&s.table.includes("Offensive")) || {};
+    const rows = [["Games played", stats.GAMESPLAYED||0],["Games started", stats.GAMESSTARTED||0],["Pass yards", stats.PASSYDS||0],["Pass TD", stats.PASSTDS||0],["INT", stats.PASSINTS||0],["Rush yards", stats.RUSHYDS||0],["Rush TD", stats.RUSHTDS||0]];
+    m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${esc(p.first+" "+p.last)}</h3><span style="color:#8b939c">${esc(p.pos)} · #${p.jersey} · ${esc(p.team)}</span></div>
+    <div class="scorecard">${rows.map(r=>`<div class="tm"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("")}</div>
+    <div class="scorecard"><div class="st"><span>Availability</span></div>
+      <div class="tm"><span>Status</span><b style="font-size:13px">${p.status==="PracticeSquad"?"Practice Squad":esc(p.status)}</b></div>
+      <div class="tm"><span>Health</span><b style="font-size:13px">${p.injury&&p.injury.status!=="Uninjured"?esc(p.injury.status):"Healthy"}</b></div>
+      <div class="tm"><span>Confidence</span><b>${p.confidence}</b></div></div>
+    ${!stats.GAMESPLAYED?'<p style="font-size:12px;color:#5c6570">Regular season stats populate as you sync played weeks.</p>':""}`;
+  }
+  if (pyTab==="leaders"){
+    if (S.blob.league && S.blob.league.leaders){
+      const L=S.blob.league.leaders;
+      m.innerHTML = Object.keys(L).map(cat=>`<div class="hoodhead" style="color:#fff"><h3>${esc(cat)}</h3></div>
+      <table class="stnd"><tr><th>Player</th><th>Team</th><th>${esc(L[cat].unit||"")}</th></tr>` +
+      L[cat].rows.map(r=>`<tr class="${r[0]===(S.blob.player.first+" "+S.blob.player.last)?"you":""}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${r[2]}</td></tr>`).join("") + `</table>`).join("");
+    } else {
+      m.innerHTML = `<div class="empty" style="color:#8b939c">League leaders arrive with your next desktop sync. Extractor v2 reads every stat line in the save: passing, rushing, receiving, sacks, picks.</div>`;
+    }
+  }
+}
 /* The Huddle */
 RENDER.huddle = (b, sub)=>{
   b.className="huddle";
@@ -369,89 +498,115 @@ RENDER.huddle = (b, sub)=>{
   }
 };
 function countCmts(P){ let n=0; const walk=cs=>{for(const c of cs){n++; if(c.r) walk(c.r);} }; walk(P.cmts); return n; }
-/* Meridian */
-let merTab = "overview";
+/* Meridian — real-bank layout */
+let merTab = "accounts";
+let merShow = {};
 RENDER.meridian = b=>{
-  b.className="meridian";
-  const rw = runwayWeeks(); const rwCls = rw>16?"ok":rw>8?"warn":"bad";
-  const tabs = [["overview","Overview"],["pay","Paycheck"],["bills","Bills"],["loans","Credit & Loans"],["invest","Invest"],["sweep","Auto-Sweep"]];
-  b.innerHTML = aphead("Meridian", {act:"Private Client"}) +
-  `<div class="mer-hero"><small>Player Checking</small><b>${fmc(S.cash.checking)}</b>
-   <div class="sub">Reserve ${fm(S.cash.savings)} · Tax Hold ${fm(S.cash.tax)} · Net worth ${fmk(netWorth())}</div></div>
-  <div class="mer-nav">${tabs.map(t=>`<button class="${merTab===t[0]?"on":""}" onclick="merGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
-  <div class="apbody" id="merMain"></div>`;
+  b.className="meridian lightapp";
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1><span class="mer-logo">M</span> Meridian</h1><button class="hact" style="color:#0b5cad" onclick="toast('Private Client line: (800) 555-0122')">Support</button></div>
+  <div class="apbody flush" id="merMain" style="padding-bottom:76px"></div>
+  <div class="mer-tabs">
+    ${[["accounts","Accounts","$"],["pay","Pay/Transfer","⇄"],["paycheck","Paycheck","▤"],["loans","Loans","%"],["invest","Invest","▲"]].map(t=>
+      `<button class="${merTab===t[0]?"on":""}" onclick="merGo('${t[0]}')"><i>${t[2]}</i>${t[1]}</button>`).join("")}
+  </div>`;
   merBody();
 };
-function merGo(t){ merTab=t; merBody(); $$(".mer-nav button").forEach((x,i)=>x.classList.toggle("on", ["overview","pay","bills","loans","invest","sweep"][i]===t)); }
+function merGo(t){ merTab=t; merBody(); $$(".mer-tabs button").forEach((x,i)=>x.classList.toggle("on", ["accounts","pay","paycheck","loans","invest"][i]===t)); }
+function acctCard(label, key, bal, extra){
+  const open = merShow[key];
+  return `<div class="acct">
+    <div class="acct-top"><span class="acct-name">${label} <span class="acct-num">*******${S.acctNums[key]||"0000"}</span> ›</span></div>
+    <div class="acct-sub">Available Balance**</div>
+    <div class="acct-bal">${fmc(bal)}</div>
+    <button class="acct-more" onclick="merShow['${key}']=!merShow['${key}'];merBody()">Show ${open?"less":"more"} ${open?"▴":"▾"}</button>
+    ${open? `<div class="acct-detail">${extra||recentFor(key)}</div>`:""}
+  </div>`;
+}
+function recentFor(key){
+  const rows = S.ledger.slice(-6).reverse();
+  return rows.map(l=>`<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${l.amt?fm(l.amt):""}</span></div>`).join("") || '<div style="font-size:13px;opacity:.6">No recent activity.</div>';
+}
 function merBody(){
-  const m=$("#merMain"); const rw=runwayWeeks(); const rwCls=rw>16?"ok":rw>8?"warn":"bad";
-  if (merTab==="overview"){
-    m.innerHTML = `<div class="mercard"><h4>Runway <span>burn ${fm(monthlyBurn())}/mo</span></h4>
-      <div class="runway"><div class="rw ${rwCls}"><small>Weeks</small><b>${rw>200?"∞":rw}</b></div>
-      <div class="rw ok"><small>Liquid</small><b>${fmk(liquid())}</b></div>
-      <div class="rw ${S.cash.tax>0?"ok":"warn"}"><small>Tax hold</small><b>${fmk(S.cash.tax)}</b></div></div></div>
-    <div class="mercard"><h4>Activity</h4>` + S.ledger.slice(-8).reverse().map(l=>`<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${fm(l.amt)}</span></div>`).join("") + `</div>
-    <div class="mercard"><h4>Transfer</h4>
-      <div style="display:flex;gap:8px"><select id="tFrom" class="field" style="margin:0"><option value="checking">Checking</option><option value="savings">Reserve</option><option value="tax">Tax Hold</option></select>
-      <select id="tTo" class="field" style="margin:0"><option value="savings">Reserve</option><option value="checking">Checking</option><option value="tax">Tax Hold</option></select></div>
-      <input id="tAmt" class="field" type="number" placeholder="Amount" style="margin-top:8px">
-      <button class="btn" style="background:var(--mer-acc);color:#04170d" onclick="doTransfer()">Move money</button></div>`;
+  const m=$("#merMain"); if(!m) return;
+  const rw=runwayWeeks();
+  if (merTab==="accounts"){
+    m.innerHTML = `<div class="mer-sechead">Internal Accounts <span>▾</span></div>
+    <div class="acct-group">
+      ${acctCard("Checking","checking",S.cash.checking)}
+      ${acctCard("Savings","savings",S.cash.savings)}
+      ${acctCard("Tax Hold","tax",S.cash.tax,'<div style="font-size:13px;opacity:.65;line-height:1.5">Set aside for federal and state obligations. Auto-Sweep can fund this from every deposit.</div>')}
+    </div>
+    <div class="mer-sechead">Position</div>
+    <div class="acct-group"><div class="acct">
+      <div class="payline"><span>Monthly burn</span><span>${fm(monthlyBurn())}</span></div>
+      <div class="payline"><span>Runway</span><span>${rw>200?"Indefinite":rw+" weeks"}</span></div>
+      <div class="payline"><span>Invested</span><span>${fm(investValue())}</span></div>
+      <div class="payline"><span>Net worth</span><span>${fmk(netWorth())}</span></div>
+      <div class="payline"><span>Auto-Sweep</span><span><button class="mer-link" onclick="S.autosweep=!S.autosweep;persist();merBody()">${S.autosweep?"On · "+S.sweepPct.tax+"% tax / "+S.sweepPct.savings+"% savings":"Off · turn on"}</button></span></div>
+    </div></div>
+    <div class="mer-sechead">Bills on autopay</div>
+    <div class="acct-group"><div class="acct">
+      ${S.bills.map(x=>`<div class="payline"><span>${esc(x.n)}</span><span>${fm(x.amt)}</span></div>`).join("")}
+      ${S.perception.familyAsk?`<div class="payline"><span>Family support</span><span>${fm(S.perception.familyAsk)}</span></div>`:""}
+      ${S.debts.map(d=>`<div class="payline"><span>${esc(d.n)}</span><span>${fm(d.pay)}/mo</span></div>`).join("")}
+    </div></div>`;
   }
   if (merTab==="pay"){
+    m.innerHTML = `<div class="mer-sechead">Move money</div>
+    <div class="acct-group"><div class="acct">
+      <label class="flabel">From</label><select id="tFrom" class="field"><option value="checking">Checking</option><option value="savings">Savings</option><option value="tax">Tax Hold</option></select>
+      <label class="flabel">To</label><select id="tTo" class="field"><option value="savings">Savings</option><option value="checking">Checking</option><option value="tax">Tax Hold</option></select>
+      <label class="flabel">Amount</label><input id="tAmt" class="field" type="number" placeholder="$0.00">
+      <button class="btn" style="background:#0b5cad;color:#fff" onclick="doTransfer()">Transfer</button>
+    </div></div>
+    <div class="mer-sechead">Recent activity</div>
+    <div class="acct-group"><div class="acct">${S.ledger.slice(-12).reverse().map(l=>`<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${l.amt?fm(l.amt):""}</span></div>`).join("")}</div></div>`;
+  }
+  if (merTab==="paycheck"){
     const nx = nextGame(); const road = nx && !nx[4]; const st = road? STATE_TAX[nx[3]] : null;
     const ck = checkLines(S.blob.player.status, road, st);
     const isPre = S.blob.clock.weekType==="PreSeason";
-    m.innerHTML = `<div class="mercard"><h4>${isPre?"Next season-week check (preview)":"Next check"} <span>${S.blob.player.status==="PracticeSquad"?"practice squad rate":"active roster rate"}</span></h4>` +
-      ck.lines.map(l=>`<div class="payline ${l[1]<0?"neg":""}"><span>${esc(l[0])}</span><span>${fm(l[1])}</span></div>`).join("") +
-      `<div class="payline tot"><span>Net deposit</span><span>${fm(ck.net)}</span></div></div>
-      <div class="mercard"><h4>How you're paid</h4>
-      <div style="font-size:13px;line-height:1.55;color:var(--dim)">Practice squad pays ${fm(psWeekly())} per week the roster exists — 18 weeks, ${fm(psWeekly()*18)} for the season. Game-day elevation pays the active weekly rate (${fm(activeWeekly())}) for that week. Signing to the 53 switches every remaining week to the active rate. ${isPre?"Preseason pays a camp stipend of $1,750 per week; real checks start Week 1.":""}</div></div>
-      <div class="mercard"><h4>Deposits</h4>` + S.ledger.filter(l=>l.kind==="income").slice(-10).reverse().map(l=>`<div class="payline"><span>${esc(l.t)}</span><span>${fm(l.amt)}</span></div>`).join("") + `</div>`;
-  }
-  if (merTab==="bills"){
-    m.innerHTML = `<div class="mercard"><h4>Monthly bills <span>autopay from checking</span></h4>` +
-      S.bills.map(x=>`<div class="payline"><span>${esc(x.n)}</span><span>${fm(x.amt)}</span></div>`).join("") +
-      (S.perception.familyAsk? `<div class="payline"><span>Family support (set in Settings)</span><span>${fm(S.perception.familyAsk)}</span></div>`:"") +
-      S.debts.map(d=>`<div class="payline"><span>${esc(d.n)} — payment</span><span>${fm(d.pay)}</span></div>`).join("") +
-      (S.credit.cardBal>0?`<div class="payline"><span>Card minimum</span><span>${fm(Math.max(35,S.credit.cardBal*0.03))}</span></div>`:"") +
-      `<div class="payline tot"><span>Total burn</span><span>${fm(monthlyBurn())}/mo</span></div></div>
-      <div class="mercard"><h4>Housing note</h4><div style="font-size:13px;color:var(--dim);line-height:1.5">The extended-stay bill disappears the week you close on a place in Keystone. Sometimes a mortgage is cheaper than a hotel. Sometimes.</div></div>`;
+    m.innerHTML = `<div class="mer-sechead">${isPre?"Season-week check (preview)":"Next check"}</div>
+    <div class="acct-group"><div class="acct">
+      ${ck.lines.map(l=>`<div class="payline ${l[1]<0?"neg":""}"><span>${esc(l[0])}</span><span>${fm(l[1])}</span></div>`).join("")}
+      <div class="payline tot"><span>Net deposit</span><span>${fm(ck.net)}</span></div></div></div>
+    <div class="mer-sechead">How you're paid</div>
+    <div class="acct-group"><div class="acct"><div style="font-size:13.5px;line-height:1.55;opacity:.75">Practice squad pays ${fm(psWeekly())} per week for 18 weeks (${fm(psWeekly()*18)} a season). A game-day elevation pays the active weekly rate of ${fm(activeWeekly())} for that week. Signing to the 53 switches every remaining week to the active rate. ${isPre?"Preseason pays a $1,750 weekly camp stipend; real checks start Week 1.":""}</div></div></div>
+    <div class="mer-sechead">Deposit history</div>
+    <div class="acct-group"><div class="acct">${S.ledger.filter(l=>l.kind==="income").slice(-10).reverse().map(l=>`<div class="payline"><span>${esc(l.t)}</span><span>${fm(l.amt)}</span></div>`).join("")}</div></div>`;
   }
   if (merTab==="loans"){
-    m.innerHTML = `<div class="mercard"><h4>Credit score <span>Meridian model</span></h4>
-      <b style="font-size:34px" class="mono">${S.credit.score}</b>
-      <div style="font-size:12.5px;color:var(--dim);margin-top:4px">${S.credit.score>=740?"Excellent — best rates unlock.":S.credit.score>=700?"Good — prime offers available.":S.credit.score>=640?"Fair — standard rates.":"Building — expect painful APRs."}</div></div>` +
-      D.LOANS.map(L=>{
-        const ok = S.credit.score>=L.minScore;
-        return `<div class="mercard"><h4>${esc(L.n)} <span>${L.apr.toFixed(1)}% APR · ${L.term} mo</span></h4>
-        <div style="font-size:13px;color:var(--dim);margin-bottom:8px">Up to ${fm(L.max)}. ${L.trap? esc(L.note):""} ${!ok?"Requires score "+L.minScore+".":""}</div>
-        ${ok?`<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"var(--bad)":"var(--mer-acc)"};color:#04170d;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`:""}</div>`;
-      }).join("") +
-      (S.debts.length?`<div class="mercard"><h4>Your debts</h4>`+S.debts.map((d,i)=>`<div class="payline"><span>${esc(d.n)} · ${d.apr}%</span><span>${fm(d.bal)}</span></div>`).join("")+`</div>`:"");
+    m.innerHTML = `<div class="mer-sechead">Credit score</div>
+    <div class="acct-group"><div class="acct"><div class="acct-bal" style="font-size:34px">${S.credit.score}</div>
+    <div style="font-size:13px;opacity:.65">${S.credit.score>=740?"Excellent. Best rates unlock.":S.credit.score>=700?"Good. Prime offers available.":S.credit.score>=640?"Fair. Standard rates.":"Building. Expect painful APRs."}</div></div></div>
+    <div class="mer-sechead">Products</div>
+    <div class="acct-group">${D.LOANS.map(L=>{
+      const ok = S.credit.score>=L.minScore;
+      return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(L.n)}</span><span style="font-size:12px;opacity:.6">${L.apr.toFixed(1)}% · ${L.term}mo</span></div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(L.max)}. ${L.trap? esc(L.note):""} ${!ok?"Requires score "+L.minScore+".":""}</div>
+      ${ok?`<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`:""}</div>`;
+    }).join("")}</div>
+    ${S.debts.length?`<div class="mer-sechead">Your debts</div><div class="acct-group"><div class="acct">${S.debts.map(d=>`<div class="payline"><span>${esc(d.n)} · ${d.apr}%</span><span>${fm(d.bal)}</span></div>`).join("")}</div></div>`:""}`;
   }
   if (merTab==="invest"){
     const total=investValue();
-    m.innerHTML = `<div class="mercard"><h4>Portfolio <span>${fm(total)}</span></h4>` +
-      (Object.keys(S.invest).length? Object.keys(S.invest).map(id=>{
-        const a=D.INVEST.find(x=>x.id===id); const h=S.invest[id]; const v=h.units*S.investPx[id]; const pl=v-h.cost;
-        return `<div class="invrow"><div class="l"><b>${esc(a.n)}</b><small>${esc(a.kind)}</small></div>
-        <div class="r"><b>${fm(v)}</b><small class="${pl>=0?"up":"dn"}">${pl>=0?"+":""}${fm(pl)}</small></div></div>`;}).join("") : `<div style="font-size:13px;color:var(--dim)">Nothing invested yet. Money sleeping in checking loses to inflation; money in the wrong coin loses to gravity.</div>`) + `</div>
-    <div class="mercard"><h4>Markets <span>move weekly at sync</span></h4>` +
-      D.INVEST.map(a=>`<div class="invrow"><div class="l"><b>${esc(a.n)}</b><small>${esc(a.d)}</small></div>
-        <div class="r"><b class="mono">${a.kind==="crypto"&&S.investPx[a.id]<1? "$"+S.investPx[a.id].toFixed(7): fm(S.investPx[a.id])}</b>
-        <button class="btn sm" style="background:rgba(47,208,140,.2);color:var(--mer-acc);margin-top:3px" onclick="buySheet('${a.id}')">Trade</button></div></div>`).join("") + `</div>`;
-  }
-  if (merTab==="sweep"){
-    m.innerHTML = `<div class="mercard"><h4>Auto-Sweep <span>${S.autosweep?"ON":"OFF"}</span></h4>
-      <div style="font-size:13px;color:var(--dim);line-height:1.5;margin-bottom:10px">Every deposit splits before you can touch it: ${S.sweepPct.tax}% to Tax Hold, ${S.sweepPct.savings}% to Reserve. The players who end year one right turned this on in August.</div>
-      <button class="btn" style="background:${S.autosweep?"rgba(255,255,255,.12)":"var(--mer-acc)"};color:${S.autosweep?"var(--ink)":"#04170d"}" onclick="S.autosweep=!S.autosweep;persist();merBody()">${S.autosweep?"Turn off":"Turn on Auto-Sweep"}</button></div>`;
+    m.innerHTML = `<div class="mer-sechead">Portfolio · ${fm(total)}</div>
+    <div class="acct-group"><div class="acct">${Object.keys(S.invest).length? Object.keys(S.invest).map(id=>{
+      const a=D.INVEST.find(x=>x.id===id); const h=S.invest[id]; const v=h.units*S.investPx[id]; const pl=v-h.cost;
+      return `<div class="invrow"><div class="l"><b>${esc(a.n)}</b><small>${esc(a.kind)}</small></div>
+      <div class="r"><b>${fm(v)}</b><small class="${pl>=0?"up2":"dn2"}">${pl>=0?"+":""}${fm(pl)}</small></div></div>`;}).join("") : '<div style="font-size:13px;opacity:.65">Nothing invested. Money in checking loses to inflation; money in the wrong coin loses to gravity.</div>'}</div></div>
+    <div class="mer-sechead">Markets · move weekly at sync</div>
+    <div class="acct-group">${D.INVEST.map(a=>`<div class="acct" style="padding:12px 16px"><div class="invrow" style="border:none;padding:0"><div class="l"><b>${esc(a.n)}</b><small>${esc(a.d)}</small></div>
+      <div class="r"><b class="mono">${a.kind==="crypto"&&S.investPx[a.id]<1? "$"+S.investPx[a.id].toFixed(7): fm(S.investPx[a.id])}</b>
+      <button class="btn sm" style="background:#e7f0f8;color:#0b5cad;margin-top:3px" onclick="buySheet('${a.id}')">Trade</button></div></div></div>`).join("")}</div>`;
   }
 }
+
 function doTransfer(){
   const f=$("#tFrom").value, t=$("#tTo").value, a=+$("#tAmt").value;
   if(!a||a<=0||f===t) return toast("Pick a real amount.");
   if(S.cash[f]<a) return toast("Insufficient funds in that account.");
-  S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${f} → ${t}`, amt:0, kind:"move"});
+  S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${f} to ${t}`, amt:0, kind:"move"});
   persist(); merBody(); renderWidget(); toast("Moved "+fm(a));
 }
 function takeLoan(id){
@@ -467,9 +622,9 @@ function takeLoan(id){
 function buySheet(id){
   const a=D.INVEST.find(x=>x.id===id); const px=S.investPx[id]; const held=S.invest[id];
   sheet(`<h3>${esc(a.n)}</h3><p class="sp">${esc(a.d)} · Price ${a.kind==="crypto"&&px<1?"$"+px.toFixed(7):fm(px)}${a.buyin?` · Buy-in ${fm(a.buyin)}`:""}${held?` · You hold ${fm(held.units*px)}`:""}</p>
-  ${a.buyin? `<button class="btn" style="background:var(--mer-acc);color:#04170d" onclick="doInvest('${id}',${a.buyin})">Buy in — ${fm(a.buyin)}</button>` :
+  ${a.buyin? `<button class="btn" style="background:#0b5cad;color:#fff" onclick="doInvest('${id}',${a.buyin})">Buy in — ${fm(a.buyin)}</button>` :
   `<input class="field" type="number" id="invAmt" placeholder="Dollar amount">
-   <button class="btn" style="background:var(--mer-acc);color:#04170d" onclick="doInvest('${id}')">Buy</button>`}
+   <button class="btn" style="background:#0b5cad;color:#fff" onclick="doInvest('${id}')">Buy</button>`}
   ${held? `<button class="btn" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellInvest('${id}')">Sell all — ${fm(held.units*px)}</button>`:""}
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
 }
@@ -529,36 +684,42 @@ function planeArt(seedStr){
 function genHomes(){
   const T = D.METROS[S.blob.player.team] || D.METROS["Jets"];
   const wk = wkKey(S.blob.clock);
+  const infl = Math.pow(1.035, Math.max(0,(S.blob.clock.seasonYear||2026)-2026));
   const out=[];
   T.hoods.forEach((H,hi)=>{
     const rng=seedRng(S.careerId+"|homes|"+H[0]+"|"+wk.split("/")[0]);
     for(let i=0;i<5;i++){
-      const beds=2+Math.floor(rng()*4), baths=Math.max(1.5, beds-1+Math.round(rng())*.5);
-      const sq=1100+Math.floor(rng()*2600)+(H[1]>1.5?800:0);
-      const base=H[1]*1e6; const price=Math.round((base*(0.55+rng()*0.9) + sq*180*H[1])/5000)*5000;
+      const beds=2+Math.floor(rng()*7), baths=Math.max(1.5, beds-1+Math.round(rng())*.5);
+      const lot=+( (H[2]*(0.6+rng()*1.6)).toFixed(2) );
+      const sq=1100+Math.floor(rng()*3400)+(H[1]>1.5?900:0);
+      const base=H[1]*1e6; const price=Math.round(infl*(base*(0.55+rng()*0.9) + sq*180*H[1] + lot*base*0.15)/5000)*5000;
       const num=100+Math.floor(rng()*880);
       const st=D.STREETS[Math.floor(rng()*D.STREETS.length)]+" "+D.STTYPES[Math.floor(rng()*D.STTYPES.length)];
       const kind = sq>2800?"Single family":beds<=2?"Condo":rng()>0.5?"Townhouse":"Single family";
-      out.push({id:"h"+hi+"-"+i, hood:H[0], addr:num+" "+st, beds, baths, sq, price, kind, tier:H[1]});
+      out.push({id:"h"+hi+"-"+i, hood:H[0], addr:num+" "+st, beds, baths, lot, sq, price, kind, tier:H[1]});
     }
   });
   return out;
 }
+function inflMult(){ return Math.pow(1.035, Math.max(0, (S.blob.clock.seasonYear||2026) - 2026)); }
 function genCars(){
-  const wk=wkKey(S.blob.clock); const out=[];
-  for (const [make,model,body,baseK,yr0,hot] of D.CARDATA){
+  const wk=wkKey(S.blob.clock); const out=[]; const infl=inflMult();
+  for (const [make,model,body,seg,baseK,yr0,yrEnd] of D.CARDATA){
     const rng=seedRng(S.careerId+"|car|"+make+model+"|"+wk.split("/")[0]);
-    const years=[]; for(let y=yr0;y<=2026;y++) years.push(y);
-    const pick = years.filter(()=>rng()>0.45).slice(0,6);
-    if(!pick.length) pick.push(2026);
+    const nowYr = S.blob.clock.seasonYear||2026;
+    const last = Math.min(yrEnd, nowYr);
+    const years=[]; for(let y=yr0;y<=last;y++) years.push(y);
+    // keep inventory sane: newest year always present, plus a sampling of older ones
+    const pick=[last]; for (const y of years) if(y!==last && rng()>0.55 && pick.length<6) pick.push(y);
     for (const y of pick){
-      const age=2026-y; const mi = age===0? Math.floor(rng()*40)*10 : Math.floor((6+rng()*10)*1000*age);
-      const dep=Math.pow(0.87,age);
-      const price=Math.round(baseK*1000*hot*dep*(0.92+rng()*0.16)/250)*250;
-      out.push({id:(make+model+y+mi).replace(/\W/g,""), make, model, body, yr:y, mi, price});
+      const age=nowYr-y; const mi = age===0? Math.floor(rng()*40)*10 : Math.floor((5+rng()*11)*1000*age);
+      const collect = (seg==="hyper" || (seg==="exotic" && yrEnd<nowYr-1));
+      const dep = collect? Math.pow(0.97,age) : Math.pow(0.88,age);
+      const price=Math.round(baseK*1000*infl*dep*(0.92+rng()*0.16)/250)*250;
+      out.push({id:(make+model+y+mi).replace(/\W/g,""), make, model, body, seg, yr:y, mi, price});
     }
   }
-  return out.sort((a,b)=>a.price-b.price);
+  return out;
 }
 function genBoats(){
   const wk=wkKey(S.blob.clock); const out=[];
@@ -595,9 +756,16 @@ RENDER.keystone = (b,sub)=>{
   if (sub && sub.h){
     const H=homes.find(x=>x.id===sub.h);
     b.innerHTML = aphead("Keystone",{back:"renderApp('keystone')",backlabel:"Listings"}) + `<div class="apbody">
-    <div class="listing" style="cursor:default"><div class="lphoto">${houseArt(H.id+S.careerId,H.tier)}<span class="price">${fm(H.price)}</span></div>
-    <div class="linfo"><h4>${esc(H.addr)}</h4><p>${esc(H.hood)} · ${esc(H.kind)}</p>
-    <div class="specs"><span>${H.beds} bd</span><span>${H.baths} ba</span><span>${H.sq.toLocaleString()} sqft</span></div></div></div>
+    <div class="veh-detail light">
+      <div class="vd-title">${esc(H.addr)}</div>
+      <div style="font-size:13px;opacity:.6;margin-top:-4px;margin-bottom:8px">${esc(H.hood)} · ${esc(H.kind)}</div>
+      <div class="vd-price">${fm(H.price)}</div>
+      <div class="payline"><span>Bedrooms</span><span>${H.beds}</span></div>
+      <div class="payline"><span>Bathrooms</span><span>${H.baths}</span></div>
+      <div class="payline"><span>Interior</span><span>${H.sq.toLocaleString()} sqft</span></div>
+      <div class="payline"><span>Lot</span><span>${H.lot} acres</span></div>
+      <div class="payline"><span>Property tax & upkeep</span><span>${fm(Math.round(H.price*0.02/12))}/mo</span></div>
+    </div>
     ${mortgageOptions(H.price, H.id)}
     </div>`;
     return;
@@ -606,11 +774,13 @@ RENDER.keystone = (b,sub)=>{
   `<div class="apbody" id="keyBody"></div>`;
   const kb=$("#keyBody");
   if (keyMode==="build"){
-    kb.innerHTML = `<div class="hoodhead"><h3>Design & build</h3><span>${esc(T.city)} metro</span></div>
-    <label class="flabel">Neighborhood (land)</label>
-    <select id="bHood" class="field">${T.hoods.map((h,i)=>`<option value="${i}">${esc(h[0])} — lots from ${fm(h[1]*1e6*0.28)}</option>`).join("")}</select>
-    <label class="flabel">Bedrooms</label><select id="bBeds" class="field">${[3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select>
-    <label class="flabel">Bathrooms</label><select id="bBaths" class="field">${[2,3,4,5,6,7].map(n=>`<option>${n}</option>`).join("")}</select>
+    kb.innerHTML = `<div class="hoodhead"><h3>Design & build</h3><span>${esc(T.city)} area</span></div>
+    <label class="flabel">Area (buys the land)</label>
+    <select id="bHood" class="field">${T.hoods.map((h,i)=>`<option value="${i}">${esc(h[0])}</option>`).join("")}</select>
+    <label class="flabel">Lot size (acres)</label>
+    <select id="bLot" class="field">${[0.15,0.25,0.5,0.75,1,1.5,2,3,5,10].map(a=>`<option value="${a}">${a} acres</option>`).join("")}</select>
+    <label class="flabel">Bedrooms</label><select id="bBeds" class="field">${[3,4,5,6,7,8,9,10,11,12,13,14,15,16].map(n=>`<option>${n}</option>`).join("")}</select>
+    <label class="flabel">Bathrooms</label><select id="bBaths" class="field">${[2,3,4,5,6,7,8,9,10,11,12,13,14].map(n=>`<option>${n}</option>`).join("")}</select>
     <label class="flabel">Square footage</label><input id="bSq" class="field" type="number" value="3500">
     <label class="flabel">Finish level</label><select id="bFin" class="field"><option value="1">Builder grade</option><option value="1.35">Designer</option><option value="1.8">Luxury</option><option value="2.6">Statement</option></select>
     <button class="btn" style="background:var(--key-acc);color:#fff" onclick="priceBuild()">Price it</button>
@@ -621,27 +791,29 @@ RENDER.keystone = (b,sub)=>{
   for (const H of T.hoods){
     html+=`<div class="hoodhead"><h3>${esc(H[0])}</h3><span>5 listings</span></div>`;
     html+=homes.filter(x=>x.hood===H[0]).map(H2=>`
-    <div class="listing" onclick="renderApp('keystone',{h:'${H2.id}'})">
-      <div class="lphoto">${houseArt(H2.id+S.careerId,H2.tier)}<span class="price">${fm(H2.price)}</span></div>
-      <div class="linfo"><h4>${esc(H2.addr)}</h4><p>${esc(H2.kind)}</p>
-      <div class="specs"><span>${H2.beds} bd</span><span>${H2.baths} ba</span><span>${H2.sq.toLocaleString()} sqft</span></div></div></div>`).join("");
+    <button class="veh-row light" onclick="renderApp('keystone',{h:'${H2.id}'})">
+      <span class="vr-l"><b>${esc(H2.addr)}</b><small>${H2.beds} bd · ${H2.baths} ba · ${H2.sq.toLocaleString()} sqft · ${H2.lot} ac · ${esc(H2.kind)}</small></span>
+      <span class="vr-r">${fm(H2.price)}</span></button>`).join("");
   }
   kb.innerHTML=html;
 };
 function priceBuild(){
   const T=D.METROS[S.blob.player.team]||D.METROS["Jets"];
-  const hood=T.hoods[+$("#bHood").value]; const beds=+$("#bBeds").value, baths=+$("#bBaths").value, sq=+$("#bSq").value, fin=+$("#bFin").value;
+  const hood=T.hoods[+$("#bHood").value]; const lot=+$("#bLot").value;
+  const beds=+$("#bBeds").value, baths=+$("#bBaths").value, sq=+$("#bSq").value, fin=+$("#bFin").value;
   if(!sq||sq<800) return toast("Square footage too small to permit.");
-  const land=Math.round(hood[1]*1e6*0.28/5000)*5000;
-  const build=Math.round(sq*(240*fin)*(1+ (beds+baths)*0.012)/5000)*5000;
+  const infl=Math.pow(1.035, Math.max(0,(S.blob.clock.seasonYear||2026)-2026));
+  const land=Math.round(infl*hood[1]*1e6*(0.22 + lot*0.28)/5000)*5000;
+  const build=Math.round(infl*sq*(240*fin)*(1+(beds+baths)*0.012)/5000)*5000;
   const total=land+build;
   const id="build-"+Date.now();
-  $("#bOut").innerHTML=`<div class="listing" style="cursor:default;margin-top:12px"><div class="linfo">
-   <h4>Custom build — ${esc(hood[0])}</h4><p>${beds} bd · ${baths} ba · ${sq.toLocaleString()} sqft</p>
-   <div class="payline"><span>Land</span><span>${fm(land)}</span></div>
+  $("#bOut").innerHTML=`<div class="veh-detail light" style="margin-top:12px">
+   <div class="vd-title" style="font-size:19px">Custom build — ${esc(hood[0])}</div>
+   <div style="font-size:13px;opacity:.6;margin-bottom:8px">${beds} bd · ${baths} ba · ${sq.toLocaleString()} sqft · ${lot} acres</div>
+   <div class="payline"><span>Land (${lot} ac)</span><span>${fm(land)}</span></div>
    <div class="payline"><span>Construction (${fin===1?"builder":fin===1.35?"designer":fin===1.8?"luxury":"statement"} grade)</span><span>${fm(build)}</span></div>
-   <div class="payline tot" style="font-weight:800"><span>Total</span><span>${fm(total)}</span></div></div></div>` +
-   mortgageOptions(total, id, {custom:{hood:hood[0], beds, baths, sq}});
+   <div class="payline tot"><span>Total</span><span>${fm(total)}</span></div></div>` +
+   mortgageOptions(total, id, {custom:{hood:hood[0], beds, baths, sq, lot}});
 }
 function mortgageOptions(price, hid, extra){
   const opts=[[0.20, 6.1, 30],[0.10, 6.6, 30],[0.35, 5.7, 15]];
@@ -672,43 +844,64 @@ function confirmHouse(price, down, pay, apr, label){
   persist(); closeSheet(); toast("Keys are yours."); renderApp("keystone"); renderWidget();
 }
 /* Octane */
-let octF={q:"",make:"",body:"",max:""};
+let octF={q:"",make:"",body:"",seg:"",yr:"",max:"",sort:"az"};
 RENDER.octane = (b,sub)=>{
   b.className="octane darkapp";
   const cars=genCars();
   if (sub && sub.c){
     const C=cars.find(x=>x.id===sub.c);
-    b.innerHTML=aphead("Octane",{back:"renderApp('octane')",backlabel:"Showroom"})+`<div class="apbody">
-    <div class="listing" style="cursor:default"><div class="lphoto" style="height:150px">${vehArt(C.id,C.body,C.price)}<span class="price">${fm(C.price)}</span></div>
-    <div class="linfo"><h4>${C.yr} ${esc(C.make)} ${esc(C.model)}</h4><p>${esc(C.body)} · ${C.mi.toLocaleString()} miles</p></div></div>
+    b.innerHTML=aphead("Octane",{back:"renderApp('octane')",backlabel:"Inventory"})+`<div class="apbody">
+    <div class="veh-detail">
+      <div class="vd-title">${C.yr} ${esc(C.make)}<br>${esc(C.model)}</div>
+      <div class="vd-price">${fm(C.price)}</div>
+      <div class="payline"><span>Mileage</span><span>${C.mi.toLocaleString()} mi</span></div>
+      <div class="payline"><span>Body</span><span style="text-transform:capitalize">${esc(C.body)}</span></div>
+      <div class="payline"><span>Class</span><span style="text-transform:capitalize">${esc(C.seg)}</span></div>
+      <div class="payline"><span>Est. insurance</span><span>${fm(Math.round(C.price*0.00045*12)+1400)}/yr</span></div>
+      <div class="payline"><span>Est. maintenance</span><span>${fm(Math.round(C.price*(C.seg==="hyper"||C.seg==="exotic"?0.035:0.012)))}/yr</span></div>
+    </div>
     ${finOptions(C)}</div>`;
     return;
   }
   const makes=[...new Set(D.CARDATA.map(x=>x[0]))].sort();
-  const list=cars.filter(c=> (!octF.q || (c.make+" "+c.model).toLowerCase().includes(octF.q.toLowerCase()))
-    && (!octF.make||c.make===octF.make) && (!octF.body||c.body===octF.body) && (!octF.max||c.price<=+octF.max));
+  const yrs=[...new Set(cars.map(c=>c.yr))].sort((a,b)=>b-a);
   b.innerHTML = aphead("Octane", {act: S.garage.length? "Garage ("+S.garage.length+")":"", actFn:"garSheet()"}) +
   `<div class="filters">
     <input placeholder="Search" value="${esc(octF.q)}" oninput="octF.q=this.value;octList()">
     <select onchange="octF.make=this.value;octList()"><option value="">All makes</option>${makes.map(m=>`<option ${octF.make===m?"selected":""}>${m}</option>`).join("")}</select>
-    <select onchange="octF.body=this.value;octList()"><option value="">All bodies</option>${["sedan","suv","truck","sports","exotic"].map(m=>`<option ${octF.body===m?"selected":""}>${m}</option>`).join("")}</select>
-    <select onchange="octF.max=this.value;octList()"><option value="">Any price</option><option value="30000">Under $30k</option><option value="60000">Under $60k</option><option value="120000">Under $120k</option><option value="300000">Under $300k</option><option value="99999999">Sky's the limit</option></select>
+    <select onchange="octF.body=this.value;octList()"><option value="">All bodies</option>${["sedan","coupe","suv","truck","convertible","hatchback","wagon","van"].map(m=>`<option ${octF.body===m?"selected":""}>${m}</option>`).join("")}</select>
+    <select onchange="octF.seg=this.value;octList()"><option value="">All classes</option>${["economy","mainstream","premium","luxury","performance","exotic","hyper"].map(m=>`<option ${octF.seg===m?"selected":""}>${m}</option>`).join("")}</select>
+    <select onchange="octF.yr=this.value;octList()"><option value="">Any year</option>${yrs.map(y=>`<option ${octF.yr==y?"selected":""}>${y}</option>`).join("")}</select>
+    <select onchange="octF.max=this.value;octList()"><option value="">Any price</option><option value="30000">Under $30k</option><option value="60000">Under $60k</option><option value="120000">Under $120k</option><option value="300000">Under $300k</option><option value="1000000">Under $1M</option><option value="99999999">No limit</option></select>
+    <select onchange="octF.sort=this.value;octList()"><option value="az">Make A-Z</option><option value="plo" ${octF.sort==="plo"?"selected":""}>Price: low</option><option value="phi" ${octF.sort==="phi"?"selected":""}>Price: high</option><option value="new" ${octF.sort==="new"?"selected":""}>Year: newest</option></select>
   </div>
-  <div class="oct-count" id="octCount">${list.length} vehicles</div>
-  <div class="apbody" id="octList"></div>`;
+  <div class="oct-count" id="octCount"></div>
+  <div class="apbody flush" id="octList" style="padding:0 16px 28px"></div>`;
   octList();
 };
+function octFilter(cars){
+  return cars.filter(c=> (!octF.q || (c.make+" "+c.model).toLowerCase().includes(octF.q.toLowerCase()))
+    && (!octF.make||c.make===octF.make) && (!octF.body||c.body===octF.body)
+    && (!octF.seg||c.seg===octF.seg) && (!octF.yr||c.yr===+octF.yr) && (!octF.max||c.price<=+octF.max));
+}
 function octList(){
   const cars=genCars();
-  const list=cars.filter(c=> (!octF.q || (c.make+" "+c.model).toLowerCase().includes(octF.q.toLowerCase()))
-    && (!octF.make||c.make===octF.make) && (!octF.body||c.body===octF.body) && (!octF.max||c.price<=+octF.max));
-  $("#octCount")&&($("#octCount").textContent=list.length+" vehicles");
+  let list=octFilter(cars);
+  if (octF.sort==="plo") list.sort((a,b)=>a.price-b.price);
+  else if (octF.sort==="phi") list.sort((a,b)=>b.price-a.price);
+  else if (octF.sort==="new") list.sort((a,b)=>b.yr-a.yr||a.price-b.price);
+  else list.sort((a,b)=>a.make.localeCompare(b.make)||a.model.localeCompare(b.model)||b.yr-a.yr);
+  $("#octCount")&&($("#octCount").textContent=list.length+" vehicles in inventory");
   const el=$("#octList"); if(!el) return;
-  el.innerHTML = list.slice(0,80).map(C=>`
-    <div class="listing" onclick="renderApp('octane',{c:'${C.id}'})">
-      <div class="lphoto">${vehArt(C.id,C.body,C.price)}<span class="price">${fm(C.price)}</span></div>
-      <div class="linfo"><h4>${C.yr} ${esc(C.make)} ${esc(C.model)}</h4><p>${C.mi.toLocaleString()} mi · ${esc(C.body)}</p></div></div>`).join("")
-    + (list.length>80?`<div class="empty">Showing 80 of ${list.length}. Tighten the filters.</div>`:"");
+  let html=""; let lastMake="";
+  for (const C of list.slice(0,140)){
+    if (octF.sort==="az" && C.make!==lastMake){ lastMake=C.make; html+=`<div class="oct-make">${esc(C.make)}</div>`; }
+    html+=`<button class="veh-row" onclick="renderApp('octane',{c:'${C.id}'})">
+      <span class="vr-l"><b>${C.yr} ${esc(C.make)} ${esc(C.model)}</b><small>${C.mi.toLocaleString()} mi · ${esc(C.body)} · ${esc(C.seg)}</small></span>
+      <span class="vr-r">${fm(C.price)}</span></button>`;
+  }
+  if (list.length>140) html+=`<div class="empty">Showing 140 of ${list.length}. Tighten the filters.</div>`;
+  el.innerHTML=html || '<div class="empty">Nothing matches. Loosen a filter.</div>';
 }
 function finOptions(C){
   const dn=Math.round(C.price*0.1); const r=0.079/12, n=60, pay=Math.round((C.price-dn)*r/(1-Math.pow(1+r,-n)));
@@ -746,23 +939,28 @@ RENDER.yachts = (b,sub)=>{
   const boats=genBoats();
   if (sub&&sub.y){
     const Y=boats.find(x=>x.id===sub.y);
+    const dock=Y.len*450, mx=Math.round(Y.price*0.08);
     b.innerHTML=aphead("Harborline",{back:"renderApp('yachts')",backlabel:"Brokerage"})+`<div class="apbody">
-    <div class="listing" style="cursor:default"><div class="lphoto" style="height:150px">${boatArt(Y.id)}<span class="price">${fmk(Y.price)}</span></div>
-    <div class="linfo"><h4>${Y.yr} ${esc(Y.maker)} ${esc(Y.model)}</h4><p>${Y.len} ft ${esc(Y.type)} · ${Y.hrs} engine hrs</p></div></div>
-    <div class="hoodhead"><h3>Ownership costs</h3><span>annual</span></div>
-    <div class="listing" style="cursor:default"><div class="linfo">
-      <div class="payline"><span>Dockage & storage</span><span>${fm(Y.len*450)}</span></div>
-      <div class="payline"><span>Maintenance & crew</span><span>${fm(Math.round(Y.price*0.08))}</span></div></div></div>
-    <button class="btn" style="background:var(--yct-acc);color:#fff;margin-top:8px" onclick='buyBoat("${Y.id}")'>Buy — ${fmk(Y.price)}</button></div>`;
+    <div class="veh-detail light">
+      <div class="vd-title">${Y.yr} ${esc(Y.maker)}<br>${esc(Y.model)}</div>
+      <div class="vd-price">${fmk(Y.price)}</div>
+      <div class="payline"><span>Length</span><span>${Y.len} ft</span></div>
+      <div class="payline"><span>Type</span><span style="text-transform:capitalize">${esc(Y.type)}</span></div>
+      <div class="payline"><span>Engine hours</span><span>${Y.hrs.toLocaleString()}</span></div>
+      <div class="payline"><span>Dockage & storage</span><span>${fm(dock)}/yr</span></div>
+      <div class="payline"><span>Maintenance & crew</span><span>${fm(mx)}/yr</span></div>
+      <div class="payline tot"><span>All-in upkeep</span><span>${fm(Math.round((dock+mx)/12))}/mo</span></div>
+    </div>
+    <button class="btn" style="background:var(--yct-acc);color:#fff;margin-top:10px" onclick='buyBoat("${Y.id}")'>Buy — ${fmk(Y.price)}</button></div>`;
     return;
   }
   const groups=["fishing","dayboat","wake","cruiser","sport","flybridge","sportfish","catamaran","classic","superyacht"];
   b.innerHTML = aphead("Harborline") + `<div class="apbody">` + groups.map(g=>{
     const rows=boats.filter(x=>x.type===g); if(!rows.length) return "";
     return `<div class="hoodhead"><h3 style="text-transform:capitalize">${g==="sportfish"?"Sportfishing":g}</h3><span>${rows.length} vessels</span></div>` +
-    rows.slice(0,10).map(Y=>`<div class="listing" onclick="renderApp('yachts',{y:'${Y.id}'})">
-      <div class="lphoto">${boatArt(Y.id)}<span class="price">${fmk(Y.price)}</span></div>
-      <div class="linfo"><h4>${Y.yr} ${esc(Y.maker)} ${esc(Y.model)}</h4><p>${Y.len} ft · ${Y.hrs} hrs</p></div></div>`).join("");
+    rows.map(Y=>`<button class="veh-row light" onclick="renderApp('yachts',{y:'${Y.id}'})">
+      <span class="vr-l"><b>${Y.yr} ${esc(Y.maker)} ${esc(Y.model)}</b><small>${Y.len} ft · ${Y.hrs} hrs · upkeep ${fm(Math.round((Y.len*450+Y.price*0.08)/12))}/mo</small></span>
+      <span class="vr-r">${fmk(Y.price)}</span></button>`).join("");
   }).join("") + `</div>`;
 };
 function buyBoat(id){
@@ -781,15 +979,20 @@ RENDER.planes = (b,sub)=>{
   const planes=genPlanes();
   if (sub&&sub.p){
     const P=planes.find(x=>x.id===sub.p);
+    const fixed=Math.round(P.price*0.06), hourly=Math.round(1200+P.price/25000);
     b.innerHTML=aphead("Stratos Air",{back:"renderApp('planes')",backlabel:"Hangar"})+`<div class="apbody">
-    <div class="listing" style="cursor:default"><div class="lphoto" style="height:150px">${planeArt(P.id)}<span class="price">${fmk(P.price)}</span></div>
-    <div class="linfo" style="color:var(--ink)"><h4 style="color:var(--ink)">${P.yr} ${esc(P.maker)} ${esc(P.model)}</h4><p style="color:var(--faint)">${esc(P.cls)} · ${P.seats} seats · ${P.hrs} hrs</p></div></div>
-    <div class="hoodhead" style="color:var(--ink)"><h3>Annual ownership</h3><span style="color:var(--faint)">crew, hangar, mx</span></div>
-    <div class="listing" style="cursor:default"><div class="linfo" style="color:var(--ink)">
-      <div class="payline"><span>Fixed costs</span><span>${fm(Math.round(P.price*0.06))}</span></div>
-      <div class="payline"><span>Per flight hour</span><span>${fm(Math.round(1200+P.price/25000))}</span></div></div></div>
-    <button class="btn" style="background:var(--pln-acc);color:#0e1420;margin-top:8px" onclick='buyPlane("${P.id}")'>Acquire — ${fmk(P.price)}</button>
-    <p style="font-size:12px;color:var(--faint);margin-top:10px">Charter membership tiers arrive next iteration. Whole ownership only, like a maniac.</p></div>`;
+    <div class="veh-detail">
+      <div class="vd-title">${P.yr} ${esc(P.maker)}<br>${esc(P.model)}</div>
+      <div class="vd-price">${fmk(P.price)}</div>
+      <div class="payline"><span>Class</span><span style="text-transform:capitalize">${esc(P.cls)}</span></div>
+      <div class="payline"><span>Seats</span><span>${P.seats}</span></div>
+      <div class="payline"><span>Airframe hours</span><span>${P.hrs.toLocaleString()}</span></div>
+      <div class="payline"><span>Crew, hangar, insurance</span><span>${fm(fixed)}/yr</span></div>
+      <div class="payline"><span>Direct cost per flight hour</span><span>${fm(hourly)}</span></div>
+      <div class="payline tot"><span>Fixed upkeep</span><span>${fm(Math.round(fixed/12))}/mo</span></div>
+    </div>
+    <button class="btn" style="background:var(--pln-acc);color:#0e1420;margin-top:10px" onclick='buyPlane("${P.id}")'>Acquire — ${fmk(P.price)}</button>
+    <p style="font-size:12px;color:var(--faint);margin-top:10px">Charter tiers arrive next iteration. Whole ownership only, like a maniac.</p></div>`;
     return;
   }
   b.innerHTML = aphead("Stratos Air") + `<div class="apbody">` +
@@ -797,9 +1000,9 @@ RENDER.planes = (b,sub)=>{
     const rows=planes.filter(x=>x.cls===g); if(!rows.length) return "";
     const label={piston:"Piston",vlj:"Very Light Jets",turboprop:"Turboprops",light:"Light Jets",midsize:"Midsize",["super-mid"]:"Super-Midsize",large:"Large Cabin",ultra:"Ultra Long Range",bizliner:"Bizliners"}[g];
     return `<div class="hoodhead" style="color:var(--ink)"><h3>${label}</h3><span style="color:var(--faint)">${rows.length} aircraft</span></div>` +
-    rows.map(P=>`<div class="listing" onclick="renderApp('planes',{p:'${P.id}'})">
-      <div class="lphoto">${planeArt(P.id)}<span class="price">${fmk(P.price)}</span></div>
-      <div class="linfo" style="color:var(--ink)"><h4 style="color:var(--ink)">${P.yr} ${esc(P.maker)} ${esc(P.model)}</h4><p style="color:var(--faint)">${P.seats} seats · ${P.hrs} hrs</p></div></div>`).join("");
+    rows.map(P=>`<button class="veh-row" onclick="renderApp('planes',{p:'${P.id}'})">
+      <span class="vr-l"><b>${P.yr} ${esc(P.maker)} ${esc(P.model)}</b><small>${P.seats} seats · ${P.hrs} hrs · fixed ${fm(Math.round(P.price*0.06/12))}/mo</small></span>
+      <span class="vr-r">${fmk(P.price)}</span></button>`).join("");
   }).join("") + `</div>`;
 };
 function buyPlane(id){
@@ -811,111 +1014,62 @@ function buyPlane(id){
   S.ledger.push({t:"Stratos — "+P.maker+" "+P.model, amt:-P.price, kind:"spend"});
   persist(); toast("Wheels up."); renderApp("planes"); renderWidget();
 }
+
 /* Apex */
-RENDER.apex = b=>{
+RENDER.apex = (b,sub)=>{
   b.className="apex lightapp";
+  if (sub && sub.a){
+    const A=D.AGENTS.find(x=>x.id===sub.a);
+    const mine = S.agent && S.agent.id===A.id;
+    const bar = v=>`<span class="agbar"><i style="width:${v*10}%"></i></span>`;
+    b.innerHTML = aphead("Apex Sports Group",{back:"renderApp('apex')",backlabel:"Agents"}) + `<div class="apbody">
+    <div class="veh-detail light">
+      <div class="vd-title">${esc(A.n)}</div>
+      <div style="font-size:13px;opacity:.6;margin:-2px 0 10px">${A.age} · ${A.yrs} years in the business · ${A.fee.toFixed(2)}% fee</div>
+      <div class="payline"><span>Negotiation</span><span style="display:flex;align-items:center;gap:8px">${bar(A.neg)}<b>${A.neg}</b></span></div>
+      <div class="payline"><span>Endorsements</span><span style="display:flex;align-items:center;gap:8px">${bar(A.end)}<b>${A.end}</b></span></div>
+      <div class="payline"><span>Aggressiveness</span><span style="display:flex;align-items:center;gap:8px">${bar(A.agg)}<b>${A.agg}</b></span></div>
+      <div class="payline"><span>Takes on</span><span style="max-width:55%;text-align:right;font-size:12.5px">${esc(A.willing)}</span></div>
+      <p style="font-size:13.5px;line-height:1.55;opacity:.8;margin-top:10px">${esc(A.style)}</p>
+    </div>
+    ${mine? `<button class="btn" style="background:#e8e2d4;color:#6d5a1f" disabled>Your current agent</button>` :
+      `<button class="btn" style="background:var(--apx-acc);color:#fff" onclick="signAgent('${A.id}')">${S.agent? "Switch to "+esc(A.n.split(" ")[0]) : "Sign with "+esc(A.n.split(" ")[0])}</button>`}
+    <p style="font-size:12px;opacity:.55;margin-top:8px">The fee comes out of every playing check. Switching mid-relationship is legal, common, and remembered.</p></div>`;
+    return;
+  }
   b.innerHTML = aphead("Apex Sports Group") + `<div class="apbody">
-  <div class="listing" style="cursor:default;background:#fffdf6"><div class="linfo">
-    <span class="pill" style="background:#efe6cd;color:#6b5b2a">Your representation</span>
-    <h4 style="margin-top:8px">${esc(D.CAST.agent.name)}</h4><p>Senior agent · playing contracts 3% · endorsements negotiated per deal</p></div></div>
-  <div class="hoodhead"><h3>Endorsement pipeline</h3><span>updates at sync</span></div>
-  <div class="listing" style="cursor:default;background:#fffdf6"><div class="linfo">
-    <span class="pill" style="background:#e8d9b8;color:#6b5b2a">On hold</span>
-    <h4 style="margin-top:8px">Crestline Automotive — regional ambassador</h4>
-    <p>$120,000/yr + vehicle · requires active-roster status. Dre's note: "Sit tight. Don't buy anything stupid."</p>
-    <div class="specs"><span>Exclusivity: autos</span><span>Arrival clause</span></div></div></div>
-  <div class="listing" style="cursor:default;background:#fffdf6"><div class="linfo">
-    <span class="pill" style="background:#e2e8dd;color:#3c5a3f">Open — local</span>
-    <h4 style="margin-top:8px">Florham Park Deli — name & likeness</h4>
-    <p>$4,500 flat for a sandwich named after you. The "Number Zero": chicken cutlet, vodka sauce, fresh mozz. Dre thinks it's beneath you. Dre is wrong.</p>
-    <button class="btn sm" style="background:var(--apx-acc);color:#fff;margin-top:8px" onclick="signDeli()">Sign it</button></div></div>
-  <div class="hoodhead"><h3>Contract status</h3><span>from the save</span></div>
-  <div class="listing" style="cursor:default;background:#fffdf6"><div class="linfo">
-    <h4>${esc(S.blob.player.team)} — ${esc(S.blob.player.status==="PracticeSquad"?"Practice Squad":S.blob.player.status)}</h4>
-    <div class="payline"><span>PS weekly</span><span>${fm(psWeekly())}</span></div>
-    <div class="payline"><span>Active contract on file</span><span>${fm((S.blob.player.contract?.salary?.[0])||S.blob.player.capSalary)}/yr</span></div>
-    <div class="payline"><span>Elevations used</span><span>0 of 3</span></div></div></div>
+    <div class="hoodhead"><h3>${S.agent? "Your representation" : "Choose your representation"}</h3></div>
+    ${S.agent? `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:19px">${esc(S.agent.n)}</div>
+      <div style="font-size:13px;opacity:.6">${S.agent.fee.toFixed(2)}% of playing contracts · negotiating ${S.agent.neg}/10 · endorsements ${S.agent.end}/10</div></div>` :
+      `<p style="font-size:13.5px;line-height:1.55;opacity:.75;margin-bottom:14px">Twelve agents at Apex have your camp tape. Every one of them takes a different cut, negotiates differently, and opens different doors. Nothing moves on contracts or endorsements until you pick one.</p>`}
+    <div class="hoodhead"><h3>The roster</h3><span>12 agents</span></div>
+    ${D.AGENTS.map(A=>`<button class="veh-row light" onclick="renderApp('apex',{a:'${A.id}'})">
+      <span class="vr-l"><b>${esc(A.n)} ${S.agent&&S.agent.id===A.id?"· ✓ yours":""}</b><small>neg ${A.neg} · endorse ${A.end} · aggr ${A.agg} · ${A.fee.toFixed(2)}%</small></span>
+      <span class="vr-r" style="font-size:12px;opacity:.6">${A.yrs} yrs</span></button>`).join("")}
+    <div class="hoodhead" style="margin-top:16px"><h3>Endorsement pipeline</h3><span>updates at sync</span></div>
+    <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Crestline Automotive — regional ambassador</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · requires active-roster status.${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
+      <div style="font-size:12px;opacity:.5">On hold · arrival clause · autos exclusivity</div></div>
+    <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Florham Park Deli — name & likeness</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">$4,500 flat for a sandwich named after you. The "Number Zero": chicken cutlet, vodka sauce, fresh mozz.</div>
+      ${S.deals.find(d=>d.id==="deli")? '<div style="font-size:13px;color:#2e7d32">Signed. The sandwich is in rotation.</div>' :
+      `<button class="btn sm" style="background:var(--apx-acc);color:#fff" onclick="signDeli()">${S.agent? "Sign it — $4,500" : "Need an agent first"}</button>`}</div>
+    <div class="hoodhead" style="margin-top:16px"><h3>Contract status</h3><span>from the save</span></div>
+    <div class="veh-detail light">
+      <div class="payline"><span>${esc(S.blob.player.team)}</span><span>${esc(S.blob.player.status==="PracticeSquad"?"Practice Squad":S.blob.player.status)}</span></div>
+      <div class="payline"><span>PS weekly</span><span>${fm(psWeekly())}</span></div>
+      <div class="payline"><span>Active contract on file</span><span>${fm((S.blob.player.contract?.salary?.[0])||S.blob.player.capSalary)}/yr</span></div>
+      <div class="payline"><span>Elevations used</span><span>0 of 3</span></div></div>
   </div>`;
 };
-function signDeli(){
-  if (S.deals.find(d=>d.id==="deli")) return toast("Already signed. The sandwich is in rotation.");
-  S.deals.push({id:"deli", n:"Florham Park Deli", amt:4500});
-  S.cash.checking+=4500; S.ledger.push({t:"Endorsement — Florham Park Deli", amt:4500, kind:"income"});
-  persist(); toast("Signed. $4,500 deposited."); renderApp("apex"); renderWidget();
+function signAgent(id){
+  const A=D.AGENTS.find(x=>x.id===id);
+  const prev=S.agent;
+  S.agent={id:A.id,n:A.n,fee:A.fee,neg:A.neg,end:A.end,agg:A.agg};
+  persist();
+  toast(prev? A.n.split(" ")[0]+" it is. "+prev.n.split(" ")[0]+" will hear about it." : "Signed with "+A.n+".");
+  renderApp('apex');
 }
-
-/* ClipHouse */
-RENDER.clip = b=>{
-  b.className="cliph";
-  b.innerHTML = aphead("ClipHouse", {act:"+ Add clip", actFn:"addClipSheet()"}) + `<div class="apbody">` +
-  (S.world.clips.length? S.world.clips.map((c,i)=>`<div class="clip" onclick="window.open('${esc(c.url)}','_blank')">
-    <span class="play">▶</span><span class="src pill" style="background:rgba(255,61,113,.2);color:#ff8fb0">clip</span>
-    <div class="ct"><h4>${esc(c.t)}</h4><p>${esc(c.d||"")}</p></div></div>`).join("")
-  : `<div class="empty">No clips yet.\n\nDrop real highlight links here (TikTok, YouTube) and they live inside the ClipHouse skin — real footage, fictional wrapper. Week syncs will suggest searches that match your box scores.</div>`) + `</div>`;
-};
-function addClipSheet(){
-  sheet(`<h3>Add a clip</h3><p class="sp">Paste a link to real footage. It plays out to the source; ClipHouse is the wrapper.</p>
-  <input class="field" id="clUrl" placeholder="https://…">
-  <input class="field" id="clT" placeholder="Caption (e.g. 'the back shoulder throw')">
-  <button class="btn" style="background:var(--clip-acc);color:#fff" onclick="addClip()">Add to feed</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
-}
-function addClip(){
-  const url=$("#clUrl").value.trim(), t=$("#clT").value.trim()||"Untitled clip";
-  if(!/^https?:\/\//.test(url)) return toast("That's not a link.");
-  S.world.clips.unshift({url, t, d:"added by you"});
-  persist(); closeSheet(); renderApp("clip");
-}
-
-/* Podium */
-RENDER.podium = b=>{
-  b.className="podium";
-  const P=S.world.podium;
-  b.innerHTML = aphead("Podium") +
-  `<div style="padding:0 16px 6px"><b style="font-size:17px">${esc(P.show)}</b><div style="font-size:12.5px;color:var(--dim)">${esc(P.hosts)} · The only show that matters</div></div>
-  <div class="ritual"><h4>This week's episode brief</h4><p>${esc(P.srcNote)}</p>
-    <div style="display:flex;gap:8px"><button class="btn sm" style="background:var(--pod-acc);color:#130f1e" onclick="podiumBrief()">Generate brief</button>
-    <button class="btn sm" style="background:rgba(159,123,255,.18);color:var(--pod-acc)" onclick="podiumAttach()">Attach episode</button></div></div>
-  <div class="apbody flush">` + P.eps.map((e,i)=>`<button class="ep" style="width:100%" onclick="playEp(${i})">
-    <span class="art2">◉</span><span class="tx"><h4>${esc(e.t)}</h4><p>${esc(e.d)}</p><div class="dur">${esc(e.dur)}${e.url?" · linked":""}</div></span></button>`).join("") + `</div>
-  <div class="playbar"><span class="pb-art">◉</span><span class="pb-tx"><b id="pbT">${esc(P.eps[0].t)}</b><small id="pbS">Not playing</small></span><button class="pb-btn" onclick="toast('Attach the NotebookLM file or link to this episode to play it.')">▶</button></div>`;
-};
-function playEp(i){
-  const e=S.world.podium.eps[i];
-  if (e.url) window.open(e.url,"_blank");
-  else sheet(`<h3>${esc(e.t)}</h3><p class="sp">${esc(e.d)}</p><p class="sp">No audio attached yet. Generate the brief, run it through NotebookLM, then attach the link or file here.</p>
-  <button class="btn" style="background:var(--pod-acc);color:#130f1e" onclick="closeSheet();podiumAttach()">Attach episode</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
-}
-function podiumAttach(){
-  sheet(`<h3>Attach this week's episode</h3><p class="sp">Paste the NotebookLM share link (or any hosted audio URL).</p>
-  <input class="field" id="epUrl" placeholder="https://notebooklm.google.com/…">
-  <button class="btn" style="background:var(--pod-acc);color:#130f1e" onclick="doAttach()">Attach</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
-}
-function doAttach(){
-  const u=$("#epUrl").value.trim(); if(!/^https?:/.test(u)) return toast("Paste a link.");
-  S.world.podium.eps[0].url=u; persist(); closeSheet(); renderApp("podium"); toast("Episode linked.");
-}
-function podiumBrief(){
-  const p=S.blob.player; const nx=nextGame(); const last=[...S.blob.schedule].reverse().find(g=>g[7]);
-  const brief =
-`THE WALKTHROUGH — WEEKLY EPISODE BRIEF (${wkLabel(S.blob.clock)})
-Format: two hosts (${D.CAST.podcast.hosts.join(" & ")}), 7 to 10 minutes, league-wide NFL talk. Natural banter, real analysis. This document is the only source of truth. Do not invent games or injuries beyond it.
-
-SEGMENT 1, Around the league (4-5 min): open with the state of the preseason league-wide. Storylines to riff on: contenders managing snap counts, one surprise injury scare (invent nothing specific, speak generally), rookie classes making noise, roster-cut anxiety as final cuts approach.
-
-SEGMENT 2, Team check-in (2-3 min): The ${p.team}. ${last? `Last result: ${last[4]?"vs":"at"} ${last[3]}, ${last[7][0]}-${last[7][1]} ${last[7][0]>last[7][1]?"win":"loss"}.`:""} ${nx? `Next: ${nx[4]?"home vs":"at"} ${nx[3]} (${nx[5]}).`:""} Coach Aaron Glenn's roster is thin but disciplined.
-
-SEGMENT 3, The closer (1-2 min, only if it earns it): a practice-squad quarterback named ${p.first} ${p.last}, No. ${p.jersey}, ${p.age} years old, undrafted, went 6-of-9 in garbage time and scouts noticed. He makes $6,222 a week. Mention him like insiders do: skeptical but intrigued. He is NOT a star yet. Keep it to a tease.
-
-Tone: realistic NFL podcast. No hype voice. The hosts disagree sometimes.`;
-  sheet(`<h3>Episode brief</h3><p class="sp">Copy this into NotebookLM as a source, generate the Audio Overview, then attach the link back here.</p>
-  <textarea class="field" style="height:200px;font-size:12px" id="briefTx">${esc(brief)}</textarea>
-  <button class="btn" style="background:var(--pod-acc);color:#130f1e" onclick="navigator.clipboard.writeText(document.getElementById('briefTx').value).then(()=>toast('Brief copied.'))">Copy brief</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
-}
-
 /* Contacts */
 RENDER.contacts = b=>{
   b.className="settings";
@@ -932,9 +1086,9 @@ RENDER.contacts = b=>{
 RENDER.card = b=>{
   b.className="cardapp";
   const min=Math.max(35, S.credit.cardBal*0.03);
-  b.innerHTML = aphead("Card") +
-  `<div class="thecard"><div style="display:flex;justify-content:space-between"><span class="tn">TYNET CARD</span><span style="color:#9aa2ac;font-size:11px">WORLD ELITE</span></div>
-   <div class="num">•••• •••• •••• 0${String(S.blob.player.jersey).padStart(3,"0")}</div>
+  b.innerHTML = aphead("Credit Card") +
+  `<div class="thecard"><div style="display:flex;justify-content:space-between"><span class="tn">MERIDIAN CREDIT</span><span style="color:#9aa2ac;font-size:11px">WORLD ELITE</span></div>
+   <div class="num">•••• •••• •••• ${S.last4||"4417"}</div>
    <div class="bot"><span>${esc((S.blob.player.first+" "+S.blob.player.last).toUpperCase())}</span><span>EXP 08/29</span></div></div>
   <div class="apbody">
   <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Balance <span>limit ${fm(S.credit.cardLimit)} · ${S.credit.cardApr}% APR</span></h4>
@@ -955,74 +1109,88 @@ function payCard(amt){
 }
 /* Settings */
 RENDER.settings = b=>{
-  b.className="settings";
-  const st=META.settings; const P=S.perception;
+  b.className="settings darkapp";
+  const pc = S.perception;
+  const dd = (id,opts,cur)=>`<select id="${id}" class="field" onchange="savePerception()">${opts.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
+  const debtTotal = pc.debtTotal||0;
+  const shares = pc.debtShares || D.DEBTCATS.map((_,i)=>i===0?100:0);
   b.innerHTML = aphead("Settings") + `<div class="apbody">
-  <div class="setgroup">
-    <div class="setrow"><span class="si" style="background:#2f7cf6">🖼</span><div class="stx">Wallpaper<small>Auto-fades top and bottom into black. The letterbox fix</small></div><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="pickImage('wall')">Choose</button></div>
-    <div class="setrow"><span class="si" style="background:#8e44ad">☺</span><div class="stx">Profile photo<small>Shows in Chirper, group chats, articles</small></div><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="pickImage('pfp')">Choose</button></div>
+  <div class="hoodhead" style="color:var(--ink)"><h3>World perception</h3></div>
+  <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:12px">Who the world thinks you are. Feeds every article, chirp, and text the world generates. Money facts still come only from the save.</p>
+  <label class="flabel">Hometown state</label>${dd("pcState", D.STATES, pc.state||"NJ")}
+  <label class="flabel">Where you grew up</label>${dd("pcGrew", ["Big city","Suburbs","Small town","Rural","Military family, moved a lot"], pc.grew||"Small town")}
+  <label class="flabel">High school profile</label>${dd("pcHS", ["Unranked nobody","Local standout","State champion","National recruit"], pc.hs||"Local standout")}
+  <label class="flabel">College path</label>${dd("pcCol", ["Walk-on","Mid-major starter","Power conference backup","Power conference starter","Transfer portal journeyman","FCS star"], pc.college||"Mid-major starter")}
+  <label class="flabel">Draft story</label>${dd("pcDraft", ["Undrafted free agent","Seventh round flier","Day 3 pick","Day 2 pick","First rounder"], pc.draft||"Undrafted free agent")}
+  <label class="flabel">Family situation</label>${dd("pcFam", ["Single mother household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single mother household")}
+  <label class="flabel">Monthly support you send home</label>${dd("pcAsk", ["$0","$250","$500","$1,000","$2,000","$4,000"], "$"+(pc.familyAsk||0).toLocaleString())}
+  <label class="flabel">Public reputation</label>${dd("pcRep", ["Complete unknown","Camp curiosity","Fan favorite underdog","Polarizing","Hyped and doubted"], pc.rep||"Complete unknown")}
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Debt you brought with you</h3></div>
+  <label class="flabel">Total debt</label>
+  <select id="pcDebtTotal" class="field" onchange="savePerception()">${[0,2000,5000,10000,20000,35000,60000,100000].map(v=>`<option value="${v}" ${v===debtTotal?"selected":""}>${v===0?"None":"$"+v.toLocaleString()}</option>`).join("")}</select>
+  <div id="debtSliders" ${debtTotal===0?'style="display:none"':""}>
+  <p style="font-size:12px;color:var(--faint);margin:4px 0 10px">Split it across categories. Sliders auto-balance to 100%.</p>
+  ${D.DEBTCATS.map((c,i)=>`<div class="dslid"><label>${c} <b id="ds-v${i}">${shares[i]}%</b></label>
+    <input type="range" min="0" max="100" value="${shares[i]}" oninput="debtSlide(${i}, +this.value)"></div>`).join("")}
   </div>
-  <label class="flabel">World perception — who the world thinks you are</label>
-  <div class="setgroup" style="padding:12px 14px">
-    <label class="flabel">Draft status</label>
-    <select class="field" id="pDraft">${["Undrafted","7th round","Day 3 pick","Day 2 pick","1st round pick"].map(x=>`<option ${P.draft===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label class="flabel">Recruit stars (HS)</label>
-    <select class="field" id="pStars">${[0,1,2,3,4,5].map(x=>`<option value="${x}" ${P.stars===x?"selected":""}>${"★".repeat(x)||"No stars"}</option>`).join("")}</select>
-    <label class="flabel">High school rep</label><input class="field" id="pHs" value="${esc(P.hs)}">
-    <label class="flabel">College rep</label><input class="field" id="pCol" value="${esc(P.college)}">
-    <label class="flabel">Hometown</label><input class="field" id="pHome" value="${esc(P.hometown)}" placeholder="e.g. Youngstown, OH">
-    <label class="flabel">Family situation</label>
-    <select class="field" id="pFam">${["Comfortable","Stable","Paycheck to paycheck","Struggling","Rock bottom, you're the way out"].map(x=>`<option ${P.family===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label class="flabel">Monthly family support you send</label><input class="field" id="pAsk" type="number" value="${P.familyAsk||0}">
-    <label class="flabel">Debt you brought into the league</label><input class="field" id="pDebtAmt" type="number" value="${P.debtAmt||0}">
-    <select class="field" id="pDebtKind">${["None","Student loans","Family loans","Credit cards","A guy back home"].map(x=>`<option ${P.debtKind===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label class="flabel">Your story (feeds the world's writing)</label>
-    <textarea class="field" id="pStory" style="height:70px" placeholder="The bio the world half-knows…">${esc(P.story)}</textarea>
-    <button class="btn" style="background:var(--ok);color:#04170d" onclick="savePerception()">Save perception</button>
-  </div>
-  <label class="flabel">World generation</label>
-  <div class="setgroup" style="padding:12px 14px">
-    <label class="flabel">Anthropic API key (stays on this phone)</label>
-    <input class="field" id="sKey" type="password" value="${esc(st.apiKey||"")}" placeholder="sk-ant-…">
-    <label class="flabel">Model</label>
-    <select class="field" id="sModel">${["claude-sonnet-4-6","claude-opus-4-8","claude-fable-5"].map(m=>`<option ${st.model===m?"selected":""}>${m}</option>`).join("")}</select>
-    <div class="setrow" style="padding:8px 0"><div class="stx">Generate eagerly at sync<small>Full-fat weekly world. Costs what it costs.</small></div>
-      <button class="switch ${st.autogen?"on":""}" onclick="META.settings.autogen=!META.settings.autogen;persist();renderApp('settings')"><i></i></button></div>
-    <button class="btn" style="background:rgba(255,255,255,.12)" onclick="saveGenSettings()">Save keys</button>
-  </div>
-  <label class="flabel">Careers</label>
-  <div class="setgroup">${META.careers.map(c=>`<div class="setrow"><span class="si" style="background:#134534">🏈</span>
-    <div class="stx">${esc(c.label)}<small>${esc(c.sub||"")}</small></div>
-    ${META.careers.length>1?`<button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="delCareer('${c.id}')">Delete</button>`:""}</div>`).join("")}
-  </div>
-  <div class="empty" style="padding:16px">TyNet ${VER} · append #debug to the URL for the viewport readout</div></div>`;
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>AI world engine</h3></div>
+  <label class="flabel">Anthropic API key (Claude generates your world)</label>
+  <input class="field" id="setKey" type="password" placeholder="sk-ant-..." value="${esc(META.settings.apiKey||"")}" onchange="META.settings.apiKey=this.value.trim();saveMeta();toast('Claude key saved.')">
+  <label class="flabel">Google API key (NotebookLM pipeline, future)</label>
+  <input class="field" id="setGKey" type="password" placeholder="AIza..." value="${esc(META.settings.googleKey||"")}" onchange="META.settings.googleKey=this.value.trim();saveMeta();toast('Google key saved.')">
+  <label class="flabel">Model</label>
+  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${["claude-sonnet-4-6","claude-haiku-4-5-20251001","claude-opus-4-8"].map(m=>`<option ${META.settings.model===m?"selected":""}>${m}</option>`).join("")}</select>
+  <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">Auto-generate week content on sync
+  <input type="checkbox" ${META.settings.autogen?"checked":""} onchange="META.settings.autogen=this.checked;saveMeta()"></label>
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Phone</h3></div>
+  <label class="flabel">Wallpaper</label>
+  <input class="field" type="file" accept="image/*" onchange="setWallpaper(this)">
+  <button class="btn" style="background:rgba(255,255,255,.08)" onclick="META.settings.wallpaper=null;saveMeta();applyWallpaper();toast('Wallpaper reset.')">Reset wallpaper</button>
+  <label class="flabel">Profile photo</label>
+  <input class="field" type="file" accept="image/*" onchange="setPfp(this)">
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Career</h3></div>
+  <button class="btn" style="background:rgba(255,255,255,.08)" onclick="location.hash='#debug';location.reload()">Debug readout</button>
+  <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="resetCareer()">Reset this career</button>
+  </div>`;
 };
-function savePerception(){
-  const P=S.perception;
-  P.draft=$("#pDraft").value; P.stars=+$("#pStars").value; P.hs=$("#pHs").value; P.college=$("#pCol").value;
-  P.hometown=$("#pHome").value; P.family=$("#pFam").value; P.familyAsk=+$("#pAsk").value||0;
-  const newDebt=+$("#pDebtAmt").value||0; P.debtKind=$("#pDebtKind").value;
-  if (newDebt!==P.debtAmt){
-    S.debts=S.debts.filter(d=>d.kind!=="legacy");
-    if (newDebt>0){ const apr=P.debtKind==="Credit cards"?24.9:P.debtKind==="A guy back home"?0:7.5;
-      const pay=P.debtKind==="A guy back home"?Math.round(newDebt/24):Math.round(newDebt*0.022);
-      S.debts.push({n:"Pre-league debt — "+P.debtKind, bal:newDebt, apr, pay, kind:"legacy"}); }
-    P.debtAmt=newDebt;
+function debtSlide(idx, val){
+  const shares = S.perception.debtShares || D.DEBTCATS.map((_,i)=>i===0?100:0);
+  shares[idx]=val;
+  const others = shares.reduce((a,v,i)=>i===idx?a:a+v,0);
+  const rem = 100-val;
+  if (others>0){ let acc=0; shares.forEach((v,i)=>{ if(i!==idx){ shares[i]=Math.round(v/others*rem); acc+=shares[i]; }});
+    const drift = rem-acc; for(let i=shares.length-1;i>=0;i--){ if(i!==idx){shares[i]+=drift;break;} }
+  } else { shares.forEach((v,i)=>{ if(i!==idx) shares[i]=Math.round(rem/(shares.length-1)); }); }
+  shares.forEach((v,i)=>{ const el=$("#ds-v"+i); if(el) el.textContent=Math.max(0,v)+"%"; const rg=$$("#debtSliders input[type=range]")[i]; if(rg&&i!==idx) rg.value=Math.max(0,v); });
+  S.perception.debtShares=shares.map(v=>Math.max(0,v));
+  savePerception(false);
+}
+function savePerception(rerender=true){
+  const pc=S.perception;
+  const gv=id=>{const el=$("#"+id);return el?el.value:null;};
+  pc.state=gv("pcState")||pc.state; pc.grew=gv("pcGrew")||pc.grew; pc.hs=gv("pcHS")||pc.hs;
+  pc.college=gv("pcCol")||pc.college; pc.draft=gv("pcDraft")||pc.draft; pc.family=gv("pcFam")||pc.family;
+  pc.rep=gv("pcRep")||pc.rep;
+  const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=+ask.replace(/[^0-9]/g,"");
+  const dt=gv("pcDebtTotal"); if(dt!==null) pc.debtTotal=+dt;
+  S.debts = S.debts.filter(d=>d.kind!=="legacy");
+  if (pc.debtTotal>0){
+    const shares=pc.debtShares||D.DEBTCATS.map((_,i)=>i===0?100:0);
+    const aprs=[5.5,24.9,0,7.9,11.5,0];
+    D.DEBTCATS.forEach((c,i)=>{
+      const bal=Math.round(pc.debtTotal*(shares[i]||0)/100);
+      if (bal>=250){
+        const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
+        S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
+      }
+    });
   }
-  P.story=$("#pStory").value;
-  persist(); toast("The world now knows what you told it."); renderWidget();
-}
-function saveGenSettings(){ META.settings.apiKey=$("#sKey").value.trim(); META.settings.model=$("#sModel").value; persist(); toast("Saved."); }
-async function delCareer(id){
-  sheet(`<h3>Delete career?</h3><p class="sp">This erases the phone's copy — ledger, world, everything. The Madden save is untouched.</p>
-  <button class="btn" style="background:var(--bad);color:#fff" onclick="reallyDel('${id}')">Delete forever</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep it</button>`);
-}
-async function reallyDel(id){
-  META.careers=META.careers.filter(c=>c.id!==id);
-  await idb.del("career/"+id);
-  if (META.activeId===id){ META.activeId=META.careers[0].id; S=await idb.get("career/"+META.activeId); }
-  persist(); closeSheet(); renderApp("settings"); toast("Career deleted.");
+  persist();
+  if (rerender && $("#pcDebtTotal")){ const show=+$("#pcDebtTotal").value>0; const el=$("#debtSliders"); if(el) el.style.display=show?"":"none"; }
 }
 function pickImage(kind){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
@@ -1052,6 +1220,39 @@ function applyWallpaper(){
     document.getElementById("screen").classList.add("customwall");
   }
 }
+
+function saveMeta(){ persist(); }
+function setWallpaper(inp){ pickFromInput(inp, "wall"); }
+function setPfp(inp){ pickFromInput(inp, "pfp"); }
+function pickFromInput(inp, kind){
+  const f=inp.files && inp.files[0]; if(!f) return;
+  const img=new Image(); img.onload=()=>{
+    const c=document.createElement("canvas");
+    const w = kind==="wall"? 480 : 128; const h = kind==="wall"? Math.round(w*img.height/img.width) : 128;
+    c.width=w; c.height=h; const x=c.getContext("2d");
+    x.drawImage(img,0,0,w,h);
+    if (kind==="wall"){
+      let g=x.createLinearGradient(0,0,0,h*0.16); g.addColorStop(0,"rgba(0,0,0,.92)"); g.addColorStop(1,"rgba(0,0,0,0)"); x.fillStyle=g; x.fillRect(0,0,w,h*0.16);
+      g=x.createLinearGradient(0,h*0.80,0,h); g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(1,"#000"); x.fillStyle=g; x.fillRect(0,h*0.80,w,h*0.20);
+    }
+    const data=c.toDataURL("image/jpeg",0.82);
+    if (kind==="wall"){ META.settings.wallpaper=data; applyWallpaper(); toast("Wallpaper set, edges faded."); }
+    else { META.settings.pfp=data; toast("Profile photo set."); }
+    persist();
+  };
+  img.src=URL.createObjectURL(f);
+}
+function resetCareer(){
+  sheet(`<h3>Reset this career?</h3><p class="sp">Wipes phone-side history for ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}: money moves, purchases, threads, applied weeks. The baked save facts stay.</p>
+  <button class="btn" style="background:var(--bad);color:#fff" onclick="doResetCareer()">Reset it</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep everything</button>`);
+}
+async function doResetCareer(){
+  const blob=S.blob; S=newCareerState(blob);
+  await idb.set("career/"+S.careerId, S);
+  closeSheet(); toast("Fresh start."); renderHome(); renderLock(); renderApp("settings");
+}
+
 /* ---- Sync: codec, apply, rewind ---- */
 RENDER.sync = b=>{
   b.className="sync";
@@ -1081,17 +1282,44 @@ async function deflateStr(str){
   const out=await new Response(new Blob([str]).stream().pipeThrough(cs)).arrayBuffer();
   return btoa(String.fromCharCode(...new Uint8Array(out))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
+const NFL_DIVS = {"Bills":"AFC East","Dolphins":"AFC East","Patriots":"AFC East","Jets":"AFC East","Ravens":"AFC North","Bengals":"AFC North","Browns":"AFC North","Steelers":"AFC North","Texans":"AFC South","Colts":"AFC South","Jaguars":"AFC South","Titans":"AFC South","Broncos":"AFC West","Chiefs":"AFC West","Raiders":"AFC West","Chargers":"AFC West","Cowboys":"NFC East","Giants":"NFC East","Eagles":"NFC East","Commanders":"NFC East","Bears":"NFC North","Lions":"NFC North","Packers":"NFC North","Vikings":"NFC North","Falcons":"NFC South","Panthers":"NFC South","Saints":"NFC South","Buccaneers":"NFC South","Cardinals":"NFC West","Rams":"NFC West","49ers":"NFC West","Seahawks":"NFC West"};
+function normalizeLeague(blob){
+  const L=blob.league; if(!L) return;
+  if (Array.isArray(L.teams) && typeof L.teams[0]==="string"){
+    const names=L.teams;
+    L.teams = names.map(n=>({n, d: NFL_DIVS[n]||"Other"}));
+    if (Array.isArray(L.games) && Array.isArray(L.games[0])){
+      L.games = L.games.map(g=>({ t: g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:names[g[2]], a:names[g[3]],
+        hs: g[4]<0?0:g[4], as: g[5]<0?0:g[5], played: g[4]>=0 }));
+    }
+  }
+}
 async function backupCode(){
   const code="TYNETB."+await deflateStr(JSON.stringify(S));
   await navigator.clipboard.writeText(code); toast("Backup copied — "+(code.length/1024).toFixed(1)+" KB");
 }
 async function applyCode(fromHash){
-  const raw = fromHash || $("#syncIn")?.value;
+  let raw = fromHash || $("#syncIn")?.value;
   if (!raw || !raw.trim()) return toast("Paste a code first.");
+  raw = raw.trim();
+  // multi-part QR: TYNETP.<i>.<n>.<chunk>
+  const pm = raw.match(/^TYNETP\.(\d+)\.(\d+)\.(.*)$/s);
+  if (pm){
+    const i=+pm[1], n=+pm[2];
+    META.syncParts = META.syncParts || {};
+    if (META.syncParts.n !== n){ META.syncParts = { n, got: {} }; }
+    META.syncParts.got[i] = pm[3]; saveMeta();
+    const have = Object.keys(META.syncParts.got).length;
+    if (have < n){ return toast("Part "+i+" of "+n+" scanned. "+(n-have)+" more to go."); }
+    raw = Array.from({length:n},(_,k)=>META.syncParts.got[k+1]).join("");
+    META.syncParts = null; saveMeta();
+    toast("All "+n+" parts in. Applying.");
+  }
   let dec;
   try { dec = await decodeCode(raw); } catch(e){ return toast("Code didn't decode: "+e.message); }
   if (dec.backup){ return restoreSheet(dec.data); }
   const blob=dec.blob;
+  normalizeLeague(blob);
   if (!S || blob.careerId!==S.careerId){ return newCareerSheet(blob); }
   const k=wkKey(blob.clock);
   if (S.appliedWeeks.includes(k)) return toast("That week is already applied. Codes work once.");
@@ -1171,7 +1399,7 @@ async function advanceTo(blob){
   // status change events
   const last=[...blob.schedule].reverse().find(g=>g[7]&&g[1]===newC.weekType);
   S.world.notifs=[];
-  if (last) S.world.notifs.push({app:"espn", t:"Final", p:(last[4]?"vs ":"@ ")+last[3]+" — "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" W":" L")});
+  if (last) S.world.notifs.push({app:"pylon", t:"Final", p:(last[4]?"vs ":"@ ")+last[3]+" — "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" W":" L")});
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
   persist();
   toast("Synced to "+wkLabel(newC));
@@ -1230,7 +1458,7 @@ NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
 QB ROOM: ${blob.roster.filter(r=>r[2]==="QB").map(r=>r[0]+" "+r[1]).join(", ")}.
 MONEY: practice squad $6,222/wk; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.
-PERCEPTION (who the world believes he is): ${per.draft}, ${per.stars}-star HS recruit, HS: ${per.hs}, college: ${per.college}, hometown: ${per.hometown||"unknown"}, family: ${per.family}${per.familyAsk?", sends home "+fm(per.familyAsk)+"/mo":""}${per.debtAmt?", carrying "+fm(per.debtAmt)+" of "+per.debtKind:""}. Story: ${per.story||"(none given)"}.`;
+PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${per.familyAsk?", sends home "+fm(per.familyAsk)+"/mo":""}${per.debtTotal?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}).`;
 }
 async function generateWeek(blob, last){
   toast("Generating the week's world…");
