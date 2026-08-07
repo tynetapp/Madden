@@ -28,17 +28,26 @@ function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(async()=>{ if(
 
 function newCareerState(blob){
   const p = blob.player;
+  const isCanon = blob.careerId===D.BLOB.careerId || (p.first==="Ty" && p.last==="Zadey" && p.team==="Jets");
+  const world = isCanon ? {
+    texts: structuredClone(D.SEED.texts), emails: structuredClone(D.SEED.emails),
+    articles: [Object.assign({wk:"Preseason Wk 1"}, structuredClone(D.SEED.article))],
+    earlier: structuredClone(D.SEED.earlier),
+    chirps: structuredClone(D.SEED.chirps), huddle: structuredClone(D.SEED.huddle),
+    podium: structuredClone(D.SEED.podium), clips: [], espnExtra: structuredClone(D.SEED.espnExtra),
+    notifs: structuredClone(D.SEED.notifications)
+  } : genericSeed(blob);
   return {
     careerId: blob.careerId, createdAt: Date.now(),
     blob, appliedWeeks: [wkKey(blob.clock)],
     cash: { checking: 1750, savings: 0, tax: 0 },
     autosweep: false, sweepPct: {tax:30, savings:10},
-    credit: { score: 620, cardBal: 0, cardLimit: 8000, cardApr: 24.9 },
+    credit: { score: 620, cardBal: 0, cardLimit: 8000, cardApr: 24.9, ledger: [] },
     debts: [], properties: [], garage: [], boats: [], planes: [],
     invest: {}, // id -> {units, cost}
     investPx: seedPrices(blob.careerId),
     bills: [
-      {id:"stay", n:"Extended-stay hotel (Florham Park)", amt:3400, cat:"housing"},
+      {id:"stay", n:"Extended-stay hotel ("+(isCanon?"Florham Park":(D.METROS[p.team]?D.METROS[p.team].city:"team city"))+")", amt:3400, cat:"housing"},
       {id:"phone", n:"Phone", amt:95, cat:"life"},
       {id:"stream", n:"Streaming bundle", amt:47, cat:"life"},
       {id:"food", n:"Food & groceries", amt:1400, cat:"life"},
@@ -46,17 +55,54 @@ function newCareerState(blob){
     ],
     ledger: [ {t:"Camp stipend — Meridian deposit", amt:1750, wk:"PS1", kind:"income"} ],
     deals: [], perception: { draft:"Undrafted free agent", state:"NJ", grew:"Small town", hs:"Local standout", college:"Mid-major starter", family:"Single mother household", rep:"Complete unknown", familyAsk:0, debtTotal:0, debtShares:null },
-    world: { texts: structuredClone(D.SEED.texts), emails: structuredClone(D.SEED.emails),
-             articles: [Object.assign({wk:"Preseason Wk 1"}, structuredClone(D.SEED.article))],
-             earlier: structuredClone(D.SEED.earlier),
-             chirps: structuredClone(D.SEED.chirps), huddle: structuredClone(D.SEED.huddle),
-             podium: structuredClone(D.SEED.podium), clips: [], espnExtra: structuredClone(D.SEED.espnExtra),
-             notifs: structuredClone(D.SEED.notifications) },
-    votes: {}, reads: {}, cardTx: [], handle: "@"+(p.first+p.last).toLowerCase(),
+    world,
+    votes: {}, reads: {}, cardTx: [], handle: "@"+(p.first+p.last).replace(/\W/g,"").toLowerCase(),
     agent: null,
     chirp: { followers: 842, following: 63, delta: 0, posts: [] },
     last4: String(1000 + Math.floor(seedRng(blob.careerId+"card")()*9000)),
     acctNums: { checking: String(1000+Math.floor(seedRng(blob.careerId+"a1")()*9000)), savings: String(1000+Math.floor(seedRng(blob.careerId+"a2")()*9000)), tax: String(1000+Math.floor(seedRng(blob.careerId+"a3")()*9000)) },
+  };
+}
+/* Neutral week-zero world for any non-canon career, templated entirely from its blob.
+   Real content arrives at the first AI generation; this just makes every app open clean. */
+function genericSeed(blob){
+  const p=blob.player, team=p.team;
+  const ps = p.status==="PracticeSquad";
+  const cash = (p.contract?.salary?.[p.contract?.currentYear||0]) ?? p.capSalary;
+  const wkPay = ps? 6222 : Math.round(cash/18);
+  const payLine = ps
+    ? "You are on the "+team+" practice squad. That pays $6,222 per week the roster exists (18 weeks), roughly $112,000 for the season. Elevations pay the active-week rate instead."
+    : "You are on the "+team+" active roster. The contract on file pays "+fm(cash)+" this year, landing as "+fm(wkPay)+" per regular-season check before taxes.";
+  return {
+    texts: [
+      {id:"agent", name:"Apex Sports Group", color:"#6b5b2a", msgs:[
+        ["them","Front desk at Apex. Welcome to "+team+" life, "+p.first+". Your rep situation is open."],
+        ["them","Open the Apex app when you get a minute and pick who represents you. Nothing moves on contracts or endorsements until you do."]]},
+      {id:"mom", name:"Mom", color:"#5a3a56", msgs:[
+        ["them","Saw the "+team+" news. So proud of you 🥰"],
+        ["them","Pay yourself first baby. That's what your grandfather said and he died with a paid-off house."]]}
+    ],
+    emails: [
+      {id:"nflpa", from:"NFLPA Member Services", subj:"Welcome to the NFLPA, dues & benefits enrollment", time:"7:02 AM", unread:true,
+       body:"Dear "+p.first+" "+p.last+",\n\nWelcome to the National Football League Players Association.\n\nKey items for your first month:\n\n• Union dues of $117 are deducted from each game-week paycheck during the season.\n• Your 401(k) enrollment window is open. The league matches 2-for-1 after your first credited season.\n• Health coverage begins immediately and continues through the plan year.\n• Free financial counseling is available to every member. We recommend using it before your first major purchase, not after.\n\nIn solidarity,\nNFLPA Member Services"},
+      {id:"apex1", from:"Apex Sports Group", subj:"How you actually get paid", time:"Yesterday", unread:true,
+       body:p.first+",\n\nPutting this in writing like we do for everyone.\n\nYOUR DEAL. "+payLine+"\n\nOUR CUT. Apex takes a percentage of playing contract money only, set by whichever agent you sign with. Endorsements are negotiated separately.\n\nTHE PART EVERYONE SKIPS. Taxes will take roughly 40% of every check. The check that hits your account is NOT your money to spend, it is your money to allocate. Meridian will set up the tax hold account this week.\n\nDon't buy anything with a motor yet.\n\nApex Sports Group"}
+    ],
+    articles: [], earlier: [],
+    chirps: [
+      {n:team+" Videos", h:"@"+p.teamShort.toLowerCase()+"clips", vf:1, av:"#1a5a41", t:"Camp continues in "+(D.METROS[team]?D.METROS[team].city:team)+". Full "+team+" coverage all season.", li:412, rp:38, tm:"3h"}
+    ],
+    huddle: [
+      {id:"gw1", flair:"DISCUSSION", u:"AutoModerator", tm:"6h", up:120,
+       h:"Weekly "+team+" roster and camp thread",
+       b:"Depth chart talk, camp reports, and whatever the coaches say that means the opposite. New faces get discussed here.",
+       cmts:[
+        {u:"depth_chart_watcher", tm:"5h", up:44, t:"tracking every "+p.pos+" rep this week. the room is more interesting than people think"},
+        {u:"section_314_lifer", tm:"4h", up:21, t:"just let the season start already"}]}
+    ],
+    podium: { show:"The Walkthrough", hosts:"Rachel Otani & Dom Whitfield", eps:[],
+      srcNote:"Generate this week's episode brief, feed it to NotebookLM, and paste the episode link or file back here. The brief keeps the hosts honest: league-wide first, your story earns its minutes." },
+    clips: [], espnExtra: [], notifs: []
   };
 }
 function seedPrices(cid){ const px={}; const rng=seedRng(cid+"px0");
@@ -111,6 +157,7 @@ const GLYPH = {
   chron: '<span style="font-family:Georgia,serif;font-size:19px;font-weight:700;letter-spacing:-.5px">UC</span>',
   pylon: '<i class="py-ic"></i>',
   wager: SV('<path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/><path d="M12.5 10.5h5M12.5 13.5h3.5" stroke-width="1.6"/>'),
+  cal: SV('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5"/><circle cx="8" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.5" r="1" fill="currentColor" stroke="none"/><rect x="14.7" y="16" width="3" height="2.2" rx="0.6" fill="currentColor" stroke="none"/>'),
   assist: SV('<circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/><path d="M16.5 5.5l1.2 1.2M18.6 4.6l.9.9" stroke-width="1.4"/>'),
   podium: SV('<rect x="9.2" y="3" width="5.6" height="11" rx="2.8"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21M9 21h6"/>'),
   keystone: SV('<path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10.5V20h12v-9.5"/><rect x="10" y="14.5" width="4" height="5.5" fill="currentColor" stroke="none"/>'),
@@ -139,6 +186,7 @@ const APPS = [
   {id:"card", n:"Credit Card", ic:"ic-card"},
   {id:"wager", n:"WagerLines", ic:"ic-wgr"},
   {id:"assist", n:"Client Services", ic:"ic-ast"},
+  {id:"cal", n:"Calendar", ic:"ic-cal"},
 ];
 const DOCK = [
   {id:"messages", n:"Messages", ic:"ic-msg"},
@@ -154,6 +202,7 @@ function closeSheet(){ $("#dim").classList.add("hidden"); }
 $("#dim") && document.addEventListener("click", e=>{ if(e.target.id==="dim") closeSheet(); });
 
 function clockTick(){
+  if (!META) return; // interval can fire before boot finishes
   const d=phoneNow?phoneNow():new Date();
   const t=d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}).replace(/\s?[AP]M/i,"");
   $("#lk-time").textContent=t; $("#sb-time").textContent=t;
@@ -179,6 +228,7 @@ function renderHome(){
   $("#dock").innerHTML = dockIds().map(id=>appPool().find(a=>a.id===id)).map(a=>iconEl(a, a.id==="messages"&&unreadM?unreadM:null)).join("");
   renderWidget();
 }
+function povDesc(){ const p=S.blob.player; return (p.status==="PracticeSquad"?"practice squad ":"")+(p.yearsPro===0?"rookie ":p.yearsPro>=6?"veteran ":"")+p.pos; }
 function buzzTier(f){ return f>2000000?"Household name":f>500000?"National story":f>120000?"League-wide buzz":f>25000?"Local hero":f>6000?"Beat-writer radar":f>1500?"Local curiosity":"Unknown"; }
 function gameDate(clock){
   // anchor: RS week 1 = second Thursday after Labor Day-ish; approximations by design
@@ -223,6 +273,13 @@ function nextGame(){
   cands.sort((x,y)=> (order(x[1])-order(y[1])) || (x[0]-y[0]));
   return cands[0];
 }
+/* Chronologically last played game. The schedule array interleaves PreSeason and
+   RegularSeason weeks (both are 0-indexed), so .filter(played).pop() returns a
+   preseason game during early RS weeks. Sort by (season, type, week) instead. */
+function schedOrd(g){ const t = g[1]==="PreSeason"?0 : g[1]==="RegularSeason"?1 : 2; return (g[2]||0)*10000 + t*100 + g[0]; }
+function lastPlayed(sched, type){
+  return (sched||S.blob.schedule).filter(g=>g[7] && (!type || g[1]===type)).sort((a,b)=>schedOrd(a)-schedOrd(b)).pop() || null;
+}
 function notifKey(x){ return "n:"+x.app+":"+(x.t+"|"+x.p).slice(0,60); }
 function liveNotifs(includeSeen){
   const out = [];
@@ -255,7 +312,7 @@ function markNotifRead(app){
 }
 function renderLock(){
   const n = liveNotifs();
-  const icons = {messages:"ic-msg",huddle:"ic-hud",tmail:"ic-tml",meridian:"ic-mer",chirper:"ic-chr",sync:"ic-sync",chron:"ic-chron",pylon:"ic-pylon"};
+  const icons = {messages:"ic-msg",huddle:"ic-hud",tmail:"ic-tml",meridian:"ic-mer",chirper:"ic-chr",sync:"ic-sync",chron:"ic-chron",pylon:"ic-pylon",podium:"ic-pod",cal:"ic-cal"};
   $("#lk-notifs").innerHTML = n.slice(0,4).map(x=>`<button class="lk-card" onclick="unlock();markNotifRead('${x.app}');openApp('${x.app}')">
     <span class="ic ${icons[x.app]||'ic-set'}">${GLYPH[x.app]||"•"}</span>
     <span style="min-width:0"><h4>${esc(x.t)}</h4><p>${esc(x.p)}</p></span></button>`).join("");
@@ -359,7 +416,7 @@ RENDER.chirper = (b,sub)=>{
       return;
     }
   }
-  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1>Chirper</h1><button class="hact" onclick="editHandle()" style="font-size:12.5px">Edit @</button></div>
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><h1>Chirper</h1><button class="hact" onclick="editHandle()" style="font-size:12.5px">Edit @</button></div>
   <div class="ch-profile">
     <button class="ch-av" onclick="pickPfpFromChirper()" title="Change photo">${META.settings.pfp?`<img src="${META.settings.pfp}">`:esc(S.blob.player.first[0]+S.blob.player.last[0])}</button>
     <div class="ch-pinfo">
@@ -369,20 +426,24 @@ RENDER.chirper = (b,sub)=>{
     </div>
   </div>
   <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
-  <div class="seg segc" style="background:rgba(255,255,255,.07)">${[["feed","Feed"],["mine","Your Posts"]].map(t=>`<button class="${chTab===t[0]?"on":""}" onclick="chTab='${t[0]}';renderApp('chirper')">${t[1]}</button>`).join("")}</div>
-  <div class="apbody flush" id="chList" style="padding:0 16px 90px"></div>`;
+  <div class="apbody flush" id="chList" style="padding:6px 16px 90px"></div>`;
   const el=$("#chList");
-  if (chTab==="feed"){
-    el.innerHTML = S.world.chirps.map((c,i)=>`<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
+  const worldLen = S.world.chirps.length;
+  const own = (S.chirp.posts||[]).slice().reverse().map(p=>({own:true, p, pos: Math.max(0, Math.min(worldLen, worldLen - (p.worldMark ?? worldLen)))}));
+  const rows=[];
+  const renderOwn = p => `<button class="chirp mine" onclick="renderApp('chirper',{t:'${p.id}'})">
+      <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
+      <div class="ch-h"><b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b><span>${esc(me)} · you</span></div><p>${chText(p.t)}</p>
+      <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${(p.li||0).toLocaleString()}</span> · ${(p.replies||[]).length} replies</div></div></div></button>`;
+  const renderWorld = (c,i) => `<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
       <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n)}">${initials(c.n)}</span><div class="ch-main">
       <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
-      <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
-  } else {
-    el.innerHTML = (S.chirp.posts||[]).slice().reverse().map(c=>`<button class="chirp" onclick="renderApp('chirper',{t:'${c.id}'})">
-      <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
-      <div class="ch-h"><b>You</b><span>${esc(me)}</span></div><p>${chText(c.t)}</p>
-      <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
+      <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`;
+  for (let i=0;i<=worldLen;i++){
+    for (const o of own) if (o.pos===i) rows.push(renderOwn(o.p));
+    if (i<worldLen) rows.push(renderWorld(S.world.chirps[i], i));
   }
+  el.innerHTML = rows.join("") || '<div class="empty">Quiet out there.</div>';
 };
 function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
 function chLike(id){
@@ -423,7 +484,7 @@ async function chSendReply(){
 }
 async function aiChirpReply(c, mine){
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a practice squad rookie QB) just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]", "Write the replies now.", 400);
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a "+povDesc()+") just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]", "Write the replies now.", 400);
     const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
     return Array.isArray(arr)? arr.slice(0,3) : null;
   }catch(e){ return null; }
@@ -457,21 +518,29 @@ function insMention(inpId, h){
   const box = inpId==="chQuick" ? $("#chSuggTop") : $("#chSugg");
   if (box) box.innerHTML=""; inp.focus();
 }
-async function aiPostReplies(post){
+async function aiPostReplies(post, attempt){
   if (!aiKey()) return;
+  const f = S.chirp.followers||0;
+  const nReplies = Math.max(1, Math.min(6, Math.round(f/400)));
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. "+S.handle+" (practice squad rookie QB, "+S.blob.player.team+", "+(S.chirp.followers||0)+" followers) just posted: \""+post.t+"\". Write 2-3 short realistic replies from fans, media, or teammates. If a teammate handle is mentioned in the post, one reply should be from that teammate. Mixed tones, no em dashes. Reply ONLY with JSON: [{\"a\":\"name\",\"h\":\"@handle\",\"x\":\"text\"}]", "Write the replies now.", 500);
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". Write EXACTLY "+nReplies+" short realistic replies, scaled to that follower count (a small account gets small-account energy, not viral treatment). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"x\":\"text\"}]", "Write the replies now.", 600);
     const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
-    if (Array.isArray(arr)){ post.replies=(post.replies||[]).concat(arr.slice(0,3)); persist(); if(curApp==="chirper") renderApp("chirper", chThread!==null?{t:chThread}:undefined); }
-  }catch(e){}
+    if (!Array.isArray(arr)) throw new Error("not an array");
+    post.replies=(post.replies||[]).concat(arr.slice(0,nReplies));
+    post.li=(post.li||0)+Math.round(f*(0.005+Math.random()*0.02));
+    persist(); if(curApp==="chirper") renderApp("chirper", chThread!==null?{t:chThread}:undefined);
+  }catch(e){
+    if (!attempt) return aiPostReplies(post, 1);
+    toast("Replies didn't generate: "+e.message);
+  }
 }
 function chQuickPost(){
   const el=$("#chQuick"); const txt=el&&el.value.trim(); if(!txt) return;
   const rng=seedRng(S.careerId+txt);
   S.chirp.posts=S.chirp.posts||[];
-  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]};
+  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[], worldMark:S.world.chirps.length};
   S.chirp.posts.push(post);
-  persist(); chTab="mine"; renderApp("chirper"); toast("Posted.");
+  persist(); renderApp("chirper"); toast("Posted.");
   aiPostReplies(post);
 }
 function chCompose(){
@@ -483,9 +552,9 @@ function chPost(){
   const txt=$("#chNew").value.trim(); if(!txt) return;
   S.chirp.posts=S.chirp.posts||[];
   const rng=seedRng(S.careerId+txt);
-  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]};
+  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[], worldMark:S.world.chirps.length};
   S.chirp.posts.push(post);
-  closeSheet(); persist(); chTab="mine"; renderApp('chirper'); toast("Posted.");
+  closeSheet(); persist(); renderApp('chirper'); toast("Posted.");
   aiPostReplies(post);
 }
 /* T-Mail */
@@ -507,7 +576,12 @@ RENDER.tmail = (b, sub)=>{
 RENDER.chron = (b, sub)=>{
   b.className="chron lightapp";
   const idx = sub?.a ?? 0; const A = S.world.articles[idx];
-  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><span class="masthead">United Chronicle</span></div>
+  if (!A){
+    b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
+    <div class="apbody"><div class="empty">No stories on your career yet. Coverage starts with your first synced game week.</div></div>`;
+    return;
+  }
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
   <div class="dateline">${esc(A.wk||"")} · Sports</div>
   <div class="apbody flush"><div class="art">
     <div class="kick">${esc(A.kick)}</div><h1>${esc(A.head)}</h1>
@@ -527,7 +601,7 @@ const NETMAP = g => { const day=g[5], t=+g[6];
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹</button><h1><i class="py-mark"></i>NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><i class="py-mark"></i>NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -552,7 +626,7 @@ function pyBody(){
       const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
       const recent = S.blob.league.games.filter(g=>g.t===tp && g.w>=wkNow-1 && (g.played||g.hs+g.as>0)).slice(0,24);
       leagueHtml = `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>Around the league</h3><span style="color:#8b939c">wk ${wkNow}</span></div>` +
-        recent.map(g=>`<div class="scorecard"><div class="st"><span>FINAL · WK ${g.w+1}</span></div>
+        recent.map(g=>`<div class="scorecard"><div class="st"><span>FINAL · ${g.t==="PreSeason"?"PRE ":""}WK ${g.w+1}</span></div>
         <div class="tm ${g.as>g.hs?"win":"lose"}"><span>${esc(g.a)}</span><b>${g.as}</b></div>
         <div class="tm ${g.hs>g.as?"win":"lose"}"><span>${esc(g.h)}</span><b>${g.hs}</b></div></div>`).join("");
     } else {
@@ -581,15 +655,30 @@ function pyBody(){
   }
   if (pyTab==="me"){
     const p=S.blob.player;
-    const stats = (S.blob.seasonStats||[]).find(s=>s.table&&s.table.includes("Offensive")) || {};
-    const rows = [["Games played", stats.GAMESPLAYED||0],["Games started", stats.GAMESSTARTED||0],["Pass yards", stats.PASSYDS||0],["Pass TD", stats.PASSTDS||0],["INT", stats.PASSINTS||0],["Rush yards", stats.RUSHYDS||0],["Rush TD", stats.RUSHTDS||0]];
+    // merge every stat line the blob carries (offense/defense/kicking arrive as separate tables)
+    const merged={};
+    for (const s of (S.blob.seasonStats||[])) for (const k in s){ if (k!=="table" && typeof s[k]==="number") merged[k]=Math.max(merged[k]||0, s[k]); }
+    const LBL={GAMESPLAYED:"Games played",GAMESSTARTED:"Games started",PASSYDS:"Pass yards",PASSTDS:"Pass TD",PASSINTS:"INTs thrown",PASSATTEMPTS:"Attempts",PASSCOMP:"Completions",RUSHYDS:"Rush yards",RUSHTDS:"Rush TD",RUSHATT:"Carries",RECCATCHES:"Receptions",RECYDS:"Receiving yards",RECTDS:"Receiving TD",DTACKLES:"Tackles",DSACKS:"Sacks",DINTS:"Interceptions",DFORCEDFUMBLES:"Forced fumbles",DFUMBLERECOVERIES:"Fumble recoveries",DDEFLECTIONS:"Pass deflections",KFGMADE:"FG made",KFGATT:"FG attempts",KXPMADE:"XP made",PPUNTS:"Punts",PPUNTYDS:"Punt yards",PPUNTSIN20:"Inside the 20",KRETYDS:"Kick return yards",KRETTDS:"Kick return TD",PRETYDS:"Punt return yards",PRETTDS:"Punt return TD"};
+    const POSFIELDS={
+      QB:["PASSYDS","PASSTDS","PASSINTS","RUSHYDS","RUSHTDS"],
+      HB:["RUSHYDS","RUSHTDS","RECCATCHES","RECYDS","RECTDS"], FB:["RUSHYDS","RUSHTDS","RECCATCHES","RECYDS"],
+      WR:["RECCATCHES","RECYDS","RECTDS","RUSHYDS"], TE:["RECCATCHES","RECYDS","RECTDS"],
+      K:["KFGMADE","KFGATT","KXPMADE"], P:["PPUNTS","PPUNTYDS","PPUNTSIN20"]
+    };
+    const DEFPOS=["DT","LE","RE","MLB","LOLB","ROLB","OLB","LB","CB","FS","SS"];
+    const want = POSFIELDS[p.pos] || (DEFPOS.includes(p.pos)? ["DTACKLES","DSACKS","DINTS","DFORCEDFUMBLES","DDEFLECTIONS"] : []);
+    const rows = [["Games played", merged.GAMESPLAYED||0],["Games started", merged.GAMESSTARTED||0]];
+    for (const f of want) rows.push([LBL[f]||f, merged[f]||0]);
+    // anything else nonzero the save tracked for this player (returners, two-way oddities)
+    const shown=new Set(["GAMESPLAYED","GAMESSTARTED",...want]);
+    for (const k in merged){ if (!shown.has(k) && merged[k]>0 && rows.length<12) rows.push([LBL[k]|| k.replace(/^[KDP]/,"").toLowerCase().replace(/^./,c=>c.toUpperCase()), merged[k]]); }
     m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${esc(p.first+" "+p.last)}</h3><span style="color:#8b939c">${esc(p.pos)} · #${p.jersey} · ${esc(p.team)}</span></div>
-    <div class="scorecard">${rows.map(r=>`<div class="tm"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("")}</div>
+    <div class="scorecard">${rows.map(r=>`<div class="tm"><span>${esc(r[0])}</span><b>${r[1]}</b></div>`).join("")}</div>
     <div class="scorecard"><div class="st"><span>Availability</span></div>
       <div class="tm"><span>Status</span><b style="font-size:13px">${p.status==="PracticeSquad"?"Practice Squad":esc(p.status)}</b></div>
       <div class="tm"><span>Health</span><b style="font-size:13px">${p.injury&&p.injury.status!=="Uninjured"?esc(p.injury.status):"Healthy"}</b></div>
       <div class="tm"><span>Confidence</span><b>${p.confidence}</b></div></div>
-    ${!stats.GAMESPLAYED?'<p style="font-size:12px;color:#5c6570">Regular season stats populate as you sync played weeks.</p>':""}`;
+    ${!merged.GAMESPLAYED?'<p style="font-size:12px;color:#5c6570">Regular season stats populate as you sync played weeks.</p>':""}`;
   }
   if (pyTab==="leaders"){
     if (S.blob.league && S.blob.league.leaders){
@@ -602,6 +691,7 @@ function pyBody(){
     }
   }
 }
+function hudSub(){ return "h/"+S.blob.player.team.replace(/\W/g,"").toLowerCase()+"nation"; }
 /* The Huddle */
 RENDER.huddle = (b, sub)=>{
   b.className="huddle";
@@ -621,7 +711,7 @@ RENDER.huddle = (b, sub)=>{
   if (sub && sub.post){
     const P=S.world.huddle.find(h=>h.id===sub.post);
     const psc=score(P.up, P.id);
-    b.innerHTML = aphead("h/jetsnation", {back:"renderApp('huddle')", backlabel:"Feed"}) +
+    b.innerHTML = aphead(esc(hudSub()), {back:"renderApp('huddle')", backlabel:"Feed"}) +
     `<div class="apbody flush"><div class="hpost">
       <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${esc(P.tm)}</span></div>
       <h3>${esc(P.h)}</h3><div class="body">${esc(P.b)}</div>
@@ -630,7 +720,7 @@ RENDER.huddle = (b, sub)=>{
     P.cmts.map((c,i)=>cmtHtml(c, P.id+":"+i, true)).join("") + `<div style="height:26px"></div></div>`;
   } else {
     b.innerHTML = aphead("The Huddle") +
-    `<div class="hud-sub"><span class="subav">h/</span><b>h/jetsnation</b><span>412k members · 8.1k here</span></div>
+    `<div class="hud-sub"><span class="subav">h/</span><b>${esc(hudSub())}</b><span>${112+Math.floor(seedRng("sub"+S.blob.player.team)()*380)}k members · ${(2+Math.floor(seedRng("here"+S.blob.player.team)()*9)).toFixed(1)}k here</span></div>
     <div class="apbody flush hlist">` + S.world.huddle.map(P=>{
       const psc=score(P.up,P.id);
       return `<div class="hpost" onclick="renderApp('huddle',{post:'${P.id}'})">
@@ -645,7 +735,7 @@ let merTab = "accounts";
 let merShow = {};
 RENDER.meridian = b=>{
   b.className="meridian lightapp";
-  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1><span class="mer-logo">M</span> Meridian</h1><span class="hact" style="color:#8a919c;font-size:11px;font-weight:600">Banking for the long season</span></div>
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><h1><span class="mer-logo">M</span> Meridian</h1><span class="hact" style="color:#8a919c;font-size:11px;font-weight:600">Banking for the long season</span></div>
   <div class="apbody flush" id="merMain" style="padding-bottom:76px"></div>
   <div class="mer-tabs">
     ${[["accounts","Accounts","$"],["pay","Pay/Transfer","⇄"],["paycheck","Paycheck","▤"],["loans","Loans","%"],["invest","Invest","▲"]].map(t=>
@@ -722,7 +812,7 @@ function merBody(){
       ${ck.lines.map(l=>`<div class="payline ${l[1]<0?"neg":""}"><span>${esc(l[0])}</span><span>${fm(l[1])}</span></div>`).join("")}
       <div class="payline tot"><span>Net deposit</span><span>${fm(ck.net)}</span></div></div></div>
     <div class="mer-sechead">How you're paid</div>
-    <div class="acct-group"><div class="acct"><div style="font-size:13.5px;line-height:1.55;opacity:.75">Practice squad pays ${fm(psWeekly())} per week for 18 weeks (${fm(psWeekly()*18)} a season). A game-day elevation pays the active weekly rate of ${fm(activeWeekly())} for that week. Signing to the 53 switches every remaining week to the active rate. ${isPre?"Preseason pays a $1,750 weekly camp stipend; real checks start Week 1.":""}</div></div></div>
+    <div class="acct-group"><div class="acct"><div style="font-size:13.5px;line-height:1.55;opacity:.75">${S.blob.player.status==="PracticeSquad"? `Practice squad pays ${fm(psWeekly())} per week for 18 weeks (${fm(psWeekly()*18)} a season). A game-day elevation pays the active weekly rate of ${fm(activeWeekly())} for that week. Signing to the 53 switches every remaining week to the active rate.` : `Active roster: your contract cash lands as ${fm(activeWeekly())} per regular-season week across 18 checks.`} ${isPre?"Preseason pays a $1,750 weekly camp stipend; real checks start Week 1.":""}</div></div></div>
     <div class="mer-sechead">Deposit history</div>
     <div class="acct-group"><div class="acct">${S.ledger.filter(l=>l.kind==="income").slice(-10).reverse().map(l=>`<div class="payline"><span>${esc(l.t)}</span><span>${fm(l.amt)}</span></div>`).join("")}</div></div>`;
   }
@@ -924,7 +1014,7 @@ RENDER.keystone = (b,sub)=>{
     </div>`;
     return;
   }
-  b.innerHTML = `<div class="brandhead key"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">⌂</div><div><h1>Keystone</h1><small>Homes and land, every market</small></div><button class="hact" style="margin-left:auto;color:#fff" onclick="keyMode=keyMode==='browse'?'build':'browse';renderApp('keystone')">${keyMode==="browse"?"Build your own":"Browse"}</button></div>` +
+  b.innerHTML = `<div class="brandhead key"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">⌂</div><div><h1>Keystone</h1><small>Homes and land, every market</small></div><button class="hact" style="margin-left:auto;color:#fff" onclick="keyMode=keyMode==='browse'?'build':'browse';renderApp('keystone')">${keyMode==="browse"?"Build your own":"Browse"}</button></div>` +
   `<div class="apbody" id="keyBody"></div>`;
   const kb=$("#keyBody");
   if (keyMode==="build"){
@@ -974,24 +1064,37 @@ function priceBuild(){
    <div class="payline tot"><span>Total</span><span>${fm(total)}</span></div></div>` +
    mortgageOptions(total, id, {custom:{hood:hood[0], beds, baths, sq, lot}});
 }
+let _mort=null;   // {price, hid, custom, opts:[[dnPct,apr,yrs]...]}
+let _closing=null; // {price, down, pay, apr, label}
 function mortgageOptions(price, hid, extra){
   const opts=[[0.20, 6.1, 30],[0.10, 6.6, 30],[0.35, 5.7, 15]];
+  _mort={price, hid, custom:extra?.custom||null, opts};
   const rows=opts.map((o,i)=>{
     const dn=Math.round(price*o[0]); const principal=price-dn;
     const r=o[1]/100/12, n=o[2]*12; const pay=Math.round(principal*r/(1-Math.pow(1+r,-n)));
-    return `<button class="btn" style="background:#fff;color:var(--key-ink);box-shadow:0 2px 8px rgba(19,26,34,.1);text-align:left;display:flex;justify-content:space-between" onclick='buyHouse(${price},${dn},${pay},${o[1]},"${hid}",${JSON.stringify(extra?.custom||null)})'>
+    return `<button class="btn" style="background:#fff;color:var(--key-ink);box-shadow:0 2px 8px rgba(19,26,34,.1);text-align:left;display:flex;justify-content:space-between" onclick="buyHouseOpt(${i})">
     <span>${Math.round(o[0]*100)}% down · ${o[2]}yr @ ${o[1]}%</span><span>${fm(pay)}/mo</span></button>`;}).join("");
   return `<div class="hoodhead"><h3>Financing</h3><span>Meridian pre-approval</span></div>${rows}
-  <button class="btn" style="background:var(--key-acc);color:#fff" onclick='buyHouse(${price},${price},0,0,"${hid}",${JSON.stringify(extra?.custom||null)})'>Buy in cash — ${fm(price)}</button>`;
+  <button class="btn" style="background:var(--key-acc);color:#fff" onclick="buyHouseOpt(-1)">Buy in cash — ${fm(price)}</button>`;
+}
+function buyHouseOpt(i){
+  if (!_mort) return;
+  const {price, hid, custom, opts}=_mort;
+  if (i<0) return buyHouse(price, price, 0, 0, hid, custom);
+  const o=opts[i]; const dn=Math.round(price*o[0]);
+  const r=o[1]/100/12, n=o[2]*12; const pay=Math.round((price-dn)*r/(1-Math.pow(1+r,-n)));
+  buyHouse(price, dn, pay, o[1], hid, custom);
 }
 function buyHouse(price, down, pay, apr, hid, custom){
   if (S.cash.checking < down) return toast("You need "+fm(down)+" in checking. You have "+fm(S.cash.checking)+".");
   const homes=genHomes(); const H=homes.find(x=>x.id===hid);
   const label = H? H.addr+", "+H.hood : "Custom build — "+(custom?custom.hood:"");
+  _closing={price, down, pay, apr, label};
   sheet(`<h3>Close on it?</h3><p class="sp">${esc(label)} for ${fm(price)}${pay?` — ${fm(down)} down, ${fm(pay)}/mo`:" in cash"}. Your extended-stay bill (${fm(3400)}/mo) ends at closing.</p>
-  <button class="btn" style="background:var(--key-acc);color:#fff" onclick='confirmHouse(${price},${down},${pay},${apr},${JSON.stringify(label)})'>Sign & close</button>
-  <button class="btn" style="background:rgba(127,127,127,.15)" onclick="closeSheet()">Walk away</button>`);
+  <button class="btn" style="background:var(--key-acc);color:#fff" onclick="confirmHousePending()">Sign & close</button>
+  <button class="btn" style="background:rgba(127,127,127,.15)" onclick="_closing=null;closeSheet()">Walk away</button>`);
 }
+function confirmHousePending(){ const c=_closing; _closing=null; if(c) confirmHouse(c.price, c.down, c.pay, c.apr, c.label); }
 function confirmHouse(price, down, pay, apr, label){
   S.cash.checking-=down;
   S.properties.push({n:label, value:price, bought:price});
@@ -1024,7 +1127,7 @@ RENDER.octane = (b,sub)=>{
   }
   const makes=[...new Set(D.CARDATA.map(x=>x[0]))].sort();
   const yrs=[...new Set(cars.map(c=>c.yr))].sort((a,b)=>b-a);
-  b.innerHTML = `<div class="brandhead oct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">◉</div><div><h1>Octane</h1><small>Every make. Every year.</small></div><button class="hact" style="margin-left:auto;color:#ffb35c" onclick="garSheet()">Garage (${S.garage.length})</button></div>` +
+  b.innerHTML = `<div class="brandhead oct"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">◉</div><div><h1>Octane</h1><small>Every make. Every year.</small></div><button class="hact" style="margin-left:auto;color:#ffb35c" onclick="garSheet()">Garage (${S.garage.length})</button></div>` +
   `<div class="filters">
     <input placeholder="Search" value="${esc(octF.q)}" oninput="octF.q=this.value;octList()">
     <select onchange="octF.make=this.value;octList()"><option value="">All makes</option>${makes.map(m=>`<option ${octF.make===m?"selected":""}>${m}</option>`).join("")}</select>
@@ -1081,14 +1184,14 @@ function buyVeh(id, fin){
   S.ledger.push({t:"Octane — "+C.yr+" "+C.make+" "+C.model, amt:-dn, kind:"spend"});
   persist(); toast("It's yours. Insurance adjusted."); renderApp("octane"); renderWidget();
 }
-const PAINTS=[["Gloss Black","#111",650],["Pearl White","#f2f0ea",800],["Nardo Gray","#7a8087",750],["Racing Red","#c8102e",700],["Miami Blue","#00b1c8",900],["British Green","#0b3d2e",750],["Midnight Purple","#2e1a47",1200],["Chalk","#d9d5cc",850],["Solar Yellow","#f5c400",700],["Copper","#b45f2a",950],["Frozen Matte Black","#1a1a1a",1500],["Chrome Wrap","#c9ced4",2200]];
+const PAINTS=[["Gloss Black","#111",650],["Pearl White","#f2f0ea",800],["Nardo Gray","#7a8087",750],["Racing Red","#c8102e",700],["Miami Blue","#00b1c8",900],["British Green","#0b3d2e",750],["Midnight Purple","#2e1a47",1200],["Chalk","#d9d5cc",850],["Solar Yellow","#f5c400",700],["Copper","#b45f2a",950],["Frozen Matte Black","#1a1a1a",1500],["Chrome Wrap","#c9ced4",2200],["Lime Green","#7ed321",850],["Acid Lime","#c6ff00",950],["Hot Pink","#ff2d78",900],["Rose Pink","#f4a6c6",850],["Magenta Pearl","#c2185b",1100],["Liquid Silver Metallic","#aeb6bf",1050],["Gunmetal Metallic","#4a545e",1000],["Champagne Gold Metallic","#c9a86a",1150],["Deep Ocean Metallic","#123a5e",1050],["Sunset Orange Metallic","#e2571b",1000]];
 function garSheet(){
   sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l"><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops weekly)</p></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
   `<button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet()">Close</button>`);
 }
 function paintSheet(i){
   const c=S.garage[i];
-  sheet(`<h3>Paint the ${esc(c.n)}</h3><p class="sp">Full respray at the shop Octane uses. Takes effect immediately, because this is your phone and the shop is imaginary.</p>
+  sheet(`<h3>Paint the ${esc(c.n)}</h3><p class="sp">Full respray at the shop Octane uses.</p>
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px">${PAINTS.map((p,n)=>`<button onclick="doPaint(${i},${n})" style="width:64px;border:none;background:none;color:inherit;font-size:10.5px"><span style="display:block;width:44px;height:44px;border-radius:50%;background:${p[1]};margin:0 auto 4px;border:2px solid ${c.color===p[1]?"#ffb35c":"rgba(255,255,255,.25)"}"></span>${p[0]}<br><small style="opacity:.6">${fm(p[2])}</small></button>`).join("")}</div>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="garSheet()">Back to garage</button>`);
 }
@@ -1100,9 +1203,15 @@ function doPaint(i,n){
   S.ledger.push({t:"Respray — "+c.n+" in "+p[0], amt:-p[2], kind:"spend"});
   persist(); toast(c.n+" is now "+p[0]+"."); garSheet(); renderWidget();
 }
+function recalcCarIns(){
+  const b=S.bills.find(x=>x.id==="carins"); if(!b) return;
+  if (!S.garage.length){ S.bills=S.bills.filter(x=>x.id!=="carins"); return; }
+  b.amt = Math.round(S.garage.reduce((a,c)=>a+c.value,0)*0.00045)+120;
+}
 function sellVeh(i){
   const c=S.garage[i]; const got=Math.round(c.value*0.94);
   S.cash.checking+=got; S.garage.splice(i,1);
+  recalcCarIns();
   S.ledger.push({t:"Sold — "+c.n, amt:got, kind:"income"});
   persist(); closeSheet(); toast("Sold for "+fm(got)+" (6% under value — dealers eat)."); renderWidget();
 }
@@ -1129,7 +1238,7 @@ RENDER.yachts = (b,sub)=>{
     return;
   }
   const groups=["fishing","dayboat","wake","cruiser","sport","flybridge","sportfish","catamaran","classic","superyacht"];
-  b.innerHTML = `<div class="brandhead yct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">⚓</div><div><h1>Harborline</h1><small>Yacht brokerage since 1958</small></div></div><div class="apbody">` + groups.map(g=>{
+  b.innerHTML = `<div class="brandhead yct"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">⚓</div><div><h1>Harborline</h1><small>Yacht brokerage since 1958</small></div></div><div class="apbody">` + groups.map(g=>{
     const rows=boats.filter(x=>x.type===g); if(!rows.length) return "";
     return `<div class="hoodhead"><h3 style="text-transform:capitalize">${g==="sportfish"?"Sportfishing":g}</h3><span>${rows.length} vessels</span></div>` +
     rows.map(Y=>`<button class="veh-row light" onclick="renderApp('yachts',{y:'${Y.id}'})">
@@ -1169,7 +1278,7 @@ RENDER.planes = (b,sub)=>{
     <p style="font-size:12px;color:var(--faint);margin-top:10px">Charter tiers arrive next iteration. Whole ownership only, like a maniac.</p></div>`;
     return;
   }
-  b.innerHTML = `<div class="brandhead pln"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">✈</div><div><h1>Stratos Air</h1><small>Private aviation, whole ownership</small></div></div><div class="apbody">` +
+  b.innerHTML = `<div class="brandhead pln"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">✈</div><div><h1>Stratos Air</h1><small>Private aviation, whole ownership</small></div></div><div class="apbody">` +
   ["piston","vlj","turboprop","light","midsize","super-mid","large","ultra","bizliner"].map(g=>{
     const rows=planes.filter(x=>x.cls===g); if(!rows.length) return "";
     const label={piston:"Piston",vlj:"Very Light Jets",turboprop:"Turboprops",light:"Light Jets",midsize:"Midsize",["super-mid"]:"Super-Midsize",large:"Large Cabin",ultra:"Ultra Long Range",bizliner:"Bizliners"}[g];
@@ -1211,7 +1320,7 @@ RENDER.apex = (b,sub)=>{
     <p style="font-size:12px;opacity:.55;margin-top:8px">The fee comes out of every playing check. Switching mid-relationship is legal, common, and remembered.</p></div>`;
     return;
   }
-  b.innerHTML = `<div class="brandhead apx"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">AX</div><div><h1>Apex Sports Group</h1><small>Representation for the whole career</small></div></div><div class="apbody">
+  b.innerHTML = `<div class="brandhead apx"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">AX</div><div><h1>Apex Sports Group</h1><small>Representation for the whole career</small></div></div><div class="apbody">
     <div class="hoodhead"><h3>${S.agent? "Your representation" : "Choose your representation"}</h3></div>
     ${S.agent? `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:19px">${esc(S.agent.n)}</div>
       <div style="font-size:13px;opacity:.6">${S.agent.fee.toFixed(2)}% of playing contracts · negotiating ${S.agent.neg}/10 · endorsements ${S.agent.end}/10</div></div>` :
@@ -1222,19 +1331,19 @@ RENDER.apex = (b,sub)=>{
       <span class="vr-r" style="font-size:12px;opacity:.6">${A.yrs} years experience</span></button>`).join("")}
     <div class="hoodhead" style="margin-top:16px"><h3>Endorsement pipeline</h3><span>updates at sync</span></div>
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Crestline Automotive — regional ambassador</div>
-      <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · requires active-roster status.${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · ${S.blob.player.status==="PracticeSquad"?"requires active-roster status.":"terms under review."}${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
       <div style="font-size:12px;opacity:.5">On hold · arrival clause · autos exclusivity</div></div>
     ${sponsorWatchers().map(s=>`<div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:16px">${esc(s[0])} — scouting</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">${esc(s[0])} brand team has your tape flagged. ${S.agent? esc(S.agent.n.split(" ")[0])+" is working the relationship." : "No agent on file; nobody is working the phone."} Terms unlock with roster status and buzz.</div>
       <div style="font-size:12px;opacity:.5">Watching · ${esc(s[1])} category</div></div>`).join("")}
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Florham Park Deli — name & likeness</div>
-      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">$4,500 flat for a sandwich named after you. The "Number Zero": chicken cutlet, vodka sauce, fresh mozz.</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">$4,500 flat for a sandwich named after you. The "Number ${S.blob.player.jersey}": chicken cutlet, vodka sauce, fresh mozz.</div>
       ${S.deals.find(d=>d.id==="deli")? '<div style="font-size:13px;color:#2e7d32">Signed. The sandwich is in rotation.</div>' :
       `<button class="btn sm" style="background:var(--apx-acc);color:#fff" onclick="signDeli()">${S.agent? "Sign it — $4,500" : "Need an agent first"}</button>`}</div>
     <div class="hoodhead" style="margin-top:16px"><h3>Contract status</h3><span>from the save</span></div>
     <div class="veh-detail light">
       <div class="payline"><span>${esc(S.blob.player.team)}</span><span>${esc(S.blob.player.status==="PracticeSquad"?"Practice Squad":S.blob.player.status)}</span></div>
-      <div class="payline"><span>PS weekly</span><span>${fm(psWeekly())}</span></div>
+      ${S.blob.player.status==="PracticeSquad"?`<div class="payline"><span>PS weekly</span><span>${fm(psWeekly())}</span></div>`:`<div class="payline"><span>Active weekly</span><span>${fm(activeWeekly())}</span></div>`}
       <div class="payline"><span>Active contract on file</span><span>${fm((S.blob.player.contract?.salary?.[0])||S.blob.player.capSalary)}/yr</span></div>
       <div class="payline"><span>Elevations used</span><span>0 of 3</span></div></div>
   </div>`;
@@ -1298,12 +1407,16 @@ RENDER.card = b=>{
       <button class="btn sm" style="background:rgba(207,214,223,.15);color:#cfd6df" onclick="payCard(${S.credit.cardBal})">Pay in full</button></div>`:
       `<div style="font-size:13px;color:var(--dim);margin-top:6px">Zero balance. Spend anywhere in-world and it lands here; autopay pulls the minimum monthly.</div>`}</div>
   <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Statement</h4>` +
-  (S.cardTx.length? S.cardTx.slice(-12).reverse().map(t=>`<div class="payline"><span>${esc(t.n)}</span><span>${fm(t.amt)}</span></div>`).join("") : `<div style="font-size:13px;color:var(--dim)">No activity.</div>`) + `</div></div>`;
+  (function(){
+    const rows=[...(S.credit.ledger||[]).slice(0,10).map(l=>({n:l.t, amt:l.amt})), ...S.cardTx.slice(-12).reverse().map(t=>({n:t.n, amt:t.amt}))];
+    return rows.length? rows.map(t=>`<div class="payline ${t.amt<0?"neg":""}"><span>${esc(t.n)}</span><span>${fm(t.amt)}</span></div>`).join("") : `<div style="font-size:13px;color:var(--dim)">No activity.</div>`;
+  })() + `</div></div>`;
 };
 function payCard(amt){
   amt=Math.min(amt, S.credit.cardBal);
   if (S.cash.checking<amt) return toast("Checking can't cover that payment.");
-  S.cash.checking-=amt; S.credit.cardBal-=amt; creditTouch(3);
+  S.cash.checking-=amt; S.credit.cardBal-=amt;
+  S.credit.ledger=S.credit.ledger||[]; S.credit.ledger.unshift({t:"Payment from checking", amt:-Math.round(amt), kind:"pay"}); creditTouch(3);
   S.ledger.push({t:"Card payment", amt:-amt, kind:"spend"});
   persist(); renderApp("card"); renderWidget(); toast("Payment posted.");
 }
@@ -1336,15 +1449,14 @@ RENDER.wager = b=>{
   let games;
   if (S.blob.league && S.blob.league.games.length){
     games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow && !(g.played||g.hs+g.as>0));
-    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow+ (tp==="PreSeason"?0:0)+0);
-    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow);
+    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow); // week fully played: show the closed board
   } else {
     const n=nextGame();
     games = n? [{w:n[0], t:n[1], h:n[4]?S.blob.player.team:n[3], a:n[4]?n[3]:S.blob.player.team, hs:0, as:0}] : [];
   }
   const lines = gameLines(games);
   const mine = S.blob.player.team;
-  b.innerHTML = `<div class="brandhead wgr"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/></svg></div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
+  b.innerHTML = `<div class="brandhead wgr"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/></svg></div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
   <div class="apbody">
   <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${lines.length} game${lines.length===1?"":"s"}</span></div>
   ${lines.map((g,i)=>`<div class="veh-detail" style="margin-bottom:10px;${(g.h===mine||g.a===mine)?"border-color:rgba(127,212,160,.4)":""}">
@@ -1365,7 +1477,7 @@ RENDER.assist = b=>{
   b.className="assist darkapp";
   S.assistTiers = S.assistTiers || D.ASSIST.cats.map(_=>0);
   const total = D.ASSIST.cats.reduce((a,c,i)=>a+c[1][S.assistTiers[i]][1],0);
-  b.innerHTML = `<div class="brandhead ast"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">MQ</div><div><h1>Client Services</h1><small>Mara Quinn · Apex Sports Group</small></div></div>
+  b.innerHTML = `<div class="brandhead ast"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">MQ</div><div><h1>Client Services</h1><small>Mara Quinn · Apex Sports Group</small></div></div>
   <div class="apbody">
   <p style="font-size:13px;color:var(--faint);line-height:1.55;margin-bottom:12px">I track how you actually live so the bank account stops being a surprise. Pick a lane per category; it lands in your monthly burn and Meridian sees it immediately. Text me from Messages if something changes.</p>
   ${D.ASSIST.cats.map((c,i)=>`<div class="hoodhead" style="color:var(--ink)"><h3>${esc(c[0])}</h3><span style="color:var(--faint)">${fm(c[1][S.assistTiers[i]][1])}/mo</span></div>
@@ -1390,7 +1502,7 @@ function assistMonthly(){
 RENDER.podium = b=>{
   b.className="podium darkapp";
   const P=S.world.podium;
-  b.innerHTML = `<div class="brandhead pod"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">🎙</div><div><h1>Podium</h1><small>${esc(P.show)} · ${esc(P.hosts)}</small></div></div>
+  b.innerHTML = `<div class="brandhead pod"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">🎙</div><div><h1>Podium</h1><small>${esc(P.show)} · ${esc(P.hosts)}</small></div></div>
   <div class="apbody">
   <div class="hoodhead" style="color:var(--ink)"><h3>Episodes</h3></div>
   ${P.eps.map(e=>`<div class="veh-detail" style="margin-bottom:10px">
@@ -1421,10 +1533,10 @@ async function genEpisodeBrief(){
   if (!aiKey()) return toast("Add an API key first (Settings).");
   toast("Writing the brief…");
   try{
-    const last = S.blob.schedule.filter(g=>g[7]).pop();
+    const last = lastPlayed();
     const out = await callAI(
-      "You write a detailed podcast episode brief for a fictional NFL talk show called "+S.world.podium.show+" hosted by "+S.world.podium.hosts+". League-wide stories first; the player's storyline earns a segment near the end, proportionate to his actual profile. Grounded, specific, funny in places. No em dashes. 600-900 words, formatted as segment blocks with timestamps.",
-      worldFacts(S.blob, last)+"\nWrite this week's episode brief now.", 3000);
+      "You write the episode brief for "+S.world.podium.show+", a fictional 5-10 minute NFL podcast hosted by "+S.world.podium.hosts+". This is a BRIEF for two hosts to riff from, not a transcript. Hard rules: 250-400 words total. 3-4 segments with time marks adding to 6-9 minutes, like [0:00-2:30]. League-wide stories carry the show. The player gets a segment ONLY if the facts earn it"+(S.blob.player.status==="PracticeSquad"? ", and for a practice squad player that means at most 60-90 seconds near the end, framed as a curiosity, or nothing at all some weeks" : ", sized honestly to a "+povDesc()+" with the given facts, at most 60-90 seconds unless the week demands more")+". Each segment: 2-3 bullet points of specific talking material. Grounded and dry-funny. No em dashes.",
+      worldFacts(S.blob, last)+"\nWrite this week's episode brief now.", 1200);
     const ep={id:"ep"+Date.now(), t:"Ep. "+(41+S.world.podium.eps.length)+", "+wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out};
     S.world.podium.eps.unshift(ep); persist(); renderApp("podium"); toast("Brief ready. Feed it to NotebookLM.");
   }catch(e){ toast("Generation failed: "+e.message); }
@@ -1433,6 +1545,96 @@ function attachEpLink(){
   const v=$("#epLink").value.trim(); if(!v) return;
   S.world.podium.eps[0].link=v; persist(); renderApp("podium"); toast("Episode linked.");
 }
+/* Calendar — the week, and one optional midweek beat */
+function weekDays(){
+  // in-game week anchored on Tuesday (deposit day). Returns 7 day objects Tue..Mon.
+  const clock=S.blob.clock, y=clock.seasonYear||2026;
+  let anchor;
+  if (clock.weekType==="PreSeason") anchor = new Date(y,7,7 + clock.week*7);
+  else if (clock.weekType==="RegularSeason") anchor = new Date(y,8,10 + clock.week*7);
+  else if (clock.weekType==="OffSeason") anchor = new Date(y+1,2,15);
+  else anchor = new Date(y+1,0,11 + (clock.week||0)*7);
+  // walk back to Tuesday
+  while (anchor.getDay()!==2) anchor.setDate(anchor.getDate()-1);
+  const n=nextGame();
+  const gameDayName = n? (n[5]||"Sunday") : null;
+  const days=[];
+  for (let i=0;i<7;i++){
+    const d=new Date(anchor); d.setDate(anchor.getDate()+i);
+    const name=d.toLocaleDateString(undefined,{weekday:"long"});
+    let ev="", cls="";
+    if (i===0){ ev="Direct deposit · league payday"; cls="pay"; }
+    const gameIdx = ["Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday","Monday"].indexOf(gameDayName||"Sunday");
+    if (name===gameDayName && n){ ev=(n[4]?"GAME vs ":"GAME at ")+n[3]; cls="game"; }
+    else if (!ev){
+      if (i>gameIdx) ev = i===gameIdx+1? "Recovery · treatment" : "Off day";
+      else if (i===gameIdx-1) ev = n&&!n[4]? "Walkthrough · travel" : "Walkthrough";
+      else ev="Practice · meetings";
+    }
+    days.push({d, name, ev, cls, short:d.toLocaleDateString(undefined,{month:"short",day:"numeric"})});
+  }
+  return {days, n};
+}
+RENDER.cal = b=>{
+  b.className="cal darkapp";
+  const {days, n} = weekDays();
+  const wk = wkKey(S.blob.clock);
+  S.midweek = S.midweek||{};
+  const done = !!S.midweek[wk];
+  b.innerHTML = aphead("Calendar") + `<div class="apbody">
+  <div class="hoodhead" style="color:var(--ink)"><h3>${esc(wkLabel(S.blob.clock))}</h3><span style="color:var(--faint)">${esc(gameDate(S.blob.clock))}</span></div>
+  ${days.map(x=>`<div class="calday ${x.cls}">
+    <div class="cd-date"><b>${esc(x.name)}</b><span>${esc(x.short)}</span></div>
+    <div class="cd-ev">${esc(x.ev)||"<span style='opacity:.4'>Open</span>"}</div>
+  </div>`).join("")}
+  <div class="hoodhead" style="color:var(--ink);margin-top:18px"><h3>Midweek</h3><span style="color:var(--faint)">optional · once a week</span></div>
+  <div class="synccard" style="margin:0">
+    <p style="margin-top:0">Play out the middle of the week: practice chatter, texts back, replies on your posts, this week's Podium episode, and a short look at ${n? esc(n[3]) : "the next one"}. One model call. Skip it and the week moves on without it, no penalty.</p>
+    ${done? `<p style="font-size:13px;color:#7fd4a0;margin-bottom:0">✓ Midweek played for ${esc(wkLabel(S.blob.clock))}. Next one unlocks after the game syncs.</p>`
+    : `<button class="btn sm" ${calBusy?"disabled":""} style="background:${calBusy?"rgba(255,255,255,.12)":aiKey()?"var(--ok)":"rgba(255,255,255,.12)"};color:${calBusy?"inherit":aiKey()?"#04170d":"inherit"}" onclick="midweekTick()">${calBusy?"Playing it out… (20-60s)":aiKey()?"Play out midweek":"Add an API key first"}</button>`}
+    <p style="font-size:11.5px;opacity:.6;margin:8px 0 0" >${S.lastMidweek? esc(S.lastMidweek) : ""}</p>
+  </div>
+  </div>`;
+};
+let calBusy=false;
+async function midweekTick(){
+  if (!aiKey()) return toast("Add an API key in Settings first.");
+  const wk = wkKey(S.blob.clock);
+  S.midweek = S.midweek||{};
+  if (S.midweek[wk] || calBusy) return;
+  calBusy=true; if(curApp==="cal") renderApp("cal");
+  const n=nextGame();
+  const f=S.chirp.followers||0;
+  const sys = `You write the MIDWEEK beat of a fictional NFL life-sim phone. Everything anchors to the SAVE FACTS. No game has been played since the facts were written, so NO results, only practice-week life and a look ahead. No em dashes. Output STRICT JSON only, no fences:
+{"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"1h"} x3-5, practice reports, roster chatter, one about the coming game],
+"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers],
+"texts":[{"thread":"braelon|qbroom|agent|mom|mara","msgs":[["them","..."]]} x1-3],
+"emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x0-1],
+"notebook":{"head":"","paras":["2-3 short paragraphs: practice observations, then a brief look at ${n? (n[4]?"the home game vs ":"the road game at ")+n[3] : "the next game"}"]},
+"podium":{"t":"episode title","brief":"a 250-400 word brief per the show's format: 3-4 segments with [m:ss] marks totaling 6-9 minutes, league-wide first, the player only if the facts earn 60-90 seconds"}}`;
+  try{
+    const out = await callAI(sys, worldFacts(S.blob, lastPlayed())+"\n\nWrite the midweek beat now.", 6000);
+    const j = JSON.parse(out.replace(/^```json?/,"").replace(/```$/,"").trim());
+    if (j.chirps) S.world.chirps=[...j.chirps, ...S.world.chirps].slice(0,40);
+    if (j.myReplies && j.myReplies.length){
+      const posts=(S.chirp.posts||[]).slice(-3);
+      for (const r of j.myReplies){ const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } }
+    }
+    if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th) th.msgs.push(...t.msgs); }
+    if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
+    if (j.notebook && j.notebook.paras) S.world.articles.unshift({kick:"Midweek Notebook", head:j.notebook.head||"Notes from Florham Park", stand:"", by:"Marcus Ellery · United Chronicle Sports", paras:j.notebook.paras, wk:wkLabel(S.blob.clock)});
+    if (j.podium && j.podium.brief){
+      S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:j.podium.brief.split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:j.podium.brief});
+      S.world.notifs.unshift({app:"podium", t:"Podium", p:"New episode brief is up"});
+    }
+    S.midweek[wk]=true;
+    const d=new Date();
+    S.lastMidweek = "Played "+d.toLocaleDateString([], {month:"short",day:"numeric"})+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" · "+(j.chirps||[]).length+" chirps, "+(j.texts||[]).length+" text threads"+((j.emails||[]).length?", 1 email":"")+(j.podium?", Podium episode":"");
+    persist(); toast("Midweek played out.");
+  }catch(e){ toast("Midweek failed: "+e.message); }
+  calBusy=false; if(curApp==="cal") renderApp("cal");
+}
+
 /* Settings */
 const COLLEGE_TIERS = {elite:["Ohio State","Michigan","Alabama","Georgia","Texas","Oregon","Notre Dame","USC","Penn State","LSU","Clemson","Florida State","Oklahoma","Tennessee","Ole Miss"], mid:["Louisville","Iowa","Kansas State","Utah","UCF","Boise State","Memphis","Tulane","Appalachian State","Toledo","Marshall","San Diego State"], small:["Howard","Monmouth","Villanova","North Dakota State","Montana","Yale","Fordham","Lehigh","Grambling State","Jackson State"]};
 function collegePrestige(name){
@@ -1498,7 +1700,7 @@ RENDER.settings = b=>{
   <label class="flabel">Provider</label>
   <select class="field" onchange="META.settings.provider=this.value;META.settings.model=D.AI[this.value].models[0];saveMeta();rerenderSettings()">${Object.keys(D.AI).map(k=>`<option value="${k}" ${prov===k?"selected":""}>${D.AI[k].label}</option>`).join("")}</select>
   <label class="flabel">Model</label>
-  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${D.AI[prov].models.map((m,i)=>`<option value="${m}" ${(META.settings.model||D.AI[prov].models[0])===m?"selected":""}>${m}${i===0?" (best)":""}</option>`).join("")}</select>
+  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${D.AI[prov].models.map((m,i)=>`<option value="${m}" ${(D.AI[prov].models.includes(META.settings.model)?META.settings.model:D.AI[prov].models[0])===m?"selected":""}>${m}${i===0?" (best)":""}</option>`).join("")}</select>
   <label class="flabel">${D.AI[prov].label} API key</label>
   <input class="field" type="password" placeholder="${D.AI[prov].keyHint}" value="${esc((META.settings.keys&&META.settings.keys[prov])||"")}" onchange="META.settings.keys=META.settings.keys||{};META.settings.keys['${prov}']=this.value.trim();saveMeta();toast('Key saved.')">
   <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">Auto-generate week content on sync
@@ -1563,9 +1765,14 @@ function applyDebts(){
   const shares=pc.debtShares || [40,25,5,15,10,5];
   S.debts = S.debts.filter(d=>d.kind!=="legacy");
   const aprs=[5.5,0,0,7.9,11.5,0];
+  S.credit.ledger = (S.credit.ledger||[]).filter(l=>l.kind!=="seed");
   D.DEBTCATS.forEach((c,i)=>{
     const bal=Math.round(total*shares[i]/100);
-    if (i===1){ S.credit.cardBal = bal; return; }
+    if (i===1){
+      S.credit.cardBal = bal;
+      if (bal>0) S.credit.ledger.unshift({t:"Balance carried in (your debt profile: credit card share)", amt:bal, kind:"seed"});
+      return;
+    }
     if (bal>=250){
       const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
       S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
@@ -1706,15 +1913,27 @@ RENDER.sync = b=>{
   <div class="synccard"><h4>Applied weeks — ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}</h4>
   <p>${S.appliedWeeks.map(esc).join(" · ")}</p></div>
   <div class="synccard"><h4>Refresh this week</h4><p>Regenerates the world for the current week with your AI engine: chirps, threads, texts, emails. No new article (those belong to game results). Costs one model call.</p>
-  <button class="btn sm" style="background:${aiKey()?"var(--ok)":"rgba(255,255,255,.12)"};color:${aiKey()?"#04170d":"inherit"}" onclick="refreshWeek()">${aiKey()?"Refresh world now":"Add an API key first"}</button></div>
+  <button class="btn sm" ${refreshBusy?"disabled":""} style="background:${refreshBusy?"rgba(255,255,255,.12)":aiKey()?"var(--ok)":"rgba(255,255,255,.12)"};color:${refreshBusy?"inherit":aiKey()?"#04170d":"inherit"}" onclick="refreshWeek()">${refreshBusy?"Generating… (20-60s)":aiKey()?"Refresh world now":"Add an API key first"}</button>
+  <p style="font-size:11.5px;opacity:.6;margin-top:8px" id="lastRefreshLine">${lastRefreshLine()}</p></div>
   <div class="synccard"><h4>Backup</h4><p>Emits this career's full phone-side history as a code (covers iOS eviction and phone-to-phone moves).</p>
   <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="backupCode()">Copy backup code</button></div></div>`;
 };
+let refreshBusy=false;
 async function refreshWeek(){
   if (!aiKey()) return toast("Add an API key in Settings first.");
-  const last = S.blob.schedule.filter(g=>g[7]).pop();
+  if (refreshBusy) return;
+  refreshBusy=true; if(curApp==="sync") renderApp("sync");
+  const last = lastPlayed();
   try{ await generateWeek(S.blob, last, {noArticle:true}); }
-  catch(e){ toast("Refresh failed: "+e.message); }
+  catch(e){ S.lastRefresh={when:Date.now(), wk:wkLabel(S.blob.clock), ok:false, err:String(e.message||e).slice(0,90)}; persist(); toast("Refresh failed: "+e.message); }
+  refreshBusy=false; if(curApp==="sync") renderApp("sync");
+}
+function lastRefreshLine(){
+  const r=S.lastRefresh; if(!r) return "No refresh yet this career.";
+  const d=new Date(r.when); const t=d.toLocaleDateString([], {month:"short",day:"numeric"})+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+  if (!r.ok) return "Last attempt failed ("+t+"): "+esc(r.err||"unknown error");
+  const c=r.counts||{};
+  return "Last "+(r.kind==="weekly"?"weekly sync world":"refresh")+": "+esc(r.wk)+" · "+t+" · "+(c.chirps||0)+" chirps, "+(c.threads||0)+" threads, "+(c.texts||0)+" texts, "+(c.emails||0)+" emails"+(c.article?", 1 article":"");
 }
 async function decodeCode(code){
   code=code.trim();
@@ -1755,9 +1974,10 @@ function normalizeLeague(blob){
   }
 }
 async function backupCode(){
-  const code="TYNETB."+await deflateStr(JSON.stringify(S));
+  const code="TYNETB."+await deflateStr(JSON.stringify({__v:2, S, META}));
   await navigator.clipboard.writeText(code); toast("Backup copied — "+(code.length/1024).toFixed(1)+" KB");
 }
+function clockOrd(c){ return c.seasonYear*1000 + (c.weekType==="PreSeason"?0:c.weekType==="RegularSeason"?100:500) + c.week; }
 async function applyCode(fromHash){
   let raw = fromHash || $("#syncIn")?.value;
   if (!raw || !raw.trim()) return toast("Paste a code first.");
@@ -1780,21 +2000,65 @@ async function applyCode(fromHash){
   if (dec.backup){ return restoreSheet(dec.data); }
   const blob=dec.blob;
   normalizeLeague(blob); autoFromSave(blob);
-  if (!S || blob.careerId!==S.careerId){ return newCareerSheet(blob); }
+  if (!S || blob.careerId!==S.careerId){
+    // same player under a new career ID? (trade, season rollover, extractor update)
+    const nm=(blob.player.first+" "+blob.player.last).toLowerCase();
+    const cand = META.careers.find(c=> c.id!==blob.careerId && (c.label||"").toLowerCase()===nm);
+    if (cand){
+      const st = await idb.get("career/"+cand.id);
+      const pidOld = st?.blob?.player?.presentationId, pidNew = blob.player.presentationId;
+      if (st && (pidOld==null || pidNew==null || pidOld===pidNew)) return adoptSheet(blob, cand.id);
+    }
+    if (META.careers.find(c=>c.id===blob.careerId)){
+      // career exists but isn't active: switch to it and continue (previously this re-added and wiped it)
+      const st=await idb.get("career/"+blob.careerId);
+      if (st){ S=st; META.activeId=blob.careerId; persist(); renderHome(); }
+      else return newCareerSheet(blob);
+    } else return newCareerSheet(blob);
+  }
   const k=wkKey(blob.clock);
   if (S.appliedWeeks.includes(k)) return toast("That week is already applied. Codes work once.");
-  const ord = c => c.seasonYear*1000 + (c.weekType==="PreSeason"?0:c.weekType==="RegularSeason"?100:500) + c.week;
-  if (ord(blob.clock) < ord(S.blob.clock)) return rewindSheet(blob);
+  if (clockOrd(blob.clock) < clockOrd(S.blob.clock)) return rewindSheet(blob);
   await advanceTo(blob);
 }
+function adoptSheet(blob, oldId){
+  _pending={blob, oldId};
+  sheet(`<h3>Same player, new career ID</h3><p class="sp">This code identifies ${esc(blob.player.first+" "+blob.player.last)} under a new ID (team change, season rollover, or an extractor update). Continue the existing career? Everything carries over: money, purchases, threads, applied weeks.</p>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="doAdoptPending()">Continue existing career</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="adoptForkPending()">Add as a separate career</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="_pending=null;closeSheet()">Cancel</button>`);
+}
+async function adoptForkPending(){ const x=_pending; _pending=null; if(x) await addCareer(x.blob); }
+async function doAdoptPending(){
+  const x=_pending; _pending=null; if(!x) return;
+  const {blob, oldId}=x;
+  const st=await idb.get("career/"+oldId);
+  if (!st){ closeSheet(); return toast("Couldn't load that career."); }
+  st.careerId=blob.careerId;
+  await idb.set("career/"+blob.careerId, st);
+  if (oldId!==blob.careerId) await idb.del("career/"+oldId);
+  const c=META.careers.find(k=>k.id===oldId); if(c) c.id=blob.careerId;
+  if (META.activeId===oldId) META.activeId=blob.careerId;
+  S=st; META.activeId=blob.careerId; persist(); closeSheet(); renderHome();
+  const k=wkKey(blob.clock);
+  if (S.appliedWeeks.includes(k)) return toast("Career adopted under the new ID. That week was already applied.");
+  if (clockOrd(blob.clock) < clockOrd(S.blob.clock)) return rewindSheet(blob);
+  await advanceTo(blob);
+}
+/* Pending-object pattern: never inline JSON into onclick attributes.
+   Blob/backup JSON contains apostrophes (T'Vondre, D'Angelo, Leiper's Fork...)
+   which terminate single-quoted HTML attributes and silently break the button. */
+let _pending=null;
 function newCareerSheet(blob){
   const p=blob.player;
+  _pending=blob;
   sheet(`<h3>New career detected</h3><p class="sp">${esc(p.first)} ${esc(p.last)} — ${esc(p.pos)}, ${esc(p.team)} (${esc(wkLabel(blob.clock))}). Add it as a separate phone profile?</p>
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick='addCareer(${JSON.stringify(JSON.stringify(blob))})'>Add career</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="addCareerPending()">Add career</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="_pending=null;closeSheet()">Cancel</button>`);
 }
-async function addCareer(blobJson){
-  const blob=JSON.parse(blobJson);
+async function addCareerPending(){ const b=_pending; _pending=null; if(b) await addCareer(b); }
+async function addCareer(blobOrJson){
+  const blob = typeof blobOrJson==="string" ? JSON.parse(blobOrJson) : blobOrJson;
   const st=newCareerState(blob);
   await idb.set("career/"+blob.careerId, st);
   META.careers.push({id:blob.careerId, label:blob.player.first+" "+blob.player.last, sub:blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock)});
@@ -1802,12 +2066,14 @@ async function addCareer(blobJson){
   if (curApp) renderApp(curApp);
 }
 function rewindSheet(blob){
+  _pending=blob;
   sheet(`<h3>Older save detected</h3><p class="sp">This code is from ${esc(wkLabel(blob.clock))}; the phone is at ${esc(wkLabel(S.blob.clock))}. Rewinding deletes everything newer — deposits, articles, threads, purchases stay only if they existed then.</p>
-  <button class="btn" style="background:var(--bad);color:#fff" onclick='doRewind(${JSON.stringify(JSON.stringify(blob))})'>Rewind (deletes newer)</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Ignore this code</button>`);
+  <button class="btn" style="background:var(--bad);color:#fff" onclick="doRewindPending()">Rewind (deletes newer)</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="_pending=null;closeSheet()">Ignore this code</button>`);
 }
-async function doRewind(blobJson){
-  const blob=JSON.parse(blobJson);
+async function doRewindPending(){ const b=_pending; _pending=null; if(b) await doRewind(b); }
+async function doRewind(blobOrJson){
+  const blob = typeof blobOrJson==="string" ? JSON.parse(blobOrJson) : blobOrJson;
   // v1 rewind: reset to a fresh state at that blob, preserving settings/perception
   const per=S.perception; const st=newCareerState(blob); st.perception=per;
   S=st; await idb.set("career/"+S.careerId, S);
@@ -1815,15 +2081,24 @@ async function doRewind(blobJson){
   persist(); closeSheet(); toast("Rewound to "+wkLabel(blob.clock)); renderHome(); if(curApp) renderApp(curApp);
 }
 function restoreSheet(data){
-  sheet(`<h3>Restore backup?</h3><p class="sp">Career "${esc(data.blob.player.first+" "+data.blob.player.last)}" at ${esc(wkLabel(data.blob.clock))}. Overwrites any existing copy of the same career.</p>
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick='doRestore(${JSON.stringify(JSON.stringify(data))})'>Restore</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  const st = data.__v===2? data.S : data;
+  _pending=data;
+  sheet(`<h3>Restore backup?</h3><p class="sp">Career "${esc(st.blob.player.first+" "+st.blob.player.last)}" at ${esc(wkLabel(st.blob.clock))}${data.__v===2?", plus your phone settings (wallpaper, photo, keys, app order)":""}. Overwrites any existing copy of the same career.</p>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="doRestorePending()">Restore</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="_pending=null;closeSheet()">Cancel</button>`);
 }
-async function doRestore(json){
-  const data=JSON.parse(json);
-  await idb.set("career/"+data.careerId, data);
-  if (!META.careers.find(c=>c.id===data.careerId)) META.careers.push({id:data.careerId, label:data.blob.player.first+" "+data.blob.player.last, sub:wkLabel(data.blob.clock)});
-  META.activeId=data.careerId; S=data; persist(); closeSheet(); toast("Restored."); renderHome();
+async function doRestorePending(){ const d=_pending; _pending=null; if(d) await doRestore(d); }
+async function doRestore(dataOrJson){
+  const data = typeof dataOrJson==="string" ? JSON.parse(dataOrJson) : dataOrJson;
+  const st = data.__v===2? data.S : data;
+  if (data.__v===2 && data.META){
+    const keepCareers = META.careers;
+    META = data.META;
+    for (const c of keepCareers) if(!META.careers.find(x=>x.id===c.id)) META.careers.push(c);
+  }
+  await idb.set("career/"+st.careerId, st);
+  if (!META.careers.find(c=>c.id===st.careerId)) META.careers.push({id:st.careerId, label:st.blob.player.first+" "+st.blob.player.last, sub:wkLabel(st.blob.clock)});
+  META.activeId=st.careerId; S=st; persist(); closeSheet(); toast("Restored, settings and all."); applyWallpaper(); applyTheme(); renderHome();
 }
 
 /* ---- the week engine ---- */
@@ -1836,10 +2111,14 @@ async function advanceTo(blob){
   if (newC.weekType==="RegularSeason"){
     const start = oldC.weekType==="RegularSeason"? oldC.week : 0;
     for (let w=start; w<newC.week; w++) wksElapsed.push(w);
+  } else if (newC.weekType!=="PreSeason" && oldC.weekType==="RegularSeason"){
+    // synced past the end of the regular season (playoffs/offseason): pay every remaining RS check
+    for (let w=oldC.week; w<18; w++) wksElapsed.push(w);
   }
   if (oldC.weekType==="PreSeason"){
-    const preWeeks = (newC.weekType==="PreSeason"? newC.week : 3) - oldC.week;
-    for (let i=0;i<preWeeks;i++){ deposit("Camp stipend — week "+(oldC.week+i+1), 1750); events.push("Camp stipend $1,750"); }
+    // stipend per preseason week ARRIVED AT; leaving preseason passes weeks oldC.week+1..2 only
+    const preWeeks = (newC.weekType==="PreSeason"? newC.week : 2) - oldC.week;
+    for (let i=0;i<preWeeks;i++){ deposit("Camp stipend — week "+(oldC.week+i+2), 1750); events.push("Camp stipend $1,750"); }
   }
   for (const w of wksElapsed){
     const g=blob.schedule.find(x=>x[1]==="RegularSeason"&&x[0]===w);
@@ -1857,7 +2136,7 @@ async function advanceTo(blob){
   S.blob=blob; S.appliedWeeks.push(wkKey(newC));
   const c=META.careers.find(x=>x.id===S.careerId); if(c) c.sub=blob.player.pos+" · "+blob.player.team+" · "+wkLabel(newC);
   // status change events
-  const last=[...blob.schedule].reverse().find(g=>g[7]&&g[1]===newC.weekType);
+  const last = lastPlayed(blob.schedule, newC.weekType) || lastPlayed(blob.schedule);
   S.world.notifs=[];
   if (last) S.world.notifs.push({app:"pylon", t:"Final", p:(last[4]?"vs ":"@ ")+last[3]+" — "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" W":" L")});
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
@@ -1884,28 +2163,29 @@ function burnWeek(){
 function cardCycle(w){
   if (S.credit.cardBal>0){ const min=Math.max(35,S.credit.cardBal*0.03);
     if (S.cash.checking>=min){ S.cash.checking-=min; S.credit.cardBal=Math.max(0, S.credit.cardBal*(1+S.credit.cardApr/100/12)-min); }
-    else { creditTouch(-20); S.credit.cardBal*= (1+S.credit.cardApr/100/12); } }
+    else { creditTouch(-20); const before=S.credit.cardBal; S.credit.cardBal*=(1+S.credit.cardApr/100/12); const intr=Math.round(S.credit.cardBal-before); if(intr>=1){ S.credit.ledger=S.credit.ledger||[]; S.credit.ledger.unshift({t:"Interest charged ("+S.credit.cardApr+"% APR)", amt:intr, kind:"interest"}); } } }
 }
 function placeholderWeek(blob, last){
   const won=last[7][0]>last[7][1];
-  S.world.chirps.unshift({n:"Jets Videos",h:"@snyjets",vf:1,av:"#1a7a41",t:"FINAL: "+(last[4]?"Jets "+last[7][0]+", "+last[3]+" "+last[7][1] : last[3]+" "+last[7][1]+", Jets "+last[7][0])+".", li:800+((last[7][0]*37)%900), rp:120, tm:"1h"});
+  const team=blob.player.team, short=blob.player.teamShort, pos=blob.player.pos;
+  S.world.chirps.unshift({n:team+" Videos",h:"@"+short.toLowerCase()+"clips",vf:1,av:"#1a5a41",t:"FINAL: "+(last[4]? team+" "+last[7][0]+", "+last[3]+" "+last[7][1] : last[3]+" "+last[7][1]+", "+team+" "+last[7][0])+".", li:800+((last[7][0]*37)%900), rp:120, tm:"1h"});
   S.world.huddle.unshift({id:"pw"+wkKey(blob.clock).replace(/\W/g,""), flair:"DISCUSSION", u:"weekly_bot", tm:"5h", up:77,
     h:"Weekly practice squad + roster watch: who's trending",
     b:"Recurring thread. Elevations, injuries, snap counts, and whatever the coaches say that means the opposite.", cmts:[
     {u:"depth_chart_dan",tm:"4h",up:52,t:"reminder that elevations are capped at three per player. every one they burn is information"},
-    {u:"FlightBoysZn",tm:"3h",up:29,t:"the QB room math is getting funnier every week"},
-    {u:"casual_since_2015",tm:"2h",up:-8,t:"can someone explain why we keep four quarterbacks like i'm five"}]});
+    {u:"depth_chart_watcher",tm:"3h",up:29,t:"the "+pos.toLowerCase()+" room math is getting funnier every week"},
+    {u:"casual_since_2015",tm:"2h",up:-8,t:"can someone explain the depth chart to me like i'm five"}]});
   S.world.huddle.unshift({id:"pg"+wkKey(blob.clock).replace(/\W/g,""), flair:"GAME THREAD", u:"AutoModerator", tm:"3h", up:won?400:150,
-    h:"Post-Game Thread: "+(last[4]?"Jets ":"")+(won?"win ":"fall ")+last[7][0]+"-"+last[7][1]+(last[4]?" vs ":" at ")+last[3],
+    h:"Post-Game Thread: "+(last[4]?team+" ":"")+(won?"win ":"fall ")+last[7][0]+"-"+last[7][1]+(last[4]?" vs ":" at ")+last[3],
     b:"Final from "+(last[4]?"home":"the road")+". Score updates synced from the save. Full write-ups, quotes, and box context arrive when an API key is in Settings; until then the thread runs on vibes.", cmts:[
-    {u:"FlightBoysZn",tm:"2h",up:won?220:80,t:won?"WE ARE SO BACK":"it's august for the soul all year with this team"},
-    {u:"stat_daddy_nyj",tm:"2h",up:64,t:"early read from the broadcast: "+(won?"o-line held up in the second half and the score says the rest":"tackling was optional in the third quarter and it snowballed"),r:[
+    {u:"diehard_since_forever",tm:"2h",up:won?220:80,t:won?"WE ARE SO BACK":"it's august for the soul all year with this team"},
+    {u:"stat_daddy",tm:"2h",up:64,t:"early read from the broadcast: "+(won?"the line held up in the second half and the score says the rest":"tackling was optional in the third quarter and it snowballed"),r:[
       {u:"CoachTapeAndCoffee",tm:"1h",up:41,t:"charting it tonight. early numbers "+(won?"support the eye test":"are uglier than the score")},
-      {u:"gang_green_therapy",tm:"55m",up:-12,t:"we do not need charts to know what we watched"}]},
-    {u:"MetLifeParkingLot",tm:"2h",up:won?95:12,t:won?"road trips hit different when you win. drive home was a party":"18 dollars for a beer to watch that"},
-    {u:"jerseyshoreQBclub",tm:"1h",up:33,t:"any word on which QBs got the late reps? asking for reasons",r:[
+      {u:"group_therapy_thread",tm:"55m",up:-12,t:"we do not need charts to know what we watched"}]},
+    {u:"parking_lot_economist",tm:"2h",up:won?95:12,t:won?"road trips hit different when you win. drive home was a party":"18 dollars for a beer to watch that"},
+    {u:"late_reps_watcher",tm:"1h",up:33,t:"any word on who got the late reps? asking for reasons",r:[
       {u:"PS_Insider_Burner",tm:"49m",up:88,t:"you know exactly why you're asking. and yes."}]},
-    {u:"tannenbaum_truther",tm:"1h",up:-31,t:"fire everyone. every single person in the building. the janitor too"}]});
+    {u:"fire_everyone_guy",tm:"1h",up:-31,t:"fire everyone. every single person in the building. the janitor too"}]});
   persist();
 }
 /* ---- AI generation (user's own key, phone-side) ---- */
@@ -1955,8 +2235,8 @@ CLOCK: ${wkLabel(blob.clock)}.
 LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
-QB ROOM: ${blob.roster.filter(r=>r[2]==="QB").map(r=>r[0]+" "+r[1]).join(", ")}.
-MONEY: practice squad $6,222/wk; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.
+POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
+MONEY: ${p.status==="PracticeSquad"? "practice squad $6,222/wk" : "active roster, "+fm(Math.round((((p.contract||{}).salary||[])[(p.contract||{}).currentYear||0] ?? p.capSalary)/18))+"/wk"}; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.
 PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${per.familyAsk?", sends home "+fm(per.familyAsk)+"/mo":""}${per.debtTotal?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}).`;
 }
 async function generateWeek(blob, last, opts){
@@ -1976,7 +2256,9 @@ ${opts.noArticle?"":`{"article":{"kick":"","head":"","stand":"","by":"Marcus Ell
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
   if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th) th.msgs.push(...t.msgs); }
   if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
-  S.world.notifs.unshift({app:"huddle", t:"h/jetsnation", p:j.huddle?.[0]?.h||"New threads"});
+  S.world.notifs.unshift({app:"huddle", t:hudSub(), p:j.huddle?.[0]?.h||"New threads"});
+  S.lastRefresh = { when: Date.now(), wk: wkLabel(blob.clock), ok: true, kind: opts.noArticle? "refresh":"weekly",
+    counts: { chirps:(j.chirps||[]).length, threads:(j.huddle||[]).length, texts:(j.texts||[]).reduce((a,t)=>a+t.msgs.length,0), emails:(j.emails||[]).length, article: (j.article&&!opts.noArticle)?1:0 } };
   persist(); toast("The world caught up."); if(curApp) renderApp(curApp);
 }
 async function aiReply(thread, userMsg){
@@ -1991,7 +2273,7 @@ async function aiReply(thread, userMsg){
   const members = [];
   if (thread.group){
     for (const m of thread.msgs){ if(m[0]!=="me" && m[1].includes("|")){ const nm=m[1].slice(0,m[1].indexOf("|")); if(!members.includes(nm)) members.push(nm); } }
-    for (const r of S.blob.roster.filter(x=>x[2]==="QB").slice(0,4)){ const nm=r[0]+" "+r[1]; if(nm!==S.blob.player.first+" "+S.blob.player.last && !members.includes(nm)) members.push(nm); }
+    for (const r of S.blob.roster.filter(x=>x[2]===S.blob.player.pos).slice(0,4)){ const nm=r[0]+" "+r[1]; if(nm!==S.blob.player.first+" "+S.blob.player.last && !members.includes(nm)) members.push(nm); }
   }
   try{
     const sys = thread.group
@@ -2006,7 +2288,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.2.2";
+const VER="v1.3.2";
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{
@@ -2032,7 +2314,7 @@ setVH(); window.addEventListener("resize", setVH); window.addEventListener("orie
   await idb.open();
   META = await idb.get("meta");
   if (!META){
-    META = { careers:[], activeId:null, settings:{apiKey:"", model:"claude-sonnet-4-6", autogen:true, wallpaper:null, pfp:null} };
+    META = { careers:[], activeId:null, settings:{apiKey:"", model:"claude-fable-5", autogen:true, wallpaper:null, pfp:null} };
     const st=newCareerState(D.BLOB);
     await idb.set("career/"+D.BLOB.careerId, st);
     META.careers.push({id:D.BLOB.careerId, label:D.BLOB.player.first+" "+D.BLOB.player.last, sub:D.BLOB.player.pos+" · "+D.BLOB.player.team+" · "+wkLabel(D.BLOB.clock)});
