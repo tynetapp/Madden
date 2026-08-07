@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TyNet">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#04100c">
+<title>TyNet</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="desk">
+  <div id="frame">
+    <div id="island"></div>
+    <div id="screen">
+      <div id="statusbar">
+        <span id="sb-time">9:41</span>
+        <span id="sb-right">
+          <span class="sb-ico sig"><i></i><i></i><i></i><i></i></span>
+          <span class="sb-5g">5G</span>
+          <span class="sb-ico batt"><i></i></span>
+        </span>
+      </div>
+      <div id="stage">
+        <!-- lockscreen -->
+        <div class="layer" id="lock">
+          <div id="lk-date">Friday, August 7</div>
+          <div id="lk-time">9:41</div>
+          <div id="lk-notifs"></div>
+          <div id="lk-career">
+            <div class="who">Careers</div>
+            <div id="lk-careers"></div>
+          </div>
+          <button id="lk-unlock">Tap to open</button>
+        </div>
+        <!-- homescreen -->
+        <div class="layer hidden" id="home">
+          <div id="hs-widget">
+            <div class="top"><h3 id="wg-title">TyNet</h3><span class="wk" id="wg-week">—</span></div>
+            <div class="row">
+              <div class="wg"><small>Checking</small><b id="wg-cash">$0</b></div>
+              <div class="wg"><small>Runway</small><b id="wg-run">—</b></div>
+              <div class="wg"><small>Next game</small><b id="wg-next">—</b></div>
+            </div>
+          </div>
+          <div id="grid"></div>
+          <div id="dock"></div>
+        </div>
+        <!-- app view (content injected per app) -->
+        <div class="layer hidden appview" id="appview">
+          <div id="app-body"></div>
+        </div>
+      </div>
+      <div id="homebar"><b id="hb"></b></div>
+      <div id="toast"></div>
+      <div id="dim" class="hidden"><div id="sheet"></div></div>
+    </div>
+  </div>
+  <div id="deskcap">TyNet · desktop preview — install on a phone for the real thing</div>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
