@@ -617,3 +617,28 @@ body[data-theme=light] .darkapp .aphead .back{ background:#e2e4e9; color:#23272e
 .ch-act button{ background:rgba(255,255,255,.08); border:none; color:inherit; border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; margin-right:8px; }
 body[data-theme=light] .darkapp .mchip{ background:rgba(29,155,240,.1); }
 input[type=range]{ accent-color:#7fd4a0; }
+
+/* ===== v1.3 ===== */
+/* calendar */
+.calday{ display:flex; gap:12px; align-items:center; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 13px; margin-bottom:7px; }
+.calday .cd-date{ width:86px; flex:none; }
+.calday .cd-date b{ display:block; font-size:13.5px; }
+.calday .cd-date span{ font-size:11px; opacity:.55; }
+.calday .cd-ev{ font-size:13px; opacity:.85; }
+.calday.pay{ border-color:rgba(127,212,160,.45); }
+.calday.pay .cd-ev{ color:#7fd4a0; font-weight:600; }
+.calday.game{ border-color:rgba(255,179,92,.5); background:rgba(255,179,92,.07); }
+.calday.game .cd-ev{ color:#ffb35c; font-weight:700; }
+.ic-cal{ background:linear-gradient(160deg,#8a2f2f,#c04545); color:#fff; }
+body[data-theme=light] .darkapp .calday{ background:#fff; border-color:#e2e4e9; }
+
+/* #2: sliders easier to grab */
+input[type=range]{ height:34px; }
+input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:rgba(127,127,127,.35); }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:#7fd4a0; margin-top:-11px; border:none; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+
+/* own posts in feed */
+.chirp.mine{ border-left:3px solid #2b6b4f; }
+
+/* labeled back pills */
+.brandhead .back{ font-size:14px; font-weight:700; padding:8px 14px 9px 10px; }
