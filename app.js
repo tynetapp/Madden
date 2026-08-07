@@ -1908,9 +1908,10 @@ async function doResetCareer(){
 RENDER.sync = b=>{
   b.className="sync";
   b.innerHTML = aphead("Sync") + `<div class="apbody">
-  <div class="synccard"><h4>How it works</h4><p>The desktop reader turns your Madden save into a code. The code IS the save's facts, nothing rides the internet. Scan the QR with your camera (it opens here and applies itself) or paste the code below.</p>
-  <textarea class="field" id="syncIn" placeholder="TYNET1.…"></textarea>
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick="applyCode()">Apply code</button></div>
+  <div class="synccard"><h4>How it works</h4><p>On the computer, double-click SYNC.bat (or run the extractor). QR squares open on the screen. Hit Scan below and point this phone at them — the code IS the save's facts, nothing rides the internet. Or paste a code by hand.</p>
+  <button class="btn" style="background:var(--acc,#4f8ef7);color:#fff" onclick="scanSheet()">Scan from computer screen</button>
+  <textarea class="field" id="syncIn" placeholder="TYNET1.…" style="margin-top:10px"></textarea>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="applyCode()">Apply pasted code</button></div>
   <div class="synccard"><h4>Applied weeks — ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}</h4>
   <p>${S.appliedWeeks.map(esc).join(" · ")}</p></div>
   <div class="synccard"><h4>Refresh this week</h4><p>Regenerates the world for the current week with your AI engine: chirps, threads, texts, emails. No new article (those belong to game results). Costs one model call.</p>
@@ -1919,6 +1920,73 @@ RENDER.sync = b=>{
   <div class="synccard"><h4>Backup</h4><p>Emits this career's full phone-side history as a code (covers iOS eviction and phone-to-phone moves).</p>
   <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="backupCode()">Copy backup code</button></div></div>`;
 };
+/* ---- in-app QR scanner: getUserMedia + jsQR. A camera-app scan of a URL opens Safari,
+   which is a SEPARATE empty copy of the app on iOS — codes must be read INSIDE the
+   installed phone. QRs now carry the raw code; this also accepts legacy URL-wrapped ones. ---- */
+let scanStream=null, scanRAF=0, scanLast="", scanLastAt=0;
+function parseScanned(t){
+  t=String(t||"").trim();
+  const m=t.match(/#sync=(.+)$/); if(m){ try{ t=decodeURIComponent(m[1]); }catch(e){ t=m[1]; } }
+  return t;
+}
+async function ensureJsQR(){
+  if (window.jsQR) return;
+  await new Promise((res,rej)=>{ const s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js";
+    s.onload=res; s.onerror=()=>rej(new Error("Scanner library didn't load. Check connection once; it caches after that."));
+    document.head.appendChild(s); });
+}
+async function scanSheet(){
+  try{ await ensureJsQR(); }catch(e){ return toast(e.message); }
+  sheet(`<h3>Scan the screen</h3><p class="sp" id="scanStat">Point the camera at a QR square on the computer.</p>
+  <video id="scv" playsinline muted style="width:100%;border-radius:14px;background:#000;aspect-ratio:3/4;object-fit:cover"></video>
+  <button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="stopScan(true)">Cancel</button>`);
+  try{
+    scanStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" }, audio:false });
+  }catch(e){ closeSheet(); return toast("Camera said no. Allow camera access for TyPhone in iOS Settings, or paste the code instead."); }
+  const v=$("#scv"); v.srcObject=scanStream; await v.play();
+  const cv=document.createElement("canvas"); const cx=cv.getContext("2d",{willReadFrequently:true});
+  const loop=()=>{
+    if (!scanStream) return;
+    if (v.readyState>=2){
+      cv.width=v.videoWidth; cv.height=v.videoHeight;
+      cx.drawImage(v,0,0);
+      try{
+        const d=cx.getImageData(0,0,cv.width,cv.height);
+        const q=window.jsQR(d.data, d.width, d.height, {inversionAttempts:"dontInvert"});
+        if (q && q.data){ scanGot(q.data); }
+      }catch(e){}
+    }
+    scanRAF=requestAnimationFrame(loop);
+  };
+  scanRAF=requestAnimationFrame(loop);
+}
+function stopScan(close){
+  if (scanRAF) cancelAnimationFrame(scanRAF); scanRAF=0;
+  if (scanStream){ for(const t of scanStream.getTracks()) t.stop(); scanStream=null; }
+  if (close) closeSheet();
+}
+async function scanGot(raw){
+  const t=parseScanned(raw);
+  if (!/^TYNET/.test(t)) return;
+  const now=Date.now();
+  if (t===scanLast && now-scanLastAt<2500) return; // same square still in frame
+  scanLast=t; scanLastAt=now;
+  // will this scan complete the set? stop the camera BEFORE applyCode may open its own sheet
+  let willComplete = /^TYNET1\.|^TYNETB\./.test(t);
+  const pm=t.match(/^TYNETP\.(\d+)\.(\d+)\./);
+  if (pm){
+    const i=+pm[1], n=+pm[2];
+    const got=META.syncParts && META.syncParts.n===n ? Object.keys(META.syncParts.got).length + (META.syncParts.got[i]?0:1) : 1;
+    willComplete = got>=n;
+  }
+  if (willComplete){ stopScan(false); await applyCode(t); }
+  else {
+    await applyCode(t);
+    const st=$("#scanStat");
+    if (st && META.syncParts) st.textContent = Object.keys(META.syncParts.got).length+" of "+META.syncParts.n+" scanned — point at the next square.";
+  }
+}
 let refreshBusy=false;
 async function refreshWeek(){
   if (!aiKey()) return toast("Add an API key in Settings first.");
@@ -2307,7 +2375,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.3.3";
+const VER="v1.3.4";
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{
