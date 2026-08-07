@@ -119,10 +119,10 @@ function monthlyBurn(){
 }
 function runwayWeeks(){ const b=monthlyBurn(); if(b<=0) return 999; return Math.floor(liquid()/(b/4.333)); }
 function psWeekly(){ return 6222; }
-function activeWeekly(){ const c=S.blob.player.contract; const yr=(c?.salary?.[c.currentYear])??S.blob.player.capSalary; return Math.round(yr/18); }
-function grossFor(status){ return status==="PracticeSquad" ? psWeekly() : activeWeekly(); }
-function checkLines(status, road, oppState){
-  const gross = grossFor(status);
+function activeWeekly(pl){ const p=pl||S.blob.player; const c=p.contract; const yr=(c?.salary?.[c.currentYear])??p.capSalary; return Math.round(yr/18); }
+function grossFor(status, pl){ return status==="PracticeSquad" ? psWeekly() : activeWeekly(pl); }
+function checkLines(status, road, oppState, pl){
+  const gross = grossFor(status, pl);
   const lines = [["Gross ("+(status==="PracticeSquad"?"practice squad week":"active week")+")", gross]];
   const fed = -Math.round(gross*0.35); lines.push(["Federal withholding", fed]);
   const st = -Math.round(gross*0.0897); lines.push(["New Jersey state", st]);
@@ -368,7 +368,7 @@ RENDER.messages = (b, sub)=>{
       <div class="composer"><input id="msgin" placeholder="Text ${esc(t.name.split(" ")[0])}" autocomplete="off"><button onclick="sendText('${t.id}')">Send</button></div>`;
     const body=b.querySelector(".apbody"); body.scrollTop=body.scrollHeight;
   } else {
-    b.innerHTML = aphead("Messages") + `<div class="apbody flush">` + S.world.texts.map(t=>{
+    b.innerHTML = aphead("Messages") + `<div class="apbody flush">` + S.world.texts.slice().sort((a,b2)=>(b2.last||0)-(a.last||0)).map(t=>{
       const last=t.msgs[t.msgs.length-1]||["them",""]; const unread=t.msgs.length&&!S.reads["t:"+t.id];
       let p=last[1]||"Say something."; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
       return `<button class="thd" style="width:100%" onclick="renderApp('messages',{thread:'${t.id}'})">
@@ -380,11 +380,11 @@ RENDER.messages = (b, sub)=>{
 async function sendText(tid){
   const inp=$("#msgin"); const v=inp.value.trim(); if(!v) return;
   const t=S.world.texts.find(x=>x.id===tid);
-  t.msgs.push(["me", v]); inp.value=""; persist();
+  t.msgs.push(["me", v]); t.last=Date.now(); inp.value=""; persist();
   renderApp("messages",{thread:tid});
   if (aiKey()){
     const reply = await aiReply(t, v);
-    if (reply){ t.msgs.push(["them", reply]); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
+    if (reply){ t.msgs.push(["them", reply]); t.last=Date.now(); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
   } else { toast("Delivered. Add an API key in Settings for replies."); }
 }
 
@@ -658,20 +658,22 @@ function pyBody(){
     // merge every stat line the blob carries (offense/defense/kicking arrive as separate tables)
     const merged={};
     for (const s of (S.blob.seasonStats||[])) for (const k in s){ if (k!=="table" && typeof s[k]==="number") merged[k]=Math.max(merged[k]||0, s[k]); }
-    const LBL={GAMESPLAYED:"Games played",GAMESSTARTED:"Games started",PASSYDS:"Pass yards",PASSTDS:"Pass TD",PASSINTS:"INTs thrown",PASSATTEMPTS:"Attempts",PASSCOMP:"Completions",RUSHYDS:"Rush yards",RUSHTDS:"Rush TD",RUSHATT:"Carries",RECCATCHES:"Receptions",RECYDS:"Receiving yards",RECTDS:"Receiving TD",DTACKLES:"Tackles",DSACKS:"Sacks",DINTS:"Interceptions",DFORCEDFUMBLES:"Forced fumbles",DFUMBLERECOVERIES:"Fumble recoveries",DDEFLECTIONS:"Pass deflections",KFGMADE:"FG made",KFGATT:"FG attempts",KXPMADE:"XP made",PPUNTS:"Punts",PPUNTYDS:"Punt yards",PPUNTSIN20:"Inside the 20",KRETYDS:"Kick return yards",KRETTDS:"Kick return TD",PRETYDS:"Punt return yards",PRETTDS:"Punt return TD"};
+    const LBL={GAMESPLAYED:"Games played",GAMESSTARTED:"Games started",PASSYARDS:"Pass yards",PASSTDS:"Pass TD",PASSINTS:"INTs thrown",PASSCOMPLETED:"Completions",PASSATTEMPTS:"Attempts",PASSSACKED:"Times sacked",PASSLONGEST:"Longest pass",RUSHYARDS:"Rush yards",RUSHTDS:"Rush TD",RUSHATTEMPTS:"Carries",RUSHLONGEST:"Longest run",RUSHFUMBLES:"Fumbles",RECEIVECATCHES:"Receptions",RECEIVEYARDS:"Receiving yards",RECEIVETDS:"Receiving TD",RECEIVEDROPS:"Drops",RECEIVELONGEST:"Longest catch",DEFTACKLES:"Tackles",ASSDEFTACKLES:"Assisted tackles",DEFTACKLESFORLOSS:"Tackles for loss",DLINESACKS:"Sacks",DLINEHALFSACK:"Half sacks",DSECINTS:"Interceptions",DSECINTTDS:"Pick sixes",DEFPASSDEFLECTIONS:"Pass deflections",DLINEFORCEDFUMBLES:"Forced fumbles",DLINEFUMBLERECOVERIES:"Fumble recoveries",BIGHITS:"Big hits",KICKFGMADE:"FG made",KICKFGATTEMPTS:"FG attempts",KICKFGLONGEST:"Longest FG",KICKEPMADE:"XP made",KICKEPATTEMPTS:"XP attempts",PUNTATTEMPTS:"Punts",PUNTYARDS:"Punt yards",PUNTNETYARDS:"Net punt yards",PUNTIN20:"Inside the 20",PUNTLONGEST:"Longest punt",KRETYARDS:"Kick return yards",KRETTDS:"Kick return TD",PRETYARDS:"Punt return yards",PRETTDS:"Punt return TD",OLINEPANCAKES:"Pancakes",OLINESACKSALLOWED:"Sacks allowed","4QCOMEBACKS":"4th-qtr comebacks",FIRSTDOWNS:"First downs"};
+    const NOISE=new Set(["DOWNSPLAYED","STAT_KEEP","SEAS_YEAR","YEARBYYEARTEAMINDEX","GAMERATING","RUSHYARDSAFTER1STHIT","RECEIVEYARDSAFTER","RUSHBROKENTACKLES","RUSH20YARDRUNS","CTHALLOWED","DSECINTRETURNYARDS","DSECINTLONGESTRETURN","DLINEFUMBLERECOVERYYARDS","DLINEBLOCKS","DLINESAFETIES","DLINEFUMBLETDS","KICKNUMKICKOFFS","KICKTOUCHBACKS","PUNTTOUCHBACKS","PUNTBLOCKED","KICKFGBLOCKED","KICKEPBLOCKED","GAMEWINFGSMADE","GAMEWINFGATTEMPTS","KRETATTEMPTS","KRETLONGEST","PRETATTEMPTS","PRETLONGEST"]);
     const POSFIELDS={
-      QB:["PASSYDS","PASSTDS","PASSINTS","RUSHYDS","RUSHTDS"],
-      HB:["RUSHYDS","RUSHTDS","RECCATCHES","RECYDS","RECTDS"], FB:["RUSHYDS","RUSHTDS","RECCATCHES","RECYDS"],
-      WR:["RECCATCHES","RECYDS","RECTDS","RUSHYDS"], TE:["RECCATCHES","RECYDS","RECTDS"],
-      K:["KFGMADE","KFGATT","KXPMADE"], P:["PPUNTS","PPUNTYDS","PPUNTSIN20"]
+      QB:["PASSYARDS","PASSTDS","PASSINTS","PASSCOMPLETED","PASSATTEMPTS","RUSHYARDS","RUSHTDS"],
+      HB:["RUSHYARDS","RUSHTDS","RUSHATTEMPTS","RECEIVECATCHES","RECEIVEYARDS","RECEIVETDS"], FB:["RUSHYARDS","RUSHTDS","RECEIVECATCHES","RECEIVEYARDS"],
+      WR:["RECEIVECATCHES","RECEIVEYARDS","RECEIVETDS","RUSHYARDS"], TE:["RECEIVECATCHES","RECEIVEYARDS","RECEIVETDS"],
+      K:["KICKFGMADE","KICKFGATTEMPTS","KICKFGLONGEST","KICKEPMADE"], P:["PUNTATTEMPTS","PUNTYARDS","PUNTIN20","PUNTLONGEST"],
+      LT:["OLINEPANCAKES","OLINESACKSALLOWED"],LG:["OLINEPANCAKES","OLINESACKSALLOWED"],C:["OLINEPANCAKES","OLINESACKSALLOWED"],RG:["OLINEPANCAKES","OLINESACKSALLOWED"],RT:["OLINEPANCAKES","OLINESACKSALLOWED"]
     };
     const DEFPOS=["DT","LE","RE","MLB","LOLB","ROLB","OLB","LB","CB","FS","SS"];
-    const want = POSFIELDS[p.pos] || (DEFPOS.includes(p.pos)? ["DTACKLES","DSACKS","DINTS","DFORCEDFUMBLES","DDEFLECTIONS"] : []);
+    const want = POSFIELDS[p.pos] || (DEFPOS.includes(p.pos)? ["DEFTACKLES","DLINESACKS","DSECINTS","DEFPASSDEFLECTIONS","DLINEFORCEDFUMBLES"] : []);
     const rows = [["Games played", merged.GAMESPLAYED||0],["Games started", merged.GAMESSTARTED||0]];
     for (const f of want) rows.push([LBL[f]||f, merged[f]||0]);
     // anything else nonzero the save tracked for this player (returners, two-way oddities)
     const shown=new Set(["GAMESPLAYED","GAMESSTARTED",...want]);
-    for (const k in merged){ if (!shown.has(k) && merged[k]>0 && rows.length<12) rows.push([LBL[k]|| k.replace(/^[KDP]/,"").toLowerCase().replace(/^./,c=>c.toUpperCase()), merged[k]]); }
+    for (const k in merged){ if (!shown.has(k) && !NOISE.has(k) && merged[k]>0 && rows.length<12) rows.push([LBL[k]|| k.toLowerCase().replace(/^./,c=>c.toUpperCase()), merged[k]]); }
     m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${esc(p.first+" "+p.last)}</h3><span style="color:#8b939c">${esc(p.pos)} · #${p.jersey} · ${esc(p.team)}</span></div>
     <div class="scorecard">${rows.map(r=>`<div class="tm"><span>${esc(r[0])}</span><b>${r[1]}</b></div>`).join("")}</div>
     <div class="scorecard"><div class="st"><span>Availability</span></div>
@@ -1388,7 +1390,7 @@ RENDER.contacts = b=>{
 };
 function textContact(id, name, color){
   let t=S.world.texts.find(x=>x.id===id);
-  if (!t){ t={id, name, color, msgs:[]}; S.world.texts.unshift(t); persist(); }
+  if (!t){ t={id, name, color, msgs:[], last:Date.now()}; S.world.texts.unshift(t); persist(); }
   openApp("messages"); renderApp("messages",{thread:id});
 }
 /* Card */
@@ -1583,10 +1585,10 @@ RENDER.cal = b=>{
   const done = !!S.midweek[wk];
   b.innerHTML = aphead("Calendar") + `<div class="apbody">
   <div class="hoodhead" style="color:var(--ink)"><h3>${esc(wkLabel(S.blob.clock))}</h3><span style="color:var(--faint)">${esc(gameDate(S.blob.clock))}</span></div>
-  ${days.map(x=>`<div class="calday ${x.cls}">
-    <div class="cd-date"><b>${esc(x.name)}</b><span>${esc(x.short)}</span></div>
+  ${days.map((x,i)=>{const today = i===(done?2:0); return `<div class="calday ${x.cls}${today?" today":""}">
+    <div class="cd-date"><b>${esc(x.name)}</b>${today?'<i class="tdy">TODAY</i>':''}<span>${esc(x.short)}</span></div>
     <div class="cd-ev">${esc(x.ev)||"<span style='opacity:.4'>Open</span>"}</div>
-  </div>`).join("")}
+  </div>`}).join("")}
   <div class="hoodhead" style="color:var(--ink);margin-top:18px"><h3>Midweek</h3><span style="color:var(--faint)">optional · once a week</span></div>
   <div class="synccard" style="margin:0">
     <p style="margin-top:0">Play out the middle of the week: practice chatter, texts back, replies on your posts, this week's Podium episode, and a short look at ${n? esc(n[3]) : "the next one"}. One model call. Skip it and the week moves on without it, no penalty.</p>
@@ -1613,14 +1615,13 @@ async function midweekTick(){
 "notebook":{"head":"","paras":["2-3 short paragraphs: practice observations, then a brief look at ${n? (n[4]?"the home game vs ":"the road game at ")+n[3] : "the next game"}"]},
 "podium":{"t":"episode title","brief":"a 250-400 word brief per the show's format: 3-4 segments with [m:ss] marks totaling 6-9 minutes, league-wide first, the player only if the facts earn 60-90 seconds"}}`;
   try{
-    const out = await callAI(sys, worldFacts(S.blob, lastPlayed())+"\n\nWrite the midweek beat now.", 6000);
-    const j = JSON.parse(out.replace(/^```json?/,"").replace(/```$/,"").trim());
+    const j = await aiJSON(sys, worldFacts(S.blob, lastPlayed())+"\n\nWrite the midweek beat now.", 6000);
     if (j.chirps) S.world.chirps=[...j.chirps, ...S.world.chirps].slice(0,40);
     if (j.myReplies && j.myReplies.length){
       const posts=(S.chirp.posts||[]).slice(-3);
       for (const r of j.myReplies){ const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } }
     }
-    if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th) th.msgs.push(...t.msgs); }
+    if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
     if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
     if (j.notebook && j.notebook.paras) S.world.articles.unshift({kick:"Midweek Notebook", head:j.notebook.head||"Notes from Florham Park", stand:"", by:"Marcus Ellery · United Chronicle Sports", paras:j.notebook.paras, wk:wkLabel(S.blob.clock)});
     if (j.podium && j.podium.brief){
@@ -2106,29 +2107,37 @@ async function advanceTo(blob){
   const oldC=S.blob.clock, newC=blob.clock;
   const rng=seedRng(S.careerId+"|wk|"+wkKey(newC));
   const events=[];
-  // elapsed regular-season weeks → paychecks
+  // elapsed regular-season weeks → paychecks, ACROSS SEASONS if the code jumps years.
+  // Each entry: {y: seasonYear, w: week index}. Skipped full seasons pay all 18 checks.
   const wksElapsed=[];
-  if (newC.weekType==="RegularSeason"){
-    const start = oldC.weekType==="RegularSeason"? oldC.week : 0;
-    for (let w=start; w<newC.week; w++) wksElapsed.push(w);
-  } else if (newC.weekType!=="PreSeason" && oldC.weekType==="RegularSeason"){
-    // synced past the end of the regular season (playoffs/offseason): pay every remaining RS check
-    for (let w=oldC.week; w<18; w++) wksElapsed.push(w);
+  {
+    const afterRS = t => t!=="PreSeason" && t!=="RegularSeason"; // playoffs / offseason
+    for (let y=oldC.seasonYear; y<=newC.seasonYear; y++){
+      let start=0, end=0;
+      if (y===oldC.seasonYear) start = oldC.weekType==="RegularSeason"? oldC.week : (afterRS(oldC.weekType)? 18 : 0);
+      if (y===newC.seasonYear) end = newC.weekType==="RegularSeason"? newC.week : (afterRS(newC.weekType)? 18 : 0);
+      else end = 18; // fully elapsed intermediate (or origin) season
+      for (let w=start; w<end; w++) wksElapsed.push({y, w});
+    }
   }
   if (oldC.weekType==="PreSeason"){
     // stipend per preseason week ARRIVED AT; leaving preseason passes weeks oldC.week+1..2 only
-    const preWeeks = (newC.weekType==="PreSeason"? newC.week : 2) - oldC.week;
+    const preWeeks = (newC.weekType==="PreSeason" && newC.seasonYear===oldC.seasonYear ? newC.week : 2) - oldC.week;
     for (let i=0;i<preWeeks;i++){ deposit("Camp stipend — week "+(oldC.week+i+2), 1750); events.push("Camp stipend $1,750"); }
   }
-  for (const w of wksElapsed){
-    const g=blob.schedule.find(x=>x[1]==="RegularSeason"&&x[0]===w);
+  for (const e of wksElapsed){
+    const {y, w} = e;
+    const g = (y===newC.seasonYear) ? blob.schedule.find(x=>x[1]==="RegularSeason"&&x[0]===w) : null;
     const road=g&&!g[4]; const st=road? STATE_TAX[g[3]]:null;
-    const ck=checkLines(blob.player.status, road, st);
+    // weeks in the incoming season pay per the NEW truth; earlier seasons pay per the truth the phone already held
+    const pl = (y===newC.seasonYear)? blob.player : S.blob.player;
+    const ck=checkLines(pl.status, road, st, pl);
     let net=ck.net;
     if (S.autosweep){ const tx=Math.round(net*S.sweepPct.tax/100), sv=Math.round(net*S.sweepPct.savings/100);
       S.cash.tax+=tx; S.cash.savings+=sv; net-=tx+sv; }
-    deposit("Game check — Week "+(w+1)+(road?" (@ "+g[3]+")":""), net);
-    events.push("Week "+(w+1)+" check "+fm(net));
+    const yTag = (y!==newC.seasonYear)? y+" " : "";
+    deposit("Game check — "+yTag+"Week "+(w+1)+(road?" (@ "+g[3]+")":""), net);
+    events.push(yTag+"Week "+(w+1)+" check "+fm(net));
     burnWeek(); tickInvest(rng); cardCycle(w);
   }
   if (!wksElapsed.length){ burnWeek(); tickInvest(rng); }
@@ -2189,6 +2198,17 @@ function placeholderWeek(blob, last){
   persist();
 }
 /* ---- AI generation (user's own key, phone-side) ---- */
+/* JSON-mode wrapper: parse, and on failure retry ONCE with an explicit correction
+   (Ty's midweek "json error then second try worked" — the retry is now automatic). */
+async function aiJSON(system, user, maxTokens){
+  let out = await callAI(system, user, maxTokens);
+  const clean = s => s.replace(/^```json?/,"").replace(/```$/,"").trim();
+  try { return JSON.parse(clean(out)); }
+  catch(e){
+    out = await callAI(system, user + "\n\nIMPORTANT: your previous output was not valid JSON. Output ONLY the JSON object, no prose, no markdown fences.", maxTokens);
+    return JSON.parse(clean(out)); // second failure throws to the caller honestly
+  }
+}
 async function callAI(system, user, maxTokens){
   const prov = META.settings.provider||"anthropic";
   const model = META.settings.model || D.AI[prov].models[0];
@@ -2247,14 +2267,13 @@ ${opts.noArticle?"":`{"article":{"kick":"","head":"","stand":"","by":"Marcus Ell
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"braelon|qbroom|agent|mom","msgs":[["them","..."]]} x2-4 additions],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]}`;
-  const out = await callClaude(sys, worldFacts(blob,last)+"\n\nWrite this week's "+(opts.noArticle?"world (no article this pass).":"full world."), 16000);
   let j;
-  try { j = JSON.parse(out.replace(/^```json?/,"").replace(/```$/,"").trim()); }
-  catch(e){ throw new Error("bad JSON from model"); }
+  try { j = await aiJSON(sys, worldFacts(blob,last)+"\n\nWrite this week's "+(opts.noArticle?"world (no article this pass).":"full world."), 16000); }
+  catch(e){ throw new Error("bad JSON from model (after a retry)"); }
   if (j.article && !opts.noArticle){ j.article.wk=wkLabel(blob.clock); S.world.articles.unshift(j.article); }
   if (j.chirps) S.world.chirps=[...j.chirps, ...S.world.chirps].slice(0,40);
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
-  if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th) th.msgs.push(...t.msgs); }
+  if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
   if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
   S.world.notifs.unshift({app:"huddle", t:hudSub(), p:j.huddle?.[0]?.h||"New threads"});
   S.lastRefresh = { when: Date.now(), wk: wkLabel(blob.clock), ok: true, kind: opts.noArticle? "refresh":"weekly",
@@ -2288,7 +2307,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.3.2";
+const VER="v1.3.3";
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{
