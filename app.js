@@ -106,11 +106,11 @@ const GLYPH = {
   meridian: '<span style="font-family:Georgia,serif;font-size:26px;font-weight:700">M</span>',
   huddle: '<span style="font-size:19px;font-weight:800;letter-spacing:-.5px">h/</span>',
   sync: SV('<path d="M4 9h13l-3.5-3.5M20 15H7l3.5 3.5"/>'),
-  chirper: SV('<path d="M20.5 6.5c-.6.3-1.2.5-1.9.6.7-.4 1.2-1 1.4-1.8-.6.4-1.3.7-2.1.8C17.3 5.4 16.4 5 15.4 5c-1.9 0-3.4 1.5-3.4 3.4 0 .3 0 .5.1.8-2.8-.1-5.3-1.5-7-3.6-.3.5-.5 1.1-.5 1.7 0 1.2.6 2.2 1.5 2.8-.6 0-1.1-.2-1.5-.4 0 1.6 1.2 3 2.7 3.3-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.4 1.7 2.4 3.2 2.4-1.2.9-2.6 1.5-4.2 1.5H4c1.5 1 3.3 1.5 5.2 1.5 6.3 0 9.7-5.2 9.7-9.7v-.4c.7-.5 1.2-1.1 1.6-1.8z" fill="currentColor" stroke="none"/>'),
+  chirper: SV('<path d="M8.2 20.5c3.1.6 6.4-.2 8.4-2.6 1.7-2 2.3-4.8 1.6-7.3l1.9-1.2-2.4-.4c-.5-.9-1.3-1.7-2.3-2.2l1-2.1-2.3.9C10.9 4.4 7.5 6 6.4 9c-.8 2.2-.4 4.7 1 6.5-1.1 1.3-2.6 2-4.4 2.1 1.4 1.5 3.2 2.5 5.2 2.9z" fill="currentColor" stroke="none"/><circle cx="13.4" cy="9.6" r="1" fill="var(--ch-bg,#000)" stroke="none"/><path d="M19.5 4.5l2-1M20 6.6l2.2-.2" stroke-width="1.5"/>'),
   tmail: SV('<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/>'),
   chron: '<span style="font-family:Georgia,serif;font-size:19px;font-weight:700;letter-spacing:-.5px">UC</span>',
   pylon: '<i class="py-ic"></i>',
-  wager: '<span style="font-weight:900;font-size:19px;letter-spacing:-1px">W/</span>',
+  wager: SV('<path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/><path d="M12.5 10.5h5M12.5 13.5h3.5" stroke-width="1.6"/>'),
   assist: SV('<circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/><path d="M16.5 5.5l1.2 1.2M18.6 4.6l.9.9" stroke-width="1.4"/>'),
   podium: SV('<rect x="9.2" y="3" width="5.6" height="11" rx="2.8"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21M9 21h6"/>'),
   keystone: SV('<path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 10.5V20h12v-9.5"/><rect x="10" y="14.5" width="4" height="5.5" fill="currentColor" stroke="none"/>'),
@@ -138,7 +138,7 @@ const APPS = [
   {id:"contacts", n:"Contacts", ic:"ic-con"},
   {id:"card", n:"Credit Card", ic:"ic-card"},
   {id:"wager", n:"WagerLines", ic:"ic-wgr"},
-  {id:"assist", n:"Mara", ic:"ic-ast"},
+  {id:"assist", n:"Client Services", ic:"ic-ast"},
 ];
 const DOCK = [
   {id:"messages", n:"Messages", ic:"ic-msg"},
@@ -157,7 +157,7 @@ function clockTick(){
   const d=phoneNow?phoneNow():new Date();
   const t=d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}).replace(/\s?[AP]M/i,"");
   $("#lk-time").textContent=t; $("#sb-time").textContent=t;
-  $("#lk-date").textContent=d.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
+  $("#lk-date").textContent = (typeof S!=="undefined" && S && S.blob) ? gameDateLong(S.blob.clock) : d.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
 }
 setInterval(clockTick, 5000);
 
@@ -167,15 +167,16 @@ function lock(){ renderLock(); $("#lock").classList.remove("hidden"); $("#home")
 function iconEl(a, badge){
   return `<button class="app" onclick="openApp('${a.id}')"><b class="icon ${a.ic}">${GLYPH[a.id]||""}${badge?`<span class="badge">${badge}</span>`:""}</b><span>${a.n}</span></button>`;
 }
-function orderedApps(){
+function orderedApps(){ return gridApps(); }
+function orderedApps_old(){
   const ord = META.settings.appOrder||{};
   return APPS.slice().sort((a,b)=> ((a.id in ord)? ord[a.id]-0.5 : APPS.indexOf(a)) - ((b.id in ord)? ord[b.id]-0.5 : APPS.indexOf(b)) );
 }
 function renderHome(){
   const unreadM = S.world.texts.filter(t=>!S.reads["t:"+t.id]).length;
   const unreadE = S.world.emails.filter(e=>e.unread && !S.reads["e:"+e.id]).length;
-  $("#grid").innerHTML = APPS.map(a=>iconEl(a, a.id==="tmail"&&unreadE?unreadE:null)).join("");
-  $("#dock").innerHTML = DOCK.map(a=>iconEl(a, a.id==="messages"&&unreadM?unreadM:null)).join("");
+  $("#grid").innerHTML = gridApps().map(a=>iconEl(a, a.id==="tmail"&&unreadE?unreadE:null)).join("");
+  $("#dock").innerHTML = dockIds().map(id=>appPool().find(a=>a.id===id)).map(a=>iconEl(a, a.id==="messages"&&unreadM?unreadM:null)).join("");
   renderWidget();
 }
 function buzzTier(f){ return f>2000000?"Household name":f>500000?"National story":f>120000?"League-wide buzz":f>25000?"Local hero":f>6000?"Beat-writer radar":f>1500?"Local curiosity":"Unknown"; }
@@ -188,6 +189,15 @@ function gameDate(clock){
   else if (clock.weekType==="OffSeason") base = new Date(y+1,2,15);
   else base = new Date(y+1,0,11 + (clock.week||0)*7); // playoffs
   return base.toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"});
+}
+function gameDateLong(clock){
+  const y=clock.seasonYear||2026;
+  let base;
+  if (clock.weekType==="PreSeason") base = new Date(y,7,7 + clock.week*7);
+  else if (clock.weekType==="RegularSeason") base = new Date(y,8,10 + clock.week*7);
+  else if (clock.weekType==="OffSeason") base = new Date(y+1,2,15);
+  else base = new Date(y+1,0,11 + (clock.week||0)*7);
+  return base.toLocaleDateString(undefined,{weekday:"long", month:"long", day:"numeric"});
 }
 function phoneNow(){
   const d=new Date();
@@ -213,25 +223,35 @@ function nextGame(){
   cands.sort((x,y)=> (order(x[1])-order(y[1])) || (x[0]-y[0]));
   return cands[0];
 }
-function liveNotifs(){
+function notifKey(x){ return "n:"+x.app+":"+(x.t+"|"+x.p).slice(0,60); }
+function liveNotifs(includeSeen){
+  const out = [];
   const base = (S? S.world.notifs : D.SEED.notifications)||[];
-  const out = base.filter(x=> !(S && S.reads["n:"+(x.t+x.p).slice(0,40)]));
-  // live unread signals
+  for (const x of base) out.push({...x, key:notifKey(x)});
   if (S){
-    const unreadTexts = S.world.texts.filter(t=>t.msgs.length && t.msgs[t.msgs.length-1][0]!=="me" && !S.reads["t:"+t.id]);
+    S.notifSeen = S.notifSeen || {mail:[], texts:{}};
+    if (Array.isArray(S.notifSeen.texts)) S.notifSeen.texts={};
+    const unreadTexts = S.world.texts.filter(t=>t.msgs.length && t.msgs[t.msgs.length-1][0]!=="me" && !S.reads["t:"+t.id] && (S.notifSeen.texts[t.id]||0) < t.msgs.length);
     for (const t of unreadTexts.slice(0,2)){
       let p=t.msgs[t.msgs.length-1][1]; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
-      out.unshift({app:"messages", t:t.name, p});
+      out.unshift({app:"messages", t:t.name, p, key:"n:messages:"+t.id});
     }
-    const unreadMail=(S.world.emails||[]).filter(e=>!S.reads["e:"+e.id]);
-    if (unreadMail.length) out.unshift({app:"tmail", t:"T-Mail", p:unreadMail.length+" unread — "+unreadMail[0].s});
+    const unreadMail=(S.world.emails||[]).filter(e=>!S.reads["e:"+e.id] && !S.notifSeen.mail.includes(e.id));
+    if (unreadMail.length) out.unshift({app:"tmail", t:"T-Mail", p:unreadMail.length+" unread — "+unreadMail[0].s, key:"n:tmail:batch"});
   }
-  return out;
+  return includeSeen? out : out.filter(x=> !(S && S.reads[x.key]));
 }
 function markNotifRead(app){
   if (!S) return;
-  for (const x of (S.world.notifs||[])) if (x.app===app) S.reads["n:"+(x.t+x.p).slice(0,40)]=1;
-  persist(); 
+  for (const x of liveNotifs(true)){
+    if (x.app!==app) continue;
+    S.reads[x.key]=1;
+  }
+  S.notifSeen = S.notifSeen || {mail:[], texts:{}};
+  if (Array.isArray(S.notifSeen.texts)) S.notifSeen.texts={};
+  if (app==="tmail") for (const e of (S.world.emails||[])) if(!S.notifSeen.mail.includes(e.id)) S.notifSeen.mail.push(e.id);
+  if (app==="messages") for (const t of S.world.texts) S.notifSeen.texts[t.id]=t.msgs.length;
+  persist();
 }
 function renderLock(){
   const n = liveNotifs();
@@ -312,6 +332,10 @@ async function sendText(tid){
 }
 
 /* Chirper */
+const VF = '<i class="vfk"><svg viewBox="0 0 22 22" width="15" height="15"><circle cx="11" cy="11" r="10.5" fill="#1d9bf0"/><path d="M6.2 11.4l3.1 3.1 6.3-6.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
+function chText(t){
+  return esc(t).replace(/@([A-Za-z0-9_]+)/g, '<span class="mention">@$1</span>');
+}
 let chTab="feed"; let chThread=null;
 RENDER.chirper = (b,sub)=>{
   b.className="chirper darkapp";
@@ -323,47 +347,68 @@ RENDER.chirper = (b,sub)=>{
       b.innerHTML = aphead("Post",{back:"chThread=null;renderApp('chirper')",backlabel:"Chirper"}) + `<div class="apbody flush" style="padding:0 16px 90px">
       <div class="chirp big">
         <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n||"me")}">${c.n?initials(c.n):(META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last))}</span><div class="ch-main">
-        <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b>${c.vf?'<i class="vfk">✔</i>':""}<span>${esc(c.h||me)}</span></div></div></div>
-        <p style="margin-top:8px">${esc(c.t)}</p>
+        <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b>${c.vf?VF:""}<span>${esc(c.h||me)}</span></div></div></div>
+        <p style="margin-top:8px">${chText(c.t)}</p>
         <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.rp||0).toLocaleString()} rechirps</div>
-        <div class="ch-act"><button onclick="chLike('${c.id}')">♡ Like</button><button onclick="chReplyBox()">↩ Reply</button></div>
+        <div class="ch-act"><button onclick="chLike(chThread)">${S.chirpLiked&&S.chirpLiked[chThread]?"♥ Liked":"♡ Like"}</button><button onclick="chReplyBox()">↩ Reply</button></div>
       </div>
       <div id="chReplyBox"></div>
       <div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${(c.replies||[]).length}</span></div>
-      ${(c.replies||[]).map(r=>`<div class="chirp reply"><div class="ch-row"><span class="av chav sm" style="background:${avColor(r.a)}">${r.h===S.handle&&META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(r.a)}</span><div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b><span>${esc(r.h)}</span></div><p>${esc(r.x)}</p></div></div></div>`).join("") || '<div class="empty">No replies yet.</div>'}
+      ${(c.replies||[]).map(r=>`<div class="chirp reply"><div class="ch-row"><span class="av chav sm" style="background:${avColor(r.a)}">${r.h===S.handle&&META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(r.a)}</span><div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b><span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`).join("") || '<div class="empty">No replies yet.</div>'}
       </div>`;
       return;
     }
   }
-  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1>Chirper</h1><button class="hact" onclick="chCompose()">Post</button></div>
+  b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹</button><h1>Chirper</h1><button class="hact" onclick="editHandle()" style="font-size:12.5px">Edit @</button></div>
   <div class="ch-profile">
     <button class="ch-av" onclick="pickPfpFromChirper()" title="Change photo">${META.settings.pfp?`<img src="${META.settings.pfp}">`:esc(S.blob.player.first[0]+S.blob.player.last[0])}</button>
     <div class="ch-pinfo">
       <b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>
-      <span>${esc(me)} · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
+      <span><button class="hlink" onclick="editHandle()">${esc(me)} ✎</button> · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
       <div class="ch-follow"><span><b>${S.chirp.followers.toLocaleString()}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${S.chirp.delta.toLocaleString()} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
     </div>
   </div>
-  <div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
+  <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
   <div class="seg segc" style="background:rgba(255,255,255,.07)">${[["feed","Feed"],["mine","Your Posts"]].map(t=>`<button class="${chTab===t[0]?"on":""}" onclick="chTab='${t[0]}';renderApp('chirper')">${t[1]}</button>`).join("")}</div>
   <div class="apbody flush" id="chList" style="padding:0 16px 90px"></div>`;
   const el=$("#chList");
   if (chTab==="feed"){
     el.innerHTML = S.world.chirps.map((c,i)=>`<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
       <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n)}">${initials(c.n)}</span><div class="ch-main">
-      <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?'<i class="vfk">✔</i>':""}<span>${esc(c.h)} · ${esc(c.tm||"")}</span></div><p>${esc(c.t)}</p>
-      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
+      <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
+      <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">Quiet out there.</div>';
   } else {
     el.innerHTML = (S.chirp.posts||[]).slice().reverse().map(c=>`<button class="chirp" onclick="renderApp('chirper',{t:'${c.id}'})">
       <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
-      <div class="ch-h"><b>You</b><span>${esc(me)}</span></div><p>${esc(c.t)}</p>
-      <div class="ch-meta">${(c.li||0).toLocaleString()} likes · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
+      <div class="ch-h"><b>You</b><span>${esc(me)}</span></div><p>${chText(c.t)}</p>
+      <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`).join("") || '<div class="empty">You have not posted. Silence is a strategy too.</div>';
   }
 };
 function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
-function chLike(id){ const c=chGet(id); if(c){c.li=(c.li||0)+1; persist(); renderApp('chirper',{t:id});} }
+function chLike(id){
+  const c=chGet(id); if(!c) return;
+  S.chirpLiked=S.chirpLiked||{};
+  const list=$("#chList"); const sc=list?list.scrollTop:null;
+  if (S.chirpLiked[id]){ delete S.chirpLiked[id]; c.li=Math.max(0,(c.li||0)-1); }
+  else { S.chirpLiked[id]=1; c.li=(c.li||0)+1; }
+  persist();
+  if (chThread!==null) renderApp('chirper',{t:chThread});
+  else { renderApp('chirper'); requestAnimationFrame(()=>{const nl=$("#chList"); if(nl&&sc!==null) nl.scrollTop=sc;}); }
+}
+function editHandle(){
+  sheet(`<h3>Your handle</h3><p class="sp">This is your @. The world will use it going forward.</p>
+  <input class="field" id="hIn" value="${esc(S.handle)}" maxlength="20">
+  <button class="btn" style="background:var(--ch-acc);color:#fff" onclick="saveHandle()">Save</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+}
+function saveHandle(){
+  let v=$("#hIn").value.trim().replace(/\s+/g,"");
+  if(!v.startsWith("@")) v="@"+v;
+  if(v.length<3) return toast("Too short.");
+  S.handle=v; persist(); closeSheet(); renderApp('chirper'); toast("Handle updated to "+v+".");
+}
 function chReplyBox(){
-  $("#chReplyBox").innerHTML = `<div class="chirp" style="border-style:dashed"><textarea id="chRTxt" class="field" style="margin:0 0 8px" rows="2" placeholder="Reply as ${esc(S.handle)}"></textarea>
+  $("#chReplyBox").innerHTML = `<div class="chirp" style="border-style:dashed"><textarea id="chRTxt" class="field" style="margin:0 0 8px" rows="2" placeholder="Reply as ${esc(S.handle)}" oninput="chMention(this)"></textarea><div id="chSugg"></div>
   <button class="btn sm" style="background:var(--ch-acc);color:#fff" onclick="chSendReply()">Reply</button></div>`;
 }
 async function chSendReply(){
@@ -388,12 +433,46 @@ function pickPfpFromChirper(){
   inp.onchange=()=>pickFromInput(inp,"pfp") || setTimeout(()=>renderApp("chirper"),600);
   inp.click();
 }
+function mentionPool(){
+  const pool=[];
+  for (const r of S.blob.roster.slice(0,75)){
+    const h="@"+(r[0][0]+r[1]).replace(/\W/g,"").toLowerCase();
+    pool.push({n:r[0]+" "+r[1], h});
+  }
+  for (const c of S.world.chirps) if(c.h) pool.push({n:c.n, h:c.h});
+  const seen={}; return pool.filter(p=>{ if(seen[p.h])return false; seen[p.h]=1; return true; });
+}
+function chMention(inp){
+  const box = inp.id==="chQuick" ? $("#chSuggTop") : $("#chSugg");
+  if (!box) return;
+  const v=inp.value; const m=v.match(/@([A-Za-z0-9_]*)$/);
+  if (!m){ box.innerHTML=""; return; }
+  const q=m[1].toLowerCase();
+  const hits = mentionPool().filter(p=> p.h.slice(1).toLowerCase().startsWith(q) || p.n.toLowerCase().includes(q)).slice(0,4);
+  box.innerHTML = hits.map(p=>`<button class="mchip" onclick="insMention('${inp.id}','${p.h}')">${esc(p.n)} <small>${esc(p.h)}</small></button>`).join("");
+}
+function insMention(inpId, h){
+  const inp=$("#"+inpId); if(!inp) return;
+  inp.value = inp.value.replace(/@([A-Za-z0-9_]*)$/, h+" ");
+  const box = inpId==="chQuick" ? $("#chSuggTop") : $("#chSugg");
+  if (box) box.innerHTML=""; inp.focus();
+}
+async function aiPostReplies(post){
+  if (!aiKey()) return;
+  try{
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. "+S.handle+" (practice squad rookie QB, "+S.blob.player.team+", "+(S.chirp.followers||0)+" followers) just posted: \""+post.t+"\". Write 2-3 short realistic replies from fans, media, or teammates. If a teammate handle is mentioned in the post, one reply should be from that teammate. Mixed tones, no em dashes. Reply ONLY with JSON: [{\"a\":\"name\",\"h\":\"@handle\",\"x\":\"text\"}]", "Write the replies now.", 500);
+    const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
+    if (Array.isArray(arr)){ post.replies=(post.replies||[]).concat(arr.slice(0,3)); persist(); if(curApp==="chirper") renderApp("chirper", chThread!==null?{t:chThread}:undefined); }
+  }catch(e){}
+}
 function chQuickPost(){
   const el=$("#chQuick"); const txt=el&&el.value.trim(); if(!txt) return;
   const rng=seedRng(S.careerId+txt);
   S.chirp.posts=S.chirp.posts||[];
-  S.chirp.posts.push({id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]});
+  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]};
+  S.chirp.posts.push(post);
   persist(); chTab="mine"; renderApp("chirper"); toast("Posted.");
+  aiPostReplies(post);
 }
 function chCompose(){
   sheet(`<h3>New post</h3><textarea id="chNew" class="field" rows="3" placeholder="What's happening, ${esc(S.handle)}?"></textarea>
@@ -404,8 +483,10 @@ function chPost(){
   const txt=$("#chNew").value.trim(); if(!txt) return;
   S.chirp.posts=S.chirp.posts||[];
   const rng=seedRng(S.careerId+txt);
-  S.chirp.posts.push({id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]});
+  const post={id:"me"+Date.now(), t:txt, li:Math.floor(S.chirp.followers*(0.02+rng()*0.08)), replies:[]};
+  S.chirp.posts.push(post);
   closeSheet(); persist(); chTab="mine"; renderApp('chirper'); toast("Posted.");
+  aiPostReplies(post);
 }
 /* T-Mail */
 RENDER.tmail = (b, sub)=>{
@@ -674,7 +755,8 @@ function merBody(){
 
 function doTransfer(){
   const f=$("#tFrom").value, t=$("#tTo").value, a=+$("#tAmt").value;
-  if(!a||a<=0||f===t) return toast("Pick a real amount.");
+  if(f===t) return toast("Same account selected twice.");
+  if(!a||a<=0) return toast("Pick a real amount.");
   if(S.cash[f]<a) return toast("Insufficient funds in that account.");
   S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${cap(f)} to ${cap(t)}`, amt:0, mv:a, from:f, to:t, kind:"move"});
   persist(); merBody(); renderWidget(); toast("Moved "+fm(a));
@@ -942,7 +1024,7 @@ RENDER.octane = (b,sub)=>{
   }
   const makes=[...new Set(D.CARDATA.map(x=>x[0]))].sort();
   const yrs=[...new Set(cars.map(c=>c.yr))].sort((a,b)=>b-a);
-  b.innerHTML = `<div class="brandhead oct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">◉</div><div><h1>Octane</h1><small>Every make. Every year.</small></div>${S.garage.length?`<button class="hact" style="margin-left:auto;color:#ffb35c" onclick="garSheet()">Garage (${S.garage.length})</button>`:""}</div>` +
+  b.innerHTML = `<div class="brandhead oct"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">◉</div><div><h1>Octane</h1><small>Every make. Every year.</small></div><button class="hact" style="margin-left:auto;color:#ffb35c" onclick="garSheet()">Garage (${S.garage.length})</button></div>` +
   `<div class="filters">
     <input placeholder="Search" value="${esc(octF.q)}" oninput="octF.q=this.value;octList()">
     <select onchange="octF.make=this.value;octList()"><option value="">All makes</option>${makes.map(m=>`<option ${octF.make===m?"selected":""}>${m}</option>`).join("")}</select>
@@ -999,9 +1081,24 @@ function buyVeh(id, fin){
   S.ledger.push({t:"Octane — "+C.yr+" "+C.make+" "+C.model, amt:-dn, kind:"spend"});
   persist(); toast("It's yours. Insurance adjusted."); renderApp("octane"); renderWidget();
 }
+const PAINTS=[["Gloss Black","#111",650],["Pearl White","#f2f0ea",800],["Nardo Gray","#7a8087",750],["Racing Red","#c8102e",700],["Miami Blue","#00b1c8",900],["British Green","#0b3d2e",750],["Midnight Purple","#2e1a47",1200],["Chalk","#d9d5cc",850],["Solar Yellow","#f5c400",700],["Copper","#b45f2a",950],["Frozen Matte Black","#1a1a1a",1500],["Chrome Wrap","#c9ced4",2200]];
 function garSheet(){
-  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l"><h4>${esc(c.n)}</h4><p>Value ${fm(c.value)} (drops weekly)</p></div><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
+  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l"><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops weekly)</p></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
   `<button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet()">Close</button>`);
+}
+function paintSheet(i){
+  const c=S.garage[i];
+  sheet(`<h3>Paint the ${esc(c.n)}</h3><p class="sp">Full respray at the shop Octane uses. Takes effect immediately, because this is your phone and the shop is imaginary.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px">${PAINTS.map((p,n)=>`<button onclick="doPaint(${i},${n})" style="width:64px;border:none;background:none;color:inherit;font-size:10.5px"><span style="display:block;width:44px;height:44px;border-radius:50%;background:${p[1]};margin:0 auto 4px;border:2px solid ${c.color===p[1]?"#ffb35c":"rgba(255,255,255,.25)"}"></span>${p[0]}<br><small style="opacity:.6">${fm(p[2])}</small></button>`).join("")}</div>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="garSheet()">Back to garage</button>`);
+}
+function doPaint(i,n){
+  const c=S.garage[i]; const p=PAINTS[n];
+  if (S.cash.checking<p[2]) return toast("Checking can't cover the respray.");
+  S.cash.checking-=p[2];
+  c.color=p[1]; c.colorName=p[0];
+  S.ledger.push({t:"Respray — "+c.n+" in "+p[0], amt:-p[2], kind:"spend"});
+  persist(); toast(c.n+" is now "+p[0]+"."); garSheet(); renderWidget();
 }
 function sellVeh(i){
   const c=S.garage[i]; const got=Math.round(c.value*0.94);
@@ -1103,8 +1200,8 @@ RENDER.apex = (b,sub)=>{
     <div class="veh-detail light">
       <div class="vd-title">${esc(A.n)}</div>
       <div style="font-size:13px;opacity:.6;margin:-2px 0 10px">Age ${A.age} · ${A.yrs} years experience · takes ${A.fee.toFixed(2)}% of playing contracts</div>
-      <div class="payline"><span>Contract negotiation<br><small style="opacity:.55">How much money he squeezes out of a front office</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.neg)}<b>${A.neg}/10</b></span></div>
-      <div class="payline"><span>Endorsement reach<br><small style="opacity:.55">Which brands pick up when he calls</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.end)}<b>${A.end}/10</b></span></div>
+      <div class="payline"><span>Contract negotiation<br><small style="opacity:.55">How much money they squeeze out of a front office</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.neg)}<b>${A.neg}/10</b></span></div>
+      <div class="payline"><span>Endorsement reach<br><small style="opacity:.55">Which brands pick up when they call</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.end)}<b>${A.end}/10</b></span></div>
       <div class="payline"><span>Aggressiveness<br><small style="opacity:.55">High wins fights and burns bridges; low keeps doors open</small></span><span style="display:flex;align-items:center;gap:8px">${bar(A.agg)}<b>${A.agg}/10</b></span></div>
       <div class="payline"><span>Takes on</span><span style="max-width:55%;text-align:right;font-size:12.5px">${esc(A.willing)}</span></div>
       <p style="font-size:13.5px;line-height:1.55;opacity:.8;margin-top:10px">${esc(A.style)}</p>
@@ -1127,6 +1224,9 @@ RENDER.apex = (b,sub)=>{
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Crestline Automotive — regional ambassador</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · requires active-roster status.${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
       <div style="font-size:12px;opacity:.5">On hold · arrival clause · autos exclusivity</div></div>
+    ${sponsorWatchers().map(s=>`<div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:16px">${esc(s[0])} — scouting</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 6px">${esc(s[0])} brand team has your tape flagged. ${S.agent? esc(S.agent.n.split(" ")[0])+" is working the relationship." : "No agent on file; nobody is working the phone."} Terms unlock with roster status and buzz.</div>
+      <div style="font-size:12px;opacity:.5">Watching · ${esc(s[1])} category</div></div>`).join("")}
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Florham Park Deli — name & likeness</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 8px">$4,500 flat for a sandwich named after you. The "Number Zero": chicken cutlet, vodka sauce, fresh mozz.</div>
       ${S.deals.find(d=>d.id==="deli")? '<div style="font-size:13px;color:#2e7d32">Signed. The sandwich is in rotation.</div>' :
@@ -1139,6 +1239,24 @@ RENDER.apex = (b,sub)=>{
       <div class="payline"><span>Elevations used</span><span>0 of 3</span></div></div>
   </div>`;
 };
+function signDeli(){
+  if (!S.agent) return toast("Pick an agent first. This is what they are for.");
+  if (S.deals.find(d=>d.id==="deli")) return;
+  S.deals.push({id:"deli", n:"Florham Park Deli", amt:4500});
+  const cut = Math.round(4500*(S.agent.fee/100));
+  S.cash.checking += 4500-cut;
+  S.ledger.push({t:"Florham Park Deli — name & likeness", amt:4500, kind:"income"});
+  if (cut) S.ledger.push({t:"Apex commission — deli deal", amt:-cut, kind:"spend"});
+  persist(); toast("Signed. The Number Zero is in rotation. "+fm(4500-cut)+" after the fee.");
+  renderApp("apex");
+}
+function sponsorWatchers(){
+  const rng=seedRng(S.careerId+"|sponsors|"+wkKey(S.blob.clock));
+  const pool=D.SPONSORS.filter(s=>["apparel","beverage","tech","auto","finance"].includes(s[1]));
+  const picks=[]; const used={};
+  while (picks.length<3 && picks.length<pool.length){ const p=pool[Math.floor(rng()*pool.length)]; if(used[p[0]])continue; used[p[0]]=1; picks.push(p); }
+  return picks;
+}
 function signAgent(id){
   const A=D.AGENTS.find(x=>x.id===id);
   const prev=S.agent;
@@ -1204,8 +1322,12 @@ function gameLines(list){
     let spread = (teamPower(g.h)-teamPower(g.a)) + 1.8; // home edge
     spread = Math.round(spread*2)/2;
     const total = Math.round((41 + rng()*10 + Math.abs(spread)*0.3)*2)/2;
-    const mlH = spread<=0? Math.round(100+Math.abs(spread)*38) : -Math.round(100+spread*38);
-    return {...g, spread, total, mlH, mlA: mlH>0? -Math.round(mlH*0.9) : Math.round(Math.abs(mlH)*0.84)};
+    let mlH, mlA;
+    const s5=n=>Math.round(n/5)*5;
+    if (spread===0){ mlH=-110; mlA=-110; }
+    else if (spread>0){ mlH=-s5(100+spread*40); mlA=s5(100+spread*34); }
+    else { mlA=-s5(100+Math.abs(spread)*40); mlH=s5(100+Math.abs(spread)*34); }
+    return {...g, spread, total, mlH, mlA};
   });
 }
 RENDER.wager = b=>{
@@ -1222,65 +1344,28 @@ RENDER.wager = b=>{
   }
   const lines = gameLines(games);
   const mine = S.blob.player.team;
-  b.innerHTML = `<div class="brandhead wgr"><div class="bh-mark">W/</div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
+  b.innerHTML = `<div class="brandhead wgr"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/></svg></div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
   <div class="apbody">
-  <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${lines.length} games</span></div>
+  <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${lines.length} game${lines.length===1?"":"s"}</span></div>
   ${lines.map((g,i)=>`<div class="veh-detail" style="margin-bottom:10px;${(g.h===mine||g.a===mine)?"border-color:rgba(127,212,160,.4)":""}">
     <div class="payline" style="border:none;padding:2px 0"><span><b>${esc(g.a)}</b> at <b>${esc(g.h)}</b>${(g.h===mine||g.a===mine)?' <span style="color:#7fd4a0;font-size:11px">YOUR GAME</span>':""}</span></div>
     <div class="payline"><span>Spread</span><span>${g.spread===0? "PK (pick em)" : esc(g.h)+" "+(g.spread>0?"-":"+")+Math.abs(g.spread).toFixed(1)}</span></div>
     <div class="payline"><span>Total</span><span>O/U ${g.total.toFixed(1)}</span></div>
     <div class="payline"><span>Moneyline</span><span>${esc(g.h)} ${g.mlH>0?"+":""}${g.mlH} · ${esc(g.a)} ${g.mlA>0?"+":""}${g.mlA}</span></div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="betSheet(${i},'h')">${esc(g.h)}</button>
-      <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="betSheet(${i},'a')">${esc(g.a)}</button>
-    </div></div>`).join("") || '<div class="empty">No lines this week. Books are closed.</div>'}
+    </div>`).join("") || '<div class="empty">No lines this week. Books are closed.</div>'}
   ${S.bets && S.bets.length? `<div class="hoodhead" style="color:var(--ink)"><h3>Open tickets</h3></div>
    ${S.bets.map(bt=>`<div class="veh-detail" style="margin-bottom:8px"><div class="payline" style="border:none"><span>${esc(bt.label)}</span><span>${fm(bt.stake)}${bt.settled? (bt.won?' <b style="color:#7fd4a0">WON '+fm(bt.pay)+'</b>':' <b style="color:#ff9d94">LOST</b>'):""}</span></div></div>`).join("")}`:""}
-  <p style="font-size:11px;color:var(--faint);margin-top:14px">Lines are the book's opinion of your world, generated from real records in the save. Tickets settle when the week's results sync in. League policy on players betting is a story mechanic for another day.</p>
+  <p style="font-size:11px;color:var(--faint);margin-top:14px">Lines are the book's opinion of your world, generated from real records in the save. View only: NFL personnel are prohibited from betting on league games, and this phone is not trying to end your career.</p>
   </div>`;
   window._wlines = lines;
 };
-function betSheet(i, side){
-  const g=window._wlines[i];
-  const team = side==="h"? g.h : g.a;
-  const line = side==="h"? (g.spread>0?"-":"+")+Math.abs(g.spread).toFixed(1) : (g.spread>0?"+":"-")+Math.abs(g.spread).toFixed(1);
-  sheet(`<h3>${esc(team)} ${line}</h3><p class="sp">Against the spread, standard -110. Stake comes out of checking now; pays at sync when the result is in.</p>
-  <input class="field" type="number" id="betAmt" placeholder="Stake ($)">
-  <button class="btn" style="background:#2b6b4f;color:#fff" onclick="placeBet(${i},'${side}')">Place bet</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
-}
-function placeBet(i, side){
-  const g=window._wlines[i]; const amt=+$("#betAmt").value;
-  if(!amt||amt<10) return toast("Minimum $10.");
-  if(S.cash.checking<amt) return toast("Stake exceeds checking.");
-  S.cash.checking-=amt;
-  S.bets=S.bets||[];
-  const team = side==="h"? g.h : g.a;
-  const line = side==="h"? -g.spread : g.spread;
-  S.bets.push({w:g.w, t:g.t, h:g.h, a:g.a, side, line, stake:amt, label:team+" "+(line>0?"+":"")+line.toFixed(1)+" vs "+(side==="h"?g.a:g.h), settled:false});
-  S.ledger.push({t:"WagerLines stake — "+team, amt:-amt, kind:"spend"});
-  persist(); closeSheet(); renderApp("wager"); toast("Ticket booked.");
-}
-function settleBets(){
-  if (!S.bets || !S.blob.league) return;
-  for (const bt of S.bets){
-    if (bt.settled) continue;
-    const g = S.blob.league.games.find(x=>x.t===bt.t && x.w===bt.w && x.h===bt.h && x.a===bt.a && (x.played||x.hs+x.as>0));
-    if (!g) continue;
-    const margin = g.hs - g.as; // home margin
-    const cover = bt.side==="h" ? (margin + bt.line > 0) : (-margin + bt.line > 0);
-    bt.settled=true; bt.won=cover;
-    if (cover){ bt.pay=Math.round(bt.stake*(1+100/110)); S.cash.checking+=bt.pay;
-      S.ledger.push({t:"WagerLines payout — "+bt.label, amt:bt.pay, kind:"income"}); }
-  }
-}
 
 /* Mara — personal assistant */
 RENDER.assist = b=>{
   b.className="assist darkapp";
   S.assistTiers = S.assistTiers || D.ASSIST.cats.map(_=>0);
   const total = D.ASSIST.cats.reduce((a,c,i)=>a+c[1][S.assistTiers[i]][1],0);
-  b.innerHTML = `<div class="brandhead ast"><div class="bh-mark">MQ</div><div><h1>Mara Quinn</h1><small>${esc(D.ASSIST.title)}</small></div></div>
+  b.innerHTML = `<div class="brandhead ast"><button class="back" onclick="closeApp()">‹</button><div class="bh-mark">MQ</div><div><h1>Client Services</h1><small>Mara Quinn · Apex Sports Group</small></div></div>
   <div class="apbody">
   <p style="font-size:13px;color:var(--faint);line-height:1.55;margin-bottom:12px">I track how you actually live so the bank account stops being a surprise. Pick a lane per category; it lands in your monthly burn and Meridian sees it immediately. Text me from Messages if something changes.</p>
   ${D.ASSIST.cats.map((c,i)=>`<div class="hoodhead" style="color:var(--ink)"><h3>${esc(c[0])}</h3><span style="color:var(--faint)">${fm(c[1][S.assistTiers[i]][1])}/mo</span></div>
@@ -1377,35 +1462,43 @@ RENDER.settings = b=>{
   const pc = S.perception;
   const dd = (id,opts,cur)=>`<select id="${id}" class="field" onchange="savePerception()">${opts.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
   const prov = META.settings.provider||"anthropic";
+  const stateOpts = D.STATES.concat(["Other (type a country)"]);
+  const stateCur = pc.stateOther!==undefined? "Other (type a country)" : (pc.state||"NJ");
+  const debtT = pc.debtTotal||0;
+  const shares = pc.debtShares || [40,25,5,15,10,5];
   b.innerHTML = aphead("Settings") + `<div class="apbody">
   <div class="hoodhead" style="color:var(--ink)"><h3>Initial information</h3></div>
   <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:12px">Who you were before the league. The world's perception is dynamic from here: it moves with your play, your posts, and your results. Money facts still come only from the save.</p>
-  <label class="flabel">Hometown state</label>${dd("pcState", D.STATES, pc.state||"NJ")}
+  <label class="flabel">Hometown state</label>${dd("pcState", stateOpts, stateCur)}
+  ${pc.stateOther!==undefined || stateCur==="Other (type a country)" ? `<label class="flabel">Country</label><input class="field" id="pcStateOther" value="${esc(pc.stateOther||"")}" placeholder="e.g. Nigeria, Germany, Australia" onchange="savePerception()">` : ""}
   <label class="flabel">Where you grew up (town, area, whatever you want the world to know)</label>
   <input class="field" id="pcGrew" value="${esc(pc.grew||"")}" placeholder="e.g. Toms River, small town off the parkway" onchange="savePerception()">
   <label class="flabel">High school profile</label>${dd("pcHS", ["Unranked nobody","Local standout","State champion","National recruit"], pc.hs||"Local standout")}
   <label class="flabel">College</label>
-  <input class="field" id="pcColName" value="${esc(pc.collegeName||"")}" placeholder="School name (auto-fills from the save at next sync)" onchange="savePerception()">
-  <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px">Prestige is read automatically: ${esc(collegePrestige(pc.collegeName))}.</div>
+  <input class="field" id="pcColName" value="${esc(pc.collegeName||"")}" placeholder="School name (auto-fills from the save when it has one)" onchange="savePerception()">
+  <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px">Prestige reads automatically: ${esc(collegePrestige(pc.collegeName))}.</div>
   <label class="flabel">College career</label>${dd("pcCol", ["Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"], pc.college||"Career backup")}
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
   <label class="flabel">Monthly support you send home ($)</label>
   <input class="field" id="pcAsk" type="number" min="0" step="50" value="${pc.familyAsk||0}" onchange="savePerception()">
-  <label class="flabel">Draft story</label>${dd("pcDraft", ["Undrafted free agent","Seventh round flier","Day 3 pick","Day 2 pick","First rounder"], pc.draft||"Undrafted free agent")}
+  <label class="flabel">Draft story ${S.blob.player.draftRound!=null?'(read from the save)':''}</label>
+  <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>
   <label class="flabel">Public reputation (set by the league, not by you)</label>
   <div class="field" style="opacity:.75">${esc(autoReputation())}</div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Debt you brought with you</h3></div>
-  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Fill in what you actually owe. Credit card debt lands on the Meridian Credit card. Starting bank balance is seeded automatically from your profile (draft money, NIL, family) on new careers.</p>
-  ${D.DEBTCATS.map((c,i)=>`<label class="flabel">${c} ($)</label>
-   <input class="field" type="number" min="0" step="100" id="pcDebt${i}" value="${(pc.debtAmts&&pc.debtAmts[i])||0}" onchange="savePerception()">`).join("")}
-  <div style="font-size:12px;color:var(--faint)">Profile-seeded starting balance for this background: <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply to this career</button>`:" (locked once weeks are applied)"}</div>
+  <label class="flabel">Total debt ($)</label>
+  <input class="field" type="number" min="0" step="500" id="pcDebtTotal" value="${debtT}" onchange="savePerception();rerenderSettings()">
+  ${debtT>0? `<p style="font-size:12px;color:var(--faint);margin:0 0 10px">Slide how it splits. Credit card share lands on the Meridian Credit card.</p>
+  <div id="debtSliders">${D.DEBTCATS.map((c,i)=>`<label class="flabel" style="display:flex;justify-content:space-between"><span>${c}</span><span>${fm(Math.round(debtT*shares[i]/100))}</span></label>
+   <input type="range" min="0" max="100" value="${shares[i]}" style="width:100%" oninput="debtSlide(${i}, +this.value)">`).join("")}</div>` : ""}
+  <div style="font-size:12px;color:var(--faint);margin-top:6px">Starting balance seeds from your profile (draft money, NIL, family): <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply</button>`:""}</div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>AI world engine</h3></div>
   <label class="flabel">Provider</label>
-  <select class="field" onchange="META.settings.provider=this.value;saveMeta();renderApp('settings')">${Object.keys(D.AI).map(k=>`<option value="${k}" ${prov===k?"selected":""}>${D.AI[k].label}</option>`).join("")}</select>
+  <select class="field" onchange="META.settings.provider=this.value;META.settings.model=D.AI[this.value].models[0];saveMeta();rerenderSettings()">${Object.keys(D.AI).map(k=>`<option value="${k}" ${prov===k?"selected":""}>${D.AI[k].label}</option>`).join("")}</select>
   <label class="flabel">Model</label>
-  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${D.AI[prov].models.map(m=>`<option ${META.settings.model===m?"selected":""}>${m}</option>`).join("")}</select>
+  <select class="field" onchange="META.settings.model=this.value;saveMeta()">${D.AI[prov].models.map((m,i)=>`<option value="${m}" ${(META.settings.model||D.AI[prov].models[0])===m?"selected":""}>${m}${i===0?" (best)":""}</option>`).join("")}</select>
   <label class="flabel">${D.AI[prov].label} API key</label>
   <input class="field" type="password" placeholder="${D.AI[prov].keyHint}" value="${esc((META.settings.keys&&META.settings.keys[prov])||"")}" onchange="META.settings.keys=META.settings.keys||{};META.settings.keys['${prov}']=this.value.trim();saveMeta();toast('Key saved.')">
   <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">Auto-generate week content on sync
@@ -1420,52 +1513,122 @@ RENDER.settings = b=>{
     ${[["0","Real time"],["-360","Evening mode (-6h)"],["-480","Game night (-8h)"],["240","+4h"],["480","+8h"],["720","+12h"]].map(o=>`<option value="${o[0]}" ${String(META.settings.clockOffsetMin||0)===o[0]?"selected":""}>${o[1]}</option>`).join("")}
   </select>
   <label class="flabel">Wallpaper</label>
-  <input class="field" type="file" accept="image/*" onchange="setWallpaper(this)">
-  <button class="btn" style="background:rgba(255,255,255,.08)" onclick="META.settings.wallpaper=null;saveMeta();applyWallpaper();toast('Wallpaper reset.')">Reset wallpaper</button>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <span style="font-size:13px;color:${META.settings.wallpaper?'#7fd4a0':'var(--faint)'}">${META.settings.wallpaper?"Saved ✓":"Default"}</span>
+    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('wallpaper')">${META.settings.wallpaper?"Change":"Choose"}</button>
+    ${META.settings.wallpaper?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="META.settings.wallpaper=null;saveMeta();applyWallpaper();rerenderSettings();toast('Wallpaper reset.')">Reset</button>`:""}
+  </div>
   <label class="flabel">Profile photo (used on Chirper)</label>
-  <input class="field" type="file" accept="image/*" onchange="setPfp(this)">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <span style="font-size:13px;color:${META.settings.pfp?'#7fd4a0':'var(--faint)'}">${META.settings.pfp?"Saved ✓":"Initials"}</span>
+    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('pfp')">${META.settings.pfp?"Change":"Choose"}</button>
+    ${META.settings.pfp?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="META.settings.pfp=null;saveMeta();rerenderSettings();toast('Back to initials.')">Reset</button>`:""}
+  </div>
+
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Dock (bottom 4)</h3></div>
+  ${[0,1,2,3].map(i=>{const cur=dockIds()[i];return `<label class="flabel" style="display:flex;justify-content:space-between;align-items:center">Slot ${i+1}
+   <select class="field" style="width:60%;margin:0" onchange="setDock(${i}, this.value)">${appPool().map(a=>`<option value="${a.id}" ${cur===a.id?"selected":""}>${a.n}</option>`).join("")}</select></label>`}).join("")}
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Home screen order</h3></div>
-  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Pick a slot number for each app. Saved on this phone; survives updates and refreshes.</p>
-  ${APPS.map((a,i)=>{const cur=(META.settings.appOrder&&META.settings.appOrder[a.id])??i;return `<label class="flabel" style="display:flex;justify-content:space-between;align-items:center">${a.n}
-   <select class="field" style="width:76px;margin:0" onchange="META.settings.appOrder=META.settings.appOrder||{};META.settings.appOrder['${a.id}']=+this.value;saveMeta();renderHome()">${APPS.map((_,n)=>`<option value="${n}" ${cur===n?"selected":""}>#${n+1}</option>`).join("")}</select></label>`}).join("")}
+  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Give an app a slot and everything else shifts around it. No two apps share a slot. Saved on this phone; survives updates.</p>
+  ${gridApps().map((a,i)=>`<label class="flabel" style="display:flex;justify-content:space-between;align-items:center">${a.n}
+   <select class="field" style="width:76px;margin:0" onchange="moveApp('${a.id}', +this.value)">${gridApps().map((_,n)=>`<option value="${n}" ${i===n?"selected":""}>#${n+1}</option>`).join("")}</select></label>`).join("")}
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Career</h3></div>
   <button class="btn" style="background:rgba(255,255,255,.08)" onclick="location.hash='#debug';location.reload()">Debug readout</button>
   <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="resetCareer()">Reset this career</button>
   </div>`;
 };
+function pickFile(kind){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
+  inp.onchange=()=>{ if(kind==="wallpaper") setWallpaper(inp); else setPfp(inp); setTimeout(rerenderSettings, 700); };
+  inp.click();
+}
+function rerenderSettings(){
+  const b=document.querySelector(".apbody"); const sc=b?b.scrollTop:0;
+  renderApp("settings");
+  requestAnimationFrame(()=>{const nb=document.querySelector(".apbody"); if(nb) nb.scrollTop=sc;});
+}
+function debtSlide(i, val){
+  const pc=S.perception;
+  pc.debtShares = pc.debtShares || [40,25,5,15,10,5];
+  pc.debtShares[i]=val;
+  const sum=pc.debtShares.reduce((a,b)=>a+b,0)||1;
+  pc.debtShares = pc.debtShares.map(x=>Math.round(x*100/sum));
+  applyDebts(); persist(); rerenderSettings();
+}
+function applyDebts(){
+  const pc=S.perception;
+  const total=pc.debtTotal||0;
+  const shares=pc.debtShares || [40,25,5,15,10,5];
+  S.debts = S.debts.filter(d=>d.kind!=="legacy");
+  const aprs=[5.5,0,0,7.9,11.5,0];
+  D.DEBTCATS.forEach((c,i)=>{
+    const bal=Math.round(total*shares[i]/100);
+    if (i===1){ S.credit.cardBal = bal; return; }
+    if (bal>=250){
+      const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
+      S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
+    }
+  });
+}
+function savePerception(){
+  const pc=S.perception;
+  const gv=id=>{const el=$("#"+id);return el?el.value:null;};
+  const st=gv("pcState");
+  if (st==="Other (type a country)"){ pc.stateOther = pc.stateOther||""; const co=gv("pcStateOther"); if(co!==null) pc.stateOther=co; if(!$("#pcStateOther")) rerenderSettings(); }
+  else if (st){ pc.state=st; delete pc.stateOther; }
+  pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
+  pc.collegeName=gv("pcColName")??pc.collegeName;
+  pc.college=gv("pcCol")||pc.college; pc.family=gv("pcFam")||pc.family;
+  const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=Math.max(0,+ask||0);
+  const dt=gv("pcDebtTotal"); if(dt!==null) pc.debtTotal=Math.max(0,+dt||0);
+  pc.rep = autoReputation();
+  applyDebts();
+  persist();
+}
+function applyTheme(){
+  document.body.dataset.theme = META.settings.theme==="light" ? "light" : "dark";
+}
+/* pool + dock + order */
+function appPool(){ return [{id:"messages",n:"Messages",ic:"ic-msg"},{id:"meridian",n:"Meridian",ic:"ic-mer"},{id:"sync",n:"Sync",ic:"ic-sync"},{id:"settings",n:"Settings",ic:"ic-set"}].concat(APPS); }
+function dockIds(){
+  let d = META.settings.dock;
+  if (!Array.isArray(d) || d.length!==4) d = ["messages","meridian","sync","settings"];
+  return d;
+}
+function setDock(slot, id){
+  const d = dockIds().slice();
+  const other = d.indexOf(id);
+  if (other>=0 && other!==slot){ d[other]=d[slot]; } // swap if already docked
+  d[slot]=id;
+  META.settings.dock=d; saveMeta(); renderHome(); rerenderSettings();
+}
+function gridApps(){
+  const pool=appPool(), dock=dockIds();
+  let ord = META.settings.order;
+  if (!Array.isArray(ord)) ord = pool.map(a=>a.id);
+  for (const a of pool) if (!ord.includes(a.id)) ord.push(a.id); // new apps append
+  ord = ord.filter(id=>pool.some(a=>a.id===id));
+  META.settings.order = ord;
+  return ord.filter(id=>!dock.includes(id)).map(id=>pool.find(a=>a.id===id));
+}
+function moveApp(id, to){
+  const dock=dockIds();
+  const gridIds = META.settings.order.filter(x=>!dock.includes(x));
+  const from = gridIds.indexOf(id);
+  if (from<0) return;
+  gridIds.splice(from,1); gridIds.splice(to,0,id);
+  // rebuild full order: docked ids keep their old positions appended at end (they don't render in grid anyway)
+  META.settings.order = gridIds.concat(dock.filter(d=>!gridIds.includes(d)));
+  saveMeta(); renderHome(); rerenderSettings();
+}
 function applySeedCash(){
   const target=startingCash(S.perception);
   S.cash.checking=target;
   S.ledger=S.ledger.filter(l=>l.kind!=="seed");
   S.ledger.push({t:"Starting balance (profile seed)", amt:target, kind:"seed"});
   persist(); toast("Starting balance set to "+fm(target)+"."); renderApp("settings"); renderWidget();
-}
-function savePerception(){
-  const pc=S.perception;
-  const gv=id=>{const el=$("#"+id);return el?el.value:null;};
-  pc.state=gv("pcState")||pc.state; pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
-  pc.collegeName=gv("pcColName")??pc.collegeName;
-  pc.college=gv("pcCol")||pc.college; pc.draft=gv("pcDraft")||pc.draft; pc.family=gv("pcFam")||pc.family;
-  const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=Math.max(0,+ask||0);
-  pc.debtAmts = D.DEBTCATS.map((_,i)=> Math.max(0, +(gv("pcDebt"+i)||0)) );
-  pc.rep = autoReputation();
-  // rebuild legacy debts; credit card debt goes to the card, not a loan row
-  S.debts = S.debts.filter(d=>d.kind!=="legacy");
-  const aprs=[5.5,0,0,7.9,11.5,0];
-  D.DEBTCATS.forEach((c,i)=>{
-    const bal=pc.debtAmts[i]||0;
-    if (i===1){ S.credit.cardBal = bal; return; } // credit cards -> card page
-    if (bal>=250){
-      const apr=aprs[i]; const pay = apr>0? Math.max(25, Math.round(bal*(apr/100/12)/(1-Math.pow(1+apr/100/12,-48)))) : Math.max(25, Math.round(bal/60));
-      S.debts.push({n:c, bal, apr, pay, kind:"legacy"});
-    }
-  });
-  persist();
-}
-function applyTheme(){
-  document.body.dataset.theme = META.settings.theme==="light" ? "light" : "dark";
 }
 function pickImage(kind){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
@@ -1542,9 +1705,17 @@ RENDER.sync = b=>{
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="applyCode()">Apply code</button></div>
   <div class="synccard"><h4>Applied weeks — ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}</h4>
   <p>${S.appliedWeeks.map(esc).join(" · ")}</p></div>
+  <div class="synccard"><h4>Refresh this week</h4><p>Regenerates the world for the current week with your AI engine: chirps, threads, texts, emails. No new article (those belong to game results). Costs one model call.</p>
+  <button class="btn sm" style="background:${aiKey()?"var(--ok)":"rgba(255,255,255,.12)"};color:${aiKey()?"#04170d":"inherit"}" onclick="refreshWeek()">${aiKey()?"Refresh world now":"Add an API key first"}</button></div>
   <div class="synccard"><h4>Backup</h4><p>Emits this career's full phone-side history as a code (covers iOS eviction and phone-to-phone moves).</p>
   <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="backupCode()">Copy backup code</button></div></div>`;
 };
+async function refreshWeek(){
+  if (!aiKey()) return toast("Add an API key in Settings first.");
+  const last = S.blob.schedule.filter(g=>g[7]).pop();
+  try{ await generateWeek(S.blob, last, {noArticle:true}); }
+  catch(e){ toast("Refresh failed: "+e.message); }
+}
 async function decodeCode(code){
   code=code.trim();
   if (code.startsWith("TYNETB.")) return {backup:true, data: JSON.parse(await inflate(code.slice(7)))};
@@ -1747,7 +1918,7 @@ async function callAI(system, user, maxTokens){
       method:"POST",
       headers:{ "Content-Type":"application/json", "x-api-key":aiKey(),
         "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-      body: JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-4-6", max_tokens: maxTokens||8000,
+      body: JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-5", max_tokens: maxTokens||8000,
         system, messages:[{role:"user", content:user}] })
     });
     if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
@@ -1788,19 +1959,19 @@ QB ROOM: ${blob.roster.filter(r=>r[2]==="QB").map(r=>r[0]+" "+r[1]).join(", ")}.
 MONEY: practice squad $6,222/wk; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.
 PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${per.familyAsk?", sends home "+fm(per.familyAsk)+"/mo":""}${per.debtTotal?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}).`;
 }
-async function generateWeek(blob, last){
+async function generateWeek(blob, last, opts){
+  opts=opts||{};
   toast("Generating the week's world…");
   const sys = `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan/journalist voices with distinct personalities. The player is NOT famous unless the facts imply it. Output STRICT JSON only, no markdown fences, matching:
-{"article":{"kick":"","head":"","stand":"","by":"Marcus Ellery · United Chronicle Sports","paras":["8-12 paragraphs, feature length"],"pq":"one pull quote"},
-"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"2h"} x6-9],
+${opts.noArticle?"":`{"article":{"kick":"","head":"","stand":"","by":"Marcus Ellery · United Chronicle Sports","paras":["8-12 paragraphs, feature length"],"pq":"one pull quote"},`}${opts.noArticle?"{":""}"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"2h"} x6-9],
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"braelon|qbroom|agent|mom","msgs":[["them","..."]]} x2-4 additions],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]}`;
-  const out = await callClaude(sys, worldFacts(blob,last)+"\n\nWrite this week's full world.", 16000);
+  const out = await callClaude(sys, worldFacts(blob,last)+"\n\nWrite this week's "+(opts.noArticle?"world (no article this pass).":"full world."), 16000);
   let j;
   try { j = JSON.parse(out.replace(/^```json?/,"").replace(/```$/,"").trim()); }
   catch(e){ throw new Error("bad JSON from model"); }
-  if (j.article){ j.article.wk=wkLabel(blob.clock); S.world.articles.unshift(j.article); }
+  if (j.article && !opts.noArticle){ j.article.wk=wkLabel(blob.clock); S.world.articles.unshift(j.article); }
   if (j.chirps) S.world.chirps=[...j.chirps, ...S.world.chirps].slice(0,40);
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
   if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th) th.msgs.push(...t.msgs); }
@@ -1811,18 +1982,31 @@ async function generateWeek(blob, last){
 async function aiReply(thread, userMsg){
   if (!thread.persona){
     const r = S.blob.roster.find(x=> (x[0]+" "+x[1])===thread.name);
-    if (r) thread.persona = thread.name+" is a "+r[2]+" on the "+S.blob.player.team+", jersey #"+r[4]+", overall talent "+r[3]+"/99"+(r[5]==="PracticeSquad"?", also on the practice squad":"")+". A teammate texting casually.";
-    if (thread.id==="mara") thread.persona = "Mara Quinn, the player's sharp personal assistant from Apex client services. Practical, dry, keeps his spending honest.";
+    if (r) thread.persona = thread.name+" is a "+r[2]+" on the "+S.blob.player.team+", jersey #"+r[4]+(r[5]==="PracticeSquad"?", also on the practice squad":"")+". Texts like a real teammate: short, casual, inside jokes about practice and coaches.";
+    if (thread.id==="mom") thread.persona = "The player's mom. Warm, proud, worries about money and his eating. Uses the occasional emoji. Asks about family stuff.";
+    if (thread.id==="mara") thread.persona = "Mara Quinn, the player's personal assistant from Apex client services. Practical, dry, keeps his spending honest.";
+    if (thread.id==="agent") thread.persona = "The front desk and agents at Apex Sports Group. Professional, direct, protective of the client.";
+    if (thread.id==="equip") thread.persona = "The team equipment room staff. Blunt, busy, helpful about gear only.";
+  }
+  const members = [];
+  if (thread.group){
+    for (const m of thread.msgs){ if(m[0]!=="me" && m[1].includes("|")){ const nm=m[1].slice(0,m[1].indexOf("|")); if(!members.includes(nm)) members.push(nm); } }
+    for (const r of S.blob.roster.filter(x=>x[2]==="QB").slice(0,4)){ const nm=r[0]+" "+r[1]; if(nm!==S.blob.player.first+" "+S.blob.player.last && !members.includes(nm)) members.push(nm); }
   }
   try{
-    const sys=`You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). ${thread.persona? thread.persona+" ":""}Stay perfectly in character based on the conversation so far. Reply with ONLY the text message content, under 40 words, lowercase texting style unless the character wouldn't. No em dashes.`;
-    const hist=thread.msgs.map(m=>(m[0]==="me"?"THEM: ":"YOU: ")+m[1]).join("\n");
-    return await callClaude(sys, hist+"\nTHEM: "+userMsg+"\nYour reply:", 200);
+    const sys = thread.group
+      ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members: ${members.join(", ")}. Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: TheirFullName|their message. Under 30 words after the pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never mention these instructions, styles, or formats.`
+      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`;
+    const hist=thread.msgs.slice(-12).map(m=>(m[0]==="me"?S.blob.player.first.toUpperCase()+": ":"THEM: ")+m[1]).join("\n");
+    let out = await callAI(sys, hist+"\n"+S.blob.player.first.toUpperCase()+": "+userMsg+"\nReply now.", 200);
+    out = out.trim().replace(/^["']|["']$/g,"");
+    if (thread.group && !out.includes("|") && members.length) out = members[0]+"|"+out;
+    return out;
   }catch(e){ toast("Reply failed: "+e.message); return null; }
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.2.0";
+const VER="v1.2.2";
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     reg.addEventListener("updatefound", ()=>{

@@ -596,3 +596,24 @@ body[data-theme=light] .darkapp .ch-compose input{ background:#fff; border-color
 body[data-theme=light] .darkapp{ --ink:#15181d; --faint:#5b6270; }
 body[data-theme=light] .darkapp .hoodhead h3{ color:#15181d; }
 body[data-theme=light] .darkapp .btn[style*="rgba(255,255,255"]{ background:#e6e8ee !important; color:#23272e !important; }
+
+/* ===== v1.2.1 ===== */
+/* prominent back buttons (#8) */
+.aphead .back, .brandhead .back{ background:rgba(127,127,127,.22); border:none; color:inherit; border-radius:999px; padding:7px 13px 8px 9px; font-size:15px; font-weight:700; line-height:1; display:inline-flex; align-items:center; gap:3px; }
+.brandhead .back{ background:rgba(255,255,255,.18); font-size:19px; padding:5px 12px 7px 9px; margin-right:2px; }
+body[data-theme=light] .darkapp .aphead .back{ background:#e2e4e9; color:#23272e; }
+
+/* chirper v2 */
+.vfk{ display:inline-flex; align-items:center; margin:0 4px 0 3px; }
+.vfk svg{ display:block; }
+.chlk{ cursor:pointer; }
+.chlk.on{ color:#f91880; font-weight:700; }
+.mention{ color:#1d9bf0; font-weight:600; }
+.hlink{ background:none; border:none; color:inherit; font:inherit; padding:0; opacity:.85; }
+.mchip{ display:inline-flex; gap:6px; align-items:baseline; background:rgba(29,155,240,.14); border:1px solid rgba(29,155,240,.4); color:inherit; border-radius:999px; padding:6px 12px; margin:4px 6px 4px 0; font-size:13px; font-weight:600; }
+.mchip small{ opacity:.6; font-weight:500; }
+#chSuggTop{ padding:0 16px; }
+#chSugg{ padding:2px 0 6px; }
+.ch-act button{ background:rgba(255,255,255,.08); border:none; color:inherit; border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; margin-right:8px; }
+body[data-theme=light] .darkapp .mchip{ background:rgba(29,155,240,.1); }
+input[type=range]{ accent-color:#7fd4a0; }

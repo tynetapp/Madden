@@ -74,7 +74,12 @@ article:{
 "What is also verifiable: practice squad players make $6,222 a week, the same whether they throw back-shoulder fades or hold a clipboard, and other teams are allowed to sign them away. The Jets can protect four practice squad players from poaching each week once the season begins. It would be a surprise if No. 0 is not one of them.",
 "The rest of the evening's business was ordinary. The first-team offensive line allowed pressure on three of Smith's eleven dropbacks, which will get cleaned up or get someone benched. Breece Hall did not play. Garrett Wilson played six snaps and caught two balls, including a third-down conversion that was the only first-half play drawn up to look like the regular season. The defense, missing four starters held out with soft-tissue caution, tackled poorly in space, and Glenn said so without being asked.",
 "New York travels to Pittsburgh on Friday for preseason week two. The starters are expected to play into the second quarter. The fourth quarter, as of this week, is appointment viewing.",
- ],
+ ,
+"The quarterback room he joined is its own study in layered incentive. Geno Smith is the unquestioned starter and has treated the rookie with what teammates describe as professional warmth, which in quarterback rooms is not nothing. Klubnik and Zappe occupy the two seats that a practice squad arm threatens most directly, and both have been careful with their words. One veteran on the offense, granted anonymity to speak freely, put it plainly: nobody is mad at the kid, everybody is doing math.",
+"The economics underneath are unglamorous. A practice squad week pays $6,222 before taxes, agent fees, and the quiet arithmetic of supporting people back home. Elevation to the active roster for a single game changes that week entirely. Three elevations are all a team gets per player before the roster decision becomes permanent. Every rep Zadey takes in August is, in the coldest reading, a negotiation about when those levers get pulled.",
+"League scouts contacted for this story offered a narrow range of takes. The arm is real. The bio is thin. The tape is nine dropbacks. One AFC evaluator compared the situation to finding a wallet on the sidewalk: everyone wants to know whose it is before they celebrate. Multiple teams are said to have called about his availability, which the Jets have answered by not answering.",
+"What happens next follows a script the league knows well. Preseason week two comes to Pittsburgh on Friday. If the backups falter and the rookie plays, the story gets louder. If he sits, the silence will be read as strategy. Either way, the building has stopped treating Ty Zadey like an afterthought, and buildings are usually the last to know."
+],
  pq:"\"He's on the practice squad. He helps us get ready to play. Next question.\""
 },
 earlier:[
@@ -208,11 +213,7 @@ D.AGENTS = [
  {id:"lindqvist", n:"Sofia Lindqvist", age:42, yrs:14, fee:2.75, neg:7, end:7, agg:5, willing:"International markets a specialty. Open roster.", style:"Balanced across the board with a global endorsement book nobody else at Apex touches. Never spectacular, never a mistake."},
  {id:"battle", n:"Marcus Battle", age:45, yrs:17, fee:3.0, neg:8, end:6, agg:7, willing:"Ex-players get priority. Everyone gets a call back.", style:"Nine years at safety before the flip. Understands locker rooms from the inside; front offices trust him even mid-fight. Strong everywhere, elite nowhere."}
 ];
-D.DEBTCATS = ["Student loans","Credit cards","Medical debt","Auto loan","Personal loan","Money owed to family",
-"The quarterback room he joined is its own study in layered incentive. Geno Smith is the unquestioned starter and has treated the rookie with what teammates describe as professional warmth, which in quarterback rooms is not nothing. Klubnik and Zappe occupy the two seats that a practice squad arm threatens most directly, and both have been careful with their words. One veteran on the offense, granted anonymity to speak freely, put it plainly: nobody is mad at the kid, everybody is doing math.",
-"The economics underneath are unglamorous. A practice squad week pays $6,222 before taxes, agent fees, and the quiet arithmetic of supporting people back home. Elevation to the active roster for a single game changes that week entirely. Three elevations are all a team gets per player before the roster decision becomes permanent. Every rep Zadey takes in August is, in the coldest reading, a negotiation about when those levers get pulled.",
-"League scouts contacted for this story offered a narrow range of takes. The arm is real. The bio is thin. The tape is nine dropbacks. One AFC evaluator compared the situation to finding a wallet on the sidewalk: everyone wants to know whose it is before they celebrate. Multiple teams are said to have called about his availability, which the Jets have answered by not answering.",
-"What happens next follows a script the league knows well. Preseason week two comes to Pittsburgh on Friday. If the backups falter and the rookie plays, the story gets louder. If he sits, the silence will be read as strategy. Either way, the building has stopped treating Ty Zadey like an afterthought, and buildings are usually the last to know."];
+D.DEBTCATS = ["Student loans","Credit cards","Medical debt","Auto loan","Personal loan","Money owed to family"];
 D.STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 D.PYLON = { brand:"Pylon", tag:"The scores. The stats. The whole league." };
 
@@ -230,22 +231,22 @@ D.SPONSORS = [
 
 /* ---------- personal assistant spending tiers: [category, [5 tiers of {n,amt/mo}]] ---------- */
 D.ASSIST = {
- name:"Mara Quinn", handle:"mara", title:"Personal assistant, Apex client services",
+ name:"Mara Quinn", handle:"mara", title:"Client Services, Apex Sports Group",
  cats:[
-  ["Wardrobe & clothes",[["Team swag and sweats",0],["Mall runs",350],["Streetwear rotation",1200],["Designer pieces",4500],["Full stylist and designer",12000]]],
-  ["Food & dining",[["Facility food only",0],["Groceries and meal prep",600],["Eating out often",1500],["Private meal service",3500],["Personal chef",8000]]],
-  ["Training & recovery",[["Team facilities only",0],["Local gym and massage",300],["Private trainer",1800],["Trainer plus recovery suite",4500],["Full performance team",10000]]],
-  ["Jewelry & watches",[["Nothing",0],["A chain, once",400],["Rotating pieces",2000],["Watch habit",7500],["Iced out",20000]]],
-  ["Travel & vacations",[["Nowhere",0],["Home to family",400],["A trip each break",1500],["First class habits",5000],["Jets and villas",15000]]],
-  ["Grooming & wellness",[["Clippers at home",0],["Barber weekly",200],["Barber, skin, spa",700],["Full self-care program",1800],["Traveling glam team",4000]]]
+  ["Wardrobe & clothes",[["Team swag and sweats",0],["Mall runs",350],["Streetwear rotation",1200],["Designer pieces",4500],["Stylist and designer",12000],["Full stylist team",25000],["Fashion week rotation",60000],["Never worn twice",150000]]],
+  ["Food & dining",[["Facility food only",0],["Groceries and meal prep",600],["Eating out often",1500],["Private meal service",3500],["Personal chef",8000],["Chef plus dietitian",15000],["Private chef team",30000],["Chef travels with you",60000]]],
+  ["Training & recovery",[["Team facilities only",0],["Local gym and massage",300],["Private trainer",1800],["Trainer plus recovery suite",4500],["Full performance team",10000],["Year-round staff",20000],["Biohacking suite",40000],["Lab, staff, and entourage",80000]]],
+  ["Jewelry & watches",[["Nothing",0],["A chain, once",400],["Rotating pieces",2000],["Watch habit",7500],["Iced out",20000],["Serious collector",50000],["Jeweler on call",120000],["Vault lifestyle",300000]]],
+  ["Travel & vacations",[["Nowhere",0],["Home to family",400],["A trip each break",1500],["First class habits",5000],["Jets and villas",15000],["Charter everything",35000],["Nothing commercial ever",75000],["Yacht weeks",150000]]],
+  ["Grooming & wellness",[["Clippers at home",0],["Barber weekly",200],["Barber, skin, spa",700],["Full self-care program",1800],["Traveling glam team",4000],["Image consultant added",8000],["Full-time glam staff",15000],["A whole department",30000]]]
  ]
 };
 
 /* ---------- AI engine matrix ---------- */
 D.AI = {
- anthropic:{ label:"Anthropic (Claude)", models:["claude-fable-5","claude-opus-4-8","claude-sonnet-4-6","claude-haiku-4-5-20251001"], keyHint:"sk-ant-..." },
- openai:{ label:"OpenAI (GPT)", models:["gpt-5.6","gpt-5.6-terra","gpt-5.6-luna"], keyHint:"sk-..." },
- google:{ label:"Google (Gemini)", models:["gemini-3.1-pro-preview","gemini-3.6-flash","gemini-3.5-flash"], keyHint:"AIza..." }
+ anthropic:{ label:"Anthropic (Claude)", models:["claude-fable-5","claude-opus-5","claude-sonnet-5","claude-haiku-4-5"], keyHint:"sk-ant-..." },
+ openai:{ label:"OpenAI (GPT)", models:["gpt-5.6-sol","gpt-5.6-terra","gpt-5.6-luna"], keyHint:"sk-..." },
+ google:{ label:"Google (Gemini)", models:["gemini-3.1-pro-preview","gemini-3.6-flash","gemini-3.5-flash","gemini-3.5-flash-lite"], keyHint:"AIza..." }
 };
 D.STREETS = ["Alder","Beaumont","Cedar Hollow","Dunmore","Ellery","Fairbanks","Granite","Halstead","Ivywood","Juniper","Kingsbury","Larkspur","Mercer","Northfield","Orchard","Pembroke","Quarry","Rosalind","Sycamore","Thornbury","Vesper","Waverly","Yardley","Bristlecone","Cormorant"];
 D.STTYPES = ["St","Ave","Ln","Ct","Dr","Terrace","Pl","Rd"];
