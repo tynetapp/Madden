@@ -1,3 +1,4 @@
+/* TyPhone data.js — v1.5 (Aug 8 2026) */
 /* ============ TyNet world data ============
    D.BLOB       , the baked truth blob from the desktop extractor (real save facts)
    D.SEED       , week-zero world content generated for this career (regenerates via AI at sync)

@@ -1,5 +1,5 @@
-/* TyNet service worker — polite auto-updates */
-const VER = "typhone-v1.4.3";
+/* TyPhone sw.js — v1.5 (Aug 8 2026) — polite auto-updates */
+const VER = "typhone-v1.5";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
 const EXTRAS = []; // scanner retired v1.4 (copy-paste is THE sync path); jsqr.min.js no longer cached
 const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use
