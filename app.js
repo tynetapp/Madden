@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.5 (Aug 8 2026) */
+/* TyPhone app.js — v1.5.1 (Aug 8 2026) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -230,7 +230,31 @@ function renderHome(){
   renderWidget();
 }
 function povDesc(){ const p=S.blob.player; return (p.status==="PracticeSquad"?"practice squad ":"")+(p.yearsPro===0?"rookie ":p.yearsPro>=6?"veteran ":"")+p.pos; }
-function buzzTier(f){ return f>2000000?"Household name":f>500000?"National story":f>120000?"League-wide buzz":f>25000?"Local hero":f>6000?"Beat-writer radar":f>1500?"Local curiosity":"Unknown"; }
+/* v1.5.1: 14-tier fame ladder, Unknown to global icon. Top of the scale is Ronaldo/LeBron/MJ
+   territory — a 10-ring record-breaker in this world outgrows the sport itself. */
+function buzzTier(f){
+  return f>1000000000?"Bigger than the game"
+       : f>350000000?"One of one"
+       : f>120000000?"Global icon"
+       : f>50000000?"Transcends the sport"
+       : f>20000000?"Face of the league"
+       : f>8000000?"Superstar"
+       : f>3000000?"Household name"
+       : f>1000000?"National story"
+       : f>400000?"League-wide buzz"
+       : f>120000?"Fan favorite"
+       : f>25000?"Local hero"
+       : f>6000?"Beat-writer radar"
+       : f>1500?"Local curiosity"
+       : "Unknown";
+}
+function fmFoll(n){
+  n=n||0;
+  if (n>=1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,"")+"B";
+  if (n>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,"")+"M";
+  if (n>=10000) return Math.round(n/1000)+"K";
+  return n.toLocaleString();
+}
 function gameDate(clock){
   // anchor: RS week 1 = second Thursday after Labor Day-ish; approximations by design
   const y=clock.seasonYear||2026;
@@ -329,24 +353,45 @@ function splitGroupMsg(tx, members){
 /* v1.4: follower engine. Deterministic target from save truth + market + production;
    followers only climb toward it (nobody sheds fans for syncing). */
 const MARKET = {"Jets":1.7,"Giants":1.7,"Cowboys":1.8,"Eagles":1.4,"Bears":1.4,"49ers":1.4,"Rams":1.3,"Chargers":1.1,"Patriots":1.3,"Steelers":1.35,"Packers":1.3,"Dolphins":1.15,"Falcons":1.05,"Texans":1.1,"Broncos":1.1,"Seahawks":1.1,"Commanders":1.15,"Browns":1,"Bengals":1,"Ravens":1.05,"Vikings":1,"Lions":1.05,"Buccaneers":1,"Saints":1,"Panthers":.9,"Colts":.95,"Titans":.9,"Cardinals":.95,"Raiders":1.15,"Chiefs":1.25,"Bills":1.05,"Jaguars":.85};
+function seasonProd(blob){
+  let prod=0, yds=0, tds=0;
+  for (const line of (blob.seasonStats||[])) for (const k in line){
+    if (/YARDS$/.test(k)) { prod += line[k]; yds += line[k]; }
+    if (/TDS$/.test(k)) { prod += line[k]*120; tds += line[k]; }
+    if (k==="DLINESACKS"||k==="DSECINTS") prod += line[k]*400;
+  }
+  return {prod, yds, tds};
+}
+function isPlayoffType(t){ return t!=="PreSeason" && t!=="RegularSeason" && t!=="OffSeason"; }
+/* Bank a finished season into the career ledger (called when a sync crosses into a new season). */
+function bankSeason(oldBlob){
+  S.legacy = S.legacy || {seasons:0, wins:0, titles:0, yds:0, tds:0};
+  const sp=seasonProd(oldBlob);
+  const wins=(oldBlob.schedule||[]).filter(g=>g[1]==="RegularSeason"&&g[7]&&g[7][0]>g[7][1]).length;
+  const po=(oldBlob.schedule||[]).filter(g=>isPlayoffType(g[1])&&g[7]).sort((a,b)=>a[0]-b[0]);
+  const wonTitle = po.length>=1 && po.every(g=>g[7][0]>g[7][1]) && po.length>=3; // ran the table through 3+ playoff rounds (heuristic; flagged in log)
+  S.legacy.seasons++; S.legacy.wins+=wins; S.legacy.yds+=sp.yds; S.legacy.tds+=sp.tds;
+  if (wonTitle) S.legacy.titles++;
+}
 function followerTarget(blob){
   const p=blob.player;
+  const L = S.legacy || {seasons:0, wins:0, titles:0, yds:0, tds:0};
   const draftBase = p.draftRound<=1? 160000 : p.draftRound===2? 55000 : p.draftRound===3? 22000 : p.draftRound<=5? 8000 : p.draftRound<=7? 3000 : 800;
   const ovrK = Math.max(0, (p.ovr||60)-62); let base = draftBase + ovrK*ovrK*22;
   base *= (MARKET[p.team]||1);
   base *= p.status==="PracticeSquad"? 0.25 : p.status==="Signed"? 1 : 0.6;
   base *= 1 + Math.min(p.yearsPro||0, 8)*0.18;
-  let prod=0;
-  for (const line of (blob.seasonStats||[])) for (const k in line){
-    if (/YARDS$/.test(k)) prod += line[k];
-    if (/TDS$/.test(k)) prod += line[k]*120;
-    if (k==="DLINESACKS"||k==="DSECINTS") prod += line[k]*400;
-  }
-  base += prod*90*(MARKET[p.team]||1);
+  base += seasonProd(blob).prod*90*(MARKET[p.team]||1);
   const wins=(blob.schedule||[]).filter(g=>g[7]&&g[7][0]>g[7][1]).length;
   base *= 1+wins*0.04;
+  // career body of work: banked seasons, banked production, and rings (each ring is a fame doubling force)
+  base += L.yds*45 + L.tds*6000 + L.wins*3500;
+  base *= (1 + L.seasons*0.12) * Math.pow(1.5, L.titles);
+  // fame compounds superlinearly past a million: stardom generates its own gravity.
+  // A decade-long dynasty run lands in LeBron/Ronaldo territory (hundreds of millions).
+  if (base > 1e6) base = 1e6 * Math.pow(base/1e6, 1.26);
   const rng=seedRng(blob.careerId+"|foll|"+wkKey(blob.clock));
-  return Math.round(base*(0.92+rng()*0.16));
+  return Math.round(Math.min(base*(0.92+rng()*0.16), 2.5e9));
 }
 function reseedFollowers(blob){
   const target=followerTarget(blob);
@@ -537,7 +582,7 @@ RENDER.chirper = (b,sub)=>{
     <div class="ch-pinfo">
       <b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>
       <span><button class="hlink" onclick="editHandle()">${esc(me)} ✎</button> · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
-      <div class="ch-follow"><span><b>${S.chirp.followers.toLocaleString()}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${S.chirp.delta.toLocaleString()} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
+      <div class="ch-follow"><span><b>${fmFoll(S.chirp.followers)}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${fmFoll(Math.abs(S.chirp.delta))} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
     </div>
   </div>
   <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
@@ -2375,6 +2420,7 @@ async function advanceTo(blob){
   // adopt the new truth
   const gameDelta = gameDateObj(newC) - gameDateObj(oldC);           // v1.4: how far the WORLD moved
   if (gameDelta > 0) shiftWorldTime(gameDelta);                       // everything already here ages by game time
+  if (newC.seasonIndex > oldC.seasonIndex) bankSeason(S.blob);        // v1.5.1: finished season joins the career ledger
   S.blob=blob; S.appliedWeeks.push(wkKey(newC));
   reseedFollowers(blob);                                              // v1.4: fame follows the save, not 842 forever
   const c=META.careers.find(x=>x.id===S.careerId); if(c) c.sub=blob.player.pos+" · "+blob.player.team+" · "+wkLabel(newC);
@@ -2561,7 +2607,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.5";
+const VER="v1.5.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
