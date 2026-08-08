@@ -254,6 +254,108 @@ function phoneNow(){
   if (META.settings.clockOffsetMin) d.setMinutes(d.getMinutes()+META.settings.clockOffsetMin);
   return d;
 }
+function gameDateObj(clock){
+  const y=clock.seasonYear||2026;
+  if (clock.weekType==="PreSeason") return new Date(y,7,7 + clock.week*7);
+  if (clock.weekType==="RegularSeason") return new Date(y,8,10 + clock.week*7);
+  if (clock.weekType==="OffSeason") return new Date(y+1,2,15);
+  return new Date(y+1,0,11 + (clock.week||0)*7);
+}
+/* v1.4: relative age labels for world content ("3w", "8mo", "2y") */
+function agoLabel(ts){
+  const d = Date.now()-ts;
+  if (d < 90*1000) return "now";
+  const m=d/60000, h=m/60, dy=h/24, w=dy/7, mo=dy/30.4, y=dy/365;
+  if (m<60) return Math.round(m)+"m";
+  if (h<24) return Math.round(h)+"h";
+  if (dy<7) return Math.round(dy)+"d";
+  if (w<5)  return Math.round(w)+"w";
+  if (mo<12) return Math.round(mo)+"mo";
+  return (y<2? "1y" : Math.round(y)+"y");
+}
+function gapLabel(ms){
+  const dy=ms/86400000, w=dy/7, mo=dy/30.4, y=dy/365;
+  if (dy<10) return Math.round(dy)+" days later";
+  if (w<6)   return Math.round(w)+" weeks later";
+  if (mo<12) return Math.round(mo)+" months later";
+  return (Math.round(y*10)/10)+" years later";
+}
+/* Everything already on the phone ages by GAME time when a sync jumps the clock. */
+function shiftWorldTime(ms){
+  if (!(ms>0)) return;
+  const sh = x => (x && typeof x==="number") ? x-ms : x;
+  for (const t of (S.world.texts||[])){
+    if (t.last) t.last = sh(t.last);
+    for (const m of t.msgs) if (m[2]) m[2] = sh(m[2]);
+  }
+  for (const e of (S.world.emails||[])) if (e.ts) e.ts = sh(e.ts);
+  for (const c of (S.world.chirps||[])) if (c.ts) c.ts = sh(c.ts);
+  for (const h of (S.world.huddle||[])) if (h.ts) h.ts = sh(h.ts);
+  for (const p of ((S.chirp&&S.chirp.posts)||[])) if (p.ts) p.ts = sh(p.ts);
+  for (const a of (S.world.articles||[])) if (a.ts) a.ts = sh(a.ts);
+}
+/* One-time stamps for content that predates the ts model (staggered so it doesn't all read "now"). */
+function stampWorld(){
+  let i=0; const base=Date.now();
+  for (const c of (S.world.chirps||[])) if (!c.ts) c.ts = base - (2+i++)*3600000;
+  i=0; for (const h of (S.world.huddle||[])) if (!h.ts) h.ts = base - (4+i++)*3600000;
+  i=0; for (const e of (S.world.emails||[])) if (!e.ts) e.ts = base - (3+i++)*5400000;
+  for (const t of (S.world.texts||[])){
+    if (!t.last) t.last = base - 7200000;
+    const n=t.msgs.length;
+    t.msgs.forEach((m,k)=>{ if(!m[2]) m[2] = t.last - (n-1-k)*240000; });
+  }
+  for (const p of ((S.chirp&&S.chirp.posts)||[])) if (!p.ts) p.ts = base - 3600000;
+  for (const a of (S.world.articles||[])) if (!a.ts) a.ts = base - 86400000;
+}
+/* v1.4.2 BETA DIALS: hand-set practice/film meters (0-10) that the whole world treats as truth.
+   Placeholder for the future practice engine; lives per-career in S.beta. */
+function betaDials(){ S.beta = S.beta || {practice:5, film:5}; return S.beta; }
+function dialLabel(v){ return v<=1?"disastrous":v<=3?"poor":v<=4?"shaky":v<=6?"solid":v<=8?"sharp":"exceptional"; }
+function practiceLine(){
+  const b=betaDials();
+  return `PRACTICE THIS WEEK (coach's private evaluation, treat as ground truth that leaks into how insiders talk): on-field practice ${b.practice}/10 (${dialLabel(b.practice)}), film study / mental prep ${b.film}/10 (${dialLabel(b.film)}). Low numbers show up as coach frustration, lost reps, trade-rumor energy; high numbers as earned trust, first-team reps chatter, "coaches love him" energy. Scale the reaction to how extreme the number is, and ALWAYS judge relative to the player's actual ability level and role: a limited player's 10/10 week means effort, growth, and turning heads ("kid is outworking everyone"), never sudden stardom; a star's 3/10 week is an alarming story. Practice quality moves TRUST and OPPORTUNITY talk, not talent.`;
+}
+/* v1.4: group texts arrive as "Name|message" but models sometimes write "Name: message" — accept both. */
+function splitGroupMsg(tx, members){
+  const i=tx.indexOf("|");
+  if (i>0 && i<30) return { who: tx.slice(0,i), tx: tx.slice(i+1) };
+  const m=tx.match(/^([A-Z][A-Za-z.'\- ]{1,26}?):\s+(.*)$/s);
+  if (m && (!members || !members.length || members.some(n=>n.toLowerCase().startsWith(m[1].toLowerCase().split(" ")[0]))||m[1].split(" ").length<=3))
+    return { who: m[1], tx: m[2] };
+  return { who: "", tx };
+}
+/* v1.4: follower engine. Deterministic target from save truth + market + production;
+   followers only climb toward it (nobody sheds fans for syncing). */
+const MARKET = {"Jets":1.7,"Giants":1.7,"Cowboys":1.8,"Eagles":1.4,"Bears":1.4,"49ers":1.4,"Rams":1.3,"Chargers":1.1,"Patriots":1.3,"Steelers":1.35,"Packers":1.3,"Dolphins":1.15,"Falcons":1.05,"Texans":1.1,"Broncos":1.1,"Seahawks":1.1,"Commanders":1.15,"Browns":1,"Bengals":1,"Ravens":1.05,"Vikings":1,"Lions":1.05,"Buccaneers":1,"Saints":1,"Panthers":.9,"Colts":.95,"Titans":.9,"Cardinals":.95,"Raiders":1.15,"Chiefs":1.25,"Bills":1.05,"Jaguars":.85};
+function followerTarget(blob){
+  const p=blob.player;
+  const draftBase = p.draftRound<=1? 160000 : p.draftRound===2? 55000 : p.draftRound===3? 22000 : p.draftRound<=5? 8000 : p.draftRound<=7? 3000 : 800;
+  const ovrK = Math.max(0, (p.ovr||60)-62); let base = draftBase + ovrK*ovrK*22;
+  base *= (MARKET[p.team]||1);
+  base *= p.status==="PracticeSquad"? 0.25 : p.status==="Signed"? 1 : 0.6;
+  base *= 1 + Math.min(p.yearsPro||0, 8)*0.18;
+  let prod=0;
+  for (const line of (blob.seasonStats||[])) for (const k in line){
+    if (/YARDS$/.test(k)) prod += line[k];
+    if (/TDS$/.test(k)) prod += line[k]*120;
+    if (k==="DLINESACKS"||k==="DSECINTS") prod += line[k]*400;
+  }
+  base += prod*90*(MARKET[p.team]||1);
+  const wins=(blob.schedule||[]).filter(g=>g[7]&&g[7][0]>g[7][1]).length;
+  base *= 1+wins*0.04;
+  const rng=seedRng(blob.careerId+"|foll|"+wkKey(blob.clock));
+  return Math.round(base*(0.92+rng()*0.16));
+}
+function reseedFollowers(blob){
+  const target=followerTarget(blob);
+  const cur=S.chirp.followers||842;
+  if (target>cur){
+    const next = cur + Math.round((target-cur)*0.75);
+    S.chirp.delta = next-cur; S.chirp.followers = next;
+  } else S.chirp.delta = 0;
+  S.chirp.seedv = 2;
+}
 function renderWidget(){
   const p=S.blob.player;
   $("#wg-title").textContent = p.first+" "+p.last+" · #"+p.jersey+" "+p.pos+" · "+p.teamShort;
@@ -290,7 +392,7 @@ function liveNotifs(includeSeen){
     if (Array.isArray(S.notifSeen.texts)) S.notifSeen.texts={};
     const unreadTexts = S.world.texts.filter(t=>t.msgs.length && t.msgs[t.msgs.length-1][0]!=="me" && !S.reads["t:"+t.id] && (S.notifSeen.texts[t.id]||0) < t.msgs.length);
     for (const t of unreadTexts.slice(0,2)){
-      let p=t.msgs[t.msgs.length-1][1]; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
+      let p=t.msgs[t.msgs.length-1][1]; if(t.group) p=splitGroupMsg(p, t.members).tx;
       out.unshift({app:"messages", t:t.name, p, key:"n:messages:"+t.id});
     }
     const unreadMail=(S.world.emails||[]).filter(e=>!S.reads["e:"+e.id] && !S.notifSeen.mail.includes(e.id));
@@ -360,36 +462,48 @@ RENDER.messages = (b, sub)=>{
     const t=S.world.texts.find(x=>x.id===sub.thread);
     S.reads["t:"+t.id]=1; persist();
     b.innerHTML = aphead(esc(t.name), {back:"renderApp('messages')", backlabel:"Messages"}) +
-      `<div class="apbody flush"><div class="chat">` + t.msgs.map(m=>{
+      `<div class="apbody flush"><div class="chat">` + t.msgs.map((m,mi)=>{
         const me=m[0]==="me"; let who="", tx=m[1];
-        if(t.group && !me && tx.includes("|")){ const i=tx.indexOf("|"); who=tx.slice(0,i); tx=tx.slice(i+1); }
-        return `<div class="bub ${me?"me":"them"}">${who?`<span class="who">${esc(who)}</span>`:""}${esc(tx)}</div>`;
+        if(t.group && !me){ const g=splitGroupMsg(tx, t.members); who=g.who; tx=g.tx; }
+        let gap="";
+        if (mi>0 && m[2] && t.msgs[mi-1][2] && (m[2]-t.msgs[mi-1][2])>7*86400000)
+          gap = `<div class="day">${gapLabel(m[2]-t.msgs[mi-1][2])}</div>`;
+        return gap+`<div class="bub ${me?"me":"them"}">${who?`<span class="who">${esc(who)}</span>`:""}${esc(tx)}</div>`;
       }).join("") + `</div></div>
       <div class="composer"><input id="msgin" placeholder="Text ${esc(t.name.split(" ")[0])}" autocomplete="off"><button onclick="sendText('${t.id}')">Send</button></div>`;
     const body=b.querySelector(".apbody"); body.scrollTop=body.scrollHeight;
   } else {
     b.innerHTML = aphead("Messages") + `<div class="apbody flush">` + S.world.texts.slice().sort((a,b2)=>(b2.last||0)-(a.last||0)).map(t=>{
       const last=t.msgs[t.msgs.length-1]||["them",""]; const unread=t.msgs.length&&!S.reads["t:"+t.id];
-      let p=last[1]||"Say something."; if(t.group&&p.includes("|")) p=p.slice(p.indexOf("|")+1);
+      let p=last[1]||"Say something."; if(t.group) p=splitGroupMsg(p, t.members).tx;
       return `<button class="thd" style="width:100%" onclick="renderApp('messages',{thread:'${t.id}'})">
         <span class="av" style="background:${t.color||avColor(t.name)}">${initials(t.name)}</span>
-        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6">•</span>':''}<time>now</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span></button>`;
+        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6">•</span>':''}<time>${t.last?agoLabel(t.last):""}</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span></button>`;
     }).join("") + `</div>`;
   }
 };
 async function sendText(tid){
   const inp=$("#msgin"); const v=inp.value.trim(); if(!v) return;
   const t=S.world.texts.find(x=>x.id===tid);
-  t.msgs.push(["me", v]); t.last=Date.now(); inp.value=""; persist();
+  t.msgs.push(["me", v, Date.now()]); t.last=Date.now(); inp.value=""; persist();
   renderApp("messages",{thread:tid});
   if (aiKey()){
     const reply = await aiReply(t, v);
-    if (reply){ t.msgs.push(["them", reply]); t.last=Date.now(); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
+    if (reply){ t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
   } else { toast("Delivered. Add an API key in Settings for replies."); }
 }
 
 /* Chirper */
-const VF = '<i class="vfk"><svg viewBox="0 0 22 22" width="15" height="15"><circle cx="11" cy="11" r="10.5" fill="#1d9bf0"/><path d="M6.2 11.4l3.1 3.1 6.3-6.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
+/* v1.4.1: real art. Files live in phone/img/; every use degrades gracefully if a file is missing. */
+const TEAMKEYS = new Set(["jets","giants","patriots","bills","dolphins","steelers","ravens","bengals","browns","texans","colts","titans","jaguars","chiefs","raiders","chargers","broncos","cowboys","eagles","commanders","49ers","seahawks","rams","cardinals","packers","bears","vikings","lions","buccaneers","saints","falcons","panthers"]);
+function teamLogo(name){ const k=String(name||"").toLowerCase(); return TEAMKEYS.has(k)? "img/team-"+k+".png" : null; }
+function tlogoImg(name, cls){ const src=teamLogo(name); return src? `<img class="${cls||"tlogo"}" src="${src}" alt="" onerror="this.remove()">` : ""; }
+function chAvatar(c){
+  const src = c.n? teamLogo((c.n||"").split(" ")[0]) : null; // "Jets Videos", "Jets" official
+  if (src) return `<span class="av chav teamav"><img src="${src}" alt="" onerror="this.parentNode.textContent='${(c.n||"?")[0]}'"></span>`;
+  return `<span class="av chav" style="background:${c.av||avColor(c.n||"me")}">${initials(c.n||"?")}</span>`;
+}
+const VF = '<i class="vfk"><img src="img/chirper-verified.png" width="15" height="15" alt="" onerror="this.outerHTML=&quot;<svg viewBox=\'0 0 22 22\' width=\'15\' height=\'15\'><circle cx=\'11\' cy=\'11\' r=\'10.5\' fill=\'#1d9bf0\'/><path d=\'M6.2 11.4l3.1 3.1 6.3-6.6\' fill=\'none\' stroke=\'#fff\' stroke-width=\'2.2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>&quot;"></i>';
 function chText(t){
   return esc(t).replace(/@([A-Za-z0-9_]+)/g, '<span class="mention">@$1</span>');
 }
@@ -436,8 +550,8 @@ RENDER.chirper = (b,sub)=>{
       <div class="ch-h"><b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b><span>${esc(me)} · you</span></div><p>${chText(p.t)}</p>
       <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${(p.li||0).toLocaleString()}</span> · ${(p.replies||[]).length} replies</div></div></div></button>`;
   const renderWorld = (c,i) => `<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
-      <div class="ch-row"><span class="av chav" style="background:${c.av||avColor(c.n)}">${initials(c.n)}</span><div class="ch-main">
-      <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
+      <div class="ch-row">${chAvatar(c)}<div class="ch-main">
+      <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${c.ts?agoLabel(c.ts):esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
       <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${(c.li||0).toLocaleString()}</span> · ${(c.replies||[]).length} replies</div></div></div></button>`;
   for (let i=0;i<=worldLen;i++){
     for (const o of own) if (o.pos===i) rows.push(renderOwn(o.p));
@@ -484,7 +598,7 @@ async function chSendReply(){
 }
 async function aiChirpReply(c, mine){
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a "+povDesc()+") just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]", "Write the replies now.", 400);
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). Original post by "+(c.n||"the player")+": \""+c.t+"\". The player ("+S.handle+", a "+povDesc()+") just replied: \""+mine+"\". Write 2 short realistic replies from OTHER fans or accounts reacting to the player's reply. Mixed tones. Do not use em dashes. Reply ONLY with JSON: [{\"a\":\"display name\",\"h\":\"@handle\",\"x\":\"reply text\"}]", "Write the replies now.", 400);
     const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
     return Array.isArray(arr)? arr.slice(0,3) : null;
   }catch(e){ return null; }
@@ -523,7 +637,7 @@ async function aiPostReplies(post, attempt){
   const f = S.chirp.followers||0;
   const nReplies = Math.max(1, Math.min(6, Math.round(f/400)));
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". Write EXACTLY "+nReplies+" short realistic replies, scaled to that follower count (a small account gets small-account energy, not viral treatment). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"x\":\"text\"}]", "Write the replies now.", 600);
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". Write EXACTLY "+nReplies+" short realistic replies, scaled to that follower count (a small account gets small-account energy, not viral treatment). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"x\":\"text\"}]", "Write the replies now.", 600);
     const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
     if (!Array.isArray(arr)) throw new Error("not an array");
     post.replies=(post.replies||[]).concat(arr.slice(0,nReplies));
@@ -563,11 +677,11 @@ RENDER.tmail = (b, sub)=>{
   if (sub && sub.mail){
     const m=S.world.emails.find(x=>x.id===sub.mail); m.unread=false; S.reads["e:"+m.id]=1; persist();
     b.innerHTML = aphead("T-Mail", {back:"renderApp('tmail')", backlabel:"Inbox"}) +
-      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${esc(m.time)}</div>${esc(m.body)}</div></div>`;
+      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoLabel(m.ts)+" ago":esc(m.time)}</div>${esc(m.body)}</div></div>`;
   } else {
     b.innerHTML = aphead("T-Mail") + `<div class="apbody flush">` + S.world.emails.map(m=>`
       <div class="mail ${m.unread&&!S.reads["e:"+m.id]?"unread":""}" onclick="renderApp('tmail',{mail:'${m.id}'})">
-        <div class="frm"><b>${esc(m.from.split(" — ")[0])}</b><time>${esc(m.time)}</time></div>
+        <div class="frm"><b>${esc(m.from.split(" — ")[0])}</b><time>${m.ts?agoLabel(m.ts):esc(m.time)}</time></div>
         <h4>${esc(m.subj)}</h4><p>${esc(m.body.slice(0,140))}</p></div>`).join("") + `</div>`;
   }
 };
@@ -598,10 +712,17 @@ const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
   if (day==="Sunday"){ if (t>=1200) return "NBC"; return ["CBS","FOX"][g[0]%2]; } return "CBS"; };
+const NETIMG = {ESPN:"net-espn", NBC:"net-nbc", CBS:"net-cbs-dark", FOX:"net-fox", PRIME:"net-prime", ABC:"net-abc"};
+function netChip(net){
+  const f=NETIMG[net];
+  if (f) return `<span class="netimg"><img src="img/${f}.png" alt="${net}" onerror="this.parentNode.outerHTML=NETFALL('${net}')"></span>`;
+  return NETFALL(net);
+}
+function NETFALL(net){ return `<span class="net ${net}">${net==="PRIME"?"Prime Video":net}</span>`; }
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><i class="py-mark"></i>NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><img class="nflsn-emblem" src="img/nflsn-emblem.png" alt="" onerror="this.remove()">NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -615,7 +736,7 @@ function pyBody(){
     const rowA = home? [them, sc?sc[1]:null, sc&&!w] : [T, sc?sc[0]:null, w];
     const rowH = home? [T, sc?sc[0]:null, w] : [them, sc?sc[1]:null, sc&&!w];
     const status = sc? "FINAL · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1) : g[5].slice(0,3).toUpperCase()+" · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1);
-    return `<div class="scorecard"><div class="st"><span>${status}</span><span class="net ${NETMAP(g)}">${NETMAP(g)==="PRIME"?"Prime Video":NETMAP(g)}</span></div>
+    return `<div class="scorecard"><div class="st"><span>${status}</span>${netChip(NETMAP(g))}</div>
       <div class="tm ${sc?(rowA[2]?"win":"lose"):""}"><span>${esc(rowA[0])}</span><b>${rowA[1]??""}</b></div>
       <div class="tm ${sc?(rowH[2]?"win":"lose"):""}"><span>${esc(rowH[0])}</span><b>${rowH[1]??""}</b></div></div>`; };
   if (pyTab==="scores"){
@@ -624,11 +745,14 @@ function pyBody(){
     let leagueHtml = "";
     if (S.blob.league && S.blob.league.games && S.blob.league.games.length){
       const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
-      const recent = S.blob.league.games.filter(g=>g.t===tp && g.w>=wkNow-1 && (g.played||g.hs+g.as>0)).slice(0,24);
-      leagueHtml = `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>Around the league</h3><span style="color:#8b939c">wk ${wkNow}</span></div>` +
+      // league games are compact arrays [type,week,hIdx,aIdx,hs,as] (v1.4.1: same shape bug as WagerLines; this list was silently empty)
+      const tn=S.blob.league.teams;
+      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tn[g[2]], a:tn[g[3]], hs:g[4], as:g[5], played:g[4]>=0} : g);
+      const recent = all.filter(g=>g.t===tp && g.w>=wkNow-1 && g.w<=wkNow && (g.played||g.hs+g.as>0)).sort((x,y)=>y.w-x.w).slice(0,24);
+      leagueHtml = `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>Around the league</h3><span style="color:#8b939c">wk ${wkNow+1}</span></div>` +
         recent.map(g=>`<div class="scorecard"><div class="st"><span>FINAL · ${g.t==="PreSeason"?"PRE ":""}WK ${g.w+1}</span></div>
-        <div class="tm ${g.as>g.hs?"win":"lose"}"><span>${esc(g.a)}</span><b>${g.as}</b></div>
-        <div class="tm ${g.hs>g.as?"win":"lose"}"><span>${esc(g.h)}</span><b>${g.hs}</b></div></div>`).join("");
+        <div class="tm ${g.as>g.hs?"win":"lose"}"><span>${tlogoImg(g.a)}${esc(g.a)}</span><b>${g.as}</b></div>
+        <div class="tm ${g.hs>g.as?"win":"lose"}"><span>${tlogoImg(g.h)}${esc(g.h)}</span><b>${g.hs}</b></div></div>`).join("");
     } else {
       leagueHtml = `<p style="font-size:12px;color:#5c6570;margin-top:14px">League-wide scores arrive with your next desktop sync (extractor v2 reads every game in the save).</p>`;
     }
@@ -706,16 +830,17 @@ RENDER.huddle = (b, sub)=>{
       <button class="uv ${mine===1?"on":""}" onclick="_hv('${id}',1)">▲</button>
       <b class="${sc<0?"neg":""}">${sc>999?(sc/1000).toFixed(1)+"k":sc}</b>
       <button class="dv ${mine===-1?"on":""}" onclick="_hv('${id}',-1)">▼</button></div>
-      <div class="cx"><div class="u"><b>${esc(c.u)}</b>${c.op?'<span class="op">OP</span>':''}${c.awd?`<span class="awd">${c.awd}</span>`:''}<span>· ${esc(c.tm)}</span></div>
+      <div class="cx"><div class="u"><b>${esc(c.u)}</b>${c.op?'<span class="op">OP</span>':''}${c.awd?`<span class="awd">${c.awd}</span>`:''}<span>· ${(_hOld?"":esc(c.tm))}</span></div>
       <p>${esc(c.t)}</p>
       ${(c.r||[]).map((r,i)=>`<div class="sub">${cmtHtml(r, id+"."+i, false)}</div>`).join("")}</div></div>`;
   };
   if (sub && sub.post){
     const P=S.world.huddle.find(h=>h.id===sub.post);
+    window._hOld = !!(P.ts && Date.now()-P.ts > 7*86400000); // old thread: comment "3h" stamps would lie, hide them
     const psc=score(P.up, P.id);
     b.innerHTML = aphead(esc(hudSub()), {back:"renderApp('huddle')", backlabel:"Feed"}) +
     `<div class="apbody flush"><div class="hpost">
-      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${esc(P.tm)}</span></div>
+      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
       <h3>${esc(P.h)}</h3><div class="body">${esc(P.b)}</div>
       <div class="stats"><span>▲ ${psc>999?(psc/1000).toFixed(1)+"k":psc}</span><span>💬 ${countCmts(P)}</span><span>Share</span></div></div>
     <div class="hud-sort"><span class="on">Best</span><span>Top</span><span>New</span><span>Controversial</span></div>` +
@@ -726,7 +851,7 @@ RENDER.huddle = (b, sub)=>{
     <div class="apbody flush hlist">` + S.world.huddle.map(P=>{
       const psc=score(P.up,P.id);
       return `<div class="hpost" onclick="renderApp('huddle',{post:'${P.id}'})">
-      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${esc(P.tm)}</span></div>
+      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
       <h3>${esc(P.h)}</h3><div class="body">${esc(P.b)}</div>
       <div class="stats"><span>▲ ${psc>999?(psc/1000).toFixed(1)+"k":psc}</span><span>💬 ${countCmts(P)}</span></div></div>`;}).join("") + `</div>`;
   }
@@ -1445,13 +1570,24 @@ function gameLines(list){
     return {...g, spread, total, mlH, mlA};
   });
 }
+function wagerNet(g, i){
+  // board games carry no day/time; hand out broadcast windows deterministically per week
+  if (g.t==="PreSeason") return "NFLN";
+  if (i===0) return "NBC"; if (i===1) return "PRIME"; if (i===2) return "ESPN";
+  return i%2? "FOX":"CBS";
+}
 RENDER.wager = b=>{
   b.className="wager darkapp";
   const wkNow=S.blob.clock.week, tp=S.blob.clock.weekType;
   let games;
   if (S.blob.league && S.blob.league.games.length){
-    games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow && !(g.played||g.hs+g.as>0));
-    if (!games.length) games = S.blob.league.games.filter(g=>g.t===tp && g.w===wkNow); // week fully played: show the closed board
+    // league games are COMPACT ARRAYS [type(0 pre/1 reg), week, homeIdx, awayIdx, hs, as] — map first (v1.4 fix: filtering on .t/.w matched nothing, board collapsed to your game only)
+    const tnames=S.blob.league.teams;
+    const all=S.blob.league.games.map(g=>Array.isArray(g)
+      ? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tnames[g[2]], a:tnames[g[3]], hs:g[4], as:g[5], played:g[4]>=0}
+      : g);
+    games = all.filter(g=>g.t===tp && g.w===wkNow && !(g.played||g.hs+g.as>0));
+    if (!games.length) games = all.filter(g=>g.t===tp && g.w===wkNow); // week fully played: show the closed board
   } else {
     const n=nextGame();
     games = n? [{w:n[0], t:n[1], h:n[4]?S.blob.player.team:n[3], a:n[4]?n[3]:S.blob.player.team, hs:0, as:0}] : [];
@@ -1462,7 +1598,7 @@ RENDER.wager = b=>{
   <div class="apbody">
   <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${lines.length} game${lines.length===1?"":"s"}</span></div>
   ${lines.map((g,i)=>`<div class="veh-detail" style="margin-bottom:10px;${(g.h===mine||g.a===mine)?"border-color:rgba(127,212,160,.4)":""}">
-    <div class="payline" style="border:none;padding:2px 0"><span><b>${esc(g.a)}</b> at <b>${esc(g.h)}</b>${(g.h===mine||g.a===mine)?' <span style="color:#7fd4a0;font-size:11px">YOUR GAME</span>':""}</span></div>
+    <div class="payline" style="border:none;padding:2px 0"><span class="wl-match">${tlogoImg(g.a,"tlogo wl")}<b>${esc(g.a)}</b> at ${tlogoImg(g.h,"tlogo wl")}<b>${esc(g.h)}</b>${(g.h===mine||g.a===mine)?' <span style="color:#7fd4a0;font-size:11px">YOUR GAME</span>':""}</span><span>${netChip(wagerNet(g,i))}</span></div>
     <div class="payline"><span>Spread</span><span>${g.spread===0? "PK (pick em)" : esc(g.h)+" "+(g.spread>0?"-":"+")+Math.abs(g.spread).toFixed(1)}</span></div>
     <div class="payline"><span>Total</span><span>O/U ${g.total.toFixed(1)}</span></div>
     <div class="payline"><span>Moneyline</span><span>${esc(g.h)} ${g.mlH>0?"+":""}${g.mlH} · ${esc(g.a)} ${g.mlA>0?"+":""}${g.mlA}</span></div>
@@ -1621,8 +1757,9 @@ async function midweekTick(){
       const posts=(S.chirp.posts||[]).slice(-3);
       for (const r of j.myReplies){ const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } }
     }
-    if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
+    if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs.map(m=>[m[0],m[1],Date.now()])); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
     if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
+    stampWorld();
     if (j.notebook && j.notebook.paras) S.world.articles.unshift({kick:"Midweek Notebook", head:j.notebook.head||"Notes from Florham Park", stand:"", by:"Marcus Ellery · United Chronicle Sports", paras:j.notebook.paras, wk:wkLabel(S.blob.clock)});
     if (j.podium && j.podium.brief){
       S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:j.podium.brief.split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:j.podium.brief});
@@ -1692,11 +1829,18 @@ RENDER.settings = b=>{
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Debt you brought with you</h3></div>
   <label class="flabel">Total debt ($)</label>
   <input class="field" type="number" min="0" step="500" id="pcDebtTotal" value="${debtT}" onchange="savePerception();rerenderSettings()">
-  ${debtT>0? `<p style="font-size:12px;color:var(--faint);margin:0 0 10px">Slide how it splits. Credit card share lands on the Meridian Credit card.</p>
-  <div id="debtSliders">${D.DEBTCATS.map((c,i)=>`<label class="flabel" style="display:flex;justify-content:space-between"><span>${c}</span><span>${fm(Math.round(debtT*shares[i]/100))}</span></label>
-   <input type="range" min="0" max="100" value="${shares[i]}" style="width:100%" oninput="debtSlide(${i}, +this.value)">`).join("")}</div>` : ""}
+  ${debtT>0? `<p style="font-size:12px;color:var(--faint);margin:0 0 10px">Tap − / + in 5% steps. Shares are relative; the dollars show the real split. Credit card share lands on the Meridian Credit card.</p>
+  <div id="debtSliders">${D.DEBTCATS.map((c,i)=>`<div class="dstep">
+    <span class="ds-name">${c}</span>
+    <span class="ds-amt" id="dsAmt${i}">${fm(Math.round(debtT*shares[i]/(shares.reduce((a,b)=>a+b,0)||1)))}</span>
+    <span class="ds-ctl"><button onclick="debtStep(${i},-1)">−</button><b id="dsPct${i}">${Math.round(shares[i]*100/(shares.reduce((a,b)=>a+b,0)||1))}%</b><button onclick="debtStep(${i},1)">+</button></span>
+  </div>`).join("")}</div>` : ""}
   <div style="font-size:12px;color:var(--faint);margin-top:6px">Starting balance seeds from your profile (draft money, NIL, family): <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply</button>`:""}</div>
 
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Beta: practice dials</h3></div>
+  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Testing controls for the future practice engine. The world treats these as the coach's honest evaluation of your week. 0 is a disaster, 10 is the best week of your life. Tap a number.</p>
+  ${["practice","film"].map(k=>`<label class="flabel">${k==="practice"?"On-field practice":"Film study / mental prep"} · <b id="bd-${k}-lbl">${betaDials()[k]}/10 ${dialLabel(betaDials()[k])}</b></label>
+  <div class="dialrow" id="bd-${k}">${Array.from({length:11},(_,v)=>`<button class="${betaDials()[k]===v?"on":""}" onclick="setDial('${k}',${v})">${v}</button>`).join("")}</div>`).join("")}
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>AI world engine</h3></div>
   <label class="flabel">Provider</label>
   <select class="field" onchange="META.settings.provider=this.value;META.settings.model=D.AI[this.value].models[0];saveMeta();rerenderSettings()">${Object.keys(D.AI).map(k=>`<option value="${k}" ${prov===k?"selected":""}>${D.AI[k].label}</option>`).join("")}</select>
@@ -1752,13 +1896,27 @@ function rerenderSettings(){
   renderApp("settings");
   requestAnimationFrame(()=>{const nb=document.querySelector(".apbody"); if(nb) nb.scrollTop=sc;});
 }
-function debtSlide(i, val){
+function debtStep(i, dir){
+  // v1.4: 5% steps replace the sliders (renormalize-and-rerender on every drag tick made them sticky).
   const pc=S.perception;
   pc.debtShares = pc.debtShares || [40,25,5,15,10,5];
-  pc.debtShares[i]=val;
-  const sum=pc.debtShares.reduce((a,b)=>a+b,0)||1;
-  pc.debtShares = pc.debtShares.map(x=>Math.round(x*100/sum));
-  applyDebts(); persist(); rerenderSettings();
+  pc.debtShares[i] = Math.max(0, Math.min(100, pc.debtShares[i] + 5*dir));
+  applyDebts(); persist();
+  // update ONLY the labels in place; no full rerender mid-interaction
+  const total=pc.debtTotal||0, sum=pc.debtShares.reduce((a,b)=>a+b,0)||1;
+  D.DEBTCATS.forEach((c,k)=>{
+    const a=$("#dsAmt"+k), pEl=$("#dsPct"+k);
+    if (a) a.textContent = fm(Math.round(total*pc.debtShares[k]/sum));
+    if (pEl) pEl.textContent = Math.round(pc.debtShares[k]*100/sum)+"%";
+  });
+}
+function setDial(k, v){
+  betaDials()[k]=v; persist();
+  const row=$("#bd-"+k); if(row) [...row.children].forEach((b,i)=>b.classList.toggle("on", i===v));
+  const l=$("#bd-"+k+"-lbl"); if(l) l.textContent=v+"/10 "+dialLabel(v);
+}
+function debtSlide(i, val){ /* DEAD v1.4: slider replaced by debtStep; kept per helper-deletion law */
+  const pc=S.perception; pc.debtShares = pc.debtShares || [40,25,5,15,10,5]; pc.debtShares[i]=val; applyDebts(); persist();
 }
 function applyDebts(){
   const pc=S.perception;
@@ -1909,7 +2067,7 @@ RENDER.sync = b=>{
   b.className="sync";
   b.innerHTML = aphead("Sync") + `<div class="apbody">
   <div class="synccard"><h4>How it works</h4><p>On the computer, double-click SYNC.bat (or run the extractor). QR squares open on the screen. Hit Scan below and point this phone at them — the code IS the save's facts, nothing rides the internet. Or paste a code by hand.</p>
-  <button class="btn" style="background:var(--acc,#4f8ef7);color:#fff" onclick="scanSheet()">Scan from computer screen</button>
+  
   <textarea class="field" id="syncIn" placeholder="TYNET1.…" style="margin-top:10px"></textarea>
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="applyCode()">Apply pasted code</button></div>
   <div class="synccard"><h4>Applied weeks — ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}</h4>
@@ -1929,6 +2087,9 @@ function parseScanned(t){
   const m=t.match(/#sync=(.+)$/); if(m){ try{ t=decodeURIComponent(m[1]); }catch(e){ t=m[1]; } }
   return t;
 }
+/* DEAD as of v1.4 (Ty: QRs need 4 pics for a full career code, so the scanner is retired;
+   copy-paste is THE sync path). Kept per the helper-deletion law; parseScanned still guards
+   legacy pasted URL codes. */
 async function ensureJsQR(){
   if (window.jsQR) return;
   const load=src=>new Promise((res,rej)=>{ const s=document.createElement("script");
@@ -2211,7 +2372,10 @@ async function advanceTo(blob){
   }
   if (!wksElapsed.length){ burnWeek(); tickInvest(rng); }
   // adopt the new truth
+  const gameDelta = gameDateObj(newC) - gameDateObj(oldC);           // v1.4: how far the WORLD moved
+  if (gameDelta > 0) shiftWorldTime(gameDelta);                       // everything already here ages by game time
   S.blob=blob; S.appliedWeeks.push(wkKey(newC));
+  reseedFollowers(blob);                                              // v1.4: fame follows the save, not 842 forever
   const c=META.careers.find(x=>x.id===S.careerId); if(c) c.sub=blob.player.pos+" · "+blob.player.team+" · "+wkLabel(newC);
   // status change events
   const last = lastPlayed(blob.schedule, newC.weekType) || lastPlayed(blob.schedule);
@@ -2264,6 +2428,7 @@ function placeholderWeek(blob, last){
     {u:"late_reps_watcher",tm:"1h",up:33,t:"any word on who got the late reps? asking for reasons",r:[
       {u:"PS_Insider_Burner",tm:"49m",up:88,t:"you know exactly why you're asking. and yes."}]},
     {u:"fire_everyone_guy",tm:"1h",up:-31,t:"fire everyone. every single person in the building. the janitor too"}]});
+  stampWorld();
   persist();
 }
 /* ---- AI generation (user's own key, phone-side) ---- */
@@ -2319,7 +2484,9 @@ async function callAI(system, user, maxTokens){
 const callClaude = callAI; // legacy alias
 function worldFacts(blob, last){
   const p=blob.player; const per=S.perception;
-  return `PLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
+  return `TODAY (in-world): ${gameDateLong(blob.clock)}, ${wkLabel(blob.clock)}. All content you write happens NOW; anything from earlier weeks or seasons is the past.
+HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (Marcus Ellery of the United Chronicle is the house beat writer; NFLSN is the stats network).
+${practiceLine()}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
 LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
@@ -2331,19 +2498,30 @@ PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${
 async function generateWeek(blob, last, opts){
   opts=opts||{};
   toast("Generating the week's world…");
-  const sys = `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan/journalist voices with distinct personalities. The player is NOT famous unless the facts imply it. Output STRICT JSON only, no markdown fences, matching:
-${opts.noArticle?"":`{"article":{"kick":"","head":"","stand":"","by":"Marcus Ellery · United Chronicle Sports","paras":["8-12 paragraphs, feature length"],"pq":"one pull quote"},`}${opts.noArticle?"{":""}"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"2h"} x6-9],
+  // v1.4: the article is its OWN call with its own register. Inside the world JSON it came out
+  // short and chatty (Ty: "read like the writer was talking to a buddy"). A newspaper feature
+  // deserves a dedicated pass; the world call always runs article-free now.
+  if (!opts.noArticle){
+    try{
+      const asys = `You are Marcus Ellery, the veteran beat writer for the United Chronicle, a serious local newspaper. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"Marcus Ellery · United Chronicle Sports","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+      const art = await aiJSON(asys, worldFacts(blob,last)+"\n\nWrite the game story now.", 8000);
+      if (art && art.paras && art.paras.length){ art.wk=wkLabel(blob.clock); art.ts=Date.now(); S.world.articles.unshift(art); }
+    }catch(e){ toast("Article pass failed ("+e.message+") — world continues."); }
+  }
+  const sys = `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities. The player is NOT famous unless the facts imply it. Group text threads (qbroom) MUST format every message as "FirstName LastName|message text" with the pipe character. Output STRICT JSON only, no markdown fences, matching:
+{"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"2h"} x6-9],
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"braelon|qbroom|agent|mom","msgs":[["them","..."]]} x2-4 additions],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]}`;
   let j;
-  try { j = await aiJSON(sys, worldFacts(blob,last)+"\n\nWrite this week's "+(opts.noArticle?"world (no article this pass).":"full world."), 16000); }
+  try { j = await aiJSON(sys, worldFacts(blob,last)+"\n\nWrite this week's world.", 16000); }
   catch(e){ throw new Error("bad JSON from model (after a retry)"); }
   if (j.article && !opts.noArticle){ j.article.wk=wkLabel(blob.clock); S.world.articles.unshift(j.article); }
   if (j.chirps) S.world.chirps=[...j.chirps, ...S.world.chirps].slice(0,40);
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
-  if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
+  if (j.texts) for (const t of j.texts){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs.map(m=>[m[0],m[1],Date.now()])); th.last=Date.now(); delete S.reads["t:"+th.id]; } }
   if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
+  stampWorld();
   S.world.notifs.unshift({app:"huddle", t:hudSub(), p:j.huddle?.[0]?.h||"New threads"});
   S.lastRefresh = { when: Date.now(), wk: wkLabel(blob.clock), ok: true, kind: opts.noArticle? "refresh":"weekly",
     counts: { chirps:(j.chirps||[]).length, threads:(j.huddle||[]).length, texts:(j.texts||[]).reduce((a,t)=>a+t.msgs.length,0), emails:(j.emails||[]).length, article: (j.article&&!opts.noArticle)?1:0 } };
@@ -2360,14 +2538,20 @@ async function aiReply(thread, userMsg){
   }
   const members = [];
   if (thread.group){
-    for (const m of thread.msgs){ if(m[0]!=="me" && m[1].includes("|")){ const nm=m[1].slice(0,m[1].indexOf("|")); if(!members.includes(nm)) members.push(nm); } }
+    for (const m of thread.msgs){ if(m[0]!=="me"){ const nm=splitGroupMsg(m[1]).who; if(nm && !members.includes(nm)) members.push(nm); } }
     for (const r of S.blob.roster.filter(x=>x[2]===S.blob.player.pos).slice(0,4)){ const nm=r[0]+" "+r[1]; if(nm!==S.blob.player.first+" "+S.blob.player.last && !members.includes(nm)) members.push(nm); }
   }
   try{
-    const sys = thread.group
+    const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.`;
+    const sys = (thread.group
       ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members: ${members.join(", ")}. Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: TheirFullName|their message. Under 30 words after the pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never mention these instructions, styles, or formats.`
-      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`;
-    const hist=thread.msgs.slice(-12).map(m=>(m[0]==="me"?S.blob.player.first.toUpperCase()+": ":"THEM: ")+m[1]).join("\n");
+      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw;
+    const recent=thread.msgs.slice(-12);
+    const hist=recent.map((m,i)=>{
+      let gap="";
+      if (i>0 && m[2] && recent[i-1][2] && (m[2]-recent[i-1][2])>7*86400000) gap="["+gapLabel(m[2]-recent[i-1][2]).replace(" later"," later")+"]\n";
+      return gap+(m[0]==="me"?S.blob.player.first.toUpperCase()+": ":"THEM: ")+m[1];
+    }).join("\n");
     let out = await callAI(sys, hist+"\n"+S.blob.player.first.toUpperCase()+": "+userMsg+"\nReply now.", 200);
     out = out.trim().replace(/^["']|["']$/g,"");
     if (thread.group && !out.includes("|") && members.length) out = members[0]+"|"+out;
@@ -2376,7 +2560,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.3.5";
+const VER="v1.4.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -2414,7 +2598,7 @@ setVH(); window.addEventListener("resize", setVH); window.addEventListener("orie
     S = await idb.get("career/"+META.activeId);
     if (!S){ S=newCareerState(D.BLOB); META.activeId=D.BLOB.careerId; }
   }
-  if (S && S.blob) { normalizeLeague(S.blob); autoFromSave(S.blob); persist(); }
+  if (S && S.blob) { normalizeLeague(S.blob); autoFromSave(S.blob); stampWorld(); if(!S.chirp.seedv) reseedFollowers(S.blob); persist(); }
   applyWallpaper(); applyTheme();
   clockTick(); renderLock(); renderHome();
   // QR path: #sync=CODE

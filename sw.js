@@ -1,7 +1,7 @@
 /* TyNet service worker — polite auto-updates */
-const VER = "typhone-v1.3.5";
+const VER = "typhone-v1.4.3";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
-const EXTRAS = ["./jsqr.min.js"]; // best-effort: never allowed to block install if missing
+const EXTRAS = []; // scanner retired v1.4 (copy-paste is THE sync path); jsqr.min.js no longer cached
 const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use
 self.addEventListener("install", e=>{
   e.waitUntil(caches.open(VER).then(c=>
