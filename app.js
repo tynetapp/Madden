@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.5.1 (Aug 8 2026) */
+/* TyPhone app.js — v1.5.4 (Aug 8 2026) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -542,14 +542,20 @@ async function sendText(tid){
 /* Chirper */
 /* v1.4.1: real art. Files live in phone/img/; every use degrades gracefully if a file is missing. */
 const TEAMKEYS = new Set(["jets","giants","patriots","bills","dolphins","steelers","ravens","bengals","browns","texans","colts","titans","jaguars","chiefs","raiders","chargers","broncos","cowboys","eagles","commanders","49ers","seahawks","rams","cardinals","packers","bears","vikings","lions","buccaneers","saints","falcons","panthers"]);
-function teamLogo(name){ const k=String(name||"").toLowerCase(); return TEAMKEYS.has(k)? "img/team-"+k+".png" : null; }
-function tlogoImg(name, cls){ const src=teamLogo(name); return src? `<img class="${cls||"tlogo"}" src="${src}" alt="" onerror="this.remove()">` : ""; }
+/* v1.5.4: art lives at the REPO ROOT (Ty's uploads land there) — try root first, img/ second,
+   then each site's own last resort. artE(el) returns true while retries remain. */
+function artE(el){
+  if (!el.dataset.r){ el.dataset.r="1"; el.src="img/"+el.src.split("/").pop(); return true; }
+  return false;
+}
+function teamLogo(name){ const k=String(name||"").toLowerCase(); return TEAMKEYS.has(k)? "team-"+k+".png" : null; }
+function tlogoImg(name, cls){ const src=teamLogo(name); return src? `<img class="${cls||"tlogo"}" src="${src}" alt="" onerror="if(!artE(this))this.remove()">` : ""; }
 function chAvatar(c){
   const src = c.n? teamLogo((c.n||"").split(" ")[0]) : null; // "Jets Videos", "Jets" official
-  if (src) return `<span class="av chav teamav"><img src="${src}" alt="" onerror="this.parentNode.textContent='${(c.n||"?")[0]}'"></span>`;
+  if (src) return `<span class="av chav teamav"><img src="${src}" alt="" onerror="if(!artE(this))this.parentNode.textContent='${(c.n||"?")[0]}'"></span>`;
   return `<span class="av chav" style="background:${c.av||avColor(c.n||"me")}">${initials(c.n||"?")}</span>`;
 }
-const VF = '<i class="vfk"><img src="img/chirper-verified.png" width="15" height="15" alt="" onerror="this.outerHTML=&quot;<svg viewBox=\'0 0 22 22\' width=\'15\' height=\'15\'><circle cx=\'11\' cy=\'11\' r=\'10.5\' fill=\'#1d9bf0\'/><path d=\'M6.2 11.4l3.1 3.1 6.3-6.6\' fill=\'none\' stroke=\'#fff\' stroke-width=\'2.2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>&quot;"></i>';
+const VF = '<i class="vfk"><img src="chirper-verified.png" width="15" height="15" alt="" onerror="if(!artE(this))this.outerHTML=&quot;<svg viewBox=\'0 0 22 22\' width=\'15\' height=\'15\'><circle cx=\'11\' cy=\'11\' r=\'10.5\' fill=\'#1d9bf0\'/><path d=\'M6.2 11.4l3.1 3.1 6.3-6.6\' fill=\'none\' stroke=\'#fff\' stroke-width=\'2.2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>&quot;"></i>';
 function chText(t){
   return esc(t).replace(/@([A-Za-z0-9_]+)/g, '<span class="mention">@$1</span>');
 }
@@ -758,17 +764,17 @@ const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
   if (day==="Sunday"){ if (t>=1200) return "NBC"; return ["CBS","FOX"][g[0]%2]; } return "CBS"; };
-const NETIMG = {ESPN:"net-espn", NBC:"net-nbc", CBS:"net-cbs-dark", FOX:"net-fox", PRIME:"net-prime", ABC:"net-abc"};
+const NETIMG = {ESPN:"net-espn", NBC:"net-nbc", CBS:"net-cbs-dark", FOX:"net-fox", PRIME:"net-prime", ABC:"net-abc", SNF:"broadcast-sunday-night-football", TNF:"broadcast-thursday-night-football", MNF:"broadcast-monday-night-football", NFLN:"broadcast-nfl-network"};
 function netChip(net){
   const f=NETIMG[net];
-  if (f) return `<span class="netimg"><img src="img/${f}.png" alt="${net}" onerror="this.parentNode.outerHTML=NETFALL('${net}')"></span>`;
+  if (f) return `<span class="netimg"><img src="${f}.png" alt="${net}" onerror="if(!artE(this))this.parentNode.outerHTML=NETFALL('${net}')"></span>`;
   return NETFALL(net);
 }
 function NETFALL(net){ return `<span class="net ${net}">${net==="PRIME"?"Prime Video":net}</span>`; }
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><img class="nflsn-emblem" src="img/nflsn-emblem.png" alt="" onerror="this.remove()">NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><img class="nflsn-emblem" src="nflsn-emblem.png" alt="" onerror="if(!artE(this))this.remove()">NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["me","My Season"],["leaders","Leaders"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -1506,7 +1512,7 @@ RENDER.apex = (b,sub)=>{
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Crestline Automotive — regional ambassador</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">$120,000/yr + vehicle · ${S.blob.player.status==="PracticeSquad"?"requires active-roster status.":"terms under review."}${S.agent? " "+esc(S.agent.n.split(" ")[0])+"'s note: sit tight, do not buy anything stupid." : " No agent on file to work the clause."}</div>
       <div style="font-size:12px;opacity:.5">On hold · arrival clause · autos exclusivity</div></div>
-    ${sponsorWatchers().map(s=>`<div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:16px">${esc(s[0])} — scouting</div>
+    ${sponsorWatchers().map(s=>`<div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:16px">${sponsorImg(s[0])}${esc(s[0])} — scouting</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">${esc(s[0])} brand team has your tape flagged. ${S.agent? esc(S.agent.n.split(" ")[0])+" is working the relationship." : "No agent on file; nobody is working the phone."} Terms unlock with roster status and buzz.</div>
       <div style="font-size:12px;opacity:.5">Watching · ${esc(s[1])} category</div></div>`).join("")}
     <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">Florham Park Deli — name & likeness</div>
@@ -1532,9 +1538,11 @@ function signDeli(){
   persist(); toast("Signed. The Number Zero is in rotation. "+fm(4500-cut)+" after the fee.");
   renderApp("apex");
 }
+function sponsorSlug(n){ return n.toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,""); }
+function sponsorImg(n){ return `<img class="sponslogo" src="sponsor-${sponsorSlug(n)}.png" alt="" onerror="if(!artE(this))this.remove()">`; }
 function sponsorWatchers(){
   const rng=seedRng(S.careerId+"|sponsors|"+wkKey(S.blob.clock));
-  const pool=D.SPONSORS.filter(s=>["apparel","beverage","tech","auto","finance"].includes(s[1]));
+  const pool=D.SPONSORS.filter(s=>!["media","equipment"].includes(s[1])); // v1.5.2: 190+ brand pool; media/equipment stay out of personal-endorsement scouting
   const picks=[]; const used={};
   while (picks.length<3 && picks.length<pool.length){ const p=pool[Math.floor(rng()*pool.length)]; if(used[p[0]])continue; used[p[0]]=1; picks.push(p); }
   return picks;
@@ -1617,9 +1625,10 @@ function gameLines(list){
   });
 }
 function wagerNet(g, i){
-  // board games carry no day/time; hand out broadcast windows deterministically per week
+  // board games carry no day/time; hand out broadcast windows deterministically per week.
+  // Primetime slots wear the PACKAGE lockup (SNF/TNF/MNF) — the network is implied.
   if (g.t==="PreSeason") return "NFLN";
-  if (i===0) return "NBC"; if (i===1) return "PRIME"; if (i===2) return "ESPN";
+  if (i===0) return "SNF"; if (i===1) return "TNF"; if (i===2) return "MNF";
   return i%2? "FOX":"CBS";
 }
 RENDER.wager = b=>{
@@ -2607,7 +2616,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.5.1";
+const VER="v1.5.4";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
