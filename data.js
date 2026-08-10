@@ -1,0 +1,451 @@
+/* TyPhone data.js — v1.6.0-public (Aug 10 2026) — THE PRIVACY EDITION */
+/* ============ TyNet world data ============
+   D.BLOB       , null on the public build — no baked demo career ships. The phone boots to a
+                  connect screen and a career exists only after the visitor applies their own
+                  sync code from the desktop extractor.
+   D.NEIGHBORHOODS, D.CARS, D.YACHTS, D.PLANES, offline catalogs (world data, never rides the blob)
+   Rule: save facts are truth; everything else is authored world fiction keyed to those facts. */
+window.D = window.D || {};
+
+/* ---------- no baked career on the public build ---------- */
+D.BLOB = null;
+D.SEED = null;
+
+/* ---------- NEIGHBORHOODS v2: 20 real areas per market [name, base $M in 2026, typical lot acres] ---------- */
+D.METROS = {
+ "Jets": {city:"New York", hoods:[["Hoboken, NJ",1.45,.06],["Jersey City (Paulus Hook)",1.2,.05],["Fort Lee, NJ",0.95,.15],["Edgewater, NJ",1.05,.1],["Montclair, NJ",1.1,.25],["Ridgewood, NJ",1.15,.3],["Summit, NJ",1.35,.35],["Short Hills, NJ",2.1,.5],["Alpine, NJ",3.4,1.5],["Saddle River, NJ",2.4,1.8],["Franklin Lakes, NJ",1.8,1.2],["Williamsburg, Brooklyn",1.7,.04],["Park Slope, Brooklyn",1.9,.05],["Brooklyn Heights",2.3,.05],["Tribeca, Manhattan",3.6,.03],["Upper East Side",2.6,.03],["Long Island City",1.25,.04],["Garden City, LI",1.25,.25],["Manhasset, LI",1.9,.4],["Old Westbury, LI",3.0,2.0]]},
+ "Bills": {city:"Buffalo", hoods:[["Elmwood Village",0.44,.1],["North Buffalo",0.4,.12],["Allentown",0.38,.08],["Orchard Park",0.52,.5],["East Aurora",0.5,.6],["Hamburg",0.42,.4],["Clarence",0.65,.8],["Williamsville",0.55,.3],["Amherst",0.48,.35],["Kenmore",0.34,.15],["Grand Island",0.5,.6],["Lancaster",0.42,.4],["West Seneca",0.36,.3],["Snyder",0.52,.3],["Lewiston",0.48,.5],["Niagara-on-the-Lake area",0.55,.5],["Eden",0.38,1.0],["Springville",0.34,1.2],["Ellicottville",0.6,.8],["Waterfront (Marine Drive)",0.5,.05]]},
+ "Dolphins": {city:"Miami", hoods:[["Brickell",1.0,.03],["Edgewater",0.85,.04],["Wynwood",0.75,.05],["Coconut Grove",1.5,.2],["Coral Gables",1.5,.25],["Key Biscayne",2.4,.25],["Miami Beach (South of Fifth)",2.6,.05],["Sunset Islands",4.5,.35],["Bal Harbour",2.2,.1],["Aventura",0.9,.08],["Pinecrest",1.7,.7],["Palmetto Bay",0.95,.5],["Doral",0.8,.15],["Fort Lauderdale (Victoria Park)",0.85,.2],["Fort Lauderdale (Las Olas Isles)",2.3,.25],["Weston",0.95,.3],["Parkland",1.05,.4],["Boca Raton (Royal Palm)",2.0,.4],["Hollywood Lakes",0.8,.25],["Davie",0.75,.5]]},
+ "Patriots": {city:"Boston", hoods:[["Back Bay",2.0,.03],["Beacon Hill",2.2,.03],["South End",1.6,.04],["Seaport",1.5,.03],["Charlestown",1.2,.05],["South Boston",1.1,.05],["Cambridge (Harvard Sq)",1.7,.1],["Brookline",1.6,.2],["Newton",1.4,.3],["Wellesley",1.8,.5],["Weston, MA",2.4,1.2],["Dover, MA",2.1,2.0],["Needham",1.3,.35],["Milton",1.0,.4],["Hingham",1.2,.5],["Foxborough",0.65,.6],["Franklin",0.6,.5],["Providence (East Side)",0.6,.15],["Barrington, RI",0.75,.4],["Cape Cod (Osterville)",1.5,.6]]},
+ "Ravens": {city:"Baltimore", hoods:[["Federal Hill",0.44,.03],["Canton",0.46,.03],["Fells Point",0.5,.03],["Mount Vernon",0.38,.04],["Locust Point",0.45,.04],["Roland Park",0.7,.3],["Guilford",0.75,.3],["Homeland",0.65,.25],["Towson",0.52,.25],["Ruxton",0.9,.8],["Lutherville",0.55,.4],["Owings Mills",0.55,.3],["Pikesville",0.6,.35],["Ellicott City",0.62,.4],["Columbia",0.55,.25],["Annapolis (Downtown)",0.85,.15],["Severna Park",0.75,.4],["Green Spring Valley",1.4,2.0],["Canton Waterfront",0.7,.03],["Harbor East",0.8,.02]]},
+ "Bengals": {city:"Cincinnati", hoods:[["Over-the-Rhine",0.44,.03],["Mount Adams",0.58,.06],["Hyde Park",0.66,.2],["Oakley",0.5,.15],["Mount Lookout",0.6,.2],["Columbia Tusculum",0.48,.12],["East Walnut Hills",0.45,.15],["Indian Hill",1.5,2.5],["Terrace Park",0.75,.4],["Mariemont",0.6,.25],["Madeira",0.55,.3],["Montgomery",0.62,.4],["Anderson Township",0.48,.5],["Fort Thomas, KY",0.48,.25],["Covington (Mainstrasse)",0.4,.05],["Newport (East Row)",0.42,.06],["West Chester",0.5,.35],["Mason",0.52,.35],["Loveland",0.45,.4],["Wyoming, OH",0.58,.3]]},
+ "Browns": {city:"Cleveland", hoods:[["Ohio City",0.4,.05],["Tremont",0.38,.05],["Detroit-Shoreway",0.34,.06],["Downtown (Warehouse District)",0.42,.02],["University Circle",0.4,.08],["Shaker Heights",0.5,.3],["Cleveland Heights",0.4,.2],["Rocky River",0.52,.25],["Bay Village",0.55,.3],["Westlake",0.58,.35],["Avon Lake",0.52,.4],["Lakewood",0.38,.12],["Chagrin Falls",0.65,.6],["Hunting Valley",1.6,3.0],["Gates Mills",0.85,1.5],["Pepper Pike",0.75,.9],["Beachwood",0.55,.3],["Strongsville",0.42,.35],["Brecksville",0.5,.5],["Hudson",0.6,.5]]},
+ "Steelers": {city:"Pittsburgh", hoods:[["Shadyside",0.52,.1],["Squirrel Hill",0.5,.12],["Lawrenceville",0.44,.05],["South Side Flats",0.4,.04],["Mount Washington",0.42,.1],["Highland Park",0.42,.15],["Point Breeze",0.48,.2],["Regent Square",0.42,.12],["Sewickley",0.8,.5],["Sewickley Heights",1.6,2.5],["Fox Chapel",1.1,1.2],["Mt. Lebanon",0.5,.2],["Upper St. Clair",0.6,.4],["Peters Township",0.55,.5],["Cranberry Township",0.5,.35],["Wexford",0.55,.5],["Oakmont",0.45,.25],["Aspinwall",0.42,.1],["North Shore (condos)",0.5,.02],["Downtown (Cultural District)",0.45,.02]]},
+ "Texans": {city:"Houston", hoods:[["The Heights",0.6,.12],["Montrose",0.62,.1],["Midtown",0.5,.05],["EaDo",0.45,.06],["River Oaks",2.5,.5],["Memorial (Villages)",1.2,.4],["Tanglewood",1.3,.4],["West University Place",1.1,.2],["Bellaire",0.85,.25],["Museum District",0.7,.1],["Garden Oaks",0.55,.2],["Oak Forest",0.5,.18],["Spring Branch",0.55,.25],["Katy (Cinco Ranch)",0.48,.2],["Sugar Land",0.5,.25],["The Woodlands",0.55,.3],["Pearland",0.42,.2],["Cypress (Towne Lake)",0.5,.25],["Kingwood",0.42,.3],["Friendswood",0.45,.3]]},
+ "Colts": {city:"Indianapolis", hoods:[["Broad Ripple",0.42,.15],["Meridian-Kessler",0.52,.25],["Butler-Tarkington",0.44,.2],["Fountain Square",0.36,.08],["Mass Ave (Downtown)",0.42,.03],["Herron-Morton",0.48,.1],["Irvington",0.32,.15],["Carmel",0.65,.3],["Carmel (Village of WestClay)",0.75,.35],["Zionsville",0.72,.5],["Fishers",0.52,.3],["Noblesville",0.45,.35],["Westfield",0.5,.3],["Geist",0.75,.5],["Meridian Hills",0.8,.8],["Williams Creek",0.9,1.0],["Greenwood",0.38,.3],["Avon",0.4,.3],["Brownsburg",0.38,.3],["McCordsville",0.42,.35]]},
+ "Jaguars": {city:"Jacksonville", hoods:[["Riverside",0.44,.15],["Avondale",0.48,.2],["San Marco",0.52,.2],["Springfield",0.34,.12],["Murray Hill",0.32,.15],["Ortega",0.7,.4],["San Jose",0.5,.3],["Mandarin",0.52,.4],["Jacksonville Beach",0.7,.15],["Neptune Beach",0.75,.18],["Atlantic Beach",0.8,.2],["Ponte Vedra Beach",1.3,.4],["Nocatee",0.6,.2],["Julington Creek",0.5,.3],["Fleming Island",0.48,.3],["Amelia Island",0.9,.3],["St. Johns (Durbin)",0.52,.25],["Queens Harbour",0.85,.4],["Epping Forest",1.2,.6],["Downtown (Brooklyn)",0.4,.03]]},
+ "Titans": {city:"Nashville", hoods:[["The Gulch",0.8,.02],["Germantown",0.7,.05],["East Nashville (Lockeland Springs)",0.6,.15],["12 South",0.85,.15],["Green Hills",1.0,.3],["Belle Meade",2.2,1.0],["Forest Hills",1.5,1.2],["Oak Hill",1.2,1.0],["Sylvan Park",0.62,.15],["The Nations",0.5,.1],["Wedgewood-Houston",0.55,.08],["Brentwood",1.2,.8],["Franklin (Westhaven)",0.95,.25],["Franklin (Downtown)",0.9,.3],["Thompson's Station",0.65,.6],["Nolensville",0.6,.4],["Mt. Juliet",0.5,.35],["Hendersonville",0.5,.4],["College Grove (The Grove)",1.4,1.0],["Leiper's Fork",1.3,3.0]]},
+ "Broncos": {city:"Denver", hoods:[["LoDo",0.75,.02],["RiNo",0.6,.04],["Washington Park",0.95,.12],["Cherry Creek",1.35,.1],["Country Club",1.6,.25],["Highlands (LoHi)",0.85,.08],["Berkeley",0.65,.12],["Congress Park",0.7,.12],["Observatory Park",1.0,.2],["Hilltop",1.2,.25],["Cherry Hills Village",2.6,1.0],["Greenwood Village",1.2,.6],["Castle Pines",0.95,.4],["Lone Tree",0.75,.25],["Golden",0.7,.3],["Boulder (Chautauqua)",1.6,.3],["Evergreen",0.85,1.5],["Morrison",0.7,1.0],["Littleton (Ken Caryl)",0.6,.3],["Parker",0.6,.3]]},
+ "Chiefs": {city:"Kansas City", hoods:[["Country Club Plaza",0.58,.08],["Brookside",0.5,.15],["Waldo",0.38,.15],["River Market",0.42,.03],["Crossroads",0.45,.03],["Westport",0.4,.1],["Hyde Park KC",0.42,.15],["Mission Hills, KS",1.6,.5],["Prairie Village",0.55,.25],["Leawood",0.75,.35],["Overland Park (Hallbrook)",0.9,.4],["Fairway",0.5,.25],["Lenexa",0.48,.3],["Olathe",0.42,.3],["Lee's Summit",0.45,.3],["Parkville",0.5,.4],["Liberty",0.4,.3],["Loch Lloyd",1.1,.8],["Weatherby Lake",0.6,.4],["Briarcliff",0.55,.25]]},
+ "Raiders": {city:"Las Vegas", hoods:[["Summerlin (The Ridges)",2.0,.4],["Summerlin (Red Rock CC)",1.2,.3],["Summerlin (Downtown)",0.72,.15],["The Summit Club",4.5,.8],["MacDonald Highlands",2.2,.5],["Anthem Country Club",0.9,.3],["Seven Hills",0.85,.3],["Green Valley Ranch",0.6,.2],["Lake Las Vegas",0.9,.3],["Southern Highlands",0.9,.35],["Spanish Trail",0.75,.3],["Queensridge",1.1,.35],["The Lakes",0.65,.25],["Centennial Hills",0.5,.25],["Skye Canyon",0.55,.2],["Inspirada",0.55,.18],["Downtown (Arts District)",0.45,.05],["Boulder City",0.5,.3],["Mount Charleston",0.6,.8],["Henderson (Ascaya)",3.0,.6]]},
+ "Chargers": {city:"Los Angeles", hoods:[["Manhattan Beach",2.8,.1],["Hermosa Beach",2.3,.08],["Redondo Beach",1.5,.1],["Playa Vista",1.4,.06],["Venice",1.8,.08],["Santa Monica",2.2,.1],["Pacific Palisades",3.4,.25],["Brentwood, LA",3.0,.3],["Beverly Hills (Flats)",4.5,.4],["Bel Air",4.8,.8],["Hollywood Hills",2.0,.25],["Silver Lake",1.3,.12],["Los Feliz",1.7,.2],["Studio City",1.5,.2],["Encino",1.6,.35],["Calabasas (The Oaks)",2.4,.5],["Hidden Hills",3.5,1.2],["Pasadena (Madison Heights)",1.4,.25],["San Marino",2.4,.4],["Palos Verdes Estates",2.2,.4]]},
+ "Rams": {city:"Los Angeles", hoods:"Chargers"},
+ "Giants": {city:"New York", hoods:"Jets"},
+ "Cowboys": {city:"Dallas", hoods:[["Uptown",0.8,.04],["Highland Park",2.6,.3],["University Park",1.9,.25],["Preston Hollow",1.8,.5],["Lakewood",0.75,.25],["M Streets",0.65,.15],["Bishop Arts",0.5,.1],["Deep Ellum",0.52,.04],["Knox-Henderson",0.75,.08],["Devonshire",0.9,.25],["Frisco (Starwood)",0.85,.25],["Frisco (Newman Village)",0.95,.3],["Plano (Willow Bend)",0.75,.3],["Southlake",1.2,.5],["Westlake (Vaquero)",2.6,.8],["Colleyville",0.9,.5],["Prosper",0.7,.35],["Celina (Light Farms)",0.6,.25],["Flower Mound",0.62,.3],["McKinney (Stonebridge)",0.55,.25]]},
+ "Eagles": {city:"Philadelphia", hoods:[["Rittenhouse Square",1.0,.02],["Society Hill",0.95,.03],["Old City",0.65,.03],["Fishtown",0.5,.03],["Northern Liberties",0.6,.03],["Graduate Hospital",0.65,.03],["Fairmount",0.55,.04],["Queen Village",0.7,.03],["Chestnut Hill",0.75,.25],["Mt. Airy",0.45,.15],["Haddonfield, NJ",0.7,.25],["Moorestown, NJ",0.65,.4],["Cherry Hill, NJ",0.5,.3],["Ardmore (Main Line)",0.65,.2],["Bryn Mawr",0.9,.4],["Villanova",1.4,.8],["Gladwyne",1.7,1.0],["Wayne",0.85,.4],["Newtown Square",0.75,.5],["Media",0.55,.25]]},
+ "Commanders": {city:"Washington", hoods:[["Georgetown",1.6,.05],["Logan Circle",0.95,.03],["Capitol Hill",0.9,.04],["Navy Yard",0.8,.02],["Shaw",0.85,.03],["Dupont Circle",0.95,.03],["Kalorama",1.9,.1],["Spring Valley",1.7,.3],["Chevy Chase, DC",1.3,.15],["Bethesda, MD",1.2,.2],["Potomac, MD",1.5,.9],["Chevy Chase Village, MD",1.8,.25],["Arlington (Clarendon)",1.0,.08],["Arlington (Country Club Hills)",1.6,.3],["McLean, VA",1.7,.5],["Great Falls, VA",1.6,1.5],["Alexandria (Old Town)",0.95,.05],["Vienna, VA",1.0,.3],["Falls Church City",0.95,.2],["Ashburn (One Loudoun)",0.7,.15]]},
+ "Bears": {city:"Chicago", hoods:[["Lincoln Park",1.0,.05],["Gold Coast",1.5,.04],["West Loop",0.9,.03],["River North",0.75,.02],["Wicker Park",0.75,.05],["Bucktown",0.7,.05],["Lakeview",0.65,.04],["Logan Square",0.55,.05],["Streeterville",0.7,.02],["Old Town",0.85,.04],["Hyde Park (Kenwood)",0.6,.15],["Evanston",0.65,.15],["Wilmette",0.9,.25],["Winnetka",1.6,.5],["Kenilworth",2.0,.5],["Glencoe",1.4,.4],["Highland Park, IL",0.9,.4],["Lake Forest",1.2,.9],["Hinsdale",1.3,.4],["Oak Brook",1.0,.7]]},
+ "Lions": {city:"Detroit", hoods:[["Corktown",0.36,.05],["Midtown Detroit",0.38,.04],["Brush Park",0.45,.04],["Indian Village",0.4,.2],["Boston-Edison",0.35,.2],["Palmer Woods",0.5,.3],["Grosse Pointe",0.6,.25],["Grosse Pointe Farms",0.75,.3],["Grosse Pointe Shores",0.9,.4],["Royal Oak",0.45,.15],["Ferndale",0.38,.12],["Birmingham, MI",0.9,.25],["Bloomfield Hills",1.3,.8],["West Bloomfield",0.6,.4],["Franklin, MI",0.9,.8],["Northville",0.6,.3],["Plymouth",0.5,.25],["Rochester Hills",0.5,.3],["Troy",0.48,.25],["Ann Arbor (Burns Park)",0.7,.2]]},
+ "Packers": {city:"Green Bay", hoods:[["Astor Park",0.3,.15],["Olde Main Street",0.26,.12],["De Pere (East)",0.4,.25],["De Pere (West)",0.38,.25],["Allouez",0.34,.25],["Ashwaubenon",0.32,.25],["Howard",0.34,.3],["Suamico",0.44,.5],["Bellevue",0.34,.3],["Ledgeview",0.5,.5],["Hobart",0.45,.5],["Lawrence",0.4,.4],["Green Bay (Bay Beach area)",0.3,.2],["Oneida",0.28,.5],["Wrightstown",0.32,.4],["Appleton (North)",0.4,.3],["Neenah (Island)",0.45,.3],["Door County (Egg Harbor)",0.6,.8],["Door County (Fish Creek)",0.65,.8],["Shorewood Hills (Madison)",0.75,.3]]},
+ "Vikings": {city:"Minneapolis", hoods:[["North Loop",0.65,.02],["Mill District",0.6,.02],["Uptown",0.52,.08],["Linden Hills",0.75,.15],["Fulton",0.65,.15],["Kenwood",1.0,.25],["Lowry Hill",0.85,.2],["Southwest (Armatage)",0.5,.15],["Edina (Country Club)",1.1,.3],["Edina (Indian Hills)",1.2,.6],["Wayzata",1.4,.4],["Orono",1.3,1.0],["Deephaven",1.1,.6],["Minnetonka",0.65,.4],["Plymouth, MN",0.6,.3],["Eden Prairie",0.62,.3],["St. Paul (Crocus Hill)",0.6,.15],["St. Paul (Highland Park)",0.5,.15],["North Oaks",0.95,1.2],["Maple Grove",0.5,.25]]},
+ "Falcons": {city:"Atlanta", hoods:[["Buckhead (Tuxedo Park)",2.2,.9],["Buckhead (Garden Hills)",1.0,.3],["Midtown ATL",0.7,.04],["Inman Park",0.75,.15],["Old Fourth Ward",0.65,.08],["Virginia-Highland",0.85,.2],["Morningside",0.95,.25],["Ansley Park",1.3,.3],["Candler Park",0.6,.15],["Grant Park",0.55,.12],["Decatur",0.6,.2],["Brookhaven (Historic)",1.0,.3],["Sandy Springs",0.8,.4],["Dunwoody",0.65,.35],["Vinings",0.75,.3],["Smyrna",0.5,.2],["Alpharetta (Avalon)",0.75,.25],["Milton",0.95,1.0],["Johns Creek",0.6,.35],["East Cobb",0.6,.35]]},
+ "Panthers": {city:"Charlotte", hoods:[["South End",0.6,.05],["Dilworth",0.7,.15],["Myers Park",1.2,.35],["Eastover",1.5,.5],["Elizabeth",0.65,.15],["Plaza Midwood",0.55,.12],["NoDa",0.5,.1],["Fourth Ward",0.55,.03],["Wesley Heights",0.5,.08],["SouthPark",0.85,.3],["Foxcroft",1.1,.4],["Cotswold",0.6,.25],["Ballantyne",0.65,.25],["Waxhaw (Marvin)",0.85,.7],["Weddington",0.9,.9],["Davidson",0.7,.3],["Cornelius (The Peninsula)",0.9,.35],["Lake Norman (Mooresville)",0.75,.4],["Fort Mill, SC",0.55,.3],["Matthews",0.5,.25]]},
+ "Saints": {city:"New Orleans", hoods:[["Garden District",0.8,.15],["Uptown",0.65,.12],["Audubon",0.85,.2],["French Quarter",0.7,.03],["Marigny",0.48,.05],["Bywater",0.42,.06],["Lakeview",0.55,.15],["Lake Vista",0.75,.25],["Mid-City",0.4,.08],["Broadmoor",0.38,.1],["English Turn",0.6,.4],["Old Metairie",0.7,.25],["Metairie (Lakefront)",0.5,.2],["Mandeville",0.5,.4],["Covington",0.48,.5],["Madisonville",0.45,.4],["Slidell (Oak Harbor)",0.4,.3],["Kenner (Chateau Estates)",0.38,.25],["Gretna (Timberlane)",0.35,.3],["Belle Chasse",0.38,.35]]},
+ "Buccaneers": {city:"Tampa", hoods:[["Hyde Park",0.8,.15],["Davis Islands",1.5,.2],["Harbour Island",1.2,.1],["Bayshore Beautiful",0.9,.2],["Palma Ceia",0.85,.2],["Beach Park",1.1,.3],["Westshore",0.7,.2],["Seminole Heights",0.45,.15],["Channelside",0.6,.02],["Water Street (condos)",0.9,.02],["Westchase",0.55,.2],["Carrollwood",0.5,.25],["Lutz",0.5,.4],["Odessa (Keystone)",0.8,1.0],["Wesley Chapel",0.45,.2],["Apollo Beach",0.55,.2],["St. Pete (Old Northeast)",0.65,.15],["St. Pete (Snell Isle)",1.1,.25],["Clearwater Beach",0.9,.1],["Belleair",0.9,.4]]},
+ "Cardinals": {city:"Phoenix", hoods:[["Arcadia",0.95,.35],["Biltmore",0.85,.3],["Paradise Valley",2.4,1.0],["North Scottsdale (Silverleaf)",2.8,.8],["Scottsdale (Old Town)",0.75,.1],["Scottsdale (McCormick Ranch)",0.8,.25],["Scottsdale (DC Ranch)",1.5,.4],["Desert Mountain",1.6,.8],["Troon",1.0,.6],["Cave Creek",0.7,1.0],["Fountain Hills",0.7,.4],["Central Phoenix (Willo)",0.55,.15],["Ahwatukee",0.55,.25],["Chandler (Ocotillo)",0.6,.25],["Gilbert (Agritopia)",0.55,.2],["Mesa (Las Sendas)",0.6,.3],["Queen Creek",0.5,.3],["Tempe (near ASU)",0.5,.15],["Peoria (Vistancia)",0.55,.25],["Litchfield Park",0.5,.3]]},
+ "49ers": {city:"San Francisco Bay", hoods:[["Marina District",2.0,.03],["Pacific Heights",3.2,.05],["Noe Valley",1.9,.05],["Russian Hill",2.2,.03],["Mission District",1.4,.04],["Cole Valley",1.7,.05],["Palo Alto",2.9,.2],["Menlo Park",2.6,.25],["Atherton",6.5,1.0],["Hillsborough",4.2,.7],["Burlingame",2.2,.2],["San Mateo",1.6,.15],["Los Altos",3.2,.3],["Los Gatos",2.4,.3],["Saratoga",2.8,.5],["Willow Glen (San Jose)",1.5,.2],["Santa Clara (Rivermark)",1.4,.08],["Sunnyvale",1.7,.15],["Woodside",4.5,1.5],["Mill Valley",1.9,.3]]},
+ "Seahawks": {city:"Seattle", hoods:[["Capitol Hill",0.9,.06],["Queen Anne",1.1,.1],["Ballard",0.85,.08],["Fremont",0.85,.08],["Wallingford",0.9,.1],["Green Lake",0.9,.1],["Madison Park",1.5,.15],["Laurelhurst",1.6,.2],["Magnolia",1.1,.15],["West Seattle (Alki)",0.85,.12],["Bellevue (West)",1.8,.25],["Bellevue (Bridle Trails)",1.6,.5],["Medina",4.5,.6],["Clyde Hill",3.2,.4],["Kirkland (Juanita)",1.2,.2],["Mercer Island",1.9,.3],["Redmond (Education Hill)",1.1,.18],["Sammamish",1.2,.3],["Issaquah Highlands",0.95,.15],["Woodinville",1.0,.6]]}
+};
+/* Rams/Giants share via string pointer, resolved below */
+for (const k in D.METROS){ const h=D.METROS[k].hoods; if (typeof h === "string") D.METROS[k] = {city:D.METROS[k].city, hoods:D.METROS[h].hoods}; }
+
+
+/* street name pools for fake addresses */
+
+/* ---------- APEX AGENT ROSTER: pick your representation ----------
+   neg: contract negotiation 1-10 · end: endorsement reach 1-10 · agg: aggressiveness 1-10
+   fee: % of playing contracts · willing: who they take */
+D.AGENTS = [
+ {id:"holloway", n:"Dre Holloway", age:51, yrs:24, fee:3.0, neg:9, end:6, agg:5, willing:"Selective. Takes projects he believes in.", style:"Old school. Answers on the second ring, hates flash, has walked three clients out of bad rooms. Will tell you no to your face."},
+ {id:"vasquez", n:"Carmen Vasquez", age:44, yrs:18, fee:3.0, neg:8, end:9, agg:7, willing:"Wants marketable clients, any round.", style:"Built two rookies into national brands before their second contract. Pushes endorsement money hard, sometimes before the locker room thinks you earned it."},
+ {id:"okafor", n:"Chidi Okafor", age:38, yrs:12, fee:2.5, neg:7, end:7, agg:8, willing:"Takes anyone with tape. Hungry.", style:"Cut his fee to build a roster. Aggressive in negotiations to the point of friction; two GMs will not take his calls, four return them instantly."},
+ {id:"brandt", n:"Ellie Brandt", age:56, yrs:30, fee:3.0, neg:10, end:4, agg:4, willing:"Veterans and franchise players only. A PS rookie is a hard sell.", style:"The best pure contract mind at Apex. Zero interest in your shoe deal. If she takes you, the league notices."},
+ {id:"reyes", n:"Manny Reyes", age:33, yrs:7, fee:2.0, neg:5, end:6, agg:9, willing:"Anyone. Literally anyone.", style:"Young, loud, extremely online. Cheapest fee in the building. Half his moves are brilliant, the other half get apologized for later."},
+ {id:"whitfield", n:"Janae Whitfield", age:47, yrs:20, fee:3.0, neg:8, end:8, agg:6, willing:"Prefers quarterbacks. Interested in yours.", style:"Represents three starting QBs. Knows every OC in the league by first name. Her clients get elevated fast but she demands message discipline."},
+ {id:"sato", n:"Ken Sato", age:41, yrs:15, fee:2.75, neg:7, end:5, agg:3, willing:"Patient builds. Loves undrafted stories.", style:"The slow-cooker. Turns minimum deals into second contracts by never rushing a market. You will sometimes wish he pushed harder."},
+ {id:"donnelly", n:"Pat Donnelly", age:60, yrs:34, fee:3.0, neg:9, end:3, agg:6, willing:"Referral only. Dre can get you in.", style:"Semi-retired legend. Six All-Pros, two holdouts won outright. Checks email once a day. When he calls a front office, it is an event."},
+ {id:"amara", n:"Nia Amara", age:36, yrs:9, fee:2.5, neg:6, end:10, agg:7, willing:"Takes personality. Bring a story.", style:"Former marketing exec. Weakest at the negotiating table, lethal everywhere else. Her clients out-earn their contracts off the field."},
+ {id:"kowalski", n:"Bruno Kowalski", age:49, yrs:22, fee:3.0, neg:8, end:5, agg:10, willing:"Anyone willing to go to war.", style:"The hammer. Front offices hate him, which is the point. Relationships burn, numbers climb. Not a career-long partner for everyone."},
+ {id:"lindqvist", n:"Sofia Lindqvist", age:42, yrs:14, fee:2.75, neg:7, end:7, agg:5, willing:"International markets a specialty. Open roster.", style:"Balanced across the board with a global endorsement book nobody else at Apex touches. Never spectacular, never a mistake."},
+ {id:"battle", n:"Marcus Battle", age:45, yrs:17, fee:3.0, neg:8, end:6, agg:7, willing:"Ex-players get priority. Everyone gets a call back.", style:"Nine years at safety before the flip. Understands locker rooms from the inside; front offices trust him even mid-fight. Strong everywhere, elite nowhere."}
+];
+D.DEBTCATS = ["Student loans","Credit cards","Medical debt","Auto loan","Personal loan","Money owed to family"];
+D.STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+D.PYLON = { brand:"Pylon", tag:"The scores. The stats. The whole league." };
+
+/* ---------- future sponsor/brand pool (logos later; names now) ---------- */
+D.SPONSORS = [
+ ["Nike","apparel"],["Jordan Brand","apparel"],["Adidas","apparel"],["Under Armour","apparel"],["New Balance","apparel"],["Puma","apparel"],
+ ["Gatorade","beverage"],["Pepsi","beverage"],["Bud Light","beverage"],["Michelob Ultra","beverage"],["Monster Energy","beverage"],["BodyArmor","beverage"],["Dunkin'","food"],["McDonald's","food"],["Subway","food"],["Chipotle","food"],["Frito-Lay","food"],["Snickers","food"],["Skittles","food"],["Campbell's Chunky","food"],["Buffalo Wild Wings","food"],
+ ["Verizon","tech"],["Microsoft Surface","tech"],["Amazon","tech"],["Apple","tech"],["Bose","tech"],["EA Sports","tech"],["Sony","tech"],
+ ["Toyota","auto"],["Ford","auto"],["Chevrolet","auto"],["Hyundai","auto"],["Kia","auto"],["Mercedes-Benz","auto"],["Bridgestone","auto"],["Castrol","auto"],
+ ["Visa","finance"],["Intuit TurboTax","finance"],["Rocket Mortgage","finance"],["USAA","finance"],["Invesco QQQ","finance"],["Experian","finance"],
+ ["Caesars Sportsbook","betting"],["DraftKings","betting"],["FanDuel","betting"],["BetMGM","betting"],
+ ["Marriott Bonvoy","travel"],["FedEx","logistics"],["Lowe's","retail"],["Dick's Sporting Goods","retail"],["Fanatics","retail"],
+ ["Old Spice","grooming"],["Gillette","grooming"],["Head & Shoulders","grooming"],["Dove Men+Care","grooming"],["Sleep Number","wellness"],["Whoop","wellness"],
+ /* v1.5.2: art-drop expansion — every brand below has a logo in img/ */
+ ["Champion","apparel"],
+ ["Foot Locker","apparel"],
+ ["Lululemon","apparel"],
+ ["Mitchell & Ness","apparel"],
+ ["Oakley","apparel"],
+ ["Reebok","apparel"],
+ ["Skechers","apparel"],
+ ["Academy Sports","apparel"],
+ ["Celsius","beverage"],
+ ["Coca-Cola","beverage"],
+ ["Coors Light","beverage"],
+ ["Corona","beverage"],
+ ["Crown Royal","beverage"],
+ ["Dr Pepper","beverage"],
+ ["Dunkin","beverage"],
+ ["Heineken","beverage"],
+ ["Liquid Death","beverage"],
+ ["Modelo","beverage"],
+ ["Mountain Dew","beverage"],
+ ["Powerade","beverage"],
+ ["Prime Hydration","beverage"],
+ ["Red Bull","beverage"],
+ ["Burger King","food"],
+ ["Cheetos","food"],
+ ["Dominos","food"],
+ ["Doritos","food"],
+ ["Hormel","food"],
+ ["KFC","food"],
+ ["Lays","food"],
+ ["M&Ms","food"],
+ ["Oreo","food"],
+ ["Papa Johns","food"],
+ ["Pizza Hut","food"],
+ ["Popeyes","food"],
+ ["Pringles","food"],
+ ["Reeses","food"],
+ ["Tyson","food"],
+ ["Wendys","food"],
+ ["Little Caesars","food"],
+ ["DoorDash","food"],
+ ["Uber Eats","food"],
+ ["Beats","tech"],
+ ["Best Buy","tech"],
+ ["Cisco","tech"],
+ ["Dell","tech"],
+ ["Fitbit","tech"],
+ ["Garmin","tech"],
+ ["Google","tech"],
+ ["Intel","tech"],
+ ["JBL","tech"],
+ ["Lenovo","tech"],
+ ["Netflix","tech"],
+ ["Nvidia","tech"],
+ ["Oracle","tech"],
+ ["PayPal","tech"],
+ ["Peacock","tech"],
+ ["PlayStation","tech"],
+ ["Prime Video","tech"],
+ ["Salesforce","tech"],
+ ["Samsung","tech"],
+ ["Xbox","tech"],
+ ["YouTube TV","tech"],
+ ["DAZN","tech"],
+ ["T-Mobile","tech"],
+ ["AT&T","tech"],
+ ["Audi","auto"],
+ ["Dodge","auto"],
+ ["GMC","auto"],
+ ["Goodyear","auto"],
+ ["Jeep","auto"],
+ ["Lexus","auto"],
+ ["Michelin","auto"],
+ ["Mobil 1","auto"],
+ ["Nissan","auto"],
+ ["Pennzoil","auto"],
+ ["Ram","auto"],
+ ["Shell","auto"],
+ ["Subaru","auto"],
+ ["Valvoline","auto"],
+ ["Volkswagen","auto"],
+ ["Allstate","finance"],
+ ["Bank of America","finance"],
+ ["Capital One","finance"],
+ ["Charles Schwab","finance"],
+ ["Chase","finance"],
+ ["Citi","finance"],
+ ["Coinbase","finance"],
+ ["Fidelity","finance"],
+ ["Geico","finance"],
+ ["Liberty Mutual","finance"],
+ ["Mastercard","finance"],
+ ["MetLife","finance"],
+ ["Nationwide","finance"],
+ ["PNC","finance"],
+ ["Progressive","finance"],
+ ["Prudential","finance"],
+ ["Robinhood","finance"],
+ ["State Farm","finance"],
+ ["Venmo","finance"],
+ ["Wells Fargo","finance"],
+ ["bet365","betting"],
+ ["ESPN Bet","betting"],
+ ["Hard Rock Bet","betting"],
+ ["PrizePicks","betting"],
+ ["Airbnb","travel"],
+ ["American Airlines","travel"],
+ ["Booking.com","travel"],
+ ["Delta","travel"],
+ ["Emirates","travel"],
+ ["Expedia","travel"],
+ ["Hilton","travel"],
+ ["Hyatt","travel"],
+ ["Qatar Airways","travel"],
+ ["Southwest","travel"],
+ ["United","travel"],
+ ["DHL","logistics"],
+ ["UPS","logistics"],
+ ["Costco","retail"],
+ ["CVS","retail"],
+ ["Home Depot","retail"],
+ ["Target","retail"],
+ ["Walgreens","retail"],
+ ["Walmart","retail"],
+ ["Axe","grooming"],
+ ["Degree","grooming"],
+ ["Harrys","grooming"],
+ ["Manscaped","grooming"],
+ ["Nivea","grooming"],
+ ["GNC","wellness"],
+ ["Hyperice","wellness"],
+ ["Optum","wellness"],
+ ["Peloton","wellness"],
+ ["Tylenol","wellness"],
+ ["WHOOP","wellness"],
+ ["Riddell","equipment"],
+ ["Wilson","equipment"],
+ ["CBS Sports","media"],
+ ["ESPN","media"],
+ ["Fox Sports","media"],
+ ["NBC Sports","media"]
+];
+
+/* ---------- personal assistant spending tiers: [category, [5 tiers of {n,amt/mo}]] ---------- */
+D.ASSIST = {
+ name:"Mara Quinn", handle:"mara", title:"Client Services, Apex Sports Group",
+ cats:[
+  ["Wardrobe & clothes",[["Team swag and sweats",0],["Mall runs",350],["Streetwear rotation",1200],["Designer pieces",4500],["Stylist and designer",12000],["Full stylist team",25000],["Fashion week rotation",60000],["Never worn twice",150000]]],
+  ["Food & dining",[["Facility food only",0],["Groceries and meal prep",600],["Eating out often",1500],["Private meal service",3500],["Personal chef",8000],["Chef plus dietitian",15000],["Private chef team",30000],["Chef travels with you",60000]]],
+  ["Training & recovery",[["Team facilities only",0],["Local gym and massage",300],["Private trainer",1800],["Trainer plus recovery suite",4500],["Full performance team",10000],["Year-round staff",20000],["Biohacking suite",40000],["Lab, staff, and entourage",80000]]],
+  ["Jewelry & watches",[["Nothing",0],["A chain, once",400],["Rotating pieces",2000],["Watch habit",7500],["Iced out",20000],["Serious collector",50000],["Jeweler on call",120000],["Vault lifestyle",300000]]],
+  ["Travel & vacations",[["Nowhere",0],["Home to family",400],["A trip each break",1500],["First class habits",5000],["Jets and villas",15000],["Charter everything",35000],["Nothing commercial ever",75000],["Yacht weeks",150000]]],
+  ["Grooming & wellness",[["Clippers at home",0],["Barber weekly",200],["Barber, skin, spa",700],["Full self-care program",1800],["Traveling glam team",4000],["Image consultant added",8000],["Full-time glam staff",15000],["A whole department",30000]]]
+ ]
+};
+
+/* ---------- AI engine matrix ---------- */
+D.AI = {
+ anthropic:{ label:"Anthropic (Claude)", models:["claude-fable-5","claude-opus-5","claude-sonnet-5","claude-haiku-4-5"], keyHint:"sk-ant-..." },
+ openai:{ label:"OpenAI (GPT)", models:["gpt-5.6-sol","gpt-5.6-terra","gpt-5.6-luna"], keyHint:"sk-..." },
+ google:{ label:"Google (Gemini)", models:["gemini-3.1-pro-preview","gemini-3.6-flash","gemini-3.5-flash","gemini-3.5-flash-lite"], keyHint:"AIza..." }
+};
+D.STREETS = ["Alder","Beaumont","Cedar Hollow","Dunmore","Ellery","Fairbanks","Granite","Halstead","Ivywood","Juniper","Kingsbury","Larkspur","Mercer","Northfield","Orchard","Pembroke","Quarry","Rosalind","Sycamore","Thornbury","Vesper","Waverly","Yardley","Bristlecone","Cormorant"];
+D.STTYPES = ["St","Ave","Ln","Ct","Dr","Terrace","Pl","Rd"];
+
+/* ---------- CAR CATALOG v2: [make, model, body, segment, base $k new, first yr, last yr] ----------
+   body: sedan|coupe|suv|truck|convertible|hatchback|wagon|van
+   segment: economy|mainstream|premium|luxury|performance|exotic|hyper */
+D.CARDATA = [
+/* Toyota */
+["Toyota","Corolla","sedan","economy",24,2018,2026],["Toyota","Camry","sedan","mainstream",30,2018,2026],["Toyota","Avalon","sedan","mainstream",38,2018,2022],["Toyota","Prius","hatchback","economy",29,2018,2026],["Toyota","GR86","coupe","performance",31,2022,2026],["Toyota","GR Supra","coupe","performance",57,2020,2026],["Toyota","GR Corolla","hatchback","performance",39,2023,2026],["Toyota","RAV4","suv","mainstream",32,2018,2026],["Toyota","Highlander","suv","mainstream",41,2018,2026],["Toyota","Grand Highlander","suv","mainstream",45,2024,2026],["Toyota","4Runner","suv","mainstream",44,2018,2026],["Toyota","Land Cruiser","suv","premium",58,2018,2026],["Toyota","Sequoia","suv","premium",64,2018,2026],["Toyota","Tacoma","truck","mainstream",36,2018,2026],["Toyota","Tundra","truck","mainstream",47,2018,2026],["Toyota","Sienna","van","mainstream",40,2018,2026],
+/* Honda / Acura */
+["Honda","Civic","sedan","economy",26,2018,2026],["Honda","Civic Type R","hatchback","performance",46,2018,2026],["Honda","Accord","sedan","mainstream",31,2018,2026],["Honda","CR-V","suv","mainstream",32,2018,2026],["Honda","Pilot","suv","mainstream",42,2018,2026],["Honda","Passport","suv","mainstream",44,2019,2026],["Honda","Ridgeline","truck","mainstream",42,2018,2026],["Honda","Odyssey","van","mainstream",42,2018,2026],
+["Acura","Integra","hatchback","premium",34,2023,2026],["Acura","Integra Type S","hatchback","performance",53,2024,2026],["Acura","TLX Type S","sedan","performance",58,2021,2026],["Acura","MDX","suv","premium",52,2018,2026],["Acura","MDX Type S","suv","performance",68,2022,2026],["Acura","NSX Type S","coupe","exotic",171,2022,2022],
+/* Nissan / Infiniti */
+["Nissan","Altima","sedan","mainstream",28,2018,2026],["Nissan","Maxima","sedan","mainstream",39,2018,2023],["Nissan","350Z","coupe","performance",34,2003,2009],["Nissan","370Z","coupe","performance",41,2009,2020],["Nissan","Z","coupe","performance",44,2023,2026],["Nissan","Z Nismo","coupe","performance",66,2024,2026],["Nissan","GT-R","coupe","exotic",122,2018,2024],["Nissan","GT-R Nismo","coupe","exotic",222,2018,2024],["Nissan","Rogue","suv","mainstream",31,2018,2026],["Nissan","Pathfinder","suv","mainstream",38,2018,2026],["Nissan","Armada","suv","premium",60,2018,2026],["Nissan","Frontier","truck","mainstream",34,2018,2026],["Nissan","Titan","truck","mainstream",43,2018,2024],
+["Infiniti","Q50 Red Sport","sedan","performance",59,2018,2024],["Infiniti","QX60","suv","premium",52,2018,2026],["Infiniti","QX80","suv","luxury",86,2018,2026],
+/* Mazda / Subaru / Mitsubishi */
+["Mazda","Mazda3","hatchback","mainstream",27,2018,2026],["Mazda","MX-5 Miata","convertible","performance",30,2018,2026],["Mazda","CX-5","suv","mainstream",31,2018,2026],["Mazda","CX-90","suv","premium",42,2024,2026],
+["Subaru","WRX","sedan","performance",34,2018,2026],["Subaru","WRX STI","sedan","performance",42,2018,2021],["Subaru","BRZ","coupe","performance",31,2018,2026],["Subaru","Outback","wagon","mainstream",31,2018,2026],["Subaru","Forester","suv","mainstream",30,2018,2026],["Subaru","Ascent","suv","mainstream",37,2019,2026],
+["Mitsubishi","Lancer Evolution X Final","sedan","performance",41,2015,2015],
+/* Ford / Lincoln */
+["Ford","Mustang EcoBoost","coupe","mainstream",34,2018,2026],["Ford","Mustang GT","coupe","performance",46,2018,2026],["Ford","Mustang Dark Horse","coupe","performance",64,2024,2026],["Ford","Mustang Shelby GT350","coupe","performance",62,2018,2020],["Ford","Mustang Shelby GT500","coupe","exotic",81,2020,2022],["Ford","GT","coupe","hyper",500,2018,2022],["Ford","F-150","truck","mainstream",44,2018,2026],["Ford","F-150 Raptor","truck","performance",80,2018,2026],["Ford","F-150 Raptor R","truck","performance",112,2023,2026],["Ford","F-250 Super Duty","truck","mainstream",50,2018,2026],["Ford","F-350 Super Duty","truck","mainstream",56,2018,2026],["Ford","Maverick","truck","economy",26,2022,2026],["Ford","Ranger","truck","mainstream",34,2019,2026],["Ford","Ranger Raptor","truck","performance",57,2024,2026],["Ford","Bronco","suv","mainstream",42,2021,2026],["Ford","Bronco Raptor","suv","performance",92,2022,2026],["Ford","Explorer","suv","mainstream",41,2018,2026],["Ford","Expedition","suv","premium",60,2018,2026],["Ford","Mustang Mach-E","suv","premium",45,2021,2026],
+["Lincoln","Aviator","suv","luxury",58,2020,2026],["Lincoln","Navigator","suv","luxury",92,2018,2026],["Lincoln","Navigator L Black Label","suv","luxury",122,2019,2026],
+/* Chevrolet / GMC / Cadillac / Hummer */
+["Chevrolet","Malibu","sedan","mainstream",27,2018,2025],["Chevrolet","Camaro SS","coupe","performance",46,2018,2024],["Chevrolet","Camaro ZL1","coupe","performance",72,2018,2024],["Chevrolet","Corvette Stingray","coupe","performance",71,2020,2026],["Chevrolet","Corvette Z06","coupe","exotic",115,2023,2026],["Chevrolet","Corvette E-Ray","coupe","exotic",108,2024,2026],["Chevrolet","Corvette ZR1","coupe","hyper",175,2025,2026],["Chevrolet","Silverado 1500","truck","mainstream",43,2018,2026],["Chevrolet","Silverado 2500HD","truck","mainstream",52,2018,2026],["Chevrolet","Colorado ZR2","truck","performance",50,2018,2026],["Chevrolet","Tahoe","suv","premium",60,2018,2026],["Chevrolet","Suburban","suv","premium",63,2018,2026],["Chevrolet","Traverse","suv","mainstream",38,2018,2026],
+["GMC","Sierra 1500 Denali","truck","premium",66,2018,2026],["GMC","Sierra AT4X","truck","performance",78,2022,2026],["GMC","Yukon Denali","suv","luxury",80,2018,2026],["GMC","Yukon Denali Ultimate","suv","luxury",102,2023,2026],["GMC","Hummer EV Pickup","truck","luxury",106,2022,2026],["GMC","Hummer EV SUV","suv","luxury",98,2023,2026],
+["Cadillac","CT4-V Blackwing","sedan","performance",63,2022,2026],["Cadillac","CT5-V Blackwing","sedan","performance",96,2022,2026],["Cadillac","Escalade","suv","luxury",96,2018,2026],["Cadillac","Escalade-V","suv","luxury",162,2023,2026],["Cadillac","Celestiq","sedan","hyper",340,2024,2026],["Cadillac","Lyriq","suv","luxury",63,2023,2026],
+/* Dodge / Ram / Jeep / Chrysler */
+["Dodge","Charger Scat Pack","sedan","performance",52,2018,2023],["Dodge","Charger Hellcat Redeye","sedan","exotic",92,2021,2023],["Dodge","Challenger R/T Scat Pack","coupe","performance",50,2018,2023],["Dodge","Challenger SRT Hellcat","coupe","exotic",75,2018,2023],["Dodge","Challenger SRT Demon 170","coupe","hyper",100,2023,2023],["Dodge","Durango SRT Hellcat","suv","exotic",96,2021,2026],["Dodge","Charger Daytona EV","coupe","performance",62,2025,2026],
+["Ram","1500","truck","mainstream",45,2018,2026],["Ram","1500 TRX","truck","exotic",90,2021,2024],["Ram","1500 RHO","truck","performance",71,2025,2026],["Ram","2500 Heavy Duty","truck","mainstream",52,2018,2026],
+["Jeep","Wrangler Rubicon","suv","mainstream",50,2018,2026],["Jeep","Wrangler Rubicon 392","suv","performance",92,2021,2026],["Jeep","Grand Cherokee","suv","mainstream",46,2018,2026],["Jeep","Grand Cherokee Trackhawk","suv","exotic",92,2018,2021],["Jeep","Grand Wagoneer L","suv","luxury",115,2022,2026],["Jeep","Gladiator","truck","mainstream",42,2020,2026],
+/* Tesla / Lucid / Rivian */
+["Tesla","Model 3","sedan","mainstream",42,2018,2026],["Tesla","Model 3 Performance","sedan","performance",56,2018,2026],["Tesla","Model Y","suv","mainstream",47,2020,2026],["Tesla","Model S","sedan","luxury",82,2018,2026],["Tesla","Model S Plaid","sedan","exotic",110,2021,2026],["Tesla","Model X","suv","luxury",90,2018,2026],["Tesla","Model X Plaid","suv","exotic",115,2021,2026],["Tesla","Cybertruck","truck","luxury",82,2024,2026],["Tesla","Cybertruck Cyberbeast","truck","exotic",102,2024,2026],
+["Lucid","Air Touring","sedan","luxury",96,2022,2026],["Lucid","Air Sapphire","sedan","hyper",250,2024,2026],["Lucid","Gravity","suv","luxury",96,2025,2026],
+["Rivian","R1T","truck","luxury",76,2022,2026],["Rivian","R1S","suv","luxury",80,2022,2026],
+/* Hyundai / Kia / Genesis */
+["Hyundai","Elantra N","sedan","performance",35,2022,2026],["Hyundai","Sonata","sedan","mainstream",29,2018,2026],["Hyundai","Palisade","suv","mainstream",40,2020,2026],["Hyundai","Ioniq 5 N","suv","performance",68,2025,2026],["Hyundai","Santa Cruz","truck","mainstream",30,2022,2026],
+["Kia","K5 GT","sedan","mainstream",34,2021,2026],["Kia","Stinger GT","sedan","performance",53,2018,2023],["Kia","Telluride","suv","mainstream",40,2020,2026],["Kia","EV6 GT","suv","performance",63,2022,2026],["Kia","Carnival","van","mainstream",38,2022,2026],
+["Genesis","G70","sedan","premium",42,2019,2026],["Genesis","G80","sedan","luxury",58,2018,2026],["Genesis","G90","sedan","luxury",92,2018,2026],["Genesis","GV70","suv","premium",48,2022,2026],["Genesis","GV80","suv","luxury",62,2021,2026],
+/* VW / Audi */
+["Volkswagen","GTI","hatchback","mainstream",33,2018,2026],["Volkswagen","Golf R","hatchback","performance",47,2018,2026],["Volkswagen","Jetta GLI","sedan","mainstream",32,2019,2026],["Volkswagen","Atlas","suv","mainstream",39,2018,2026],["Volkswagen","ID. Buzz","van","premium",62,2025,2026],
+["Audi","A4","sedan","premium",44,2018,2026],["Audi","S4","sedan","performance",54,2018,2026],["Audi","A6","sedan","premium",59,2018,2026],["Audi","S6","sedan","performance",76,2018,2026],["Audi","RS 6 Avant","wagon","exotic",128,2021,2026],["Audi","A8 L","sedan","luxury",92,2018,2026],["Audi","S8","sedan","luxury",122,2020,2026],["Audi","RS 5","coupe","performance",78,2018,2026],["Audi","RS 7","sedan","exotic",130,2020,2026],["Audi","TT RS","coupe","performance",74,2018,2022],["Audi","R8 V10 Performance","coupe","exotic",212,2018,2023],["Audi","Q5","suv","premium",46,2018,2026],["Audi","SQ5","suv","performance",60,2018,2026],["Audi","Q7","suv","premium",62,2018,2026],["Audi","Q8","suv","luxury",76,2019,2026],["Audi","RS Q8","suv","exotic",132,2020,2026],["Audi","e-tron GT","sedan","luxury",108,2022,2026],["Audi","RS e-tron GT","sedan","exotic",150,2022,2026],
+/* BMW */
+["BMW","230i","coupe","premium",40,2018,2026],["BMW","M240i","coupe","performance",51,2018,2026],["BMW","M2","coupe","performance",66,2018,2026],["BMW","330i","sedan","premium",46,2018,2026],["BMW","M340i","sedan","performance",60,2020,2026],["BMW","M3","sedan","performance",78,2018,2026],["BMW","M3 Competition xDrive","sedan","performance",88,2022,2026],["BMW","M4","coupe","performance",80,2018,2026],["BMW","M4 CSL","coupe","exotic",140,2023,2023],["BMW","540i","sedan","premium",63,2018,2026],["BMW","M5","sedan","exotic",112,2018,2026],["BMW","M5 CS","sedan","exotic",143,2022,2022],["BMW","750i","sedan","luxury",100,2018,2026],["BMW","i7 M70","sedan","luxury",169,2024,2026],["BMW","M8 Competition Gran Coupe","coupe","exotic",143,2020,2026],["BMW","X3 M","suv","performance",76,2020,2026],["BMW","X5","suv","premium",68,2018,2026],["BMW","X5 M Competition","suv","exotic",125,2020,2026],["BMW","X6 M","suv","exotic",118,2020,2026],["BMW","X7 M60i","suv","luxury",112,2023,2026],["BMW","XM","suv","exotic",160,2023,2026],["BMW","Z4 M40i","convertible","performance",67,2019,2026],["BMW","i8","coupe","exotic",148,2014,2020],
+/* Mercedes */
+["Mercedes-Benz","C 300","sedan","premium",48,2018,2026],["Mercedes-Benz","AMG C 63 S","sedan","performance",86,2018,2026],["Mercedes-Benz","E 450","sedan","premium",66,2018,2026],["Mercedes-Benz","AMG E 63 S","sedan","exotic",112,2018,2024],["Mercedes-Benz","S 580","sedan","luxury",128,2021,2026],["Mercedes-Benz","AMG S 63 E","sedan","luxury",185,2024,2026],["Mercedes-Benz","Maybach S 680","sedan","hyper",235,2021,2026],["Mercedes-Benz","CLE 450","coupe","premium",66,2024,2026],["Mercedes-Benz","AMG GT 63","coupe","exotic",178,2018,2026],["Mercedes-Benz","AMG GT Black Series","coupe","hyper",325,2021,2021],["Mercedes-Benz","AMG SL 63","convertible","exotic",184,2022,2026],["Mercedes-Benz","GLC 300","suv","premium",50,2018,2026],["Mercedes-Benz","GLE 450","suv","premium",70,2019,2026],["Mercedes-Benz","AMG GLE 63 S","suv","exotic",130,2021,2026],["Mercedes-Benz","GLS 580","suv","luxury",112,2020,2026],["Mercedes-Benz","Maybach GLS 600","suv","hyper",175,2021,2026],["Mercedes-Benz","G 550","suv","luxury",148,2018,2026],["Mercedes-Benz","AMG G 63","suv","exotic",190,2018,2026],["Mercedes-Benz","EQS 580","sedan","luxury",128,2022,2026],
+/* Porsche */
+["Porsche","718 Cayman","coupe","performance",72,2018,2026],["Porsche","718 Cayman GT4 RS","coupe","exotic",166,2022,2025],["Porsche","718 Boxster Spyder","convertible","performance",110,2020,2025],["Porsche","911 Carrera","coupe","performance",122,2018,2026],["Porsche","911 Carrera S","coupe","performance",142,2018,2026],["Porsche","911 Carrera GTS","coupe","performance",166,2018,2026],["Porsche","911 Targa 4S","convertible","performance",152,2018,2026],["Porsche","911 GT3","coupe","exotic",236,2018,2026],["Porsche","911 GT3 RS","coupe","hyper",284,2019,2026],["Porsche","911 GT3 Touring","coupe","exotic",245,2022,2026],["Porsche","911 Turbo","coupe","exotic",197,2018,2026],["Porsche","911 Turbo S","coupe","exotic",245,2018,2026],["Porsche","911 S/T","coupe","hyper",292,2024,2024],["Porsche","911 Dakar","coupe","hyper",223,2023,2024],["Porsche","Taycan 4S","sedan","luxury",118,2020,2026],["Porsche","Taycan Turbo S","sedan","exotic",210,2020,2026],["Porsche","Panamera Turbo E-Hybrid","sedan","exotic",192,2018,2026],["Porsche","Macan GTS","suv","performance",88,2018,2026],["Porsche","Cayenne","suv","luxury",84,2018,2026],["Porsche","Cayenne Turbo GT","suv","exotic",202,2022,2026],
+/* Land Rover / Range Rover / Jaguar */
+["Land Rover","Defender 110","suv","premium",64,2020,2026],["Land Rover","Defender 130 Outbound","suv","premium",86,2023,2026],["Land Rover","Discovery","suv","premium",62,2018,2026],
+["Range Rover","Evoque","suv","premium",52,2018,2026],["Range Rover","Velar","suv","premium",64,2018,2026],["Range Rover","Sport","suv","luxury",92,2018,2026],["Range Rover","Sport SV","suv","exotic",182,2024,2026],["Range Rover","Autobiography LWB","suv","luxury",172,2018,2026],["Range Rover","SV","suv","hyper",240,2023,2026],
+["Jaguar","F-Type R","coupe","performance",108,2018,2024],["Jaguar","F-Pace SVR","suv","performance",92,2019,2024],
+/* Lexus */
+["Lexus","IS 500","sedan","performance",62,2022,2026],["Lexus","ES 350","sedan","premium",46,2018,2026],["Lexus","LS 500","sedan","luxury",82,2018,2026],["Lexus","RC F","coupe","performance",68,2018,2026],["Lexus","LC 500","coupe","luxury",100,2018,2026],["Lexus","RX 350","suv","premium",50,2018,2026],["Lexus","GX 550 Overtrail","suv","premium",70,2024,2026],["Lexus","LX 600","suv","luxury",95,2022,2026],["Lexus","TX 500h","suv","premium",58,2024,2026],["Lexus","LFA","coupe","hyper",375,2011,2012],
+/* Maserati / Alfa Romeo / Lotus */
+["Maserati","Ghibli Trofeo","sedan","exotic",122,2021,2024],["Maserati","Quattroporte Trofeo","sedan","exotic",146,2021,2024],["Maserati","Levante Trofeo","suv","exotic",160,2019,2024],["Maserati","Grecale Trofeo","suv","performance",106,2023,2026],["Maserati","GranTurismo Trofeo","coupe","exotic",190,2024,2026],["Maserati","MC20","coupe","exotic",240,2022,2026],
+["Alfa Romeo","Giulia Quadrifoglio","sedan","performance",82,2018,2026],["Alfa Romeo","Stelvio Quadrifoglio","suv","performance",90,2018,2026],
+["Lotus","Emira","coupe","performance",102,2023,2026],["Lotus","Evija","coupe","hyper",2300,2023,2026],
+/* Aston / Bentley / Rolls */
+["Aston Martin","Vantage","coupe","exotic",194,2019,2026],["Aston Martin","DB11","coupe","exotic",206,2018,2023],["Aston Martin","DB12","coupe","exotic",250,2024,2026],["Aston Martin","DBS Superleggera","coupe","hyper",320,2019,2023],["Aston Martin","DBX707","suv","exotic",245,2023,2026],["Aston Martin","Valour","coupe","hyper",1500,2024,2024],
+["Bentley","Continental GT","coupe","exotic",245,2018,2026],["Bentley","Continental GT Speed","coupe","exotic",305,2022,2026],["Bentley","Flying Spur","sedan","exotic",230,2020,2026],["Bentley","Bentayga","suv","exotic",210,2018,2026],["Bentley","Bentayga EWB Mulliner","suv","hyper",320,2023,2026],["Bentley","Batur","coupe","hyper",2100,2024,2025],
+["Rolls-Royce","Ghost","sedan","hyper",355,2018,2026],["Rolls-Royce","Phantom","sedan","hyper",495,2018,2026],["Rolls-Royce","Phantom EWB","sedan","hyper",610,2018,2026],["Rolls-Royce","Wraith","coupe","hyper",345,2018,2023],["Rolls-Royce","Dawn","convertible","hyper",360,2018,2023],["Rolls-Royce","Cullinan","suv","hyper",405,2019,2026],["Rolls-Royce","Cullinan Black Badge","suv","hyper",490,2020,2026],["Rolls-Royce","Spectre","coupe","hyper",430,2024,2026],
+/* Ferrari / Lamborghini / McLaren */
+["Ferrari","Portofino M","convertible","exotic",250,2021,2024],["Ferrari","Roma","coupe","exotic",250,2021,2026],["Ferrari","296 GTB","coupe","exotic",342,2022,2026],["Ferrari","F8 Tributo","coupe","exotic",302,2020,2023],["Ferrari","SF90 Stradale","coupe","hyper",528,2021,2026],["Ferrari","812 Superfast","coupe","hyper",404,2018,2023],["Ferrari","12Cilindri","coupe","hyper",423,2025,2026],["Ferrari","Purosangue","suv","hyper",430,2023,2026],["Ferrari","Daytona SP3","coupe","hyper",2300,2023,2025],
+["Lamborghini","Huracán EVO","coupe","exotic",270,2020,2024],["Lamborghini","Huracán STO","coupe","hyper",334,2021,2024],["Lamborghini","Huracán Tecnica","coupe","exotic",244,2023,2024],["Lamborghini","Temerario","coupe","hyper",340,2025,2026],["Lamborghini","Aventador SVJ","coupe","hyper",520,2019,2022],["Lamborghini","Revuelto","coupe","hyper",610,2024,2026],["Lamborghini","Urus","suv","exotic",235,2019,2026],["Lamborghini","Urus Performante","suv","hyper",265,2023,2026],
+["McLaren","570S","coupe","exotic",195,2018,2021],["McLaren","720S","coupe","exotic",300,2018,2023],["McLaren","750S","coupe","hyper",324,2024,2026],["McLaren","765LT","coupe","hyper",382,2021,2022],["McLaren","Artura","coupe","exotic",237,2023,2026],["McLaren","GT","coupe","exotic",210,2020,2024],["McLaren","Senna","coupe","hyper",960,2019,2020],
+/* Hypercar row */
+["Pagani","Huayra","coupe","hyper",2600,2013,2022],["Pagani","Huayra Roadster","convertible","hyper",3200,2018,2021],["Pagani","Utopia","coupe","hyper",3100,2023,2026],
+["Koenigsegg","Regera","coupe","hyper",2200,2018,2022],["Koenigsegg","Jesko","coupe","hyper",3200,2022,2026],["Koenigsegg","Gemera","coupe","hyper",1900,2024,2026],
+["Bugatti","Chiron","coupe","hyper",3300,2018,2024],["Bugatti","Chiron Super Sport","coupe","hyper",3900,2022,2024],["Bugatti","Mistral","convertible","hyper",5300,2024,2026],["Bugatti","Tourbillon","coupe","hyper",4100,2026,2026],
+["Rimac","Nevera","coupe","hyper",2200,2022,2026],
+["Ineos","Grenadier","suv","premium",74,2023,2026],
+["Volvo","XC90","suv","premium",58,2018,2026],["Volvo","XC60","suv","premium",48,2018,2026],["Volvo","V90 Cross Country","wagon","premium",60,2018,2026],
+["Wagoneer","Wagoneer","suv","premium",64,2022,2026]
+];
+
+/* ---- expansion: classics, icons, vans, everything missing ---- */
+D.CARDATA.push(
+/* Bugatti + hypercar gaps */
+["Bugatti","Veyron 16.4","coupe","hyper",1700,2006,2011],["Bugatti","Veyron Grand Sport","convertible","hyper",2000,2009,2012],["Bugatti","Veyron Super Sport","coupe","hyper",2600,2011,2012],["Bugatti","EB110","coupe","hyper",350,1991,1995],
+["McLaren","F1","coupe","hyper",815,1993,1998],["McLaren","P1","coupe","hyper",1150,2014,2016],["McLaren","600LT","coupe","exotic",240,2019,2021],["McLaren","620R","coupe","exotic",250,2020,2021],["McLaren","Elva","convertible","hyper",1700,2021,2022],
+["Ferrari","Enzo","coupe","hyper",660,2003,2004],["Ferrari","F40","coupe","hyper",400,1987,1992],["Ferrari","F50","coupe","hyper",480,1995,1997],["Ferrari","LaFerrari","coupe","hyper",1400,2014,2016],["Ferrari","Testarossa","coupe","exotic",181,1984,1996],["Ferrari","355 F1","coupe","exotic",130,1994,1999],["Ferrari","360 Modena","coupe","exotic",150,1999,2005],["Ferrari","F430","coupe","exotic",168,2005,2009],["Ferrari","458 Italia","coupe","exotic",230,2010,2015],["Ferrari","488 GTB","coupe","exotic",250,2016,2019],["Ferrari","California T","convertible","exotic",200,2015,2017],["Ferrari","GTC4Lusso","coupe","exotic",260,2017,2020],["Ferrari","550 Maranello","coupe","exotic",204,1997,2001],["Ferrari","599 GTB","coupe","exotic",310,2007,2012],["Ferrari","Dino 246 GT","coupe","exotic",290,1969,1974],
+["Lamborghini","Murciélago","coupe","hyper",320,2002,2010],["Lamborghini","Murciélago LP670-4 SV","coupe","hyper",450,2009,2010],["Lamborghini","Diablo","coupe","hyper",240,1990,2001],["Lamborghini","Countach","coupe","hyper",120,1974,1990],["Lamborghini","Miura","coupe","hyper",200,1966,1973],["Lamborghini","Gallardo","coupe","exotic",180,2004,2013],["Lamborghini","Aventador LP700-4","coupe","hyper",400,2012,2016],["Lamborghini","Huracán Performante","coupe","hyper",275,2018,2019],
+["Porsche","Carrera GT","coupe","hyper",448,2004,2006],["Porsche","918 Spyder","convertible","hyper",845,2014,2015],["Porsche","959","coupe","hyper",225,1987,1988],["Porsche","911 (964) Carrera","coupe","performance",70,1989,1994],["Porsche","911 (993) Carrera","coupe","performance",71,1995,1998],["Porsche","911 (996) Turbo","coupe","performance",111,2001,2005],["Porsche","911 (997) GT3 RS","coupe","exotic",132,2007,2011],["Porsche","911 (930) Turbo","coupe","exotic",48,1975,1989],["Porsche","944 Turbo","coupe","performance",30,1986,1991],["Porsche","928 GTS","coupe","performance",80,1992,1995],
+["Pagani","Zonda F","coupe","hyper",670,2005,2011],["Koenigsegg","Agera RS","coupe","hyper",2500,2015,2018],["Koenigsegg","CCX","coupe","hyper",700,2006,2010],
+/* Vans + utility */
+["Mercedes-Benz","Sprinter 2500","van","mainstream",50,2010,2026],["Mercedes-Benz","Sprinter 3500 Crew","van","mainstream",62,2014,2026],["Mercedes-Benz","Metris","van","mainstream",36,2016,2023],["Ford","Transit 350","van","mainstream",48,2015,2026],["Ford","E-Series Cutaway","van","mainstream",42,2010,2026],["Ram","ProMaster 2500","van","mainstream",46,2014,2026],["Chevrolet","Express 2500","van","mainstream",42,2003,2026],["GMC","Savana","van","mainstream",42,2003,2026],["Mercedes-Benz","Sprinter Luxe Conversion","van","luxury",185,2018,2026],
+/* American classics */
+["Chevrolet","Corvette C1","convertible","exotic",120,1953,1962],["Chevrolet","Corvette C2 Sting Ray","coupe","exotic",140,1963,1967],["Chevrolet","Corvette C3 Stingray","coupe","performance",45,1968,1982],["Chevrolet","Corvette C4","coupe","performance",18,1984,1996],["Chevrolet","Corvette C5 Z06","coupe","performance",38,2001,2004],["Chevrolet","Corvette C6 ZR1","coupe","exotic",95,2009,2013],["Chevrolet","Corvette C7 Z06","coupe","exotic",92,2015,2019],
+["Chevrolet","Bel Air","coupe","exotic",75,1955,1957],["Chevrolet","Impala SS 409","coupe","exotic",70,1961,1964],["Chevrolet","Chevelle SS 396","coupe","exotic",78,1966,1970],["Chevrolet","Camaro Z/28 (1st gen)","coupe","exotic",90,1967,1969],["Chevrolet","Camaro (2nd gen)","coupe","performance",38,1970,1981],["Chevrolet","C10 Pickup","truck","performance",45,1967,1972],["Chevrolet","K5 Blazer","suv","performance",60,1969,1975],["Chevrolet","Nova SS","coupe","performance",48,1968,1972],["Chevrolet","El Camino SS","truck","performance",42,1968,1972],
+["Ford","Mustang (1st gen fastback)","coupe","exotic",65,1965,1968],["Ford","Mustang Boss 302","coupe","exotic",95,1969,1970],["Ford","Mustang Mach 1","coupe","performance",58,1969,1971],["Ford","Mustang Fox Body GT","coupe","performance",22,1987,1993],["Ford","Bronco (1st gen)","suv","exotic",75,1966,1977],["Ford","F-100","truck","performance",40,1953,1972],["Ford","Thunderbird","convertible","performance",48,1955,1957],["Ford","GT40 (continuation)","coupe","hyper",450,1964,1969],
+["Dodge","Charger R/T 440","coupe","exotic",85,1968,1970],["Dodge","Challenger R/T (E-body)","coupe","exotic",90,1970,1971],["Plymouth","Barracuda 'Cuda","coupe","exotic",95,1970,1971],["Plymouth","Road Runner","coupe","performance",55,1968,1970],["Pontiac","GTO Judge","coupe","exotic",80,1969,1971],["Pontiac","Trans Am (2nd gen)","coupe","performance",45,1977,1981],["Pontiac","GTO (2004)","coupe","performance",28,2004,2006],["Buick","Grand National GNX","coupe","exotic",150,1987,1987],["Oldsmobile","442","coupe","performance",52,1968,1972],["Cadillac","Eldorado","convertible","performance",42,1959,1959],["Dodge","Viper RT/10","convertible","exotic",65,1992,1995],["Dodge","Viper GTS","coupe","exotic",78,1996,2002],["Dodge","Viper ACR","coupe","exotic",120,2016,2017],["Dodge","Magnum SRT8","wagon","performance",30,2006,2008],
+/* JDM icons */
+["Nissan","Skyline GT-R R32","coupe","performance",55,1989,1994],["Nissan","Skyline GT-R R33","coupe","performance",70,1995,1998],["Nissan","Skyline GT-R R34","coupe","exotic",180,1999,2002],["Nissan","240SX","coupe","performance",22,1989,1998],["Nissan","Silvia S15 Spec-R","coupe","performance",45,1999,2002],["Nissan","300ZX Twin Turbo","coupe","performance",38,1990,1996],["Toyota","Supra MK4 Turbo","coupe","exotic",120,1993,1998],["Toyota","AE86 Corolla GT-S","coupe","performance",35,1985,1987],["Toyota","Land Cruiser FJ40","suv","exotic",70,1960,1983],["Toyota","Land Cruiser FJ62","suv","performance",45,1988,1990],["Toyota","MR2 Turbo","coupe","performance",28,1991,1995],["Toyota","Century","sedan","luxury",90,1997,2017],["Mazda","RX-7 FD","coupe","exotic",68,1993,1995],["Mazda","RX-7 FC Turbo II","coupe","performance",30,1987,1991],["Mazda","RX-8","coupe","performance",15,2004,2011],["Honda","NSX (NA1)","coupe","exotic",130,1991,2001],["Honda","S2000","convertible","performance",42,2000,2009],["Honda","Civic Type R (EK9, import)","hatchback","performance",38,1997,2000],["Honda","Integra Type R (DC2)","coupe","performance",55,1997,2001],["Mitsubishi","3000GT VR-4","coupe","performance",28,1991,1999],["Mitsubishi","Lancer Evolution VIII","sedan","performance",38,2003,2005],["Mitsubishi","Lancer Evolution IX","sedan","performance",48,2006,2007],["Subaru","Impreza 22B STI","coupe","hyper",300,1998,1998],["Datsun","240Z","coupe","performance",45,1970,1973],["Acura","RSX Type-S","coupe","mainstream",14,2002,2006],
+/* Euro icons + gaps */
+["BMW","M3 (E30)","coupe","exotic",90,1986,1991],["BMW","M3 (E36)","coupe","performance",35,1995,1999],["BMW","M3 (E46)","coupe","performance",55,2001,2006],["BMW","M3 (E92)","coupe","performance",45,2008,2013],["BMW","M5 (E39)","sedan","performance",60,2000,2003],["BMW","M5 (E60) V10","sedan","performance",42,2006,2010],["BMW","Z8","convertible","exotic",230,2000,2003],["BMW","850CSi","coupe","performance",95,1994,1996],["BMW","2002tii","coupe","performance",45,1972,1974],["BMW","1M Coupe","coupe","performance",75,2011,2011],
+["Mercedes-Benz","300SL Gullwing","coupe","hyper",1600,1954,1957],["Mercedes-Benz","190E 2.3-16 Cosworth","sedan","performance",60,1986,1987],["Mercedes-Benz","500E","sedan","performance",55,1992,1994],["Mercedes-Benz","E55 AMG","sedan","performance",28,2003,2006],["Mercedes-Benz","SLS AMG","coupe","exotic",240,2011,2015],["Mercedes-Benz","SLR McLaren","coupe","hyper",480,2005,2009],["Mercedes-Benz","G 500 Cabrio","suv","exotic",210,2016,2017],["Mercedes-Benz","AMG One","coupe","hyper",2700,2023,2024],
+["Audi","RS2 Avant","wagon","exotic",95,1994,1995],["Audi","RS4 Avant (B7)","wagon","performance",45,2007,2008],["Audi","R8 V8 (1st gen)","coupe","exotic",115,2008,2015],["Audi","Quattro (Ur)","coupe","exotic",95,1981,1991],
+["Volkswagen","Golf GTI Mk1","hatchback","performance",30,1983,1984],["Volkswagen","Corrado VR6","coupe","performance",22,1992,1995],["Volkswagen","Phaeton W12","sedan","luxury",40,2004,2006],["Volkswagen","Type 2 Bus (21-window)","van","exotic",120,1950,1967],
+["Land Rover","Defender 90 (classic)","suv","exotic",90,1983,1997],["Land Rover","Range Rover Classic","suv","performance",55,1970,1996],["Jaguar","E-Type Series 1","convertible","hyper",250,1961,1967],["Jaguar","XJ220","coupe","hyper",600,1992,1994],["Jaguar","XKR","coupe","performance",35,2007,2015],
+["Lotus","Esprit V8","coupe","performance",55,1996,2004],["Lotus","Elise","convertible","performance",50,2005,2011],["Lotus","Exige S","coupe","performance",70,2006,2011],
+["Aston Martin","DB5","coupe","hyper",900,1963,1965],["Aston Martin","V8 Vantage (1977)","coupe","exotic",250,1977,1989],["Aston Martin","One-77","coupe","hyper",2100,2011,2012],["Aston Martin","Valkyrie","coupe","hyper",3500,2022,2025],
+["Bentley","Turbo R","sedan","performance",35,1989,1997],["Rolls-Royce","Silver Shadow","sedan","performance",45,1965,1980],["Rolls-Royce","Corniche","convertible","exotic",120,1971,1995],
+["Alfa Romeo","4C","coupe","performance",62,2015,2020],["Alfa Romeo","Spider (Duetto)","convertible","performance",35,1966,1969],["Maserati","GranTurismo (1st gen)","coupe","exotic",75,2008,2019],["Maserati","Bora","coupe","exotic",150,1971,1978],
+["Saab","900 Turbo","hatchback","performance",25,1985,1993],["Volvo","240 Turbo","wagon","performance",22,1983,1985],["Volvo","850 R","wagon","performance",25,1996,1997],
+/* more moderns + gaps */
+["Chevrolet","SS Sedan","sedan","performance",48,2014,2017],["Chevrolet","Monte Carlo SS","coupe","mainstream",24,2000,2007],["Ford","Taurus SHO","sedan","performance",42,2010,2019],["Ford","Focus RS","hatchback","performance",41,2016,2018],["Ford","Fiesta ST","hatchback","economy",22,2014,2019],["Dodge","Neon SRT-4","sedan","performance",21,2003,2005],["Chrysler","300C SRT8","sedan","performance",32,2005,2010],["Chrysler","Crossfire SRT-6","coupe","performance",25,2005,2006],["Pontiac","G8 GXP","sedan","performance",38,2009,2009],["Saturn","Sky Red Line","convertible","performance",20,2007,2010],["Hummer","H1 Alpha","suv","exotic",250,2006,2006],["Hummer","H2","suv","performance",35,2003,2009],["Lincoln","Town Car","sedan","mainstream",22,1998,2011],["Cadillac","CTS-V Wagon","wagon","exotic",90,2011,2014],["Cadillac","XLR-V","convertible","performance",50,2006,2009],
+["Nissan","Sentra","sedan","economy",22,2013,2026],["Nissan","Versa","sedan","economy",18,2013,2026],["Nissan","Murano","suv","mainstream",38,2015,2026],["Nissan","Kicks","suv","economy",22,2018,2026],["Toyota","Camry TRD","sedan","mainstream",36,2020,2024],["Toyota","Crown","sedan","premium",42,2023,2026],["Toyota","Mirai","sedan","premium",52,2021,2026],["Honda","Fit","hatchback","economy",18,2015,2020],["Honda","Prelude","coupe","performance",42,2026,2026],["Hyundai","Genesis Coupe 3.8","coupe","performance",24,2010,2016],["Hyundai","Veloster N","hatchback","performance",30,2019,2022],["Kia","Soul","hatchback","economy",22,2014,2026],["Kia","EV9","suv","premium",58,2024,2026],["Genesis","GV60","suv","premium",54,2023,2026],["Mini","Cooper S","hatchback","mainstream",30,2014,2026],["Mini","John Cooper Works GP","hatchback","performance",47,2021,2021],["Fiat","500 Abarth","hatchback","economy",22,2012,2019],["Smart","Fortwo","hatchback","economy",15,2016,2019],
+["Tesla","Roadster (2008)","convertible","exotic",100,2008,2012],["Polestar","2","sedan","premium",50,2021,2026],["Polestar","3","suv","premium",68,2024,2026],["Fisker","Karma","sedan","performance",100,2012,2012],["Lucid","Air Grand Touring","sedan","luxury",112,2022,2026],["VinFast","VF 8","suv","mainstream",42,2023,2026],
+["Ram","1500 Classic","truck","economy",36,2019,2024],["Toyota","Tundra TRD Pro","truck","performance",72,2019,2026],["Nissan","Frontier Pro-4X","truck","mainstream",42,2022,2026],["Jeep","Cherokee (XJ)","suv","performance",25,1987,2001],["Jeep","Grand Wagoneer (classic)","suv","exotic",110,1984,1991],["Toyota","4Runner TRD Pro","suv","performance",56,2018,2026],["Lexus","GX 470","suv","premium",22,2003,2009],["Mercury","Marauder","sedan","performance",25,2003,2004],["International","Scout II","suv","exotic",65,1971,1980],["Ford","Excursion","suv","performance",40,2000,2005]
+);
+
+D.CARDATA.push(
+["Honda","Accord Coupe V6","coupe","mainstream",26,2008,2017],["Honda","Element","suv","economy",18,2003,2011],["Honda","CR-Z","coupe","economy",18,2011,2016],["Honda","Insight","sedan","economy",23,2019,2022],
+["Toyota","Celica GT-S","coupe","mainstream",22,2000,2005],["Toyota","Matrix","hatchback","economy",14,2003,2013],["Toyota","FJ Cruiser","suv","performance",38,2007,2014],["Toyota","Venza","suv","mainstream",34,2021,2024],["Toyota","Avalon","sedan","mainstream",34,2013,2017],
+["Nissan","Xterra","suv","mainstream",22,2000,2015],["Nissan","Cube","hatchback","economy",12,2009,2014],["Nissan","Juke","suv","economy",16,2011,2017],
+["Chevrolet","Cobalt SS","coupe","performance",18,2008,2010],["Chevrolet","HHR SS","hatchback","economy",14,2008,2010],["Chevrolet","Avalanche","truck","mainstream",26,2002,2013],["Chevrolet","Trailblazer SS","suv","performance",24,2006,2009],["Chevrolet","Volt","hatchback","economy",20,2011,2019],["Chevrolet","Bolt EV","hatchback","economy",26,2017,2023],["Chevrolet","Caprice (90s)","sedan","economy",12,1991,1996],
+["Ford","Crown Victoria","sedan","economy",12,1998,2011],["Ford","Ranger (classic)","truck","economy",12,1998,2011],["Ford","Flex","suv","mainstream",28,2009,2019],["Ford","Edge ST","suv","mainstream",44,2019,2024],["Ford","Escort ZX2","coupe","economy",8,1998,2003],["Ford","Probe GT","coupe","economy",10,1993,1997],
+["Dodge","Dakota R/T","truck","performance",16,1998,2003],["Dodge","Stealth R/T","coupe","performance",22,1991,1996],["Dodge","Intrepid","sedan","economy",8,1998,2004],["Dodge","Journey","suv","economy",18,2009,2020],
+["Chrysler","PT Cruiser GT","hatchback","economy",10,2003,2010],["Chrysler","Pacifica","van","mainstream",40,2017,2026],["Chrysler","Sebring Convertible","convertible","economy",10,2001,2010],
+["Jeep","Liberty","suv","economy",14,2002,2012],["Jeep","Commander","suv","mainstream",18,2006,2010],["Jeep","Renegade","suv","economy",22,2015,2023],
+["GMC","Typhoon","suv","exotic",70,1992,1993],["GMC","Syclone","truck","exotic",75,1991,1991],["GMC","Terrain","suv","mainstream",32,2018,2026],
+["Cadillac","DeVille","sedan","mainstream",16,1998,2005],["Cadillac","ATS-V","coupe","performance",42,2016,2019],["Cadillac","SRX","suv","mainstream",20,2010,2016],
+["Lincoln","Mark VIII","coupe","performance",14,1993,1998],["Lincoln","Blackwood","truck","performance",30,2002,2002],
+["Buick","Regal GS","sedan","mainstream",24,2012,2020],["Buick","Enclave","suv","mainstream",42,2018,2026],["Buick","Roadmaster Wagon","wagon","performance",22,1991,1996],
+["BMW","328i (E46)","sedan","mainstream",14,1999,2005],["BMW","X3 M40i","suv","premium",58,2018,2026],["BMW","645Ci","coupe","premium",22,2004,2005],["BMW","330Ci","convertible","mainstream",14,2001,2006],
+["Mercedes-Benz","C230 Kompressor","coupe","mainstream",12,2002,2005],["Mercedes-Benz","ML320","suv","mainstream",10,1998,2005],["Mercedes-Benz","CLK430","coupe","mainstream",14,1999,2003],["Mercedes-Benz","GLB 250","suv","premium",45,2020,2026],
+["Audi","A4 (B5) 1.8T","sedan","mainstream",10,1997,2001],["Audi","TT (Mk1)","coupe","performance",18,2000,2006],["Audi","Allroad (C5)","wagon","mainstream",12,2001,2005],["Audi","Q3","suv","premium",40,2019,2026],
+["Volkswagen","Beetle Turbo","hatchback","economy",16,2012,2019],["Volkswagen","Touareg V10 TDI","suv","performance",22,2004,2008],["Volkswagen","CC","sedan","mainstream",16,2009,2017],
+["Volvo","C30 T5","hatchback","mainstream",16,2008,2013],["Volvo","XC40","suv","premium",42,2019,2026],["Volvo","S60 Polestar","sedan","performance",38,2015,2018],
+["Subaru","Baja Turbo","truck","economy",16,2003,2006],["Subaru","SVX","coupe","performance",18,1992,1997],["Subaru","Crosstrek","suv","economy",28,2016,2026],
+["Mazda","Mazdaspeed3","hatchback","performance",18,2007,2013],["Mazda","Mazdaspeed Miata","convertible","performance",20,2004,2005],["Mazda","CX-30","suv","economy",26,2020,2026],["Mazda","Millenia S","sedan","economy",8,1995,2002],
+["Mitsubishi","Eclipse GSX","coupe","performance",24,1995,1999],["Mitsubishi","Galant VR-4","sedan","performance",18,1991,1992],["Mitsubishi","Montero","suv","performance",22,1992,2006],["Mitsubishi","Outlander","suv","economy",30,2016,2026],
+["Hyundai","Tiburon GT","coupe","economy",10,2003,2008],["Hyundai","Azera","sedan","mainstream",18,2012,2017],
+["Kia","Optima SX Turbo","sedan","mainstream",18,2011,2020],["Kia","Sedona","van","economy",22,2015,2021],["Kia","Rio","sedan","economy",16,2018,2023],
+["Lexus","SC300","coupe","performance",28,1992,2000],["Lexus","SC430","convertible","premium",22,2002,2010],["Lexus","CT200h","hatchback","premium",18,2011,2017],["Lexus","NX 350","suv","premium",44,2022,2026],
+["Infiniti","M45","sedan","mainstream",12,2003,2010],["Infiniti","FX45","suv","performance",16,2003,2008],["Infiniti","J30","sedan","economy",6,1993,1997],
+["Acura","Legend Coupe","coupe","performance",18,1991,1995],["Acura","CL Type-S","coupe","mainstream",10,2001,2003],["Acura","ZDX","suv","premium",30,2010,2013],
+["Porsche","Cayenne Turbo (955)","suv","performance",28,2003,2006],["Porsche","Boxster (986)","convertible","performance",16,1997,2004],
+["Jaguar","S-Type R","sedan","performance",18,2003,2008],["Jaguar","X-Type","sedan","economy",8,2002,2008],
+["Land Rover","LR3","suv","mainstream",14,2005,2009],["Land Rover","Freelander","suv","economy",8,2002,2005],
+["Saab","9-3 Viggen","coupe","performance",20,1999,2002],["Saturn","Ion Red Line","coupe","economy",12,2004,2007],["Pontiac","Solstice GXP","convertible","performance",22,2007,2009],["Pontiac","Bonneville SSEi","sedan","economy",10,2000,2005],
+["Suzuki","Grand Vitara","suv","economy",10,2006,2013],["Suzuki","Kizashi","sedan","economy",12,2010,2013],["Isuzu","VehiCROSS","suv","performance",28,1999,2001],["Isuzu","Trooper","suv","economy",10,1992,2002],
+["Scion","tC","coupe","economy",14,2005,2016],["Scion","xB","hatchback","economy",10,2004,2015],["Scion","FR-S","coupe","performance",22,2013,2016]
+);
+
+/* ---------- YACHTS (builder, model, type, length ft, price $M new, yr0) ---------- */
+D.YACHTDATA = [
+["Sea Ray","Sundancer 320","cruiser",32,.34,2018],["Sea Ray","SLX 400","dayboat",40,.79,2019],["Boston Whaler","345 Conquest","fishing",34,.52,2018],["Boston Whaler","420 Outrage","fishing",42,1.1,2019],
+["Grady-White","Canyon 456","fishing",45,1.4,2020],["Scout","530 LXF","fishing",53,2.4,2021],["Yellowfin","54 Offshore","fishing",54,2.1,2020],["Contender","44 ST","fishing",44,1.05,2019],
+["Axopar","37 Sun-Top","dayboat",37,.42,2019],["Chris-Craft","Launch 35 GT","dayboat",35,.55,2020],
+["Azimut","Fly 68","flybridge",68,3.9,2019],["Azimut","S7","sport",70,4.6,2020],["Azimut","Grande 32M","superyacht",105,12.4,2021],
+["Sunseeker","Manhattan 68","flybridge",68,3.8,2019],["Sunseeker","Predator 75","sport",75,4.9,2020],["Sunseeker","95 Yacht","superyacht",95,10.8,2021],
+["Princess","V55","sport",55,1.9,2019],["Princess","Y72","flybridge",72,4.4,2020],["Princess","X95","superyacht",95,11.9,2021],
+["Ferretti","720","flybridge",72,4.7,2020],["Ferretti","920","superyacht",92,9.9,2021],
+["Riva","76 Perseo Super","sport",76,6.8,2021],["Riva","Aquarama Special (restored)","classic",28,.65,2018],["Riva","110 Dolcevita","superyacht",110,17.5,2022],
+["Pershing","8X","sport",84,7.2,2021],["Pershing","140","superyacht",140,24.9,2022],
+["Prestige","M48","catamaran",48,1.3,2022],["Lagoon","SIXTY 5","catamaran",65,2.4,2020],["Leopard","53 PC","catamaran",53,1.5,2021],
+["Viking","64 Convertible","sportfish",64,4.1,2020],["Viking","80 Convertible","sportfish",80,8.9,2021],["Hatteras","GT65 Carolina","sportfish",65,4.6,2019],
+["Benetti","Oasis 40M","superyacht",131,21.5,2021],["Benetti","Diamond 145","superyacht",145,29.8,2022],
+["Sanlorenzo","SL90A","superyacht",90,9.4,2021],["Sanlorenzo","SX112","superyacht",112,16.8,2022],
+["Westport","112","superyacht",112,13.9,2019],["Westport","125","superyacht",125,18.9,2021],
+["Ocean Alexander","28R","superyacht",92,8.9,2021],["Feadship","Custom 46M (brokerage)","superyacht",151,34,2018],
+["MasterCraft","X26","wake",26,.24,2022],["Malibu","Wakesetter 25 LSV","wake",25,.21,2022],["Nautique","G25 Paragon","wake",25,.33,2023],
+["Intrepid","438 Evolution","fishing",43,1.0,2021],["Formula","500 SSC","dayboat",50,1.9,2022],["Tiara","EX 60","dayboat",60,3.2,2022],
+["Absolute","60 Fly","flybridge",60,2.6,2021],["Galeon","640 Fly","flybridge",64,3.1,2021],["Cranchi","67 Sessantasette","flybridge",67,3.4,2022]
+];
+
+/* ---------- PLANES (maker, model, class, price $M new, yr0, seats) ---------- */
+D.PLANEDATA = [
+["Cirrus","SR22T","piston",1.1,2019,4],["Cirrus","Vision Jet SF50","vlj",3.3,2019,6],
+["Daher","TBM 960","turboprop",4.8,2022,6],["Pilatus","PC-12 NGX","turboprop",5.4,2020,8],["Beechcraft","King Air 360","turboprop",8.1,2020,9],
+["Embraer","Phenom 100EV","light",4.7,2019,6],["Embraer","Phenom 300E","light",9.9,2020,9],["Embraer","Praetor 500","midsize",17.9,2020,9],["Embraer","Praetor 600","super-mid",21.5,2020,12],
+["Cessna","Citation M2 Gen2","light",6.4,2021,7],["Cessna","Citation CJ4 Gen2","light",11.9,2021,9],["Cessna","Citation XLS Gen2","midsize",15.8,2021,9],["Cessna","Citation Latitude","midsize",18.9,2019,9],["Cessna","Citation Longitude","super-mid",29.9,2019,12],
+["HondaJet","Elite II","vlj",7.0,2022,6],
+["Bombardier","Challenger 350","super-mid",27.4,2019,10],["Bombardier","Challenger 650","large",32.9,2019,12],["Bombardier","Global 5500","large",47.5,2020,16],["Bombardier","Global 6500","large",57.5,2020,17],["Bombardier","Global 7500","ultra",76.5,2019,19],
+["Gulfstream","G280","super-mid",25.5,2019,10],["Gulfstream","G450 (pre-owned)","large",16.5,2018,16],["Gulfstream","G550 (pre-owned)","large",24.5,2018,18],["Gulfstream","G600","large",59.5,2020,17],["Gulfstream","G650ER","ultra",70.5,2019,18],["Gulfstream","G700","ultra",78.5,2022,19],
+["Dassault","Falcon 2000LXS","large",36.5,2019,10],["Dassault","Falcon 900LX","large",45.5,2019,14],["Dassault","Falcon 8X","ultra",64.5,2019,16],
+["Boeing","BBJ MAX 7","bizliner",112,2021,25],["Airbus","ACJ319neo","bizliner",108,2020,19]
+];
+
+/* ---------- Investments universe ---------- */
+D.INVEST = [
+ {id:"idx500", n:"Foundry 500 Index", kind:"index", d:"Broad market index fund", mu:0.0017, sig:0.021},
+ {id:"idxtech", n:"Vanguard-Class Tech Index", kind:"index", d:"Large-cap tech index", mu:0.0022, sig:0.032},
+ {id:"bond", n:"Treasury Ladder 2-10yr", kind:"bonds", d:"Government bond ladder", mu:0.0008, sig:0.004},
+ {id:"muni", n:"NJ Municipal Bonds", kind:"bonds", d:"Tax-advantaged munis", mu:0.0007, sig:0.003},
+ {id:"stkA", n:"Helios Motors (HLS)", kind:"stock", d:"EV manufacturer, volatile", mu:0.003, sig:0.075},
+ {id:"stkB", n:"Corian Health (CRH)", kind:"stock", d:"Healthcare, steady", mu:0.0015, sig:0.028},
+ {id:"stkC", n:"Northbeam Media (NBM)", kind:"stock", d:"Streaming, story stock", mu:0.001, sig:0.06},
+ {id:"btc", n:"Bitcoin", kind:"crypto", d:"You know what this is", mu:0.004, sig:0.11},
+ {id:"eth", n:"Ethereum", kind:"crypto", d:"Smart-contract chain", mu:0.0035, sig:0.12},
+ {id:"memec", n:"$TOUCHDOWN Coin", kind:"crypto", d:"A teammate will pitch you this", mu:-0.004, sig:0.35},
+ {id:"bizWash", n:"Car Wash (Paterson, NJ)", kind:"business", d:"$180k buy-in · monthly draw, can fail", mu:0.006, sig:0.09, buyin:180000},
+ {id:"bizLaund", n:"Laundromat Partnership", kind:"business", d:"$120k buy-in · boring, resilient", mu:0.004, sig:0.04, buyin:120000},
+ {id:"bizRest", n:"Restaurant Stake (Hoboken)", kind:"business", d:"$250k buy-in · high upside, most fail", mu:0.007, sig:0.16, buyin:250000}
+];
+
+/* ---------- Loans on offer ---------- */
+D.LOANS = [
+ {id:"pl1", n:"Personal Loan, Prime", apr:9.5, max:50000, minScore:700, term:36},
+ {id:"pl2", n:"Personal Loan, Standard", apr:14.9, max:35000, minScore:640, term:36},
+ {id:"pl3", n:"Personal Loan, Rebuild", apr:21.9, max:15000, minScore:0, term:24},
+ {id:"adv", n:"Salary Advance", apr:22.0, max:40000, minScore:0, term:12, trap:true, note:"Always approved. Read the APR twice."}
+];
