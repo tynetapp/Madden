@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.10.0 (Aug 10 2026) */
+/* TyPhone app.js — v1.11.1 (Aug 10 2026) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -2757,15 +2757,15 @@ RENDER.card = b=>{
       <button class="btn sm" style="background:#cfd6df;color:#17191d" onclick="payCard(${min})">Pay minimum ${fm(min)}</button>
       <button class="btn sm" style="background:rgba(207,214,223,.15);color:#cfd6df" onclick="payCard(${S.credit.cardBal})">Pay in full</button></div>`:
       `<div style="font-size:13px;color:var(--dim);margin-top:6px">Zero balance. The card works at Octane, Harborline, Stratos, and marker settlements; autopay pulls the minimum monthly.</div>`}</div>
-  <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Your tier</h4>
-    <div style="font-size:13px;line-height:1.6;color:var(--dim)">${unl? "MERIDIAN UNLIMITED. The card cannot decline. A 500-car garage is possible, and going broke from here is entirely your own doing." : nextLine}</div>
-    <div style="margin-top:8px">${CARD_TIERS.map(t=>`<div class="payline" style="${t.id===T.id?"color:#fff":"opacity:.45"}"><span>${t.id===T.id?"\u25b8 ":""}${t.n}</span><span>${t.apr}% · ${t.cb}% back</span></div>`).join("")}</div>
-    <div style="font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.5">The tier moves at the weekly rollover with your score, income, and net worth. It only moves DOWN after a missed minimum or a real score collapse, never on a quiet week. Your line grows with income and net worth and never shrinks.</div></div>
   <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Statement</h4>` +
   (function(){
     const rows=[...(S.credit.ledger||[]).slice(0,10).map(l=>({n:l.t, amt:l.amt})), ...S.cardTx.slice(-12).reverse().map(t=>({n:t.n, amt:t.amt}))];
     return rows.length? rows.map(t=>`<div class="payline ${t.amt<0?"neg":""}"><span>${esc(t.n)}</span><span>${fm(t.amt)}</span></div>`).join("") : `<div style="font-size:13px;color:var(--dim)">No activity.</div>`;
-  })() + `</div></div>`;
+  })() + `</div>
+  <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Your tier</h4>
+    <div style="font-size:13px;line-height:1.6;color:var(--dim)">${unl? "MERIDIAN UNLIMITED. The card cannot decline. A 500-car garage is possible, and going broke from here is entirely your own doing." : nextLine}</div>
+    <div style="margin-top:8px">${CARD_TIERS.map(t=>`<div class="payline" style="${t.id===T.id?"color:#fff":"opacity:.45"}"><span>${t.id===T.id?"\u25b8 ":""}${t.n}</span><span>${t.apr}% · ${t.cb}% back</span></div>`).join("")}</div>
+    <div style="font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.5">The tier moves at the weekly rollover with your score, income, and net worth. It only moves DOWN after a missed minimum or a real score collapse, never on a quiet week. Your line grows with income and net worth and never shrinks.</div></div></div>`;   /* v1.11.1 (Ty): the tier lives UNDER statement activity */
 };
 function payCard(amt){
   amt=Math.min(amt, S.credit.cardBal);
