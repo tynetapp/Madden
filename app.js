@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.13.1 (Aug 11 2026) — THE ONE MEDIA SESSION + THE STRIPPED SYNC + THE OVERRULE (Ty's flow ruling: postgame+lookahead in one room at sync, no media card ever, unseen hand lives in the review page, coach calls deniable from upstairs, boot self-heal for silent weeks) (prior: v1.13.0 THE POWERHOUSE) */
+/* TyPhone app.js — v1.13.2 (Aug 11 2026) — THE REACTIVE WORLD (a post can move texts + the Huddle live; ONE VOICE per post per account; the coach rules at the review door so this week's behavior rides this week's code) (prior: v1.13.1) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -881,6 +881,7 @@ function dedupeReplies(fresh, existing){
   const out=[];
   for (const r of (fresh||[])){
     const h=String(r.h||"").toLowerCase(), t=normChText(r.x);
+    if (h && seen.some(x=>x.h===h)) continue;   /* v1.13.2 ONE VOICE PER POST (Ty: Demario replied twice): an account already in the section never speaks again under the same post, whatever the words */
     if (seen.some(x=>x.h===h && chDupe(x.t,t))) continue;
     seen.push({h,t}); out.push(r);
   }
@@ -1047,6 +1048,30 @@ async function aiPostReplies(post, attempt){
     toast("Replies didn't generate: "+e.message);
   }
 }
+/* v1.13.2 THE REACTIVE WORLD (Ty: "the huddle didnt react, no one texted me"): a post used to
+   echo only in its own reply section until the next sync's world write. Now the world can reach
+   him the way it really would — a teammate text, a fan thread — the moment he says something
+   that moves anyone. The MODEL decides volume honestly: a camp-body UDFA's shrug gets silence,
+   a "bench me or pay me" gets the building's attention. Fire-and-forget, checkpoint-free (a
+   lost reaction costs nothing), keyed only. */
+async function postWorldReact(post){
+  if (!aiKey()) return;
+  try{
+    const f=S.chirp.followers||0;
+    const out=await callAI("You write the PRIVATE and COMMUNITY fallout of a social post in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers) just posted: \""+post.t+"\". "+careerFactsLine()+" React ONLY as much as this post genuinely would for WHO HE IS: a nothing post = empty arrays; a locker-room grenade = a teammate or agent text and a fan-forum thread. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. Output STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2],\"huddle\":[{\"id\":\"unique\",\"flair\":\"DISCUSSION\",\"u\":\"\",\"tm\":\"1h\",\"up\":0,\"h\":\"\",\"b\":\"\",\"cmts\":[{\"u\":\"\",\"tm\":\"\",\"up\":0,\"t\":\"\",\"r\":[]} x3-6]} x0-1]}"+threadCtx(), worldFacts(S.blob, lastPlayed())+"\nWrite the fallout now (or empty arrays if there is none).", 1500);
+    const j=parseModelJSON(out); let moved=false;
+    for (const t of (j.texts||[])){
+      const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; } }
+    }
+    for (const h of (j.huddle||[])){
+      if (h && h.h && Array.isArray(h.cmts) && h.cmts.length){ S.world.huddle.unshift(h); moved=true;
+        S.world.notifs.push({app:"huddle", t:"The Huddle", p:"A thread went up about your post"}); }
+    }
+    if (moved){ if((j.texts||[]).some(t=>S.world.texts.find(x=>x.id===t.thread))) S.world.notifs.push({app:"texts", t:"Messages", p:"Your post got someone typing"});
+      persist(); if(curApp==="huddle"||curApp==="texts"||curApp==="chirper") renderApp(curApp); }
+  }catch(e){ console.log("post fallout skipped:", String(e&&e.message||e).slice(0,80)); }
+}
 /* v1.6.5: a post whose reply fetch failed (pre-armor API hiccup) can heal itself */
 function fetchReplies(id){
   const p=(S.chirp.posts||[]).find(x=>x.id===id); if(!p) return;
@@ -1074,6 +1099,7 @@ function chQuickPost(){
   wlScanPost(post);                                  // v1.7.4: the book reads his posts
   ledgerPublicPost(post.t);                          // v1.9.0: named teammates remember public words
   aiPostReplies(post);
+  postWorldReact(post);                              // v1.13.2: the world can reach him NOW
 }
 function chCompose(){
   sheet(`<h3>New post</h3><textarea id="chNew" class="field" rows="3" placeholder="What's happening, ${esc(S.handle)}?"></textarea>
@@ -1090,6 +1116,7 @@ function chPost(){
   wlScanPost(post);                                  // v1.7.4: the book reads his posts
   ledgerPublicPost(post.t);                          // v1.9.0: named teammates remember public words
   aiPostReplies(post);
+  postWorldReact(post);                              // v1.13.2: the world can reach him NOW
 }
 /* T-Mail */
 RENDER.tmail = (b, sub)=>{
@@ -4914,6 +4941,10 @@ function denyStaffOrder(i){
 }
 const ORD_COMPOSE=[["depth","Depth chart call"],["status","Roster move"],["sign","New contract"],["depthoff","Off the rows"],["position","Position change"],["number","Number change"],["resign","Rewrite a real deal"]];
 function reviewSheet(){
+  /* v1.13.2 (Ty: posted "coach is trash", review said nothing queued): the coach evaluated
+     only at SYNC — behavior from DURING the week never landed in the same week's code. The
+     review door summons the judgment NOW, so what you did this week rides this week. */
+  try{ if (coachEvaluate("moveon")) toast("The club sent word. It's in the manifest below."); }catch(e){}
   const st=staffState(); const g=nextGame();
   const dest=g? (g[4]?"vs ":"@ ")+g[3] : "the next game";
   const compose=`<p style="font-size:12px;opacity:.7;margin:10px 0 4px">The unseen hand \u2014 add a move (the news breaks like it came from the facility):</p>
@@ -6733,7 +6764,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.13.1";
+const VER="v1.13.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
