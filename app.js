@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.11.1 (Aug 10 2026) */
+/* TyPhone app.js — v1.12.0 (Aug 10 2026) — THE WRITEBACK EXPANSION */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -995,7 +995,7 @@ async function aiPostReplies(post, attempt){
      accounts still get small-account reply counts. log-scaled, floor 2, ceiling 10. */
   const nReplies = Math.max(2, Math.min(10, Math.round(2 + Math.log10(f+10)*1.55)));
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". "+careerFactsLine()+" "+myPostsLine()+" "+accountVoiceLaw()+" Write EXACTLY "+nReplies+" short realistic replies. These are the MOST POPULAR replies under the post, scaled to that follower count (a small account gets small-account energy, not viral treatment; a big account's top replies feel like a real viral reply section). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (g: m male, f female, x fan/brand accounts; vf 1 ONLY for teammates, media outlets, and official accounts — fans 0)", "Write the replies now.", Math.max(600, 220+130*nReplies));
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". "+careerFactsLine()+" "+myPostsLine()+" "+accountVoiceLaw()+chPersonaNote(post.t)+" Write EXACTLY "+nReplies+" short realistic replies. These are the MOST POPULAR replies under the post, scaled to that follower count (a small account gets small-account energy, not viral treatment; a big account's top replies feel like a real viral reply section). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (g: m male, f female, x fan/brand accounts; vf 1 ONLY for teammates, media outlets, and official accounts — fans 0)", "Write the replies now.", Math.max(600, 220+130*nReplies));
     let arr = parseModelJSON(out);                      // v1.6.2: same hardened ladder as the world call
     if (!Array.isArray(arr)){ arr = arr.replies||arr.items|| (Object.values(arr||{}).find(v=>Array.isArray(v))) || []; }
     if (Array.isArray(arr)) arr = arr.filter(r=>r&&String(r.x||"").trim()); // v1.7.6: a truncation-salvaged husk (author, no words) never gets stored
@@ -2165,6 +2165,8 @@ RENDER.apex = (b,sub)=>{
       ${reqListHtml()}
       <p style="font-size:11px;opacity:.5;margin:8px 0 0">The ask is real; the answer is the building's. Snaps requests that land ride the ONE order code. Nothing here ever writes a trade or a release — the save decides those.</p>
     </div>`:""}
+    ${depthChartHtml()}
+    ${negTableHtml()}
     ${S.agent? `<button class="veh-row light" style="justify-content:center" onclick="window._apexRoster=!window._apexRoster;renderApp('apex')"><span class="vr-l"><b>Other agents at Apex — ${D.AGENTS.length-(S.agent&&S.agent.id!=="self"?1:0)} ${window._apexRoster?"\u25be":"\u25b8"}</b><small>switching is legal, common, and remembered</small></span></button>`
       : `<div class="hoodhead"><h3>The Roster</h3><span>12 agents at Apex</span></div>`}
     ${(!S.agent||window._apexRoster)&&!selfRepped()? `<button class="veh-row light" onclick="renderApp('apex',{a:'self'})">
@@ -2350,8 +2352,53 @@ const PULL_TIERS=[
   [85,"a cornerstone","the general manager","the GM"],
   [101,"the franchise","ownership","the owner"]];
 function pullTier(){ const s=pullScore(); for (const t of PULL_TIERS) if (s<t[0]) return {score:s, word:t[1], whoLong:t[2], who:t[3]}; return {score:s, word:"the franchise", whoLong:"ownership", who:"the owner"}; }
+/* ============ v1.12.0 THE WRITEBACK EXPANSION — save-truth persona, depth, and the table ============
+   The exe (v1.7.0) grew roster rows to 14 slots (10 captain / 11 ego / 12 motiv indices /
+   13 personalityRating), and the blob gained motiv (dictionary), depth (Team.DepthChart truth,
+   named position lists), negotiations (PersonaNegotiation hooks) and teamCap (dollars). Every
+   read here GUARDS length/nullness — legacy blobs behave exactly as before. */
+function rosterRowFor(name){ return S.blob&&S.blob.roster&&S.blob.roster.find(x=>(x[0]+" "+x[1])===name)||null; }
+function motivName(i){ const M=(S.blob&&S.blob.motiv)||[]; return M[i]||""; }
+const MOTIV_WORDS={ChampionshipContender:"chasing a ring",SchemeFit:"scheme fit",CloseToHome:"staying close to home",WarmWeatherState:"warm weather",BigMarket:"a big market",HeadCoachHistoricRecord:"playing for a proven coach",HighestOffer:"the biggest number",MentoratPosition:"a mentor at his position",NoIncomeTax:"keeping the tax man away",TeamHasFranchiseQB:"a real quarterback situation",TeamPrestige:"a prestige franchise",ToptheDepthChart:"a clear path to starting"};
+function rosterPersona(name){
+  const r=rosterRowFor(name);
+  if (!r || r.length<=13) return null;
+  const mots=(Array.isArray(r[12])?r[12]:[]).map(motivName).filter(m=>m&&m!=="None");
+  return { captain: r[10]===1, ego: +r[11]||0, motiv: mots, pr: +r[13]||0 };
+}
+function egoWord(e){ return e>=75?"a big ego, feeds on status":e>=45?"a healthy ego":e>=15?"quietly self-assured":"ego barely registers, team-first wiring"; }
+function personaLine(name){
+  /* the prompt line — ROLE-PROMPTING law: describes "this teammate", never names him. */
+  const p=rosterPersona(name);
+  if (!p) return "";
+  const bits=[];
+  if (p.captain) bits.push("wears a captain's patch and carries the room like it");
+  bits.push(egoWord(p.ego));
+  if (p.motiv.length) bits.push("what moves him: "+p.motiv.map(m=>MOTIV_WORDS[m]||m).join(", "));
+  return " SAVE-TRUTH MAKEUP (real, from the franchise file): this teammate "+bits.join("; ")+".";
+}
+function depthTruth(){ return (S.blob&&S.blob.depth&&typeof S.blob.depth==="object"&&Object.keys(S.blob.depth).length)? S.blob.depth : null; }
+function myDepthSpots(){
+  const d=depthTruth(); if(!d) return [];
+  const me=S.blob.player.first+" "+S.blob.player.last;
+  const out=[];
+  for (const pos of Object.keys(d)){ const i=d[pos].indexOf(me); if(i>=0) out.push({pos, slot:i+1, of:d[pos].length}); }
+  return out;
+}
+function chPersonaNote(postText){
+  /* v1.12.0: when a public post names a teammate, that teammate's required reply obeys his
+     save-truth makeup. One teammate, one line — token-budget friendly. */
+  try{ for (const m of mentionPool()){ if (m.h && String(postText).toLowerCase().includes(m.h.toLowerCase())){ const pl2=personaLine(m.n); return pl2? " THE MENTIONED TEAMMATE'S REPLY obeys this:"+pl2 : ""; } } }catch(e){}
+  return "";
+}
+function negTruthMine(){
+  const me=S.blob.player.first+" "+S.blob.player.last;
+  return (S.blob.negotiations||[]).find(n=>n&&n.n===me)||null;
+}
 const REQ_TYPES={
   depth:  {label:"Snaps / depth chart", verb:"more snaps — a move up the room"},
+  poschange:{label:"Position change",   verb:"an official position change"},      /* v1.12.0 */
+  number: {label:"Jersey number",       verb:"a jersey number change"},           /* v1.12.0 */
   gone:   {label:"Move him out",        verb:"moving a teammate out of the building"},
   bringin:{label:"Bring him in",        verb:"bringing a player in"},
   holdout:{label:"Holdout",             verb:"sitting out until something changes"},
@@ -2404,17 +2451,43 @@ function reqChooser(){
   ${Object.entries(REQ_TYPES).map(([k,v])=>`<button class="btn sm" style="background:rgba(255,255,255,.12);width:100%;text-align:left;margin-bottom:6px" onclick="reqSheet('${k}')">${esc(v.label)}</button>`).join("")}
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
 }
-function reqSheet(type){
+function reqSheet(type, pre){
   const T=REQ_TYPES[type]; const me=S.blob.player.first+" "+S.blob.player.last;
-  const needsMate = type==="depth"||type==="gone";
+  const needsMate = type==="gone";
   const mates=S.blob.roster.filter(r=>(r[0]+" "+r[1])!==me);
   const wkGross=grossFor(S.blob.player.status, S.blob.player);
+  /* v1.12.0: the depth ask names a LIST and a SLOT from save truth. Any list is choosable —
+     the two-way law (decoded): one player may hold slots on both sides of the ball, and the
+     phone never blocks an off-position ask. The building still rules. */
+  const dTruth=depthTruth();
+  const dPositions=dTruth? Object.keys(dTruth) : ORD_POS;
+  const dDefault=(pre&&pre.pos)|| (dTruth&&dTruth[S.blob.player.pos]? S.blob.player.pos : dPositions[0]);
+  const dSlotOpts=pos=>{ const len=dTruth&&dTruth[pos]? Math.min(8, dTruth[pos].length+ (dTruth[pos].includes(me)?0:1)) : 5; return Array.from({length:len},(_,i)=>i+1); };
+  window._reqSlotRefresh=()=>{ const p=$("#reqPos").value; $("#reqSlot").innerHTML=dSlotOpts(p).map(x=>`<option>${x}</option>`).join(""); const cur=dTruth&&dTruth[p]? dTruth[p].indexOf(me):-1; $("#reqDCur").textContent= cur>=0? "You sit "+p+(cur+1)+" today."+(p!==S.blob.player.pos?" (Off-position listings are legal — two-way law.)":"") : (p!==S.blob.player.pos? "You're not on the "+p+" list today. Asking on is legal — two-way law.":"You're not listed at "+p+" today."); };
+  /* jersey numbers: what's worn on this roster (idx 4) */
+  const worn={}; for (const r of S.blob.roster){ if (r[5]==="Signed"||r[5]==="PracticeSquad") worn[+r[4]]=r[0]+" "+r[1]; }
+  window._reqNumCheck=()=>{ const n=+$("#reqNum").value; const holder= Number.isInteger(n)&&n>=0&&n<=99? worn[n] : null;
+    const el=$("#reqNumMsg"), deal=$("#reqDealRow");
+    if (!Number.isInteger(n)||n<0||n>99){ el.textContent="Numbers run 0-99."; deal.style.display="none"; return; }
+    if (holder===me){ el.textContent="That's already your number."; deal.style.display="none"; }
+    else if (holder){ el.textContent="#"+n+" belongs to "+holder+". The building won't take a man's number for you — that's between you two (marker territory)."; deal.style.display="flex"; }
+    else { el.textContent="#"+n+" is open in the building."; deal.style.display="none"; } };
   sheet(`<h3>${esc(T.label)}</h3>
   <p class="sp">This goes on the record through ${esc(S.agent.n.split(" ")[0])}. The building answers at its own pace — usually by the next sync — and the save, not the ask, decides what actually moves.</p>
   ${type==="bringin"? `<p class="sp" style="font-size:12px;opacity:.75">How this works: a yes from the building is a decision, not a transaction. The phone never signs anyone. The move only becomes real inside Madden's world — when a sync shows him on the roster, the phone announces it like the news it is.</p>`:""}
   ${type==="holdout"? `<p class="sp" style="font-size:12px;color:#e8a13c">Know the cost before you sit: every game week held out is a missed check (about ${fm(wkGross)} gross at your current status), a public holdout is an instant conduct fine, and the building remembers who blinked. Guaranteed money can get voided over it.</p>`:""}
   ${type==="leave"? `<p class="sp" style="font-size:12px;opacity:.75">The exit consult. ${esc(S.agent.n.split(" ")[0])} reads the league for you: who needs your position, where the tape travels. Talk is talk — a release or free agency only exists when the SAVE shows it; if that door ever opens in Madden's world, this is the map you walk out with.</p>${teamNeedsHtml()}`:""}
-  ${needsMate? `<label class="flabel">${type==="depth"? "Who should you be ahead of?" : "Who needs to go?"}</label>
+  ${type==="depth"? `<label class="flabel">Which list?</label><select class="field" id="reqPos" onchange="_reqSlotRefresh()">${dPositions.map(x=>`<option ${x===dDefault?"selected":""}>${x}</option>`).join("")}</select>
+    <label class="flabel">Which slot do you want?</label><select class="field" id="reqSlot">${dSlotOpts(dDefault).map(x=>`<option ${pre&&pre.slot===x?"selected":""}>${x}</option>`).join("")}</select>
+    <p class="sp" id="reqDCur" style="font-size:12px;opacity:.75"></p>`:""}
+  ${type==="poschange"? `<label class="flabel">What do you want to be, officially?</label>
+    <select class="field" id="reqPos">${ORD_POS.filter(p=>p!==S.blob.player.pos).map(x=>`<option>${x}</option>`).join("")}</select>
+    <p class="sp" style="font-size:12px;opacity:.75">You're listed ${esc(S.blob.player.pos)} today. A position change is an organizational call — the room, the scheme, the card on your locker. Depth listings don't move with it (two-way law: the lists hold whoever the staff puts on them).</p>`:""}
+  ${type==="number"? `<label class="flabel">The number you want</label>
+    <input class="field" id="reqNum" type="number" min="0" max="99" placeholder="${S.blob.player.jersey}" oninput="_reqNumCheck()">
+    <p class="sp" id="reqNumMsg" style="font-size:12px;opacity:.75">You wear #${S.blob.player.jersey} today.</p>
+    <label class="flabel" id="reqDealRow" style="display:none;gap:8px;align-items:center"><input type="checkbox" id="reqDeal"> We made a deal — he's agreed to give it up. File the paired switch.</label>`:""}
+  ${needsMate? `<label class="flabel">Who needs to go?</label>
     <select class="field" id="reqTarget">${mates.map(r=>`<option value="${esc(r[0]+" "+r[1]).replace(/"/g,"&quot;")}">${esc(r[0]+" "+r[1])} \u00b7 ${esc(r[2])} ${r[3]}${(r[2]===S.blob.player.pos)?" \u00b7 your room":""}</option>`).join("")}</select>`
   : type==="bringin"? `<label class="flabel">Who do you want in the building?</label><input class="field" id="reqTarget" placeholder="a name the front office can chase">`
   : (type==="trade"||type==="leave")? `<label class="flabel">${type==="trade"? "Where to?" : "Where do you want to land?"}</label>
@@ -2425,10 +2498,13 @@ function reqSheet(type){
   <p class="sp" style="font-size:11.5px">Public asks force the issue and the coach WILL see it. Quiet asks keep doors open.</p>
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="reqSubmit('${type}')">Send it to ${esc(S.agent.n.split(" ")[0])}</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  if (type==="depth") _reqSlotRefresh();
 }
 function agentRouteReply(type, t, pub){
   const first=S.agent.n.split(" ")[0];
   const base = type==="depth"? "The snaps ask is in. I put it in front of "+t.whoLong+"."
+    : type==="poschange"? "A position change is a scheme conversation, not a favor. I framed it as what helps them win and left it with "+t.whoLong+"."
+    : type==="number"? "Jersey paperwork. Sounds small, means everything to the guy wearing it. It's with "+t.whoLong+" and the equipment room."
     : type==="gone"? "Moving a teammate out — that's a big swing. I'll raise it with "+t.whoLong+", but understand what we are asking a front office to do."
     : type==="bringin"? "I floated the name to "+t.whoLong+". Front offices hate being told who to sign, so I dressed it up as 'fit'."
     : type==="holdout"? "A holdout from "+t.word+" is a bet on leverage. I told "+t.whoLong+" you're serious. I hope you are."
@@ -2440,10 +2516,22 @@ function reqSubmit(type){
   const tgtEl=$("#reqTarget"); const target=tgtEl? tgtEl.value.trim() : "";
   const why=($("#reqWhy")&&$("#reqWhy").value.trim())||"";
   const pub=!!($("#reqPub")&&$("#reqPub").checked);
-  if ((type==="depth"||type==="gone") && !target) return toast("Pick a name.");
+  if (type==="gone" && !target) return toast("Pick a name.");
   S.requests=S.requests||[];
   const t=pullTier();
   const r={id:"rq"+Date.now(), type, target, why, pub, wk:wkKey(S.blob.clock), status:"pending", tier:t.word};
+  /* v1.12.0: the writeback asks carry their exact shape */
+  if (type==="depth"){ r.pos=$("#reqPos")? $("#reqPos").value : S.blob.player.pos; r.slot=$("#reqSlot")? +$("#reqSlot").value : 2; r.target=r.pos+r.slot; }
+  if (type==="poschange"){ r.pos=$("#reqPos")? $("#reqPos").value : ""; if(!r.pos) return toast("Pick a position."); r.target=r.pos; }
+  if (type==="number"){
+    const n=+($("#reqNum")&&$("#reqNum").value);
+    if (!Number.isInteger(n)||n<0||n>99) return toast("Numbers run 0-99.");
+    if (n===S.blob.player.jersey) return toast("That's already your number.");
+    r.num=n; r.target="#"+n;
+    const me=S.blob.player.first+" "+S.blob.player.last;
+    const holder=S.blob.roster.find(x=>+x[4]===n && (x[5]==="Signed"||x[5]==="PracticeSquad") && (x[0]+" "+x[1])!==me);
+    if (holder){ r.holder=holder[0]+" "+holder[1]; r.deal=!!($("#reqDeal")&&$("#reqDeal").checked); }
+  }
   S.requests.push(r);
   if (pub && (type==="gone"||type==="trade") && target){
     /* v1.9.4: a PUBLIC ask to move a teammate reaches that teammate. Of course it does. */
@@ -2504,16 +2592,67 @@ function resolveRequests(){
            and a full queue leaves the ask PENDING (it lands next sync), never a fake refusal. */
         if (ordTotal()<10){
           r.status="granted";
-          const slot = (t.score>=65 && roll<0.25)? 1 : 2;
+          /* v1.12.0: the ask names its list and slot from save truth — the grant honors it
+             exactly (any list, any side: two-way law). Legacy asks keep the old 1/2 roll. */
+          const pos=r.pos||S.blob.player.pos;
+          const slot=r.slot|| ((t.score>=65 && roll<0.25)? 1 : 2);
           S.orders=S.orders||[];
-          S.orders.push({type:"depth", player:{name:S.blob.player.first+" "+S.blob.player.last}, pos:S.blob.player.pos, slot});
-          say("They moved. Decision memo's in the building: you run with the "+(slot===1?"ones":"twos")+" at "+S.blob.player.pos+". It rides the order code on the Sync screen \u2014 paste it and Madden catches up to what's already been decided.");
+          S.orders.push({type:"depth", player:{name:S.blob.player.first+" "+S.blob.player.last}, pos, slot});
+          say("They moved. Decision memo's in the building: you run "+pos+slot+". It rides the order code on the Sync screen \u2014 paste it and Madden catches up to what's already been decided.");
           S.world.notifs.push({app:"sync", t:"Front office", p:"Your snaps ask landed \u2014 depth order queued"});
         } else { say("They said yes and my hands are full \u2014 the order code is at its ten-order ceiling. Apply or clear it and this lands on the next sync."); continue; }
       } else if (roll<0.75){
         r.status="refused";
         say(t.score<25? "Heard back through "+t.who+": 'earn it in practice.' That's the whole answer at your standing." : t.who.replace(/^the /,"The ")+" heard the snaps ask and passed for now. The tape has to force their hand \u2014 keep stacking days.");
       } else { r.status="ignored"; say("Nothing. Not a no \u2014 nothing. At "+t.word+" standing, silence IS the answer some weeks."); }
+    } else if (r.type==="poschange"){
+      /* v1.12.0: an organizational call — a harder yes than snaps. Granted, it rides TYORD1
+         as a real position order; the depth lists stay whatever the staff has them (two-way law). */
+      if (lev>0.62 && roll<lev-0.3){
+        if (ordTotal()<10){
+          r.status="granted";
+          S.orders=S.orders||[];
+          S.orders.push({type:"position", player:{name:S.blob.player.first+" "+S.blob.player.last}, pos:r.pos});
+          clubMail("Roster Decision \u2014 Position Change to "+r.pos,
+            "This is formal notice from the club. By decision of "+coachName()+" and the coordinator, your official position changes to "+r.pos+". The card on your locker changes this week; the order has been filed. Where you sit on any depth list remains the staff's call, week to week. This notice is one-way; direct any response through your representation.");
+          say("They actually did it. You're a "+r.pos+" on the org chart \u2014 the order's queued on Sync. The depth lists are still theirs to set; go earn the slot at the new spot.");
+          S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Position change to "+r.pos+" \u2014 order waiting in Sync"});
+        } else { say("They said yes on the position and the order code is full at ten. Apply or clear it and the "+r.pos+" move lands next sync."); continue; }
+      } else if (roll<0.8){
+        r.status="refused";
+        say(t.score<25? "On the position switch \u2014 "+t.who+" laughed, not unkindly. 'He can play "+String(r.pos)+" when he's earned a say.' Stack tape at the spot they gave you first." : "Walked the "+String(r.pos)+" idea up to "+t.whoLong+". They see you where you are \u2014 scheme, room math, the whole board. The tape at YOUR spot is what reopens this.");
+      } else { r.status="ignored"; say("The position ask got the long silence. Coordinators guard the org chart like the playbook. File stays open."); }
+    } else if (r.type==="number"){
+      /* v1.12.0: jersey paperwork. An open number is the easiest yes in the building; a worn
+         number is NEVER taken for you \u2014 the paired switch only moves if you two made it real
+         (marker territory), and even then the club processes it, you don't. */
+      if (r.holder && !r.deal){
+        r.status="refused";
+        say("On #"+r.num+" \u2014 that's "+r.holder+"'s number. The building won't take a man's number for you; that's a conversation (and probably a price) between you two. Make the deal, then refile with me.");
+      } else if (lev+0.25>0.5 && roll<lev+ (r.holder? -0.05 : 0.25)){
+        if (ordTotal()<10 - (r.holder?1:0)){
+          r.status="granted";
+          const me=S.blob.player.first+" "+S.blob.player.last;
+          S.orders=S.orders||[];
+          if (r.holder){
+            /* the paired switch: his move rides the SAME code first (the exe's sequenced-swap law) */
+            const wornNow=new Set(S.blob.roster.filter(x=>x[5]==="Signed"||x[5]==="PracticeSquad").map(x=>+x[4]));
+            let free=null; for(let n2=99;n2>=0;n2--){ if(!wornNow.has(n2)&&n2!==r.num){ free=n2; break; } }
+            S.orders.push({type:"number", player:{name:r.holder}, num:free});
+            S.orders.push({type:"number", player:{name:me}, num:r.num});
+            clubMail("Jersey Update \u2014 #"+r.num+" (paired switch)", "Made it official: the deal you two struck is processed. "+r.holder+" moves to #"+free+", and #"+r.num+" is yours. Both orders ride the code on your Sync screen; nameplates and gear are redone once the franchise catches up. Whatever the number cost you is between you two. This notice is one-way.", (S.blob.player.team||"Club")+" Equipment Room");
+            say("Done and done. The paired switch is queued \u2014 his move first, then yours, one code. Whatever you promised him, honor it. The room hears everything.");
+          } else {
+            S.orders.push({type:"number", player:{name:me}, num:r.num});
+            clubMail("Jersey Update \u2014 #"+r.num, "Made it official: #"+r.num+" is yours. The order rides the code on your Sync screen; nameplate, practice gear, and game jerseys are redone once the franchise catches up. This notice is one-way.", (S.blob.player.team||"Club")+" Equipment Room");
+            say("Easiest ask you'll ever make. #"+r.num+" is queued on Sync \u2014 the equipment room already has the email out.");
+          }
+          S.world.notifs.push({app:"tmail", t:"Equipment Room", p:"Jersey #"+r.num+" \u2014 order waiting in Sync"});
+        } else { say("The number's approved and the order code is at its ceiling. Apply or clear it and the jersey lands next sync."); continue; }
+      } else if (roll<0.8){
+        r.status="refused";
+        say("The equipment room kicked the #"+r.num+" ask back \u2014 'league office paperwork window,' which is building-speak for not this week. Refile after a game.");
+      } else { r.status="ignored"; say("The number ask sits in somebody's tray. Paperwork moves at paperwork speed. I'll keep on it."); }
     } else if (r.type==="leave"){
       /* v1.7.5: the exit consult resolves as an honest reading. The wall stands — releases and
          free agency only exist when the save shows them; the phone never writes an exit. */
@@ -2533,7 +2672,7 @@ function resolveRequests(){
     if (selfR){
       const what=REQ_TYPES[r.type].label;
       clubMail("Re: Your "+what+" Request",
-        r.status==="granted"? "Decision memo: your snaps request has been approved by staff. The depth order rides the order code on your Sync screen; paste it and the franchise catches up to what has been decided. This notice is one-way."
+        r.status==="granted"? "Decision memo: your "+what.toLowerCase()+" request has been approved by staff. The order rides the order code on your Sync screen; paste it and the franchise catches up to what has been decided. This notice is one-way."
         : r.status==="refused"? "Your "+what.toLowerCase()+" request was reviewed at the level your standing reaches ("+t.whoLong+") and will not be acted on at this time. This notice is one-way."
         : "Your "+what.toLowerCase()+" request is on file. No response has been issued. This notice is one-way.");
       ledgerNote("t:agent", "his self-filed "+what.toLowerCase()+" request came back: "+r.status);
@@ -2547,6 +2686,199 @@ function requestsLine(){
   const t=pullTier();
   const recent=rs.slice(-4).map(r=>REQ_TYPES[r.type].label+(r.target?" ("+r.target+")":"")+(r.pub?", made PUBLIC":"")+" \u2014 "+(r.status==="pending"?"pending, no answer yet":r.status==="granted"?"the staff moved on it":r.status)).join("; ");
   return "\nFORMAL REQUESTS "+(selfRepped()?"HE FILED HIMSELF, self-represented":"THROUGH HIS AGENT")+" (facts): "+recent+". His standing in the building: "+t.word+"; asks route as far as "+t.whoLong+". LAW: talk is talk \u2014 NEVER state that a trade, release, signing, benching, or promotion happened because of a request; only the save's own news decides. The world may discuss, mock, or speculate about PUBLIC requests only.";
+}
+/* ============ v1.12.0 THE DEPTH CHART — full team view from save truth ============
+   IDENTITY LAW: this is the BUILDING's document, rendered read-only. Your rows are marked;
+   wanting a different spot routes through representation (the snaps ask), and the building
+   rules. The two-way law is visible here: off-position names render exactly as listed. */
+let _dcOpen=false;
+function depthChartHtml(){
+  const d=depthTruth();
+  if (!d) return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">The depth chart</div>
+    <p style="font-size:12.5px;opacity:.65;margin:6px 0 0">This save's sync predates the depth truth. Run a fresh sync on the computer (exe v1.7.0+) and the whole board renders here.</p></div>`;
+  const me=S.blob.player.first+" "+S.blob.player.last;
+  const spots=myDepthSpots();
+  const ORDER=["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","NT","LOLB","MLB","ROLB","SUBLB","CB","SLCB","FS","SS","K","P","KOS","LS","KR","PR","3DRB","PWHB","SLWR","RLE","RDT","RRE","GAD"];
+  const keys=[...ORDER.filter(k=>d[k]), ...Object.keys(d).filter(k=>!ORDER.includes(k))];
+  const row=pos=>{
+    const list=d[pos];
+    const names=list.map((n,i)=>{
+      const rr=rosterRowFor(n);
+      const off = rr && rr[2]!==pos && !["KR","PR","3DRB","PWHB","SLWR","SLCB","SUBLB","KOS","GAD","RLE","RDT","RRE","NT","LS"].includes(pos);
+      return `<span style="${n===me?"color:#2e7d32;font-weight:700":""}">${i+1}. ${esc(n)}${off?" ("+esc(rr[2])+")":""}</span>`;
+    }).join('<span style="opacity:.3"> \u00b7 </span>');
+    return `<div class="payline" style="align-items:flex-start"><span style="font-size:12px;font-weight:700;min-width:44px">${esc(pos)}</span><span style="font-size:12px;text-align:right;line-height:1.5">${names}</span></div>`;
+  };
+  return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">The depth chart <span style="font-size:11px;opacity:.5;font-weight:400">save truth, this sync</span></div>
+  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${spots.length? "You sit "+spots.map(s=>s.pos+s.slot).join(", ")+" today." : "You're not on a depth row today \u2014 the building's call."} One player can hold rows on both sides of the ball; off-position listings are legal and shown as listed.</p>
+  ${_dcOpen? keys.map(row).join("")+`<button class="btn sm" style="background:rgba(0,0,0,.08);margin-top:8px" onclick="_dcOpen=false;renderApp('apex')">Fold the board</button>${S.agent?`<button class="btn sm" style="background:var(--apx-acc);color:#fff;margin-top:8px" onclick="reqSheet('depth')">Want a different spot? Take it to the building</button>`:""}`
+    : `<button class="btn sm" style="background:rgba(0,0,0,.08)" onclick="_dcOpen=true;renderApp('apex')">Open the whole board \u2014 ${keys.length} lists</button>`}
+  </div>`;
+}
+
+/* ============ v1.12.0 THE NEGOTIATION RITUAL — the table, not the pen ============
+   Ty's spec: contracts negotiated ON THE PHONE — agent + front office, offers shaped by
+   PersonaNegotiation hooks + pullScore + cap truth; an agreed deal ships as a sign/resign
+   TYORD1. THE WALL is REFRAMED, not broken: the SYSTEM still rules — it decides whether the
+   table opens, what it offers, when it walks, and the paper only becomes real when the SAVE
+   shows it. The phone gains the table to sit at, never the pen to force it.
+   Deterministic: every number is seeded on careerId+week+round. No AI key needed. */
+function negState(){ S.negot=S.negot||{log:[]}; return S.negot; }
+function myContractReal(){ const c=S.blob.player.contract; return !!(c&&c.length); }
+function negFair(){
+  /* fair AAV: pull percentile against the position room's real cap hits, bounded by cap truth */
+  const pos=S.blob.player.pos, minSal=760000;
+  const caps=S.blob.roster.filter(r=>r[2]===pos && r.length>8 && +r[8]>0).map(r=>+r[8]).sort((a,b)=>b-a);
+  const top=Math.max(caps[0]||0, minSal*4);
+  let fair=minSal + Math.pow(pullScore()/100,1.25)*(top-minSal);
+  const cap=S.blob.teamCap&&S.blob.teamCap.capRoom;
+  if (cap>0) fair=Math.min(fair, cap*0.85);
+  return Math.max(minSal, Math.round(fair/50000)*50000);
+}
+function negDb(){
+  /* his own PersonaNegotiation file: what the building believes he plays for */
+  const row=negTruthMine();
+  const w={total:1, bonus:1, years:1};
+  const IMP={Low:.5, Moderate:1, High:1.6, Critical:2.2};
+  for (const [id,imp] of ((row&&row.db)||[])){
+    const k= id==="Bonus"?"bonus" : id==="ContractLength"?"years" : (id==="TotalContractValue"||id==="HighestOffer")?"total" : null;
+    if (k) w[k]=Math.max(w[k], IMP[imp]||1);
+  }
+  return {w, row};
+}
+function negAgentEdge(){ const ag=S.agent||{neg:1}; return (Number(ag.neg||1)-4)*0.02 - (selfRepped()? 0.06:0); }
+function negOfferAt(round){
+  const rng=seedRng((S.careerId||"c")+"|neg|"+wkKey(S.blob.clock)+"|"+round);
+  const fair=negFair(), pull=pullScore();
+  const open=0.74+negAgentEdge();
+  const ceil=Math.min(1.05, 0.9+negAgentEdge()+0.025*Math.min(4,round));
+  const frac=Math.min(ceil, open+round*0.05+rng()*0.02);
+  const yrs= pull>=65? 4 : pull>=45? 3 : pull>=25? 2 : 1;
+  const aav=Math.round(fair*frac/50000)*50000;
+  const bShare= pull>=65? 0.35 : pull>=45? 0.22 : pull>=25? 0.1 : 0;
+  const round2=x=>Math.round(x*100)/100;
+  return { years:yrs, totalM:round2(aav*yrs/1e6), bonusM:round2(aav*yrs*bShare/1e6), fair, ceil };
+}
+function negCeilFor(years){
+  const {w}=negDb();
+  const o=negOfferAt(negState().round||0);
+  /* dealbreaker shaping: a bonus-first file loosens structure, a total-first file buys a hair
+     more ceiling, a years-first file tolerates longer asks */
+  const maxTotal=o.fair*o.ceil*years*(1+0.02*(w.total-1))/1e6;
+  const bonusEase=Math.min(0.45, 0.28+0.08*(w.bonus-1));
+  const maxYears=Math.min(7, o.years + (w.years>1? 2:1));
+  return { maxTotal:Math.round(maxTotal*100)/100, bonusEase, maxYears };
+}
+function negOpenGate(){
+  const st=negState(); const wk=wkKey(S.blob.clock);
+  if (!S.agent) return {no:"Pick representation first \u2014 even going alone is a choice made here at Apex."};
+  if (st.walkWk===wk) return {no:"The front office left the table this week. It reopens when the world moves \u2014 next sync, next week."};
+  if ((S.orders||[]).some(o=>(o.type==="sign"||o.type==="resign")&&o.player&&o.player.name===(S.blob.player.first+" "+S.blob.player.last)))
+    return {no:"Agreed paper is already riding the order code. Apply it and let the save show the deal before opening a new table."};
+  if (pullScore()<10) return {no:"They won't sit down. At camp-body standing the building's whole offer is the tender you're on \u2014 make the team, then there's a table."};
+  return {ok:1};
+}
+function negOpen(){
+  const g=negOpenGate(); if (g.no){ toast(g.no); return; }
+  const st=negState(); const wk=wkKey(S.blob.clock);
+  if (st.wk!==wk){ st.wk=wk; st.round=0; st.patience=(()=>{ const r=negTruthMine(); const p=r&&r.pat; return (typeof p==="number"&&p>0)? Math.min(95,p) : 30+Math.round(pullScore()/2); })(); st.log=[]; }
+  persist(); negSheet();
+}
+function negFlavor(){
+  const {w,row}=negDb(); const bits=[];
+  if (w.bonus>1.3) bits.push("their file on you reads bonus-first \u2014 guaranteed money up front moves them more than headline total");
+  if (w.total>1.3) bits.push("the building believes the headline number is what you play for");
+  if (w.years>1.3) bits.push("term matters in your file \u2014 they'll stretch years before they stretch dollars");
+  const mots=(S.blob.player.motivations||[]).map(m=>MOTIV_WORDS[m]||m);
+  if (mots.length) bits.push("what the room knows moves you: "+mots.join(", "));
+  return bits.length? bits.join("; ")+"." : "No leverage file on you yet \u2014 the tape is the whole argument.";
+}
+function negPatWord(p){ return p>=60?"in no hurry, the door's open":p>=35?"listening":p>=15?"checking the clock":"one bad number from standing up"; }
+function negSheet(){
+  const st=negState(); const o=negOfferAt(st.round);
+  const cap=S.blob.teamCap;
+  const agFirst=selfRepped()? null : S.agent.n.split(" ")[0];
+  sheet(`<h3>The table</h3>
+  <p class="sp">${myContractReal()? "New paper on your real deal \u2014 an agreed number ships as a resign order and the save writes the contract." : "Your first real contract row \u2014 an agreed number ships as a sign order and the save writes the paper."} The building rules the table; the phone never forces a pen.</p>
+  <div class="payline"><span style="font-size:12.5px">Their offer on the table</span><span style="font-size:13px;font-weight:700">${o.years}yr \u00b7 $${o.totalM}M${o.bonusM?" \u00b7 $"+o.bonusM+"M to sign":""}</span></div>
+  <div class="payline"><span style="font-size:12px;opacity:.7">The room across the table</span><span style="font-size:12px">${esc(negPatWord(st.patience))}</span></div>
+  ${cap&&cap.capRoom>0? `<div class="payline"><span style="font-size:12px;opacity:.7">Cap truth (from the save)</span><span style="font-size:12px">${fm(cap.capRoom)} of room</span></div>`:""}
+  <p class="sp" style="font-size:12px;opacity:.75">${esc(agFirst? agFirst+": \""+negFlavor()+"\"" : "Your own read, alone at the table: "+negFlavor())}</p>
+  ${st.log.slice(-3).map(l=>`<p class="sp" style="font-size:11.5px;opacity:.6">${esc(l)}</p>`).join("")}
+  <label class="flabel">Counter \u2014 years</label><select class="field" id="negY">${[1,2,3,4,5,6,7].map(x=>`<option ${x===o.years?"selected":""}>${x}</option>`).join("")}</select>
+  <label class="flabel">Counter \u2014 total ($M)</label><input class="field" id="negT" type="number" step="0.5" min="0.5" value="${Math.round(o.totalM*1.25*2)/2}">
+  <label class="flabel">Counter \u2014 signing bonus ($M)</label><input class="field" id="negB" type="number" step="0.5" min="0" value="${o.bonusM}">
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="negAccept()">Take their offer \u2014 ${o.years}yr / $${o.totalM}M</button>
+  <button class="btn" style="background:var(--apx-acc);color:#fff" onclick="negCounter()">Send the counter</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="negWalk()">Leave the table</button>`);
+}
+function negCounter(){
+  const st=negState();
+  const years=+$("#negY").value, totalM=+$("#negT").value, bonusM=+($("#negB").value||0);
+  if (!totalM||totalM<=0) return toast("A number first.");
+  if (bonusM<0||bonusM>=totalM) return toast("Bonus can't beat the total.");
+  const c=negCeilFor(years);
+  const cap=S.blob.teamCap;
+  const yrHit=(totalM+bonusM)/years*1e6;
+  const rng=seedRng((S.careerId||"c")+"|negj|"+wkKey(S.blob.clock)+"|"+st.round);
+  if (cap&&cap.capRoom>0 && yrHit>cap.capRoom){
+    st.patience=Math.max(0, st.patience-16);
+    st.log.push("They slid the cap sheet across the table: your year-one hit ("+fm(yrHit)+") is bigger than the room they have ("+fm(cap.capRoom)+"). Nobody signs what the math refuses.");
+  } else if (years>c.maxYears){
+    st.patience=Math.max(0, st.patience-10);
+    st.log.push("Term's the problem \u2014 "+years+" years is past what they'll paper"+(c.maxYears<7?" (they'll go to "+c.maxYears+")":"")+ ". The money conversation never even started.");
+  } else if (totalM<=c.maxTotal && bonusM<=totalM*c.bonusEase && rng()<0.85){
+    return negAgree({years,totalM,bonusM});
+  } else {
+    const over=Math.max(0,(totalM/c.maxTotal-1));
+    st.patience=Math.max(0, st.patience-(8+Math.round(Math.min(18, over*40))));
+    st.round=(st.round||0)+1;
+    const o2=negOfferAt(st.round);
+    st.log.push(bonusM>totalM*c.bonusEase? "The structure spooked them \u2014 that much guaranteed up front isn't how they paper "+(pullTier().word)+". They came back "+o2.years+"yr / $"+o2.totalM+"M."
+      : "They passed the counter around, shook heads, came back: "+o2.years+"yr / $"+o2.totalM+"M"+(o2.bonusM?" with $"+o2.bonusM+"M to sign":"")+".");
+  }
+  if (st.patience<=0) return negWalked();
+  persist(); negSheet();
+}
+function negAccept(){ const st=negState(); return negAgree(negOfferAt(st.round)); }
+function negAgree(t){
+  if (ordTotal()>=10){ toast("Deal's agreed and the order code is full at ten. Apply or clear it, then take the offer again \u2014 it holds this week."); return; }
+  const me=S.blob.player.first+" "+S.blob.player.last;
+  const type=myContractReal()? "resign":"sign";
+  S.orders=S.orders||[];
+  S.orders.push({type, player:{name:me}, years:t.years, totalM:t.totalM, bonusM:t.bonusM||0});
+  const st=negState(); st.agreedWk=wkKey(S.blob.clock); st.round=0; st.log=[];
+  clubMail("Contract Agreement \u2014 Terms Reached",
+    "This is formal notice from the club. Terms have been agreed"+(selfRepped()?"":" with your representation")+": "+t.years+" year"+(t.years===1?"":"s")+", $"+t.totalM+"M total"+(t.bonusM?" with a $"+t.bonusM+"M signing bonus":"")+". The "+(type==="resign"?"rewritten":"new")+" paper rides the order code on your Sync screen; the contract exists when the franchise file shows it, and your pay schedule updates on that sync. This notice is one-way; direct any response through your representation.");
+  S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Terms agreed: "+t.years+"yr / $"+t.totalM+"M \u2014 order waiting in Sync"});
+  if (!selfRepped()){ const th=S.world.texts.find(x=>x.id==="agent"); if (th){ th.msgs.push(["them","Shook on it. "+t.years+" years, $"+t.totalM+"M"+(t.bonusM?", $"+t.bonusM+"M of it guaranteed up front":"")+". The paper rides your Sync code \u2014 it's real when the save says it's real, and not a minute before. Don't spend it yet.", Date.now()]); th.last=Date.now(); delete S.reads["t:agent"]; } }
+  ledgerRoomEvent("agreed terms with the building on a new deal", 1);
+  persist(); closeSheet(); toast("Terms agreed. The paper rides the order code \u2014 the save makes it real.");
+  if (curApp==="apex") renderApp("apex");
+}
+function negWalk(){
+  const st=negState(); st.round=Math.max(0,(st.round||0)); persist(); closeSheet();
+  toast("You left the table. Their offer stands this week \u2014 the room remembers who stood up first.");
+}
+function negWalked(){
+  const st=negState(); st.walkWk=wkKey(S.blob.clock); st.round=0; st.log=[];
+  persist(); closeSheet();
+  clubMail("Contract Discussions \u2014 Paused",
+    "This is formal notice from the club. Contract discussions have been paused at the club's discretion. The building's interest in a deal is unchanged; its patience for this week was not. Discussions may resume after the next game week. This notice is one-way; direct any response through your representation.");
+  S.world.notifs.push({app:"tmail", t:"Football Operations", p:"They left the table \u2014 talks resume next week"});
+  toast("They stood up. The table reopens when the world moves.");
+}
+function negTableHtml(){
+  const st=negState(); const wk=wkKey(S.blob.clock);
+  const pending=(S.orders||[]).find(o=>(o.type==="sign"||o.type==="resign")&&o.player&&o.player.name===(S.blob.player.first+" "+S.blob.player.last));
+  const line = pending? "Terms agreed \u2014 the "+(pending.type==="resign"?"rewritten":"new")+" paper ("+pending.years+"yr / $"+pending.totalM+"M) rides the order code on Sync. The save makes it real."
+    : st.walkWk===wk? "The front office left the table this week. It reopens when the world moves."
+    : pullScore()<10? "No table at camp-body standing \u2014 the tender you're on IS the offer. Make the team."
+    : "The building will sit down. Offers are shaped by your standing ("+pullTier().word+"), the position room's real money, the cap sheet, and the leverage file the save keeps on you.";
+  return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">The table \u2014 contract talks</div>
+  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${esc(line)}</p>
+  ${(!pending && st.walkWk!==wk && pullScore()>=10)? `<button class="btn sm" style="background:var(--apx-acc);color:#fff" onclick="negOpen()">${myContractReal()? "Open talks \u2014 new paper on the real deal" : "Open talks \u2014 your first real contract"}</button>`:""}
+  <p style="font-size:11px;opacity:.5;margin:8px 0 0">The system rules the table: it opens it, prices it, and walks from it. An agreed deal is an order, not a fact \u2014 the save decides when paper exists.</p></div>`;
 }
 function signAgent(id){
   const prev=S.agent;
@@ -3911,6 +4243,10 @@ RENDER.sync = b=>{
     <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('depth')">Depth chart call</button>
     <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('status')">Roster move</button>
     <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('sign')">New contract</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('depthoff')">Off the rows</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('position')">Position change</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('number')">Number change</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('resign')">Rewrite a real deal</button>
   </div>
   ${(S.orders&&S.orders.length)? `<button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94" onclick="S.orders=[];persist();renderApp('sync')">Clear your queue</button>`:""}`:""}
   </div>
@@ -3934,6 +4270,10 @@ const ORD_POS=["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","
 function ordPlayers(){ return S.blob.roster.map(r=>({n:r[0]+" "+r[1], pos:r[2], ovr:r[3], j:r[4], st:r[5]})); }
 function ordWords(o){
   if (o.type==="depth")  return "The staff reshuffles the "+o.pos+" room: "+o.player.name+" takes over "+o.pos+o.slot+".";
+  if (o.type==="depthoff") return o.pos? "The staff takes "+o.player.name+" off the "+o.pos+" depth list." : "The staff pulls "+o.player.name+" off every depth list \u2014 he doesn't dress.";
+  if (o.type==="position") return "The organization moves "+o.player.name+" to "+o.pos+" \u2014 an official position change.";
+  if (o.type==="number") return "Equipment room: "+o.player.name+" switches to #"+o.num+".";
+  if (o.type==="resign") return "The club rewrites "+o.player.name+"'s deal: "+o.years+" years, $"+o.totalM+"M"+(o.bonusM?" with $"+o.bonusM+"M to sign":"")+".";
   if (o.type==="status") return o.to==="Active"? "The front office signs "+o.player.name+" to the 53." : "The club moves "+o.player.name+" to the practice squad.";
   if (o.type==="sign")   return "The club signs "+o.player.name+": "+o.years+" years, $"+o.totalM+"M"+(o.bonusM?" with $"+o.bonusM+"M to sign":"")+".";
   return "";
@@ -3957,11 +4297,30 @@ function ordSheet(type){
     <label class="flabel">Destination</label><select class="field" id="ordTo"><option value="Active">Active roster (the 53)</option><option value="PracticeSquad">Practice squad</option></select>
     <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('status')">Queue it</button>
     <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
-  if (type==="sign") sheet(`<h3>New contract</h3><p class="sp">For created players the game itself refuses to pay (no contract row). Money in millions; the exe rejects anyone who already has a real deal.</p>${psel}
+  if (type==="sign") sheet(`<h3>New contract</h3><p class="sp">For created players the game itself refuses to pay (no contract row). Money in millions; the exe routes anyone who already has a real deal to a resign order instead.</p>${psel}
     <label class="flabel">Years</label><select class="field" id="ordY">${[1,2,3,4,5,6,7].map(x=>`<option>${x}</option>`).join("")}</select>
     <label class="flabel">Total ($M)</label><input class="field" id="ordT" type="number" step="0.5" min="0.5" placeholder="12">
     <label class="flabel">Signing bonus ($M)</label><input class="field" id="ordB" type="number" step="0.5" min="0" placeholder="0">
     <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('sign')">Queue it</button>
+    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  /* ---- v1.12.0 THE WRITEBACK EXPANSION composer sheets ---- */
+  if (type==="depthoff") sheet(`<h3>Off the rows</h3><p class="sp">Benching, the honest way: the staff clears a player off the depth rows. One list, or every list (he doesn't dress).</p>${psel}
+    <label class="flabel">Which list?</label><select class="field" id="ordPos"><option value="">Every list \u2014 he doesn't dress</option>${ORD_POS.map(x=>`<option>${x}</option>`).join("")}</select>
+    <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('depthoff')">Queue it</button>
+    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  if (type==="position") sheet(`<h3>Position change</h3><p class="sp">An organizational call: the player's official position changes. Depth listings don't move with it \u2014 the lists hold whoever the staff put on them (two-way law).</p>${psel}
+    <label class="flabel">New position</label><select class="field" id="ordPos">${ORD_POS.map(x=>`<option>${x}</option>`).join("")}</select>
+    <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('position')">Queue it</button>
+    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  if (type==="number") sheet(`<h3>Number change</h3><p class="sp">Jersey paperwork. A taken number is refused by the exe unless its wearer's move rides the SAME code first \u2014 queue his switch, then this one.</p>${psel}
+    <label class="flabel">New number (0-99)</label><input class="field" id="ordN" type="number" min="0" max="99" placeholder="0">
+    <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('number')">Queue it</button>
+    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
+  if (type==="resign") sheet(`<h3>Rewrite a real deal</h3><p class="sp">For players with a REAL contract row: the exe rewrites the paper in place \u2014 new years, new money, honest cap delta against the hit it replaces. Money in millions.</p>${psel}
+    <label class="flabel">Years</label><select class="field" id="ordY">${[1,2,3,4,5,6,7].map(x=>`<option>${x}</option>`).join("")}</select>
+    <label class="flabel">Total ($M)</label><input class="field" id="ordT" type="number" step="0.5" min="0.5" placeholder="12">
+    <label class="flabel">Signing bonus ($M)</label><input class="field" id="ordB" type="number" step="0.5" min="0" placeholder="0">
+    <button class="btn" style="background:var(--ok);color:#04170d" onclick="ordAdd('resign')">Queue it</button>
     <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
 }
 function ordAdd(type){
@@ -3969,10 +4328,15 @@ function ordAdd(type){
   let o=null;
   if (type==="depth") o={type:"depth", player:{name}, pos:$("#ordPos").value, slot:+$("#ordSlot").value};
   if (type==="status") o={type:"status", player:{name}, to:$("#ordTo").value};
-  if (type==="sign"){ const t=+$("#ordT").value, b=+($("#ordB").value||0);
+  if (type==="depthoff"){ const p=$("#ordPos").value; o={type:"depthoff", player:{name}}; if(p) o.pos=p; }
+  if (type==="position") o={type:"position", player:{name}, pos:$("#ordPos").value};
+  if (type==="number"){ const n=+$("#ordN").value;
+    if (!Number.isInteger(n)||n<0||n>99) return toast("Numbers run 0-99.");
+    o={type:"number", player:{name}, num:n}; }
+  if (type==="sign"||type==="resign"){ const t=+$("#ordT").value, b=+($("#ordB").value||0);
     if (!t||t<=0) return toast("Total money first.");
     if (b<0||b>t) return toast("Bonus can't beat the total.");
-    o={type:"sign", player:{name}, years:+$("#ordY").value, totalM:t, bonusM:b}; }
+    o={type, player:{name}, years:+$("#ordY").value, totalM:t, bonusM:b}; }
   if (!o) return;
   S.orders=S.orders||[]; S.orders.push(o); persist(); closeSheet(); renderApp('sync');
   toast("Queued. The building will act on it.");
@@ -4626,6 +4990,11 @@ function applySaveNotices(oldP, newP, newC){
     clubMail("Jersey Update — #"+newP.jersey, "Made it official: you're in #"+newP.jersey+" now (previously #"+oldP.jersey+"). Nameplate, practice gear, and game jerseys are being redone this week. If a deal or promise was attached to that number, that's between you and whoever you made it with. This notice is one-way.", (S.blob.player.team||"Club")+" Equipment Room");
     S.world.notifs.push({app:"tmail", t:"Equipment Room", p:"Made it official — you're #"+newP.jersey+" now"});
   }
+  if (oldP.pos!==newP.pos){
+    /* v1.12.0: a position change is org-chart news — announced like everything the save decides */
+    notices.push("POSITION CHANGE: he is officially a "+newP.pos+" now (was "+oldP.pos+") — announced fact, the org chart moved");
+    S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Official: you're a "+newP.pos+" now"});
+  }
   S.saveNotices = notices; // this sync's truth only; overwritten every sync
   return notices.length;
 }
@@ -5152,7 +5521,10 @@ function coachEvaluate(trigger){
     const gross=grossFor(S.blob.player.status, S.blob.player);
     const amt=Math.max(5000, Math.round(gross*0.10/500)*500);
     S.cash.checking-=amt; S.ledger.push({t:"Club fine — conduct detrimental ("+coachName()+")", amt:-amt, kind:"expense"});
-    const order={type:"depth", player:{name:nm}, pos:S.blob.player.pos, slot:3};
+    /* v1.12.0 (the writeback expansion): benching = OFF the depth rows — the exe depthoff
+       order clears him from every list (not dressing), the honest write the slot-3 stand-in
+       always approximated. */
+    const order={type:"depthoff", player:{name:nm}};
     st.orders.push({id:"st"+Date.now(), wk, kind:"bench", why:ruling.why, order, ts:Date.now()});
     st.log.unshift({wk, kind:"conduct", amt, why:ruling.why, ts:Date.now()});
     selfRepFallout(ruling);   /* v1.9.0: self-represented — the newest endorsement walks, by email */
@@ -5175,8 +5547,8 @@ function coachEvaluate(trigger){
     S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Club fine "+fm(amt)+" \u2014 conduct detrimental"});
     odNotice();
   } else {
-    const slot = ruling.kind==="bench"? 3 : 2;
-    const order={type:"depth", player:{name:nm}, pos:S.blob.player.pos, slot};
+    /* v1.12.0: a benching clears every depth row (depthoff); a demotion stays a slot-2 call. */
+    const order = ruling.kind==="bench"? {type:"depthoff", player:{name:nm}} : {type:"depth", player:{name:nm}, pos:S.blob.player.pos, slot:2};
     st.orders.push({id:"st"+Date.now(), wk, kind:ruling.kind, why:ruling.why, order, ts:Date.now()});
     st.log.unshift({wk, kind:ruling.kind, why:ruling.why, ts:Date.now()});
     clubMail("Roster Decision \u2014 "+wkLabel(S.blob.clock),
@@ -5466,7 +5838,7 @@ function ledgerBlock(thread){
     const bits=[];
     bits.push("RELATIONSHIP MEMORY (private, between you two): you two are "+warmthWord(rec.warmth)+(isPerson? "; this teammate "+respectWord(rec.respect):"")+
       (rec.fam>=12? "; you talk all the time":rec.fam>=4? "; you talk fairly often":"; you have not talked much yet")+".");
-    if (isPerson) bits.push("THEIR NATURE: "+ledgerPersonality(thread.name)+".");
+    if (isPerson) bits.push("THEIR NATURE: "+ledgerPersonality(thread.name)+"."+personaLine(thread.name));   /* v1.12.0: save-truth makeup (captain/ego/motivations) rides the same line — no names, role-prompting law */
     const older=rec.hist.slice(-8);
     if (older.length) bits.push("WHAT YOU BOTH REMEMBER (compressed, may predate the messages shown; public things included): "+older.map(h=>h.x).join("; ")+".");
     if (isPerson) bits.push(roomRepLine());
@@ -6059,7 +6431,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.10.0";
+const VER="v1.12.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
