@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.12.0 (Aug 10 2026) — THE WRITEBACK EXPANSION */
+/* TyPhone app.js — v1.12.1 (Aug 10 2026) — FIELD ROUND: 75-man camp truth + the mailbox-first connect screen (prior: v1.12.0 THE WRITEBACK EXPANSION) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -259,11 +259,13 @@ function renderHome(){
   $("#dock").innerHTML = dockIds().map(id=>appPool().find(a=>a.id===id)).map(a=>iconEl(a, bdg(a))).join("");
   renderWidget();
 }
-/* v1.7.0 (Ty): in preseason there IS no practice squad or 53 — everyone is in camp on the
-   90-man. Display truth only; pay math keeps the save's real status underneath. */
+/* v1.7.0 (Ty): in preseason there IS no practice squad or 53 — everyone is in camp. Display
+   truth only; pay math keeps the save's real status underneath.
+   v1.12.1 (Ty's field ruling): the GAME counts preseason rosters as 75, not 90 — the label
+   says exactly what Madden says. */
 function rosterLabel(){
   const c=S.blob.clock||{}; const p=S.blob.player;
-  if ((c.weekType||c.stage)==="PreSeason") return "Training Camp · 90-man";
+  if ((c.weekType||c.stage)==="PreSeason") return "Training Camp · 75-man";
   return p.status==="PracticeSquad"?"Practice Squad":p.isIR?"Injured Reserve":p.status==="Signed"?"Active Roster":p.status;
 }
 function povDesc(){ const p=S.blob.player; return (p.status==="PracticeSquad"?"practice squad ":"")+(p.yearsPro===0?"rookie ":p.yearsPro>=6?"veteran ":"")+p.pos; }
@@ -6431,7 +6433,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.12.0";
+const VER="v1.12.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -6519,15 +6521,82 @@ function renderSetup(){
   if (document.getElementById("tp-setup")) return;
   const ov=document.createElement("div");
   ov.id="tp-setup";
-  ov.style.cssText="position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px;text-align:center;background:linear-gradient(180deg,#04100c 0%,#071a12 100%)";
+  ov.style.cssText="position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:34px 22px 28px;text-align:center;background:linear-gradient(180deg,#04100c 0%,#071a12 100%);overflow-y:auto";
+  const tok=META.settings.mailToken;
+  /* v1.12.1 (Ty's order-of-events ruling): the FIRST thing on a fresh phone is the GitHub key
+     and the online sync — without it the exe's code can't reach the phone by itself, and the
+     whole online loop was gated behind a career that didn't exist yet. The mailbox is Step 1
+     now; the manual paste stays underneath, forever. */
   ov.innerHTML=`
-    <div style="font-size:34px;font-weight:800;letter-spacing:.5px;margin-bottom:6px">TyPhone</div>
-    <p style="font-size:13px;line-height:1.55;color:rgba(255,255,255,.65);max-width:280px;margin:0 0 18px">Your player's phone, built from your Madden franchise save. Nothing lives here yet — run the TyPhone Sync tool on your computer against your save, then paste the code it gives you.</p>
-    <textarea class="field" id="syncIn" placeholder="Paste your sync code (TYNET1.…)" style="width:100%;max-width:300px;height:96px;resize:none"></textarea>
-    <button class="btn" style="background:var(--ok);color:#04170d;margin-top:12px;width:100%;max-width:300px" onclick="applyCode()">Connect save</button>
-    <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:14px;max-width:280px">Everything stays on this device. No account, nothing uploaded.</p>`;
+    <div style="font-size:34px;font-weight:800;letter-spacing:.5px;margin-bottom:4px">TyPhone</div>
+    <p style="font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.65);max-width:300px;margin:0 0 14px">Your player's phone, built from your Madden franchise save. Nothing lives here yet. The order: on the COMPUTER, run TyPhone Sync \u2192 paste your GitHub token in the PURPLE box \u2192 <b>Send sync ONLINE</b>. Then connect the same token here and the code arrives by itself.</p>
+    <div style="width:100%;max-width:300px;text-align:left;background:rgba(122,92,190,.12);border:1px solid rgba(122,92,190,.35);border-radius:12px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#b9a3e8;letter-spacing:.4px;margin-bottom:6px">STEP 1 \u2014 THE ONLINE MAILBOX</div>
+      <input class="field" type="password" id="setupTokIn" placeholder="${tok? "Connected \u2713 (\u2026"+esc(tok.slice(-4))+") \u2014 paste a new one to replace" : "ghp_\u2026 (the SAME token as the computer)"}" autocomplete="off" style="width:100%">
+      <button class="btn sm" style="background:#7a5cbe;color:#fff;margin-top:8px;width:100%" onclick="setupMailPull()">${tok? "Check the mailbox" : "Connect & check the mailbox"}</button>
+      <p style="font-size:11px;line-height:1.45;color:rgba(255,255,255,.5);margin:8px 0 0" id="setupMailStat">One token, both sides. Make it at github.com \u2192 Settings \u2192 Developer settings \u2192 Tokens (classic) \u2192 tick ONLY the gist box. Never share it with anyone.</p>
+    </div>
+    <div style="width:100%;max-width:300px;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.4px;margin-bottom:6px">OR \u2014 PASTE BY HAND (always works)</div>
+      <textarea class="field" id="syncIn" placeholder="Paste your sync code (TYNET1.\u2026)" style="width:100%;height:84px;resize:none"></textarea>
+      <button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px;width:100%" onclick="applyCode()">Connect save</button>
+    </div>
+    <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:12px;max-width:280px">Everything stays on this device. No account, nothing uploaded anywhere but your own private gist.</p>`;
   document.getElementById("stage").appendChild(ov);
   const hb=$('#homebar'); if(hb) hb.style.display='none';
+}
+/* v1.12.1: FIRST-BOOT MAILBOX DISCOVERY — careerless by necessity. The gist is named
+   "TyPhone mailbox — <careerId>" and a fresh phone knows no careerId, so every TyPhone box on
+   the account is a candidate: the newest sync wins, UNAPPLIED preferred (a reinstall may find
+   only an already-applied code in the box — still the right code for an empty phone). */
+async function mailFirstPull(){
+  const list=await mailJf(MAIL_API+"/gists?per_page=100",{headers:mailHdrs()});
+  const boxes=(list||[]).filter(g=>String(g.description||"").startsWith("TyPhone mailbox \u2014 "));
+  if(!boxes.length) return {none:true};
+  const cands=[];
+  for (const b of boxes.slice(0,6)){                       // one owner won't have many; cap the API cost
+    try{ const g=await mailJf(MAIL_API+"/gists/"+b.id,{headers:mailHdrs()});
+      const st=mailState(g);
+      if (st.syncTs && g.files && g.files["sync.txt"]) cands.push({g, st});
+    }catch(e){}
+  }
+  if(!cands.length) return {empty:true};
+  cands.sort((a,b)=>(b.st.syncTs||0)-(a.st.syncTs||0));
+  const pick=cands.find(c=>!c.st.syncApplied) || cands[0];
+  const code=await mailFile(pick.g,"sync.txt");
+  return {code, gistId:pick.g.id, ts:pick.st.syncTs, wasApplied:!!pick.st.syncApplied};
+}
+async function setupMailPull(){
+  const inp=$("#setupTokIn"); const t=((inp&&inp.value)||"").trim() || (META.settings.mailToken||"");
+  const st=$("#setupMailStat");
+  const say=(m,bad)=>{ if(st){ st.textContent=m; st.style.color=bad?"#ff9d94":"#7fd4a0"; } };
+  if(!t) return say("Paste the token first (it starts with ghp_).",1);
+  say("Testing the token against GitHub\u2026");
+  try{ await mailJf(MAIL_API+"/gists?per_page=1",{headers:{"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}}); }
+  catch(e){ return say("Token didn't work: "+String(e.message||e).slice(0,110),1); }
+  META.settings.mailToken=t; saveMeta();
+  say("Connected \u2713 \u2014 checking the mailbox\u2026");
+  let r; try{ r=await mailFirstPull(); }
+  catch(e){ return say("Mailbox check failed: "+String(e.message||e).slice(0,100),1); }
+  if(r.none) return say("Token works, but no mailbox exists yet. On the computer: TyPhone Sync \u2192 same token in the PURPLE box \u2192 Send sync ONLINE. Then tap Check again.",1);
+  if(r.empty) return say("The mailbox exists but no sync code is in it yet. On the computer, hit Send sync ONLINE, then tap Check again.",1);
+  say(r.wasApplied? "Found the last code in the box (applied once before \u2014 right call for an empty phone). Applying\u2026" : "Code found \u2014 applying\u2026");
+  window.__setupPull={gistId:r.gistId, ts:r.ts};
+  await applyCode(r.code);   // every existing guard runs; success lands in addCareer \u2192 teardownSetup
+  if (S && window.__setupPull){
+    /* the career is born — stamp the mailbox truth so Sync never re-offers this same code.
+       Best-effort PATCH; the local flag is the law. */
+    S.mailGist=window.__setupPull.gistId; S.mailApplied=window.__setupPull.ts; persist();
+    try{ const g=await mailJf(MAIL_API+"/gists/"+S.mailGist,{headers:mailHdrs()});
+      const st2={...mailState(g), syncApplied:true, syncAppliedTs:Date.now()};
+      await mailJf(MAIL_API+"/gists/"+S.mailGist,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st2,null,1)}}})});
+      if(typeof mailInfo!=="undefined" && mailInfo) mailInfo.state=st2;
+    }catch(e){}
+    window.__setupPull=null;
+  } else if (!S){
+    say("The code didn't apply \u2014 see the message above. The paste box below always works.",1);
+    window.__setupPull=null;
+  }
 }
 function teardownSetup(){
   const ov=document.getElementById("tp-setup");
