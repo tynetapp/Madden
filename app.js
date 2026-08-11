@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.12.2 (Aug 11 2026) — THE FIRST WORDS + THE PODIUM WALL + THE FORMULA + THE GEOGRAPHY + THE HONEST QUEUE (prior: v1.12.1 field round) */
+/* TyPhone app.js — v1.12.3 (Aug 11 2026) — THE SECOND-CAREER DOOR + THE ABBREVIATION FIX + THE BIRTH STAMP (prior: v1.12.2 seven-fix batch) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -141,13 +141,19 @@ function nflpaDues(blob){
    (typed values are HIS data and are never touched). Roster idx14/15 carry every teammate's
    geography for the Ledger's later use; rosterHome is the one length-guarded read door. */
 function deCamel(s){ return String(s||"").replace(/([a-z])([A-Z])/g, "$1 $2"); }
+/* v1.12.3 (Ty's screenshot: "AL"): the Settings state field is a SELECT of two-letter
+   abbreviations — filling it with "New Jersey" matched nothing and the browser showed the
+   first option. The fill speaks the select's language now. Keys are the save's own CamelCase. */
+const STATE_ABBR = {Alabama:"AL",Alaska:"AK",Arizona:"AZ",Arkansas:"AR",California:"CA",Colorado:"CO",Connecticut:"CT",Delaware:"DE",Florida:"FL",Georgia:"GA",Hawaii:"HI",Idaho:"ID",Illinois:"IL",Indiana:"IN",Iowa:"IA",Kansas:"KS",Kentucky:"KY",Louisiana:"LA",Maine:"ME",Maryland:"MD",Massachusetts:"MA",Michigan:"MI",Minnesota:"MN",Mississippi:"MS",Missouri:"MO",Montana:"MT",Nebraska:"NE",Nevada:"NV",NewHampshire:"NH",NewJersey:"NJ",NewMexico:"NM",NewYork:"NY",NorthCarolina:"NC",NorthDakota:"ND",Ohio:"OH",Oklahoma:"OK",Oregon:"OR",Pennsylvania:"PA",RhodeIsland:"RI",SouthCarolina:"SC",SouthDakota:"SD",Tennessee:"TN",Texas:"TX",Utah:"UT",Vermont:"VT",Virginia:"VA",Washington:"WA",WestVirginia:"WV",Wisconsin:"WI",Wyoming:"WY",DistrictofColumbia:"DC",WashingtonDC:"DC"};
+function stateAbbrFor(saveCamel){ return STATE_ABBR[String(saveCamel||"").replace(/\s+/g,"")] || null; }
 function rosterHome(r){ return (Array.isArray(r) && r.length>15) ? {state:deCamel(r[14]), town:String(r[15]||"")} : null; }
 function homeFillPerception(per, player){
   if (!per || !player) return false;
   let did=false;
-  const hs=deCamel(player.homeState||""), ht=String(player.homeTown||"");
-  if (hs && !String(per.state||"").trim()){ per.state=hs; did=true; }
-  if (ht && (!String(per.grew||"").trim() || per.grew==="Small town")){ per.grew=ht + (hs? ", "+hs : ""); did=true; }   /* the untouched factory default counts as blank */
+  const hsFull=deCamel(player.homeState||""), ht=String(player.homeTown||"");
+  const ab=stateAbbrFor(player.homeState);                                   /* v1.12.3: the select speaks abbreviations */
+  if (ab && !String(per.state||"").trim() && per.stateOther===undefined){ per.state=ab; did=true; }
+  if (ht && (!String(per.grew||"").trim() || per.grew==="Small town")){ per.grew=ht + (hsFull? ", "+hsFull : ""); did=true; }   /* the untouched factory default counts as blank */
   return did;
 }
 function checkLines(status, road, oppState, pl){
@@ -630,7 +636,8 @@ function renderLock(){
     <span class="ic ${icons[x.app]||'ic-set'}">${GLYPH[x.app]||"•"}</span>
     <span style="min-width:0"><h4>${esc(x.t)}</h4><p>${esc(x.p)}</p></span></button>`).join("");
   $("#lk-careers").innerHTML = META.careers.map(c=>`<button class="career-pick ${c.id===META.activeId?'active':''}" onclick="switchCareer('${c.id}')">
-    <span class="l"><h4>${esc(c.label)}</h4><p>${esc(c.sub||"")}</p></span><span class="go">${c.id===META.activeId?"Active":"Open"}</span></button>`).join("");
+    <span class="l"><h4>${esc(c.label)}</h4><p>${esc(c.sub||"")}</p></span><span class="go">${c.id===META.activeId?"Active":"Open"}</span></button>`).join("")
+    + (META.settings.mailToken? `<button class="career-pick" onclick="addCareerFromMailbox()"><span class="l"><h4>+ Add a career from the mailbox</h4><p>Any player synced on this token joins with one tap</p></span><span class="go">Scan</span></button>` : "");   /* v1.12.3 THE SECOND-CAREER DOOR */
 }
 async function switchCareer(id){
   if (META.activeId!==id){ META.activeId=id; S = await idb.get("career/"+id); persist(); }
@@ -3803,8 +3810,10 @@ RENDER.settings = b=>{
   const pc = S.perception;
   const dd = (id,opts,cur)=>`<select id="${id}" class="field" onchange="savePerception()">${opts.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
   const prov = META.settings.provider||"anthropic";
-  const stateOpts = D.STATES.concat(["Other (type a country)"]);
-  const stateCur = pc.stateOther!==undefined? "Other (type a country)" : (pc.state||"");
+  /* v1.12.3 (Ty's screenshot): an EMPTY state used to render as the first option ("AL") —
+     a lie. A blank state now shows an explicit placeholder, college-picker style. */
+  const stateOpts = ((pc.stateOther===undefined && !pc.state)? ["\u2014 pick your state \u2014"] : []).concat(D.STATES).concat(["Other (type a country)"]);
+  const stateCur = pc.stateOther!==undefined? "Other (type a country)" : (pc.state||"\u2014 pick your state \u2014");
   const debtT = pc.debtTotal||0;
   const shares = pc.debtShares || [40,25,5,15,10,5];
   b.innerHTML = aphead("Settings") + `<div class="apbody">
@@ -4045,7 +4054,7 @@ function savePerception(){
   const gv=id=>{const el=$("#"+id);return el?el.value:null;};
   const st=gv("pcState");
   if (st==="Other (type a country)"){ pc.stateOther = pc.stateOther||""; const co=gv("pcStateOther"); if(co!==null) pc.stateOther=co; if(!$("#pcStateOther")) rerenderSettings(); }
-  else if (st){ pc.state=st; delete pc.stateOther; }
+  else if (st && !st.startsWith("\u2014")){ pc.state=st; delete pc.stateOther; }   /* v1.12.3: the placeholder is not a state */
   pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
   pc.collegeName=gv("pcColName")??pc.collegeName;
   pc.college=gv("pcCol")||pc.college; pc.family=gv("pcFam")||pc.family;
@@ -4931,6 +4940,7 @@ function doRefreshTruth(){
   const oldP=Object.assign({}, S.blob.player, {contract:S.blob.player.contract});
   S.blob=blob; recomputeTitles(blob);
   applySaveNotices(oldP, blob.player, blob.clock);
+  homeFillPerception(S.perception, blob.player);                             // v1.12.3: geography backfills on same-week refreshes too (blank-only, typed wins)
   S.lastSyncAt={when:Date.now(), wk:wkLabel(blob.clock), kind:"refresh"};   // v1.7.9: same-week truth refreshes stamp too
   mailMarkSyncApplied();                                                     // v1.8.0: mailbox handshake (no-op unless this code came from the box)
   persist(); closeSheet(); toast("Save truth refreshed for "+wkLabel(blob.clock)+". No time passed.");
@@ -4975,6 +4985,12 @@ function newCareerSheet(blob){
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="_pending=null;closeSheet()">Cancel</button>`);
 }
 async function addCareerPending(){ const b=_pending; _pending=null; if(b) await addCareer(b); }
+/* v1.12.3 THE BIRTH STAMP: a mailbox-born career must stamp its box (mailGist/mailApplied/hash
+   + best-effort PATCH syncApplied) — but birth happens on the SHEET's Add tap, AFTER applyCode
+   returns. v1.12.1's setupMailPull stamped right after the await, before the tap: the stamp
+   never fired and the "didn't apply" line showed under a live sheet. The stamp now rides
+   addCareer itself, set by whichever door pulled the code. */
+let _mailBirthStamp=null;   // {gistId, ts, h} — set by setupMailPull / addCareerFromMailbox before applyCode
 async function addCareer(blobOrJson){
   const blob = typeof blobOrJson==="string" ? JSON.parse(blobOrJson) : blobOrJson;
   const st=newCareerState(blob);
@@ -4982,6 +4998,15 @@ async function addCareer(blobOrJson){
   META.careers.push({id:blob.careerId, label:blob.player.first+" "+blob.player.last, sub:blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock)});
   META.activeId=blob.careerId; S=st; persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();
   if (curApp) renderApp(curApp);
+  if (_mailBirthStamp){                                             /* v1.12.3: the mailbox-born career stamps its box at the real birth */
+    const bs=_mailBirthStamp; _mailBirthStamp=null;
+    S.mailGist=bs.gistId; S.mailApplied=bs.ts; if(bs.h) S.mailAppliedHash=bs.h; persist();
+    (async()=>{ try{ const g=await mailJf(MAIL_API+"/gists/"+bs.gistId,{headers:mailHdrs()});
+      const st2={...mailState(g), syncApplied:true, syncAppliedTs:Date.now()};
+      await mailJf(MAIL_API+"/gists/"+bs.gistId,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st2,null,1)}}})});
+      if(typeof mailInfo!=="undefined" && mailInfo) mailInfo.state=st2;
+    }catch(e){ console.log("birth stamp PATCH failed (local flag is the law):", String(e.message||e)); } })();
+  }
   /* v1.12.2 THE FIRST WORDS (Ty: "why do i have to wait for a second sync for the article") —
      root cause: eager generation lived ONLY in advanceTo, so the FIRST code adopted truth and
      wrote NOTHING; the Chronicle and the world stayed silent until sync two. The first sync now
@@ -6521,7 +6546,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.12.2";
+const VER="v1.12.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -6592,6 +6617,7 @@ function recomputeTitles(blob){
   if (S) try{ if(!S.credit.tier){ S.credit.tier=cardNaturalTier().id; S.credit.cardApr=cardTier().apr; persist(); } }catch(e){}   /* v1.10.0: existing careers wake up already in their earned tier */
   if (S) try{ dropCoachThread(); }catch(e){}                       // v1.7.6 (Ty's ruling): staff never text — the old coach thread is swept from existing careers
   if (S) try{ pruneEmptyReplies(); }catch(e){}                     // v1.7.6: truncation husks already saved to disk are healed once at boot
+  if (S) try{ if(homeFillPerception(S.perception, S.blob.player)) persist(); }catch(e){}   // v1.12.3: geography backfills at boot the moment a v1.7.1 blob is on file (blank-only, typed wins)
   if (S) try{ if(!S.articleFor){ S.articleFor={}; const l=lastPlayed(); if (l && (S.world.articles||[]).some(a=>a.kick!=="Midweek Notebook")) S.articleFor[gkey(l)]=1; } }catch(e){}   // v1.7.9: existing careers with a story on file don't get a duplicate offer; empty ones correctly read as owed
   applyWallpaper(); applyTheme();
   clockTick();
@@ -6654,6 +6680,46 @@ async function mailFirstPull(){
   const code=await mailFile(pick.g,"sync.txt");
   return {code, gistId:pick.g.id, ts:pick.st.syncTs, wasApplied:!!pick.st.syncApplied};
 }
+/* v1.12.3 THE SECOND-CAREER DOOR (Ty: career #2's first code needed hand-paste). The fresh-
+   phone discovery is reused career-aware: every "TyPhone mailbox" gist on the token whose
+   careerId the phone does NOT hold is offered; a tap pulls its sync.txt through applyCode —
+   every guard runs, the Add-career sheet confirms, the birth stamp marks the box. */
+async function careerBoxList(){
+  const list=await mailJf(MAIL_API+"/gists?per_page=100",{headers:mailHdrs()});
+  const boxes=(list||[]).filter(g=>String(g.description||"").startsWith("TyPhone mailbox \u2014 "));
+  const out=[];
+  for (const b of boxes.slice(0,8)){
+    const cid=String(b.description).slice("TyPhone mailbox \u2014 ".length).trim();
+    try{ const g=await mailJf(MAIL_API+"/gists/"+b.id,{headers:mailHdrs()});
+      const st=mailState(g);
+      if (st.syncTs && g.files && g.files["sync.txt"]) out.push({g, st, cid});
+    }catch(e){}
+  }
+  return out;
+}
+let careerAddBusy=false;
+async function addCareerFromMailbox(){
+  if (careerAddBusy) return;
+  if (!META.settings.mailToken) return toast("Connect the online mailbox first \u2014 the token lives in Sync (or the connect screen).");
+  careerAddBusy=true; toast("Checking your mailboxes\u2026");
+  try{
+    const all=await careerBoxList();
+    const news=all.filter(c=>!META.careers.find(k=>k.id===c.cid));
+    if (!news.length){ toast(all.length? "Every mailbox on this token is already a career here. Send a sync for the NEW player from the computer first \u2014 that creates its box." : "No mailboxes on this token yet \u2014 on the computer: pick the save + player and Send sync ONLINE."); careerAddBusy=false; return; }
+    if (news.length===1){ await careerPullBox(news[0]); careerAddBusy=false; return; }
+    sheet(`<h3>Add a career</h3><p class="sp">These mailboxes on your token aren't on this phone yet. Pick one \u2014 its latest sync builds the career.</p>`+
+      news.map((c,i)=>`<button class="btn" style="background:rgba(255,255,255,.1);text-align:left" onclick="closeSheet();careerPullBoxAt(${i})">${esc(c.cid)}${c.st.syncWk? " \u00b7 "+esc(c.st.syncWk):""} \u00b7 sent ${esc(mailTime(c.st.syncTs))}</button>`).join("")+
+      `<button class="btn" style="background:rgba(255,255,255,.06)" onclick="closeSheet()">Cancel</button>`);
+    window.__careerBoxes=news;
+  }catch(e){ toast("Mailbox check failed: "+String(e.message||e).slice(0,100)); }
+  careerAddBusy=false;
+}
+async function careerPullBoxAt(i){ const c=(window.__careerBoxes||[])[i]; window.__careerBoxes=null; if(c){ careerAddBusy=true; try{ await careerPullBox(c); }catch(e){ toast("Pull failed: "+String(e.message||e).slice(0,100)); } careerAddBusy=false; } }
+async function careerPullBox(c){
+  const code=await mailFile(c.g,"sync.txt");
+  _mailBirthStamp={gistId:c.g.id, ts:c.st.syncTs, h:codeHash(code)};
+  await applyCode(code);   // foreign careerId \u2192 the Add-career sheet; every guard runs
+}
 async function setupMailPull(){
   const inp=$("#setupTokIn"); const t=((inp&&inp.value)||"").trim() || (META.settings.mailToken||"");
   const st=$("#setupMailStat");
@@ -6669,22 +6735,11 @@ async function setupMailPull(){
   if(r.none) return say("Token works, but no mailbox exists yet. On the computer: TyPhone Sync \u2192 same token in the PURPLE box \u2192 Send sync ONLINE. Then tap Check again.",1);
   if(r.empty) return say("The mailbox exists but no sync code is in it yet. On the computer, hit Send sync ONLINE, then tap Check again.",1);
   say(r.wasApplied? "Found the last code in the box (applied once before \u2014 right call for an empty phone). Applying\u2026" : "Code found \u2014 applying\u2026");
-  window.__setupPull={gistId:r.gistId, ts:r.ts, h:codeHash(r.code)};   /* v1.12.2: the fingerprint rides here too */
-  await applyCode(r.code);   // every existing guard runs; success lands in addCareer \u2192 teardownSetup
-  if (S && window.__setupPull){
-    /* the career is born — stamp the mailbox truth so Sync never re-offers this same code.
-       Best-effort PATCH; the local flag is the law. */
-    S.mailGist=window.__setupPull.gistId; S.mailApplied=window.__setupPull.ts; if(window.__setupPull.h) S.mailAppliedHash=window.__setupPull.h; persist();
-    try{ const g=await mailJf(MAIL_API+"/gists/"+S.mailGist,{headers:mailHdrs()});
-      const st2={...mailState(g), syncApplied:true, syncAppliedTs:Date.now()};
-      await mailJf(MAIL_API+"/gists/"+S.mailGist,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st2,null,1)}}})});
-      if(typeof mailInfo!=="undefined" && mailInfo) mailInfo.state=st2;
-    }catch(e){}
-    window.__setupPull=null;
-  } else if (!S){
-    say("The code didn't apply \u2014 see the message above. The paste box below always works.",1);
-    window.__setupPull=null;
-  }
+  /* v1.12.3: the stamp rides addCareer's birth (see THE BIRTH STAMP) — the old post-await
+     stamping ran BEFORE the sheet's Add tap and never fired. */
+  _mailBirthStamp={gistId:r.gistId, ts:r.ts, h:codeHash(r.code)};
+  await applyCode(r.code);   // every existing guard runs; the Add-career sheet owns the moment from here
+  if (!S) say("Confirm the career on the sheet above \u2014 or if a message explained a refusal, the paste box below always works.");
 }
 function teardownSetup(){
   const ov=document.getElementById("tp-setup");
