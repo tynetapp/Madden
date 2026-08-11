@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.12.3 (Aug 11 2026) — THE SECOND-CAREER DOOR + THE ABBREVIATION FIX + THE BIRTH STAMP (prior: v1.12.2 seven-fix batch) */
+/* TyPhone app.js — v1.13.0 (Aug 11 2026) — THE POWERHOUSE: the phone is the pen — checkpointed week runner + wake lock, midweek-as-a-step dead for keyed phones, media availability is a card, Move-on review before the save, full-week world call (prior: v1.12.4 midweek phone-first) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -3530,7 +3530,8 @@ async function midAvailQuestions(){
 }
 async function midAvailSheet(){
   toast("They circle up\u2026");
-  const qs=await midAvailQuestions(); _maQs=qs;
+  const cached=(S.midAvailQs||{})[wkKey(S.blob.clock)];
+  const qs=(cached&&cached.length)? cached : await midAvailQuestions(); _maQs=qs;   /* v1.13.0: the runner preloads these — the sheet opens instantly */
   sheet(`<h3>At your locker</h3><p class="sp">Midweek media availability \u00b7 the week ahead only. Whatever you type IS your midweek quote; leave one blank to pass on it.</p>
   ${qs.map((x,i)=>`<label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
     <textarea class="field" id="maA${i}" rows="2" placeholder="your words, on the record"></textarea>`).join("")}
@@ -3544,12 +3545,16 @@ function midAvailSave(){
   const yr=String((S.blob.clock||{}).seasonYear||"");
   S.askedQs=S.askedQs||{}; S.askedQs[yr]=(S.askedQs[yr]||[]).concat(qs.map(x=>x.q.slice(0,40))).slice(-40);
   persist(); closeSheet(); toast("On the record."); if(curApp==="cal") renderApp("cal");
-  if(_maResume){ _maResume=false; midweekTick(); }   // v1.8.5: the scrum came first — now the week writes with his words in the facts
+  if(_maResume){ _maResume=false;
+    if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wkKey(S.blob.clock)]=true; persist(); runWeek(); if(curApp==="sync") renderApp("sync"); }   /* v1.13.0: answering IS the step — the Podium brief writes itself now */
+    else midweekTick(); }   // v1.8.5 (keyless): the scrum came first — now the week writes with his words in the facts
 }
 function midAvailSkip(){
   S.midAvail=S.midAvail||{}; S.midAvail[wkKey(S.blob.clock)]={qa:[], skipped:true};
   persist(); toast("Waved off. That reads standoffish, once."); if(curApp==="cal") renderApp("cal");
-  if(_maResume){ _maResume=false; midweekTick(); }   // v1.8.5: waving them off is an answer too — the week writes without his quotes
+  if(_maResume){ _maResume=false;
+    if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wkKey(S.blob.clock)]=true; persist(); runWeek(); if(curApp==="sync") renderApp("sync"); }   /* v1.13.0: a wave-off is an answer — the episode writes without his quotes */
+    else midweekTick(); }   // v1.8.5 (keyless): waving them off is an answer too — the week writes without his quotes
 }
 function midAvailLine(){
   const wk=wkKey(S.blob.clock); const a=(S.midAvail||{})[wk];
@@ -3691,12 +3696,83 @@ function presserSkip(){
   toast("Skipped availability. That gets noticed exactly once.");
   if (curApp==="cal") renderApp("cal");
 }
+/* ==================== v1.13.0 THE POWERHOUSE (Ty's ruling, the streamline chat) ====================
+   THE PHONE IS THE PEN. One sync lands and the WHOLE week writes itself on the phone — a
+   checkpointed queue where every finished job persists instantly, so a lock or a walk-away
+   pauses, never ruins. A screen wake lock holds while writing (set it down face-up; it cannot
+   auto-lock mid-write) and releases the moment the last job lands. Order = what you'll touch
+   first: locker questions (seconds) -> the article -> the world -> the Podium brief (gated on
+   your media availability, per the quote law — it writes itself the moment you answer or wave).
+   Midweek as a SYNC STEP is dead for keyed phones: media availability is just a card you tap
+   during the week, or don't. Lane C survives ONLY as the keyless fallback, untouched.
+   THE EXE IS A DUMB RELIABLE PIPE: save read/write + the mailbox ferry, nothing else. */
+let weekRunBusy=false, _wakeLock=null;
+async function wakeAcquire(){ try{ if(navigator.wakeLock && !_wakeLock){ _wakeLock=await navigator.wakeLock.request("screen"); _wakeLock.addEventListener("release",()=>{_wakeLock=null;}); } }catch(e){ console.log("wake lock unavailable:", String(e.message||e)); } }
+function wakeRelease(){ try{ if(_wakeLock){ _wakeLock.release(); _wakeLock=null; } }catch(e){} }
+function mediaHandled(){ const wk=wkKey(S.blob.clock); return !!((S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk])); }
+function weekEnqueue(blob, last){
+  /* keyed phones only — the runner IS the pen. Enqueue replaces any older week's leftovers. */
+  S.weekJobs={wk:wkKey(blob.clock), gk:last?gkey(last):null,
+    jobs:[{id:"questions",st:"todo"},{id:"article",st:"todo"},{id:"world",st:"todo"},{id:"podium",st:"gated"}]};
+  persist(); runWeek();
+}
+function weekRunLine(){
+  const W=S&&S.weekJobs; if(!W) return "";
+  const done=W.jobs.filter(j=>j.st==="done").length, total=W.jobs.length;
+  const failed=W.jobs.find(j=>j.st==="failed");
+  const gated=W.jobs.find(j=>j.id==="podium"&&j.st==="gated");
+  if (weekRunBusy) return "Writing the week\u2026 "+done+" of "+total+" done \u00b7 set the phone down, the screen stays awake \u00b7 if you leave, it resumes when you're back.";
+  if (failed) return "The week's writing paused ("+failed.id+": "+esc(failed.err||"failed")+"). Tap Resume the week's writing.";
+  if (gated && done===total-1) return "The week is written \u2713 \u00b7 the Podium episode writes itself after your media availability.";
+  return "The week's writing will resume on its own \u2014 or tap Resume now.";
+}
+async function runWeek(){
+  if (weekRunBusy || !S || !S.weekJobs) return;
+  if (!aiKey()) return;                                                    // keyless never runs the phone pen
+  if (S.weekJobs.wk!==wkKey(S.blob.clock)){ S.weekJobs=null; persist(); return; }   // a week the save left dies quietly
+  weekRunBusy=true; await wakeAcquire(); if(curApp==="sync") renderApp("sync");
+  for (const j of S.weekJobs.jobs){
+    if (!S.weekJobs) break;
+    if (j.st==="done") continue;
+    if (j.id==="podium"){ if (j.st==="gated"){ if (mediaHandled()) j.st="todo"; else continue; } }
+    if (j.st!=="todo" && j.st!=="failed") continue;
+    try{
+      if (j.id==="questions"){ const qs=await midAvailQuestions(); S.midAvailQs=S.midAvailQs||{}; S.midAvailQs[S.weekJobs.wk]=qs; }
+      else if (j.id==="article"){ const l=lastPlayed(); if (l && !(S.articleFor||{})[gkey(l)]) await writeGameStory(S.blob, l); }
+      else if (j.id==="world"){ await generateWeek(S.blob, lastPlayed(), {local:true, noArticle:true, fullWeek:true}); }
+      else if (j.id==="podium"){ await podiumJobRun(); }
+      j.st="done"; delete j.err; persist(); if(curApp==="sync") renderApp("sync");
+    }catch(e){ j.st="failed"; j.err=String(e.message||e).slice(0,90); persist(); if(curApp==="sync") renderApp("sync"); break; }
+  }
+  if (S.weekJobs && S.weekJobs.jobs.every(x=>x.st==="done")){ S.weekJobs=null; S.world.notifs.push({app:"sync", t:"Sync", p:"The week is written \u2014 everything's on the phone"}); persist(); }
+  weekRunBusy=false; wakeRelease(); if(curApp==="sync") renderApp("sync");
+}
+document.addEventListener("visibilitychange", ()=>{ try{ if(!document.hidden && S && S.weekJobs) runWeek(); }catch(e){} });   /* v1.13.0: coming back resumes the week */
+async function podiumJobRun(){
+  /* the episode writes ITSELF after media availability (quote law: his real answers exist first) */
+  const last=lastPlayed();
+  const out=await callAI(podBriefSys(), worldFacts(S.blob, last)+leagueDigest()+"\nWrite this week's source document now.", podLenSpec().k==="deep"?4500:podLenSpec().k==="short"?1400:2600);
+  const focus=podFocus();
+  const ep={id:"ep"+Date.now(), t:"Ep. "+(41+S.world.podium.eps.length), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};
+  S.world.podium.eps.unshift(ep);
+  S.world.notifs.unshift({app:"podium", t:"Podium", p:"This week's episode brief wrote itself"});
+}
 async function midweekTick(){
   if (!aiKey() && !laneCOn()) return toast("Add an API key in Sync first.");   // v1.8.1: the computer's key covers the heavies
   const wk = wkKey(S.blob.clock);
   S.midweek = S.midweek||{};
   if (S.midweek[wk] || calBusy) return;
-  if (S.midSkip && S.midSkip[wk]) return toast("You chose not to talk to the media this week. That call is final; the next sync re-offers midweek fresh.");   // v1.8.5: the wave-off law, enforced at the engine too
+  if (S.midSkip && S.midSkip[wk]) return toast("You chose not to talk to the media this week. That call is final; the next sync re-offers it fresh.");   // v1.8.5: the wave-off law, enforced at the engine too
+  /* v1.13.0 THE POWERHOUSE: on a KEYED phone midweek is not a sync and not a write — the week
+     package already covered the whole week. This button is just the media availability now;
+     answering (or waving) marks the week handled and the Podium brief writes itself. The beat
+     body below survives for KEYLESS lane C phones only, exactly as it always ran. */
+  if (aiKey()){
+    if (midweekMediaOn() && !(S.midAvail&&S.midAvail[wk])){ _maResume=true; return midAvailSheet(); }
+    S.midweek[wk]=true; persist(); toast("No media asked for you this week. The week moves on.");
+    runWeek(); if(curApp==="sync") renderApp("sync"); if(curApp==="cal") renderApp("cal");
+    return;
+  }
   /* v1.8.5 (Ty's podium ruling): the locker-room scrum happens FIRST — his midweek answers
      (with his postgame podium answers already in the facts) are exactly what the Podium
      episode and the beat have "to go on". Done talking / Wave them off resumes the write;
@@ -3717,7 +3793,9 @@ async function midweekTick(){
   try{
     /* v1.8.1 LANE C: the midweek heavyweight rides the mailbox when the toggle is on; the
        intake below is UNTOUCHED — it runs when the computer's text comes home instead. */
-    if (laneCOn()){
+    if (laneCOn() && !aiKey()){
+      /* v1.12.4 law, restated: midweek rides lane C ONLY keyless (and since v1.13.0 keyed
+         phones never even reach this body — the early return above owns them). */
       const handled = await queueMidweekJob(sys, worldFacts(S.blob, lastPlayed())+"\n\nWrite the midweek beat now.", wk);
       if (handled){ calBusy=false; if(curApp==="cal") renderApp("cal"); return; }
     }
@@ -3755,6 +3833,7 @@ function intakeMidweek(j, wk){
       S.world.notifs.unshift({app:"podium", t:"Podium", p:"New episode brief is up"});
     }
     S.midweek[wk]=true;
+    if (S.mailJobs && S.mailJobs.kind==="midweek" && S.mailJobs.wk===wk){ S.mailJobs=null; console.log("stale midweek desk stamp cleared — the phone wrote this week itself (the box copy is discarded on arrival)"); }   /* v1.12.4: a locally-written midweek frees the desk at once; the consume-door guard catches any copy that still comes home */
     const d=new Date();
     S.lastMidweek = "Played "+d.toLocaleDateString([], {month:"short",day:"numeric"})+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" · "+(j.chirps||[]).length+" chirps, "+((j.huddle||[]).length?"1 thread, ":"")+(j.texts||[]).length+" text threads"+((j.emails||[]).length?", 1 email":"")+(j.podium?", Podium episode":"");
     syncTick();                                     /* v1.9.6: midweek IS a sync — the clock ticks (one door, both pens) */
@@ -4253,6 +4332,14 @@ function syncMidweekCard(){
   const done = !!(S.midweek&&S.midweek[wk]);
   const n = nextGame();
   const ma = S.midAvail&&S.midAvail[wk];
+  if (aiKey()) return `<div class="synccard box-sync"><h4>Media availability <span class="cchip chip-sync">GREEN</span></h4>
+  <p style="margin-top:0">The week already wrote itself \u2014 this is just the reporters at your locker, once a week, about the road ahead${n? " (incl. "+esc(n[3])+")" : ""}. Optional; answer and the Podium episode writes itself with your words, wave them off and it writes without them. No syncs, no computer.</p>
+  ${done? `<p style="font-size:13px;color:#7fd4a0;margin-bottom:0">\u2713 Handled for ${esc(wkLabel(S.blob.clock))}.</p>`
+  : (S.midSkip&&S.midSkip[wk])? `<p style="font-size:13px;color:var(--faint);margin-bottom:0">No media this week \u2014 your call, final for ${esc(wkLabel(S.blob.clock))}.</p>`
+  : `<button class="btn sm" style="background:var(--ok);color:#04170d" onclick="midweekTick()">Meet the media</button>
+  <button class="btn sm" style="background:rgba(255,255,255,.08);margin-left:6px" onclick="midSkip()">Don\u2019t talk to the media during the week</button>`}
+  ${ma? `<p style="font-size:12px;color:${ma.skipped?"var(--faint)":"#7fd4a0"};margin:8px 0 0">${ma.skipped? "Waved them off this week." : "\u2713 On the record for the week."}</p>`:""}
+  </div>`;
   return `<div class="synccard box-sync"><h4>Midweek <span class="cchip chip-sync">GREEN</span></h4>
   <p style="margin-top:0">Midweek is a sync too, and it happens BEFORE you play the game: your media availability first (if the media wants you), then practice chatter, texts back, replies on your posts, and this week's Podium episode \u2014 half on last week around the league, half on the week ahead${n? " (incl. "+esc(n[3])+" if it earns it)" : ""}. Optional, once a week; skip it and the week moves on, no penalty.</p>
   ${done? `<p style="font-size:13px;color:#7fd4a0;margin-bottom:0">\u2713 Midweek played for ${esc(wkLabel(S.blob.clock))}. Next one unlocks after the game syncs.</p>`
@@ -4281,7 +4368,9 @@ RENDER.sync = b=>{
   }
   b.innerHTML = aphead("Sync") + `<div class="apbody">
   ${syncSetupHtml()}
+  ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${(!weekRunBusy)? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="runWeek()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
   ${loopCard}
+  ${(aiKey() && wizStep!=="setup" && wizStep!=="verify" && wizStep!=="midweek" && midweekOwed())? syncMidweekCard() : ""}
   <div class="synccard"><h4>The unseen hand</h4>
   <p>Optional. The coach runs the building on his own \u2014 this is YOU forcing the building's hand when you want the wheel. You are not the coach and never will be: the STAFF makes these calls, the news breaks like it came from the facility, and the player finds out the way everyone else does. Queue moves here; when their turn comes, the step card above carries them back to the save.</p>
   <button class="mer-link" onclick="syncHandOpen=!syncHandOpen;renderApp('sync')">${syncHandOpen?"Hide the queue":"Open the queue"}</button>
@@ -4687,6 +4776,10 @@ async function mailConsumeJobs(g, st){
   const res={}; for(const r of (pack.results||[])) res[r.id]=r;
   if (wkKey(S.blob.clock)!==mj.wk) return jobFail(mj, "the save moved past that week before the writing came back");
   if (mj.kind==="midweek"){
+    /* v1.12.4: with midweek phone-first, a job queued under the OLD law (or keyless-then-keyed)
+       can come home AFTER a local midweek already wrote the week. One midweek per week, ever —
+       the late copy is consumed and honestly discarded, never merged twice. */
+    if (S.midweek && S.midweek[mj.wk]){ console.log("computer midweek for "+mj.wk+" arrived after the phone already wrote it — discarded (one midweek per week)"); persist(); if(curApp==="sync") renderApp("sync"); return; }
     const r=res.mid;
     if (!r || !r.ok) return jobFail(mj, (r&&r.err)||"the computer reported no result");
     try{ intakeMidweek(parseModelJSON(r.text), mj.wk); toast("The computer wrote midweek. It's in."); }
@@ -4749,11 +4842,11 @@ function mailNextStep(){
   if (sent) return {k:"wait", t:"Orders sent "+mailTime(S.mailOrdersSent)+" \u2713. Now on the COMPUTER: 1) open TyPhone Sync \u00b7 2) Pull orders from the phone (the AMBER box) \u00b7 "+(S.mailJobs?"3) Run phone jobs (the BLUE box) \u00b7 4) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 5) Send sync ONLINE (GREEN)":"3) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 4) Send sync ONLINE (GREEN)")+". Then come back here and tap Check."};
   if (S.mailJobs) return {k:"jobs", t:"The "+(S.mailJobs.kind==="midweek"?"midweek":S.mailJobs.kind==="story"?"game story's":"week's")+" writing is on the computer's desk (sent "+mailTime(S.mailJobs.sentAt)+"). On the COMPUTER: open TyPhone Sync \u2192 Run phone jobs (the BLUE box). Then come back here and tap Check."};
   if (mailInfo && mailInfo.noBox) return {k:"nobox", t:"No mailbox exists yet. One-time, on the COMPUTER: TyPhone Sync \u2192 save the token (the PURPLE box) \u2192 pick save + player \u2192 Send sync ONLINE (GREEN). That creates the box."};
-  if (midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};
+  if (!aiKey() && midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};   /* v1.13.0: a KEYED phone has no midweek step — media availability is a card, not a gate */
   if (ordTotal()>0){
     const grew = S.mailOrdersSent && st.ordersTs===S.mailOrdersSent && !st.ordersApplied && S.mailOrdersSentHash && S.mailOrdersSentHash!==codeHash(ordersCode());
-    if (grew) return {k:"send", t:"Your queue changed since the "+mailTime(S.mailOrdersSent)+" send \u2014 re-send THE order code so the computer writes the full set (the fresh code replaces the old one on its desk).", btn:"Re-send THE order code \u2014 "+ordTotal(), fn:"mailSendOrders()"};
-    return {k:"send", t:ordTotal()+" order"+(ordTotal()===1?"":"s")+" queued for the save.", btn:"Send THE order code to the computer", fn:"mailSendOrders()"};
+    if (grew) return {k:"send", t:"Your queue changed since the "+mailTime(S.mailOrdersSent)+" send \u2014 review and re-send THE order code (the fresh code replaces the old one on its desk).", btn:"Review & re-send \u2014 "+ordTotal(), fn:"reviewSheet()"};
+    return {k:"send", t:ordTotal()+" change"+(ordTotal()===1?"":"s")+" queued for the save \u2014 review before anything is written.", btn:"Review & move on", fn:"reviewSheet()"};
   }
   if (st.ordersAppliedTs && (!st.syncTs || st.syncTs<st.ordersAppliedTs)) return {k:"resync", t:"The computer applied your orders \u2713 ("+mailTime(st.ordersAppliedTs)+"). YOUR TURN in Madden: fiddle with whatever you want first (practice, lineups, the shop), play your game, then ADVANCE THE WEEK (the week isn't over until you advance \u2014 an un-advanced save syncs as this same week again), then save. THEN on the COMPUTER: re-pick the save and Send sync ONLINE (the GREEN button), then tap Check here."};
   if (st.syncTs) return {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). YOUR TURN in Madden: fiddle with whatever you want, play your game, then ADVANCE THE WEEK \u2014 the week isn't over until you advance; an un-advanced save syncs as this same week again \u2014 then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
@@ -4771,10 +4864,33 @@ function syncOrdersCard(){
   ${st.orders.length? `<p style="font-size:12.5px;margin:0 0 4px">${esc(coachName())} made these calls himself \u2014 announced in the building whether you like them or not; they ride the ONE order code below automatically.</p>
   ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.wk.split("/").slice(1).join(" wk "))} \u00b7 ${esc(o.why)}</span><button onclick="staffDismiss('${o.id}')" title="Dismiss after it's applied">\u2715</button></div>`).join("")}`:""}
   ${(S.orders&&S.orders.length)? S.orders.map(o=>`<div class="ordrow"><span>${esc(ordWords(o))}</span></div>`).join(""):""}
-  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="mailSendOrders()">Send THE order code to the computer \u2014 ${ordTotal()}</button>`
-  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="copyOrders()">Copy THE order code \u2014 ${ordTotal()} order${ordTotal()===1?"":"s"}${st.orders.length? " ("+st.orders.length+" from the coach)":""}</button>`}
+  <button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="reviewSheet()">Review &amp; move on${(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+esc(g[3]) : "";})()}</button>
   <p style="font-size:11.5px;opacity:.6;margin:8px 0 0">\u2715 a ruling only after it's been applied on the computer.</p>
   </div>`;
+}
+/* v1.13.0 THE MOVE-ON REVIEW (Ty's spec, structured-only v1): one page BEFORE anything goes
+   back to the save — every change about to ride the code, each removable, the unseen hand a
+   tap away. Approve and the ONE code goes; nothing enters the save without his finger on it.
+   AI-suggested rows are PHASE 2, banked (the marker-auto-detect false-positive law). */
+function removeOrder(i){ if(S.orders&&S.orders[i]!==undefined){ S.orders.splice(i,1); persist(); reviewSheet(); if(curApp==="sync") renderApp("sync"); } }
+function reviewSheet(){
+  const st=staffState(); const g=nextGame();
+  const dest=g? (g[4]?"vs ":"@ ")+g[3] : "the next game";
+  if (!ordTotal()){
+    sheet(`<h3>Move on \u2014 ${esc(dest)}</h3><p class="sp">Nothing is queued for the save this week \u2014 clean week. In Madden: fiddle however you like, play, then <b>ADVANCE THE WEEK</b> (an un-advanced save syncs as this same week again), save, and Send sync ONLINE on the computer.</p>
+    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Go play</button>`);
+    return;
+  }
+  sheet(`<h3>Before the save \u2014 ${esc(dest)}</h3><p class="sp">Everything below is about to ride the ONE code to the computer. Remove anything you don't want; the coach's own rulings ride regardless (the staff makes those calls).</p>
+  <div style="max-height:46vh;overflow:auto">
+  ${st.orders.length? `<p style="font-size:12px;opacity:.7;margin:0 0 4px">The coach's calls (announced in the building):</p>
+  ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.why)}</span></div>`).join("")}`:""}
+  ${(S.orders&&S.orders.length)? `<p style="font-size:12px;opacity:.7;margin:8px 0 4px">Your moves:</p>
+  ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove from this week's code">\u2715</button></div>`).join("")}`:""}
+  </div>
+  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet();mailSendOrders()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
+  : `<button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet();copyOrders()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
 }
 function mailCard(){
   /* v1.8.3 (Ty's reorg): the mailbox IS the sync now — this GREEN card is the default and
@@ -4789,7 +4905,7 @@ function mailCard(){
   ${n.k==="idle"? `<button class="btn sm" ${refreshBusy?"disabled":""} style="background:rgba(255,255,255,.08);margin-top:8px;margin-left:6px" onclick="refreshWeek()">${refreshBusy?BUSYL:"Refresh this week"}</button>`:""}
   ${(n.k==="idle"||n.k==="jobs")? `<p style="font-size:11.5px;opacity:.6;margin-top:8px" id="lastRefreshLine">${lastRefreshLine()}</p>
   <p style="font-size:11.5px;opacity:.6;margin-top:4px">${lastSyncLine()}</p>`:""}
-  <p style="font-size:11.5px;opacity:.55;margin:8px 0 0">The loop: play your game \u2192 ADVANCE THE WEEK in Madden \u2192 save \u2192 Send ONLINE on the computer \u2192 Apply here \u2192 midweek \u2192 (if orders) Send to computer \u2192 apply there \u2192 fresh sync back. One step at a time; this card always names it. Copy-paste below works forever.</p>
+  <p style="font-size:11.5px;opacity:.55;margin:8px 0 0">${aiKey()? "The loop: play \u2192 ADVANCE THE WEEK in Madden \u2192 save \u2192 Send ONLINE on the computer \u2192 Apply here \u2192 the week writes itself \u2192 LIVE IT \u2192 Review & move on \u2192 (if changes) apply on the computer \u2192 play. This card always names the step. Copy-paste below works forever." : "The loop: play your game \u2192 ADVANCE THE WEEK in Madden \u2192 save \u2192 Send ONLINE on the computer \u2192 Apply here \u2192 midweek \u2192 (if orders) Send to computer \u2192 apply there \u2192 fresh sync back. One step at a time; this card always names it. Copy-paste below works forever."}</p>
   </div>`;
 }
 /* v1.7.9 (Ty): syncBusy covers decode + bookkeeping on the Apply button; the eager weekly world
@@ -5013,7 +5129,10 @@ async function addCareer(blobOrJson){
      runs the SAME eager block: the paper works with what it has (national law — a week with no
      played game is still a week around the league). Played-game-or-not, the world speaks. */
   const last = lastPlayed(blob.schedule);
-  if ((aiKey()||laneCOn()) && META.settings.autogen){
+  if (aiKey() && META.settings.autogen){
+    weekEnqueue(blob, last);                                          /* v1.13.0: first words ride the runner too */
+  }
+  else if (laneCOn() && META.settings.autogen){
     refreshBusy=true; if(curApp==="sync") renderApp("sync");
     generateWeek(blob, last).catch(e=>{
       S.lastRefresh={when:Date.now(), wk:wkLabel(S.blob.clock), ok:false, err:String(e.message||e).slice(0,180)};
@@ -5215,7 +5334,7 @@ async function advanceTo(blob){
     if (ordTotal()>0) S.world.notifs.push({app:"sync", t:"Sync", p:"Last week's order code was never applied on the computer — your queue is intact; it re-sends fresh this week"});
   }
   /* v1.7.4: midweek matters to the sync loop — say so while it's pending */
-  S.world.notifs.push({app:"sync", t:"Sync", p:"Midweek hasn't been played for "+wkLabel(newC)});
+  S.world.notifs.push({app:"sync", t:"Sync", p:(typeof aiKey==="function"&&aiKey())? "Media availability is open for "+wkLabel(newC)+" \u2014 your call" : "Midweek hasn't been played for "+wkLabel(newC)});
   coachEvaluate("sync");                                              // v1.7.5: AFTER the notif reset — his ruling banner used to be wiped three lines up
   applySaveNotices(oldP, blob.player, newC);                          // v1.7.2: the save's truth gets announced
   homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
@@ -5234,7 +5353,11 @@ async function advanceTo(blob){
   /* v1.7.9 (Ty: "week syncs dont have a please wait thing"): the eager world is minutes of work —
      it rides the SAME refreshBusy the Refresh card shows, so the dots dance right where refreshes
      show theirs (and a manual Refresh can't double-run on top of it). */
-  if ((aiKey()||laneCOn()) && META.settings.autogen){
+  if (aiKey() && META.settings.autogen){
+    weekEnqueue(blob, last);                                          /* v1.13.0 THE POWERHOUSE: the whole week writes itself on the phone — checkpointed, resumable, wake-locked */
+  }
+  else if (laneCOn() && META.settings.autogen){
+    /* keyless lane C, unchanged forever: the computer's pen writes the weeklies */
     refreshBusy=true; if(curApp==="sync") renderApp("sync");
     generateWeek(blob, last).catch(e=>{
       S.lastRefresh={when:Date.now(), wk:wkLabel(S.blob.clock), ok:false, err:String(e.message||e).slice(0,180)};
@@ -5829,18 +5952,26 @@ async function generateWeek(blob, last, opts){
       persist(); toast("Article pass failed ("+e.message+"). World continues.");
     }
   }
-  const sys = worldSys();
+  const sys = worldSys(opts);
   let j;
   try { j = await aiJSON(sys, worldFacts(blob,last)+"\n\nWrite this week's world.", 16000); }
   catch(e){ throw new Error("world call failed: "+String(e.message||e).slice(0,140)); }
   intakeWorld(j, wkLabel(blob.clock), last? gkey(last):null, opts);
 }
-function worldSys(){
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities. The player is NOT famous unless the facts imply it. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
+function worldSys(opts){
+  /* v1.13.0 fullWeek: the ONE world call covers the WHOLE week — the reaction to the last
+     game AND the practice week ahead (the both-sides law the article and episode already
+     obey). The separate midweek beat is dead for keyed phones; its look-ahead texture and
+     myReplies live here now. */
+  const fw = opts&&opts.fullWeek;
+  const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
+  const f=S.chirp?S.chirp.followers||0:0;
+  const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
-"emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]}` + threadCtx() + inboundPlan();
+"emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]${fwReplies}}` + threadCtx() + inboundPlan();
 }
 function intakeWorld(j, wkLbl, gk, opts){
   /* v1.8.1: the world's intake is ONE door — dedupe, husks, and every merge law run
@@ -5851,6 +5982,8 @@ function intakeWorld(j, wkLbl, gk, opts){
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
   if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs.map(m=>[m[0],m[1],Date.now()])); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; } }   /* v1.9.5: the plan is ENFORCED here */
   if (j.emails) S.world.emails=[...j.emails, ...S.world.emails].slice(0,60);   /* v1.9.5: rolling window */
+  if (j.myReplies && j.myReplies.length){ const f=S.chirp.followers||0; const posts=(S.chirp.posts||[]).slice(-3);
+    for (const r of j.myReplies){ if(!r||!String(r.x||"").trim()) continue; const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; if(dedupeReplies([r], p.replies).length){ p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } } } }   /* v1.13.0 fullWeek: replies to HIS posts ride the week package (husks + dupes filtered) */
   stampWorld();
   S.world.notifs.unshift({app:"huddle", t:hudSub(), p:j.huddle?.[0]?.h||"New threads"});
   S.lastRefresh = { when: Date.now(), wk: wkLbl, ok: true, kind: opts.noArticle? "refresh":"weekly",
@@ -6546,7 +6679,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.12.3";
+const VER="v1.13.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -6618,6 +6751,7 @@ function recomputeTitles(blob){
   if (S) try{ dropCoachThread(); }catch(e){}                       // v1.7.6 (Ty's ruling): staff never text — the old coach thread is swept from existing careers
   if (S) try{ pruneEmptyReplies(); }catch(e){}                     // v1.7.6: truncation husks already saved to disk are healed once at boot
   if (S) try{ if(homeFillPerception(S.perception, S.blob.player)) persist(); }catch(e){}   // v1.12.3: geography backfills at boot the moment a v1.7.1 blob is on file (blank-only, typed wins)
+  if (S && S.weekJobs) setTimeout(()=>{ try{ runWeek(); }catch(e){} }, 900);   // v1.13.0: an interrupted week finishes itself at boot
   if (S) try{ if(!S.articleFor){ S.articleFor={}; const l=lastPlayed(); if (l && (S.world.articles||[]).some(a=>a.kick!=="Midweek Notebook")) S.articleFor[gkey(l)]=1; } }catch(e){}   // v1.7.9: existing careers with a story on file don't get a duplicate offer; empty ones correctly read as owed
   applyWallpaper(); applyTheme();
   clockTick();
