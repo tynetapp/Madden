@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.12.1 (Aug 10 2026) — FIELD ROUND: 75-man camp truth + the mailbox-first connect screen (prior: v1.12.0 THE WRITEBACK EXPANSION) */
+/* TyPhone app.js — v1.12.2 (Aug 11 2026) — THE FIRST WORDS + THE PODIUM WALL + THE FORMULA + THE GEOGRAPHY + THE HONEST QUEUE (prior: v1.12.1 field round) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -40,7 +40,7 @@ function newCareerState(blob, opts){
     podium: structuredClone(D.SEED.podium), clips: [], espnExtra: structuredClone(D.SEED.espnExtra),
     notifs: structuredClone(D.SEED.notifications)
   } : genericSeed(blob);
-  return {
+  const st = {
     careerId: blob.careerId, createdAt: Date.now(),
     blob, appliedWeeks: [wkKey(blob.clock)],
     cash: { checking: 1750, savings: 0, tax: 0 },
@@ -57,7 +57,7 @@ function newCareerState(blob, opts){
       {id:"train", n:"Training & recovery", amt:600, cat:"career"}
     ],
     ledger: [ {t:"Camp stipend — Meridian deposit", amt:1750, wk:"PS1", kind:"income"} ],
-    deals: [], perception: { draft:"Undrafted free agent", state:"", grew:"Small town", hs:"Local standout", college:"Mid-major starter", family:"Single mother household", rep:"Complete unknown", familyAsk:0, debtTotal:0, debtShares:null },   /* v1.11.0: state starts blank — the player sets it in Settings */
+    deals: [], perception: { draft:"Undrafted free agent", state:"", grew:"Small town", hs:"Local standout", college:"Mid-major starter", family:"Single mother household", rep:"Complete unknown", familyAsk:0, debtTotal:0, debtShares:null },   /* v1.11.0: state starts blank — the player sets it in Settings. v1.12.2: save geography fills the blanks below (typed values still win forever). */
     world,
     votes: {}, reads: {}, cardTx: [], handle: "@"+(p.first+p.last).replace(/\W/g,"").toLowerCase(),
     agent: null,
@@ -65,6 +65,8 @@ function newCareerState(blob, opts){
     last4: String(1000 + Math.floor(seedRng(blob.careerId+"card")()*9000)),
     acctNums: { checking: String(1000+Math.floor(seedRng(blob.careerId+"a1")()*9000)), savings: String(1000+Math.floor(seedRng(blob.careerId+"a2")()*9000)), tax: String(1000+Math.floor(seedRng(blob.careerId+"a3")()*9000)) },
   };
+  homeFillPerception(st.perception, p);   /* v1.12.2 THE GEOGRAPHY: save truth fills the blank state + grew-up at birth */
+  return st;
 }
 /* Neutral week-zero world for any non-canon career, templated entirely from its blob.
    Real content arrives at the first AI generation; this just makes every app open clean. */
@@ -86,7 +88,7 @@ function genericSeed(blob){
     ],
     emails: [
       {id:"nflpa", from:"NFLPA Member Services", subj:"Welcome to the NFLPA, dues & benefits enrollment", time:"7:02 AM", unread:true,
-       body:"Dear "+p.first+" "+p.last+",\n\nWelcome to the National Football League Players Association.\n\nKey items for your first month:\n\n• Union dues of $117 are deducted from each game-week paycheck during the season.\n• Your 401(k) enrollment window is open. The league matches 2-for-1 after your first credited season.\n• Health coverage begins immediately and continues through the plan year.\n• Free financial counseling is available to every member. We recommend using it before your first major purchase, not after.\n\nIn solidarity,\nNFLPA Member Services"},
+       body:"Dear "+p.first+" "+p.last+",\n\nWelcome to the National Football League Players Association.\n\nKey items for your first month:\n\n• Union dues of "+fm(nflpaDues(blob))+" are deducted from each game-week paycheck during the season (3.75% of the league rookie minimum salary, split across 18 checks).\n• Your 401(k) enrollment window is open. The league matches 2-for-1 after your first credited season.\n• Health coverage begins immediately and continues through the plan year.\n• Free financial counseling is available to every member. We recommend using it before your first major purchase, not after.\n\nIn solidarity,\nNFLPA Member Services"},
       {id:"apex1", from:"Apex Sports Group", subj:"How you actually get paid", time:"Yesterday", unread:true,
        body:p.first+",\n\nPutting this in writing like we do for everyone.\n\nYOUR DEAL. "+payLine+"\n\nOUR CUT. Apex takes a percentage of playing contract money only, set by whichever agent you sign with. Endorsements are negotiated separately.\n\nTHE PART EVERYONE SKIPS. Taxes will take roughly 40% of every check. The check that hits your account is NOT your money to spend, it is your money to allocate. Meridian will set up the tax hold account this week.\n\nDon't buy anything with a motor yet.\n\nApex Sports Group"}
     ],
@@ -123,6 +125,31 @@ function runwayWeeks(){ const b=monthlyBurn(); if(b<=0) return 999; return Math.
 function psWeekly(){ return 6222; }
 function activeWeekly(pl){ const p=pl||S.blob.player; const c=p.contract; const yr=(c?.salary?.[c.currentYear])??p.capSalary; return Math.round(yr/18); }
 function grossFor(status, pl){ return status==="PracticeSquad" ? psWeekly() : activeWeekly(pl); }
+/* v1.12.2 THE FORMULA (Ty's spec): NFLPA dues = 3.75% of the ROOKIE MINIMUM, split across the
+   18 game checks. The save carries its own rookie minimum (SalaryInfo.PlayerMinSalaryTable,
+   exe v1.7.1 ships it as blob.minRookieSalary in dollars — $880,000 on his era = $1,833/check),
+   so the number scales with the franchise's cap growth forever. Legacy codes without the field
+   fall back to the flat honest figure. ONE door: checkLines and the NFLPA welcome email both
+   read here. */
+function nflpaDues(blob){
+  const m = (blob && blob.minRookieSalary) || (typeof S!=="undefined" && S && S.blob && S.blob.minRookieSalary) || 0;
+  return m>0 ? Math.round(m*0.0375/18) : 1845;
+}
+/* v1.12.2 THE GEOGRAPHY (Ty: "the save has it sitting right there"): PLYR_HOME_STATE comes
+   CamelCased ("NewJersey"); deCamel renders it for humans. homeSeed builds the perception
+   fill from save truth — used at career birth AND as a blank-only backfill at every sync
+   (typed values are HIS data and are never touched). Roster idx14/15 carry every teammate's
+   geography for the Ledger's later use; rosterHome is the one length-guarded read door. */
+function deCamel(s){ return String(s||"").replace(/([a-z])([A-Z])/g, "$1 $2"); }
+function rosterHome(r){ return (Array.isArray(r) && r.length>15) ? {state:deCamel(r[14]), town:String(r[15]||"")} : null; }
+function homeFillPerception(per, player){
+  if (!per || !player) return false;
+  let did=false;
+  const hs=deCamel(player.homeState||""), ht=String(player.homeTown||"");
+  if (hs && !String(per.state||"").trim()){ per.state=hs; did=true; }
+  if (ht && (!String(per.grew||"").trim() || per.grew==="Small town")){ per.grew=ht + (hs? ", "+hs : ""); did=true; }   /* the untouched factory default counts as blank */
+  return did;
+}
 function checkLines(status, road, oppState, pl){
   const gross = grossFor(status, pl);
   const lines = [["Gross ("+(status==="PracticeSquad"?"practice squad week":"active week")+")", gross]];
@@ -135,7 +162,7 @@ function checkLines(status, road, oppState, pl){
   let jock=0; if(road && oppState){ jock = -Math.round(gross*0.35*(oppState.rate)); if(jock) lines.push(["Jock tax — "+oppState.n, jock]); }
   const feePct = (S && S.agent) ? S.agent.fee : 3.0;
   const agent = -Math.round(gross*feePct/100); if (agent) lines.push(["Agent fee ("+feePct+"%) — "+((S&&S.agent)?S.agent.n.split(" ").pop():"Apex"), agent]);   /* v1.9.0: self-rep fee 0 — no line, all his */
-  const dues = -117; lines.push(["NFLPA dues", dues]);
+  const dues = -nflpaDues(); lines.push(["NFLPA dues", dues]);   // v1.12.2: derived from the save's rookie minimum — the $117 flat era is over
   const net = gross+fed+st+jock+agent+dues;
   return {gross, net, lines};
 }
@@ -1088,7 +1115,7 @@ RENDER.chron = (b, sub)=>{
   if (!A){
     /* v1.7.9 (Ty): if a played game's story never wrote, say so — and offer to write it. */
     b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
-    <div class="apbody"><div class="empty">${storyOwed()? "Your last game is in the books, but its story never wrote \u2014 the sync's article pass failed." : "No stories on your career yet. Coverage starts with your first synced game week."}</div>${chronRetryBtn()}</div>`;
+    <div class="apbody"><div class="empty">${storyOwed()? "Your last game is in the books, but its story never wrote \u2014 the sync's article pass failed." : "No stories on your career yet. The paper writes with your first sync."}</div>${chronRetryBtn()}</div>`;
     return;
   }
   b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
@@ -3307,7 +3334,12 @@ RENDER.podium = b=>{
     ${e.script?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="showScript('${e.id}')">Read the brief</button><button class="btn sm" style="background:rgba(255,255,255,.08)" onclick="podiumRegen('${e.id}')">Regenerate</button></div>`:""}
   </div>`).join("")}
   <div class="hoodhead" style="color:var(--ink);margin-top:16px"><h3>Make this week's episode</h3></div>
-  <div class="veh-detail" style="margin-bottom:10px">
+  ${(()=>{ /* v1.12.2 (Ty's ruling): the Podium records AFTER midweek — the make-episode section
+       walls until this week's media availability is played out or waved off. Past episodes above
+       stay readable forever; only the making walls. genEpisodeBrief guards at the engine door too. */
+    const wk=wkKey(S.blob.clock); const mwDone=(S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk]);
+    if(!mwDone) return `<div class="veh-detail"><p style="font-size:13px;line-height:1.6;opacity:.85;margin:0">The show tapes after your media availability. Open <b>Sync</b> and play out midweek first, or choose \u201cDon\u2019t talk to the media during the week\u201d \u2014 then this week's episode opens up here.</p></div></div>`;
+    return `<div class="veh-detail" style="margin-bottom:10px">
     <div style="font-size:12px;opacity:.6;margin-bottom:6px">Episode length — your call, fresh every week. Never touches the save.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">${[["short","Short · 3-6 min"],["default","Default · 6-15 min"],["deep","Deep Dive · 15-25+ min"]].map(o=>`<button class="btn sm" style="background:${(S.podiumLen||"default")===o[0]?"var(--ok)":"rgba(255,255,255,.1)"};color:${(S.podiumLen||"default")===o[0]?"#04170d":"inherit"}" onclick="podSetLen('${o[0]}')">${o[1]}</button>`).join("")}</div>
   </div>
@@ -3328,7 +3360,7 @@ RENDER.podium = b=>{
     <input class="field" id="epLink" placeholder="Paste the share link" style="margin-top:8px">
     <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="attachEpLink()">Attach to latest episode</button>
   </div>
-  </div>`;
+  </div>`; })()}`;
 };
 function showScript(id){
   const e=S.world.podium.eps.find(x=>x.id===id);
@@ -3389,7 +3421,11 @@ function podFocus(){
   return "Two hosts of "+S.world.podium.show+". Work through the source in order. Talk ONLY about what the source contains. If a team or player is not in the source, they do not exist this episode. No outside NFL knowledge, no real-world events.";
 }
 async function genEpisodeBrief(){
-  if (!aiKey()) return toast("Add an API key first (Settings).");
+  /* v1.12.2 (Ty's ruling): the Podium is walled until midweek is handled — the engine door
+     enforces what the render walls, so no stale button or console call slips past. */
+  const mwWk=wkKey(S.blob.clock);
+  if (!((S.midweek&&S.midweek[mwWk])||(S.midSkip&&S.midSkip[mwWk]))) return toast("The show tapes after your media availability. Play out midweek in Sync first, or wave it off.");
+  if (!aiKey()) return toast("Add an API key in Sync first.");   /* v1.12.2: the one "Settings" straggler the v1.8.3 sweep missed */
   toast("Writing the brief…");
   try{
     const last = lastPlayed();
@@ -4475,7 +4511,21 @@ async function mailCheck(force){
       /* v1.8.5 (Ty's lock ruling): a sync he already handled — applied OR declined — is never
          offered again on reopen; only a strictly NEWER send offers. And while a decision sheet
          is up (mailPendingApply), a background check can't re-arm the offer under it. */
-      if (st.syncTs && !st.syncApplied && st.syncTs>(S.mailApplied||0) && !mailPendingApply) mailInfo.syncCode=await mailFile(g,"sync.txt");
+      if (st.syncTs && !st.syncApplied && st.syncTs>(S.mailApplied||0) && !mailPendingApply){
+        const code=await mailFile(g,"sync.txt");
+        /* v1.12.2 (Ty's screenshot round): a byte-identical re-send (a double-tapped GREEN
+           button, a nervous re-click after the old stuck step 3) carries NOTHING new — the
+           phone marks the box handled quietly and never opens its mouth. A code that actually
+           differs still offers (same-week offers wear their honest wording in mailNextStep). */
+        if (S.mailAppliedHash && codeHash(code)===S.mailAppliedHash){
+          S.mailApplied=st.syncTs; persist();
+          try{ const st2={...st, syncApplied:true, syncAppliedTs:Date.now()};
+            await mailJf(MAIL_API+"/gists/"+g.id,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st2,null,1)}}})});
+            mailInfo.state=st2;
+          }catch(e){ console.log("identical-resend mark failed (retries next check):", String(e.message||e)); }
+        }
+        else mailInfo.syncCode=code;
+      }
       await mailConsumeJobs(g, st);                          // v1.8.1: lane C writing comes home here
     }
     mailLastCheck=Date.now();
@@ -4485,7 +4535,7 @@ async function mailCheck(force){
 let mailPendingApply=null; // {gistId, ts} — set while a mailbox code is being applied; consumed by mailMarkSyncApplied
 async function mailApplySync(){
   if(!mailInfo || !mailInfo.syncCode) return;
-  mailPendingApply={gistId:mailInfo.gistId, ts:mailInfo.state.syncTs};
+  mailPendingApply={gistId:mailInfo.gistId, ts:mailInfo.state.syncTs, h:codeHash(mailInfo.syncCode)};   /* v1.12.2: the applied code's fingerprint rides the handshake */
   const code=mailInfo.syncCode;
   mailInfo.syncCode=null; if(curApp==="sync") renderApp("sync");
   await applyCode(code);   // every existing guard runs: careerId, same-week, rewind, adopt sheets
@@ -4500,13 +4550,16 @@ function mailDeclineSync(){
 async function mailMarkSyncApplied(){
   /* called by advanceTo and doRefreshTruth when the applied code came from the mailbox */
   const p=mailPendingApply; mailPendingApply=null; if(!p) return;
-  S.mailApplied=p.ts; persist();                              // local truth first — a failed PATCH never re-offers
+  S.mailApplied=p.ts; if(p.h) S.mailAppliedHash=p.h; persist();                              // local truth first — a failed PATCH never re-offers
   try{ const g=await mailJf(MAIL_API+"/gists/"+p.gistId,{headers:mailHdrs()});
     const st={...mailState(g), syncApplied:true, syncAppliedTs:Date.now()};
     await mailJf(MAIL_API+"/gists/"+p.gistId,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st,null,1)}}})});
     if(mailInfo) mailInfo.state=st;
   }catch(e){ console.log("mail mark-applied failed (harmless \u2014 local flag holds)", e); }
 }
+/* v1.12.2: one tiny fingerprint for "is this the same code" questions — the queue-changed
+   re-send offer and the identical-resend swallow both key on it. Not crypto; just a tell. */
+function codeHash(s){ s=String(s||""); let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return s.length+":"+h.toString(36); }
 async function mailSendOrders(){
   if (!mailOn() || mailBusy || !ordTotal()) return;
   const code=ordersCode();
@@ -4517,7 +4570,7 @@ async function mailSendOrders(){
     else {
       const st={...mailState(g), careerId:S.careerId, ordersTs:Date.now(), ordersApplied:false};
       await mailJf(MAIL_API+"/gists/"+g.id,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"orders.txt":{content:code},"state.json":{content:JSON.stringify(st,null,1)}}})});
-      S.mailOrdersSent=st.ordersTs; persist();
+      S.mailOrdersSent=st.ordersTs; S.mailOrdersSentHash=codeHash(code); persist();   /* v1.12.2: snapshot WHAT was sent — a queue that grows afterwards re-offers the send step honestly */
       if(mailInfo){ mailInfo.state=st; mailInfo.gistId=g.id; }
       toast("Orders sent to the computer's mailbox.");
     }
@@ -4668,13 +4721,31 @@ function mailNextStep(){
   if (mailBusy) return {k:"busy", t:"Working\u2026"};
   if (mailErr) return {k:"err", t:"Mailbox hiccup: "+mailErr+" \u2014 tap Check to retry; copy-paste below always works."};
   const st=(mailInfo&&mailInfo.state)||{};
-  if (mailInfo && mailInfo.syncCode) return {k:"apply", t:"A new sync from the save is waiting \u2014 "+(st.syncWk? st.syncWk+" \u00b7 ":"")+"sent "+mailTime(st.syncTs)+".", btn:"Apply the new sync", fn:"mailApplySync()"};
-  const sent = ordTotal()>0 && S.mailOrdersSent && st.ordersTs===S.mailOrdersSent && !st.ordersApplied;
+  if (mailInfo && mailInfo.syncCode){
+    /* v1.12.2 (Ty's screenshot round): a re-sent SAME week must never be sold as a new one —
+       the exe minting a fresh syncTs for the week he's standing in reads "sync new week just
+       to recognize the week is already up". Name it what it is. st.syncWk is written by the
+       exe's clockLabel; the mirror below must match it CHARACTER-FOR-CHARACTER (harness-pinned
+       both sides — change them together or not at all). */
+    const exeLbl = c => c ? (c.seasonYear+" "+(c.weekType==="RegularSeason"?"Season":c.weekType)+" \u00b7 Week "+c.week) : "";
+    const sameWk = st.syncWk && st.syncWk===exeLbl(S.blob.clock);
+    if (sameWk) return {k:"apply", t:"The computer re-sent "+wkLabel(S.blob.clock)+" \u2014 a SAME-WEEK truth refresh ("+mailTime(st.syncTs)+"), not a new week. Apply it only if you changed things in Madden without advancing; otherwise decline and the week stands.", btn:"Apply the same-week refresh", fn:"mailApplySync()"};
+    return {k:"apply", t:"A new sync from the save is waiting \u2014 "+(st.syncWk? st.syncWk+" \u00b7 ":"")+"sent "+mailTime(st.syncTs)+".", btn:"Apply the new sync", fn:"mailApplySync()"};
+  }
+  /* v1.12.2 (Ty's screenshot round): WAIT holds ONLY while the computer's desk carries exactly
+     what the queue holds — a queue that grew after the send (new grants, new asks) used to sit
+     silent under "Orders sent \u2713" forever. Changed queue = the send step, honestly worded. */
+  const sent = ordTotal()>0 && S.mailOrdersSent && st.ordersTs===S.mailOrdersSent && !st.ordersApplied
+    && (!S.mailOrdersSentHash || S.mailOrdersSentHash===codeHash(ordersCode()));
   if (sent) return {k:"wait", t:"Orders sent "+mailTime(S.mailOrdersSent)+" \u2713. Now on the COMPUTER: 1) open TyPhone Sync \u00b7 2) Pull orders from the phone (the AMBER box) \u00b7 "+(S.mailJobs?"3) Run phone jobs (the BLUE box) \u00b7 4) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 5) Send sync ONLINE (GREEN)":"3) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 4) Send sync ONLINE (GREEN)")+". Then come back here and tap Check."};
   if (S.mailJobs) return {k:"jobs", t:"The "+(S.mailJobs.kind==="midweek"?"midweek":S.mailJobs.kind==="story"?"game story's":"week's")+" writing is on the computer's desk (sent "+mailTime(S.mailJobs.sentAt)+"). On the COMPUTER: open TyPhone Sync \u2192 Run phone jobs (the BLUE box). Then come back here and tap Check."};
   if (mailInfo && mailInfo.noBox) return {k:"nobox", t:"No mailbox exists yet. One-time, on the COMPUTER: TyPhone Sync \u2192 save the token (the PURPLE box) \u2192 pick save + player \u2192 Send sync ONLINE (GREEN). That creates the box."};
   if (midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};
-  if (ordTotal()>0) return {k:"send", t:ordTotal()+" order"+(ordTotal()===1?"":"s")+" queued for the save.", btn:"Send THE order code to the computer", fn:"mailSendOrders()"};
+  if (ordTotal()>0){
+    const grew = S.mailOrdersSent && st.ordersTs===S.mailOrdersSent && !st.ordersApplied && S.mailOrdersSentHash && S.mailOrdersSentHash!==codeHash(ordersCode());
+    if (grew) return {k:"send", t:"Your queue changed since the "+mailTime(S.mailOrdersSent)+" send \u2014 re-send THE order code so the computer writes the full set (the fresh code replaces the old one on its desk).", btn:"Re-send THE order code \u2014 "+ordTotal(), fn:"mailSendOrders()"};
+    return {k:"send", t:ordTotal()+" order"+(ordTotal()===1?"":"s")+" queued for the save.", btn:"Send THE order code to the computer", fn:"mailSendOrders()"};
+  }
   if (st.ordersAppliedTs && (!st.syncTs || st.syncTs<st.ordersAppliedTs)) return {k:"resync", t:"The computer applied your orders \u2713 ("+mailTime(st.ordersAppliedTs)+"). YOUR TURN in Madden: fiddle with whatever you want first (practice, lineups, the shop), play your game, then ADVANCE THE WEEK (the week isn't over until you advance \u2014 an un-advanced save syncs as this same week again), then save. THEN on the COMPUTER: re-pick the save and Send sync ONLINE (the GREEN button), then tap Check here."};
   if (st.syncTs) return {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). YOUR TURN in Madden: fiddle with whatever you want, play your game, then ADVANCE THE WEEK \u2014 the week isn't over until you advance; an un-advanced save syncs as this same week again \u2014 then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
   return {k:"idle", t:"Nothing in the box yet. YOUR TURN in Madden: play your game, then ADVANCE THE WEEK, then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
@@ -4911,6 +4982,21 @@ async function addCareer(blobOrJson){
   META.careers.push({id:blob.careerId, label:blob.player.first+" "+blob.player.last, sub:blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock)});
   META.activeId=blob.careerId; S=st; persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();
   if (curApp) renderApp(curApp);
+  /* v1.12.2 THE FIRST WORDS (Ty: "why do i have to wait for a second sync for the article") —
+     root cause: eager generation lived ONLY in advanceTo, so the FIRST code adopted truth and
+     wrote NOTHING; the Chronicle and the world stayed silent until sync two. The first sync now
+     runs the SAME eager block: the paper works with what it has (national law — a week with no
+     played game is still a week around the league). Played-game-or-not, the world speaks. */
+  const last = lastPlayed(blob.schedule);
+  if ((aiKey()||laneCOn()) && META.settings.autogen){
+    refreshBusy=true; if(curApp==="sync") renderApp("sync");
+    generateWeek(blob, last).catch(e=>{
+      S.lastRefresh={when:Date.now(), wk:wkLabel(S.blob.clock), ok:false, err:String(e.message||e).slice(0,180)};
+      S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"sync", t:"Sync", p:"The week's world didn't generate — open Sync and hit Refresh world now"});
+      persist(); toast("Generation failed: "+e.message);
+    }).finally(()=>{ refreshBusy=false; if(curApp==="sync") renderApp("sync"); });
+  }
+  else if (last){ placeholderWeek(blob, last); }
 }
 function rewindSheet(blob){
   _pending=blob;
@@ -5100,13 +5186,14 @@ async function advanceTo(blob){
      (Ty's stuck screen). The week turned, so that handshake is over: clear the wait; the
      queue survives and the send step re-offers it fresh. Same-week refresh never clears. */
   if (S.mailOrdersSent && !(mailInfo&&mailInfo.state&&mailInfo.state.ordersApplied)){
-    S.mailOrdersSent=null;
+    S.mailOrdersSent=null; S.mailOrdersSentHash=null;   /* v1.12.2: the snapshot dies with the handshake */
     if (ordTotal()>0) S.world.notifs.push({app:"sync", t:"Sync", p:"Last week's order code was never applied on the computer — your queue is intact; it re-sends fresh this week"});
   }
   /* v1.7.4: midweek matters to the sync loop — say so while it's pending */
   S.world.notifs.push({app:"sync", t:"Sync", p:"Midweek hasn't been played for "+wkLabel(newC)});
   coachEvaluate("sync");                                              // v1.7.5: AFTER the notif reset — his ruling banner used to be wiped three lines up
   applySaveNotices(oldP, blob.player, newC);                          // v1.7.2: the save's truth gets announced
+  homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
   resolveRequests();                                                  // v1.7.4: the building answers formal asks
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
   syncTick();                                                         // v1.9.6: the sync clock ticks — anything owed lands now
@@ -5649,10 +5736,11 @@ ${SL(()=>myStatLine(blob),"myStatLine")}${SL(()=>awardsLine(blob),"awardsLine")}
    PERMANENTLY unwritable. The story is its own function now: the sync calls it, S.articleFor
    remembers which games got theirs, and the Chronicle offers to write any story still owed. */
 function gkey(g){ return g[2]+"|"+g[1]+"|"+g[0]; }
-/* owed = a played game with no story ON A CAREER THAT HAS SYNCED (appliedWeeks>1) — a freshly
-   added career starts with pre-adoption games it never owed coverage for, and its honest empty
-   state stays "No stories yet". */
-function storyOwed(){ const l=lastPlayed(); return (l && (S.appliedWeeks||[]).length>1 && !(S.articleFor||{})[gkey(l)])? l : null; }
+/* owed = a played game with no story on a synced career. v1.12.2 (Ty: no "play the game
+   first"): the first sync generates now (addCareer runs eager gen), so the old appliedWeeks>1
+   fence — built when adoption wrote nothing and pre-adoption games weren't owed — would leave
+   a FAILED first story permanently unwritable. Any synced career (appliedWeeks>=1) is owed. */
+function storyOwed(){ const l=lastPlayed(); return (l && (S.appliedWeeks||[]).length>=1 && !(S.articleFor||{})[gkey(l)])? l : null; }
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
@@ -6433,7 +6521,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.12.1";
+const VER="v1.12.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -6581,12 +6669,12 @@ async function setupMailPull(){
   if(r.none) return say("Token works, but no mailbox exists yet. On the computer: TyPhone Sync \u2192 same token in the PURPLE box \u2192 Send sync ONLINE. Then tap Check again.",1);
   if(r.empty) return say("The mailbox exists but no sync code is in it yet. On the computer, hit Send sync ONLINE, then tap Check again.",1);
   say(r.wasApplied? "Found the last code in the box (applied once before \u2014 right call for an empty phone). Applying\u2026" : "Code found \u2014 applying\u2026");
-  window.__setupPull={gistId:r.gistId, ts:r.ts};
+  window.__setupPull={gistId:r.gistId, ts:r.ts, h:codeHash(r.code)};   /* v1.12.2: the fingerprint rides here too */
   await applyCode(r.code);   // every existing guard runs; success lands in addCareer \u2192 teardownSetup
   if (S && window.__setupPull){
     /* the career is born — stamp the mailbox truth so Sync never re-offers this same code.
        Best-effort PATCH; the local flag is the law. */
-    S.mailGist=window.__setupPull.gistId; S.mailApplied=window.__setupPull.ts; persist();
+    S.mailGist=window.__setupPull.gistId; S.mailApplied=window.__setupPull.ts; if(window.__setupPull.h) S.mailAppliedHash=window.__setupPull.h; persist();
     try{ const g=await mailJf(MAIL_API+"/gists/"+S.mailGist,{headers:mailHdrs()});
       const st2={...mailState(g), syncApplied:true, syncAppliedTs:Date.now()};
       await mailJf(MAIL_API+"/gists/"+S.mailGist,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"state.json":{content:JSON.stringify(st2,null,1)}}})});
