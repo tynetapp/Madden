@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.13.2 (Aug 11 2026) — THE REACTIVE WORLD (a post can move texts + the Huddle live; ONE VOICE per post per account; the coach rules at the review door so this week's behavior rides this week's code) (prior: v1.13.1) */
+/* TyPhone app.js — v1.14.0 (Aug 11 2026) — THE SPIDERWEB (career-first stat milestones + depth-chart moves enter the notices river and the whole web reacts; hometown kin from the banked geography; the book's line on his game rides every pen) (prior: v1.13.5) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -140,6 +140,40 @@ function nflpaDues(blob){
    fill from save truth — used at career birth AND as a blank-only backfill at every sync
    (typed values are HIS data and are never touched). Roster idx14/15 carry every teammate's
    geography for the Ledger's later use; rosterHome is the one length-guarded read door. */
+/* v1.13.4 THE LIVING WORLD (Ty's ruling): the world perceives his MATERIAL LIFE and reacts
+   only to INCONGRUITY with his station — a UDFA in a Corolla is invisible, a UDFA in a Lambo
+   is an event, a franchise QB in a beater is a curiosity, matching money-to-life is nothing.
+   One builder rides every pen (world, article, podium, questions, texts, replies, fallout). */
+function lifeFacts(opts){
+  const noKin = opts && opts.noKin;   /* v1.14.0: GROUP prompts speak in role tags only (the real-speech law) — kin names stay out of them */
+  try{
+    const p=S.blob.player; const liquid=(S.cash&&(S.cash.checking+S.cash.savings))||0;
+    const sal=(p.contract&&p.contract.capSalary)||p.capSalary||0;
+    const tier= sal>=15000000? "franchise-money star" : sal>=5000000? "well-paid veteran" : sal>=1500000? "established starter money" : "league-minimum money (rookie/camp tier)";
+    const cars=(S.garage||[]).slice().sort((a,b)=>b.value-a.value);
+    const carLine=cars.length? cars.slice(0,2).map(c=>c.n+" ("+fm(c.value)+")").join(", ")+(cars.length>2?" +"+(cars.length-2)+" more":"") : "no car of his own (facility shuttle life)";
+    const arr=(S.arrival&&S.arrival.mode==="drive")? (S.garage||[]).find(c=>c.id===S.arrival.carId) : null;
+    const arrLine = arr? " ARRIVES AT THE FACILITY driving the "+arr.n+" — every teammate and every parking-lot camera sees it (surprise law applies)." : "";
+    const props=(S.properties||[]); const boats=(S.boats||[]); const planes=(S.planes||[]);
+    const lease=S.rental&&S.rental.city? "renting in "+S.rental.city+" ("+fm(S.rental.amt||S.rental.rent||0)+"/mo)" : "";
+    const bigBuys=(S.ledger||[]).slice(-25).filter(l=>l.kind==="spend" && Math.abs(l.amt||0)>=Math.max(40000, liquid*0.3)).slice(-3).map(l=>l.t+" ("+fm(Math.abs(l.amt))+")");
+    return "\nHIS MATERIAL LIFE (real, from the phone): pay grade "+tier+" ("+fm(sal)+"/yr cap, "+fm(liquid)+" liquid). Drives: "+carLine+"."+arrLine
+      +(props.length? " Owns "+props.length+" propert"+(props.length===1?"y":"ies")+" ("+fm(props.reduce((a,x)=>a+x.value,0))+").":"")
+      +(boats.length? " "+boats.length+" boat"+(boats.length===1?"":"s")+".":"")+(planes.length? " "+planes.length+" aircraft.":"")
+      +(lease? " "+lease+".":"")
+      +(bigBuys.length? " Recent big spends: "+bigBuys.join("; ")+".":"")
+      +(function(){ try{   /* v1.14.0: the geography we banked pays off — roster kin from home */
+        if (noKin) return "";
+        const my=S.blob.player.homeState; if(!my) return "";
+        const me=S.blob.player.first+" "+S.blob.player.last;
+        const kin=(S.blob.roster||[]).filter(r=>r.length>15&&r[14]===my&&(r[0]+" "+r[1])!==me).slice(0,3);
+        if(!kin.length) return "";
+        const town=S.blob.player.homeTown;
+        return " FROM HIS HOME STATE ("+deCamel(my)+") on the roster: "+kin.map(r=>r[0]+" "+r[1]+(town&&r[15]===town?" (same hometown!)":"")).join(", ")+" — natural kinship, fair game in texts and stories.";
+      }catch(e){ return ""; } })()
+      +"\nTHE SURPRISE LAW: react to his material life ONLY where it clashes with his station. Modest means at modest pay is INVISIBLE (never mention it). Extravagance far above his pay is a real event (fans notice the car, the agent worries about the money, teammates rib him). Extreme modesty far below famous-player pay is a mild curiosity at most. Matching life to money is nothing at all.";
+  }catch(e){ return ""; }
+}
 function deCamel(s){ return String(s||"").replace(/([a-z])([A-Z])/g, "$1 $2"); }
 /* v1.12.3 (Ty's screenshot: "AL"): the Settings state field is a SELECT of two-letter
    abbreviations — filling it with "New Jersey" matched nothing and the browser showed the
@@ -681,8 +715,11 @@ const avColor = s => { const r=seedRng("av"+s)(); return `hsl(${Math.floor(r*360
 const initials = s => s.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
 
 /* Messages */
+let curMsgThread=null;   /* v1.13.3 (Ty: "an incoming text shouldnt boot me out of my convo") */
+function rerenderMessages(){ if(curApp==="messages") renderApp("messages", curMsgThread!=null?{thread:curMsgThread}:undefined); }
 RENDER.messages = (b, sub)=>{
   b.className="msgs";
+  curMsgThread = (sub && sub.thread!=null)? sub.thread : null;
   if (sub && sub.thread!=null){
     const t=S.world.texts.find(x=>x.id===sub.thread);
     if (!t){ RENDER.messages(b); return; }               // v1.7.5: pruning made dangling ids possible — fall back to the list
@@ -796,7 +833,7 @@ async function maybeDeputy(target, userMsg){
     ledgerNote(ledgerKeyFor(th), "stepped in over how he was talking to a teammate");
     ledgerNote(ledgerKeyFor(target), "a teammate stepped in on his behalf");
     S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"messages", t:depName, p:"New message"});
-    persist(); if(curApp==="messages") renderApp("messages");
+    persist(); rerenderMessages();   /* v1.13.3: lands in the list OR the open convo — never boots him */
   }catch(e){}
 }
 
@@ -1033,7 +1070,7 @@ async function aiPostReplies(post, attempt){
      accounts still get small-account reply counts. log-scaled, floor 2, ceiling 10. */
   const nReplies = Math.max(2, Math.min(10, Math.round(2 + Math.log10(f+10)*1.55)));
   try{
-    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". "+careerFactsLine()+" "+myPostsLine()+" "+accountVoiceLaw()+chPersonaNote(post.t)+" Write EXACTLY "+nReplies+" short realistic replies. These are the MOST POPULAR replies under the post, scaled to that follower count (a small account gets small-account energy, not viral treatment; a big account's top replies feel like a real viral reply section). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (g: m male, f female, x fan/brand accounts; vf 1 ONLY for teammates, media outlets, and official accounts — fans 0)", "Write the replies now.", Math.max(600, 220+130*nReplies));
+    const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". "+careerFactsLine()+lifeFacts()+" "+myPostsLine()+" "+accountVoiceLaw()+chPersonaNote(post.t)+" Write EXACTLY "+nReplies+" short realistic replies. These are the MOST POPULAR replies under the post, scaled to that follower count (a small account gets small-account energy, not viral treatment; a big account's top replies feel like a real viral reply section). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (g: m male, f female, x fan/brand accounts; vf 1 ONLY for teammates, media outlets, and official accounts — fans 0)", "Write the replies now.", Math.max(600, 220+130*nReplies));
     let arr = parseModelJSON(out);                      // v1.6.2: same hardened ladder as the world call
     if (!Array.isArray(arr)){ arr = arr.replies||arr.items|| (Object.values(arr||{}).find(v=>Array.isArray(v))) || []; }
     if (Array.isArray(arr)) arr = arr.filter(r=>r&&String(r.x||"").trim()); // v1.7.6: a truncation-salvaged husk (author, no words) never gets stored
@@ -1068,9 +1105,46 @@ async function postWorldReact(post){
       if (h && h.h && Array.isArray(h.cmts) && h.cmts.length){ S.world.huddle.unshift(h); moved=true;
         S.world.notifs.push({app:"huddle", t:"The Huddle", p:"A thread went up about your post"}); }
     }
-    if (moved){ if((j.texts||[]).some(t=>S.world.texts.find(x=>x.id===t.thread))) S.world.notifs.push({app:"texts", t:"Messages", p:"Your post got someone typing"});
-      persist(); if(curApp==="huddle"||curApp==="texts"||curApp==="chirper") renderApp(curApp); }
+    if (moved){ if((j.texts||[]).some(t=>S.world.texts.find(x=>x.id===t.thread))) S.world.notifs.push({app:"messages", t:"Messages", p:"Your post got someone typing"});
+      persist(); if(curApp==="messages") rerenderMessages(); else if(curApp==="huddle"||curApp==="chirper") renderApp(curApp); }   /* v1.13.3: right app ids (the app is "messages", not "texts"); an open convo survives the knock */
   }catch(e){ console.log("post fallout skipped:", String(e&&e.message||e).slice(0,80)); }
+}
+/* v1.13.5 THE LIFE EVENT FALLOUT (Ty: "injury texts to get well... the possibilities can be
+   endless. code cant. ai can."): the sync's truth events (S.saveNotices — injuries, IR, awards,
+   status moves; trades already have their scripted agent text) summon the PEOPLE WHO LOVE HIM:
+   mom with a get-well, a teammate checking in, the agent on business. One small call, keyed,
+   fire-and-forget, model-scaled — a routine week writes nothing. */
+async function lifeEventReact(){
+  if (!aiKey()) return;
+  try{
+    const ev=(S.saveNotices||[]).filter(n=>!/TRADED\/SIGNED/.test(n));
+    if (!ev.length) return;
+    const out=await callAI("An NFL life-sim. This week's REAL events for "+S.blob.player.first+" "+S.blob.player.last+" ("+povDesc()+", "+S.blob.player.team+"): "+ev.join(" | ")+"."+lifeFacts()+" Write the PRIVATE reactions from the people in his life — mom with a get-well if he's hurt, a teammate checking in, the agent on the business side — ONLY where an event genuinely warrants one; a routine week = EMPTY. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-3]}", "Write the reactions now (or empty).", 900);
+    const j=parseModelJSON(out); let moved=false;
+    for (const t of (j.texts||[])){
+      const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; } }
+    }
+    if (moved){ S.world.notifs.push({app:"messages", t:"Messages", p:"People saw the news"});
+      persist(); if(curApp==="messages") rerenderMessages(); }
+  }catch(e){ console.log("life event fallout skipped:", String(e&&e.message||e).slice(0,80)); }
+}
+/* v1.13.4 THE PURCHASE FALLOUT (Ty's lambo law): a buy that clashes with his station can get
+   someone typing the moment the ink dries — the agent's office about the money, a teammate
+   about the car. Model-scaled by the SURPRISE LAW: a sensible buy is met with silence. */
+async function lifePurchaseReact(what, amt){
+  if (!aiKey()) return;
+  try{
+    const liquid=(S.cash&&(S.cash.checking+S.cash.savings))||0;
+    const out=await callAI("An NFL life-sim. "+S.blob.player.first+" "+S.blob.player.last+" ("+povDesc()+", "+S.blob.player.team+") just spent "+fm(amt)+" on: "+what+". He has "+fm(liquid)+" liquid left."+lifeFacts()+" Decide the PRIVATE fallout under the surprise law: sensible-for-his-station = EMPTY arrays; a flex above his pay or a buy that drains him = the agent office or his assistant texts about the finances, or a teammate ribs him. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2]}", "Write the fallout now (or empty).", 700);
+    const j=parseModelJSON(out); let moved=false;
+    for (const t of (j.texts||[])){
+      const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; } }
+    }
+    if (moved){ S.world.notifs.push({app:"messages", t:"Messages", p:"Someone has thoughts about that purchase"});
+      persist(); if(curApp==="messages") rerenderMessages(); }
+  }catch(e){ console.log("purchase fallout skipped:", String(e&&e.message||e).slice(0,80)); }
 }
 /* v1.6.5: a post whose reply fetch failed (pre-armor API hiccup) can heal itself */
 function fetchReplies(id){
@@ -1793,6 +1867,7 @@ function signLease(){
   S.bills=S.bills.filter(x=>x.id!=="stay");
   S.bills.push({id:"rent", n:"Apartment lease near the facility ("+R.city+")", amt:R.rent, cat:"housing"});
   S.ledger.push({t:"Lease signed — first month + deposit ("+R.city+")", amt:-(R.rent+R.dep), kind:"spend"});
+  lifePurchaseReact("a lease in "+R.city+" at "+fm(R.rent)+"/month", R.rent+R.dep);   /* v1.13.4 */
   persist(); closeSheet(); toast("Keys in hand. The hotel era is over."); renderApp("keystone"); renderWidget();
 }
 function endLease(quiet){
@@ -1924,6 +1999,7 @@ function confirmHousePending(){ const c=_closing; _closing=null; if(c) confirmHo
 function confirmHouse(price, down, pay, apr, label){
   S.cash.checking-=down;
   S.properties.push({n:label, value:price, bought:price});
+  lifePurchaseReact(label, price);   /* v1.13.4 */
   if (pay) S.debts.push({n:"Mortgage — "+label, bal:price-down, orig:price-down, apr, pay, kind:"mortgage"});
   if (S.rental){ S.cash.checking+=S.rental.dep; S.ledger.push({t:"Security deposit returned — lease ended at closing", amt:S.rental.dep, kind:"income"}); S.rental=null; }
   S.bills = S.bills.filter(x=>x.id!=="stay" && x.id!=="rent");
@@ -2006,6 +2082,7 @@ function buyVeh(id, fin){
   else { const dn=fin? Math.round(C.price*0.1) : C.price;
     if (S.cash.checking<dn) return toast("You need "+fm(dn)+". Checking has "+fm(S.cash.checking)+"."); S.cash.checking-=dn; }
   S.garage.push({n:C.yr+" "+C.make+" "+C.model, value:C.price, body:C.body, id:C.id});
+  lifePurchaseReact(C.yr+" "+C.make+" "+C.model, C.price);   /* v1.13.4: the lambo law */
   if (fin===1){ const dn=Math.round(C.price*0.1); const r=0.079/12,n=60,pay=Math.round((C.price-dn)*r/(1-Math.pow(1+r,-n)));
     S.debts.push({n:"Auto — "+C.make+" "+C.model, bal:C.price-dn, orig:C.price-dn, apr:7.9, pay, kind:"auto"}); creditTouch(-8); }   /* v1.10.0: ===1, a card buy is NOT a financing */
   S.bills.find(x=>x.id==="carins") || S.bills.push({id:"carins", n:"Auto insurance", amt:0, cat:"life"});
@@ -2142,6 +2219,7 @@ function buyBoat(id, onCard){
   if (onCard){ if(!payWithCard(Y.price, "Harborline — "+Y.maker+" "+Y.model)) return; }   /* v1.10.0: the card works here */
   else { if (S.cash.checking<Y.price) return toast("You need "+fmk(Y.price)+" liquid. Not yet."); S.cash.checking-=Y.price; }
   S.boats.push({n:Y.yr+" "+Y.maker+" "+Y.model, value:Y.price});
+  lifePurchaseReact(Y.yr+" "+Y.maker+" "+Y.model+" (a boat)", Y.price);   /* v1.13.4 */
   S.bills.push({id:"dock"+Date.now(), n:"Dockage & yacht upkeep", amt:Math.round((Y.len*450+Y.price*0.08)/12), cat:"toys"});
   if (!onCard) S.ledger.push({t:"Harborline — "+Y.maker+" "+Y.model, amt:-Y.price, kind:"spend"});
   persist(); toast("Welcome aboard."); renderApp("yachts"); renderWidget();
@@ -2185,6 +2263,7 @@ function buyPlane(id, onCard){
   if (onCard){ if(!payWithCard(P.price, "Stratos — "+P.maker+" "+P.model)) return; }   /* v1.10.0 */
   else { if (S.cash.checking<P.price) return toast("You need "+fmk(P.price)+" liquid for this. The runway metaphor becomes literal."); S.cash.checking-=P.price; }
   S.planes.push({n:P.yr+" "+P.maker+" "+P.model, value:P.price, cls:P.cls});   // v1.8.9: the class rides along (jet vs hobby aircraft)
+  lifePurchaseReact(P.yr+" "+P.maker+" "+P.model+" (an aircraft)", P.price);   /* v1.13.4 */
   S.bills.push({id:"hangar"+Date.now(), n:"Aircraft fixed costs", amt:Math.round(P.price*0.06/12), cat:"toys"});
   if (!onCard) S.ledger.push({t:"Stratos — "+P.maker+" "+P.model, amt:-P.price, kind:"spend"});
   persist(); toast("Wheels up."); renderApp("planes"); renderWidget();
@@ -3326,7 +3405,7 @@ RENDER.wager = b=>{
    ${S.bets.map(bt=>`<div class="veh-detail" style="margin-bottom:8px"><div class="payline" style="border:none"><span>${esc(bt.label)}</span><span>${fm(bt.stake)}${bt.settled? (bt.won?' <b style="color:#7fd4a0">WON '+fm(bt.pay)+'</b>':' <b style="color:#ff9d94">LOST</b>'):""}</span></div></div>`).join("")}`:""}
   <p style="font-size:11px;color:var(--faint);margin-top:14px">Lines are the book's opinion of your world, generated from real records in the save. View only: NFL personnel are prohibited from betting on league games, and this phone is not trying to end your career.</p>
   </div>`;
-  window._wlines = lines;
+  window._wlines = lines;   /* v1.13.4 ghost-sweep lesson: NOT a ghost — the harness reads this from the page (the wager-board checks). A "write with no read" verdict must grep the HARNESS too before burying anything. */
 };
 
 /* Mara — personal assistant */
@@ -5131,6 +5210,7 @@ function doRefreshTruth(){
   const oldP=Object.assign({}, S.blob.player, {contract:S.blob.player.contract});
   S.blob=blob; recomputeTitles(blob);
   applySaveNotices(oldP, blob.player, blob.clock);
+  lifeEventReact();   /* v1.13.5: a same-week refresh can carry an injury too — the people who love him hear it either door */
   homeFillPerception(S.perception, blob.player);                             // v1.12.3: geography backfills on same-week refreshes too (blank-only, typed wins)
   S.lastSyncAt={when:Date.now(), wk:wkLabel(blob.clock), kind:"refresh"};   // v1.7.9: same-week truth refreshes stamp too
   mailMarkSyncApplied();                                                     // v1.8.0: mailbox handshake (no-op unless this code came from the box)
@@ -5302,6 +5382,27 @@ function applySaveNotices(oldP, newP, newC){
     notices.push("POSITION CHANGE: he is officially a "+newP.pos+" now (was "+oldP.pos+") — announced fact, the org chart moved");
     S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Official: you're a "+newP.pos+" now"});
   }
+  /* v1.14.0 THE SPIDERWEB: career FIRSTS from the stat tables enter the SAME notices river —
+     one insertion point and the whole web reacts (the life-event texts, the world write, the
+     article, the podium, the locker questions). Once-ever flags in S.milestones. */
+  try{
+    S.milestones=S.milestones||{};
+    const M=mergedSS(S.blob)||{};
+    const firsts=[
+      ["firstGame","GAMESPLAYED",1,"FIRST NFL GAME: he played in his first professional game this week"],
+      ["firstStart","GAMESSTARTED",1,"FIRST NFL START: he started his first professional game this week"],
+      ["firstPassTD","PASSTDS",1,"CAREER FIRST: his first NFL passing touchdown"],
+      ["firstRushTD","RUSHTDS",1,"CAREER FIRST: his first NFL rushing touchdown"],
+      ["firstRecTD","RECEIVETDS",1,"CAREER FIRST: his first NFL receiving touchdown"],
+      ["firstSack","DLINESACKS",1,"CAREER FIRST: his first NFL sack"],
+      ["firstInt","DSECINTS",1,"CAREER FIRST: his first NFL interception"],
+      ["hundredPass","PASSYARDS",300,"MILESTONE GAME: a 300-yard passing week"],
+      ["hundredRush","RUSHYARDS",100,"MILESTONE: crossed 100 career rushing yards"],
+      ["hundredRec","RECEIVEYARDS",100,"MILESTONE: crossed 100 career receiving yards"]];
+    for (const [flag, key, at, line] of firsts){
+      if (!S.milestones[flag] && (M[key]||0)>=at){ S.milestones[flag]=wkKey(newC); notices.push(line); }
+    }
+  }catch(e){}
   S.saveNotices = notices; // this sync's truth only; overwritten every sync
   return notices.length;
 }
@@ -5314,6 +5415,7 @@ async function advanceTo(blob){
   const oldC=S.blob.clock, newC=blob.clock;
   const oldPlayed=new Set(S.blob.schedule.filter(g=>g[7]).map(g=>g[2]+"|"+g[1]+"|"+g[0])); // v1.7.4 presser: what was already played
   const oldP=Object.assign({}, S.blob.player, {contract: S.blob.player.contract});
+  const oldDepth = (S.blob&&S.blob.depth)? S.blob.depth : null;   /* v1.14.0: the spiderweb needs yesterday's chart */
   const oldSS=mergedSS(S.blob);                                       // v1.7.5: last sync's stat truth, for the per-game diff
   const rng=seedRng(S.careerId+"|wk|"+wkKey(newC));
   const events=[];
@@ -5421,7 +5523,18 @@ async function advanceTo(blob){
     if (String(S.lastMidweek||"").startsWith("SENT")) S.lastMidweek=null;   /* v1.13.1: a stale desk stamp from a week the save left dies at the sync — the powerhouse has no computer desk */
   }
   coachEvaluate("sync");                                              // v1.7.5: AFTER the notif reset — his ruling banner used to be wiped three lines up
+  try{   /* v1.14.0: a depth-chart rise or fall at HIS position is a life event like any other */
+    const me=S.blob&&S.blob.player? S.blob.player.first+" "+S.blob.player.last : null;
+    const dOld=oldDepth&&oldDepth[oldP.pos]? oldDepth[oldP.pos].indexOf(me) : -1;
+    const dNew=blob.depth&&blob.depth[blob.player.pos]? blob.depth[blob.player.pos].indexOf(me) : -1;
+    if (me && dOld>=0 && dNew>=0 && dOld!==dNew){
+      window.__depthMoveNotice = dNew<dOld? ("DEPTH CHART RISE: he moved up to "+blob.player.pos+(dNew+1)+" this week (was "+blob.player.pos+(dOld+1)+")")
+        : ("DEPTH CHART DROP: he fell to "+blob.player.pos+(dNew+1)+" this week (was "+blob.player.pos+(dOld+1)+")");
+    } else window.__depthMoveNotice=null;
+  }catch(e){ window.__depthMoveNotice=null; }
   applySaveNotices(oldP, blob.player, newC);                          // v1.7.2: the save's truth gets announced
+  if (window.__depthMoveNotice){ (S.saveNotices=S.saveNotices||[]).push(window.__depthMoveNotice); window.__depthMoveNotice=null; }
+  lifeEventReact();                                                   // v1.13.5: the people who love him react to the sync's truth (injury, awards, moves) — model-scaled, get-well texts and all
   homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
   resolveRequests();                                                  // v1.7.4: the building answers formal asks
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
@@ -5941,6 +6054,29 @@ function awardsLine(blob){
   const parts=[...season, ...Object.entries(weekly).map(([t,n])=>t.replace(/_/g," ")+(n>1?" \u00d7"+n:""))];
   return "\nCAREER AWARDS (save truth): "+parts.join("; ")+".";
 }
+/* v1.14.0 THE BOOK'S LINE: the wager board's opinion of HIS game, distilled for every pen —
+   "they're 6.5-point dogs Sunday" is world texture the chirps, texts, and podium can chew on. */
+function bookLine(){
+  try{
+    const g=nextGame(); if(!g) return "";
+    const L=S.blob.league; if(!L||!L.games||!L.games.length) return "";
+    const tn=L.teams;
+    const all=L.games.map(x=>Array.isArray(x)? {t:x[0]===0?"PreSeason":"RegularSeason", w:x[1], h:tn[x[2]], a:tn[x[3]], hs:x[4], as:x[5], played:x[4]>=0} : x);
+    const recs={};
+    for (const gm of all.filter(x=>x.t==="RegularSeason"&&x.played)){
+      recs[gm.h]=recs[gm.h]||{w:0,l:0}; recs[gm.a]=recs[gm.a]||{w:0,l:0};
+      if (gm.hs>gm.as){recs[gm.h].w++;recs[gm.a].l++;} else if(gm.as>gm.hs){recs[gm.a].w++;recs[gm.h].l++;}
+    }
+    const short=n=>String(n||"").split(" ").pop();
+    const my=recs[Object.keys(recs).find(k=>short(k)===short(S.blob.player.team))]||{w:0,l:0};
+    const op=recs[Object.keys(recs).find(k=>short(k)===short(g[3]))]||{w:0,l:0};
+    const wp=r=>{const t=(r.w||0)+(r.l||0);return t? r.w/t : 0.5;};
+    let spread=Math.round(((wp(op)-wp(my))*10 + (g[4]? -1.5 : 1.5))*2)/2;   /* home edge his way when hosting */
+    if (Math.abs(spread)<0.5) return "\nTHE BOOK'S LINE on the coming game: a pick'em.";
+    const fav = spread>0? g[3] : S.blob.player.team;
+    return "\nTHE BOOK'S LINE on the coming game: "+fav+" favored by "+Math.abs(spread)+(fav===S.blob.player.team? " (his side gives the points)" : " (his side are "+Math.abs(spread)+"-point underdogs)")+".";
+  }catch(e){ return ""; }
+}
 function worldFacts(blob, last){
   const p=blob.player; const per=S.perception;
   /* v1.7.7: one throwing facts line used to take the ENTIRE midweek/world call down with it.
@@ -5952,7 +6088,7 @@ STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
 ${SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${lifeFacts()}${bookLine()}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
@@ -6466,7 +6602,7 @@ function deliverPending(){
         t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); delete S.reads["t:"+t.id]; delete t.hidden;
         ledgerTouchIn(t, reply);
         S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"messages", t:t.name, p:"New message"});
-        persist(); if(curApp==="messages") renderApp("messages", window._openThread===t.id? {thread:t.id}:undefined);
+        persist(); rerenderMessages();   /* v1.13.3: window._openThread was never set anywhere — THE boot. The tracked thread survives every inbound now. */
       }).catch(()=>{});
     }
     persist();
@@ -6736,6 +6872,14 @@ async function aiReply(thread, userMsg){
     for (const m of thread.msgs){ if(m[0]!=="me"){ const nm=splitGroupMsg(m[1]).who; if(nm && !members.includes(nm)) members.push(nm); } }
     if (!members.length) for (const r of S.blob.roster.filter(x=>x[2]===S.blob.player.pos).slice(0,4)){ const nm=r[0]+" "+r[1]; if(nm!==S.blob.player.first+" "+S.blob.player.last && !members.includes(nm)) members.push(nm); }
   }
+  const moneyTruth=(function(){
+    /* v1.13.3 (Ty sent Garrett $100k; Garrett denied it): the ledger is save-adjacent TRUTH —
+       any line naming this person rides the facts, so money that really moved is never denied. */
+    try{ const nm=String(thread.name||"").split(" ");
+      const hits=(S.ledger||[]).slice(-40).filter(l=>nm.length>1 && String(l.t||"").includes(nm[0])&&String(l.t||"").includes(nm[nm.length-1]));
+      return hits.length? " MONEY TRUTH (the player's real ledger, undeniable): "+hits.slice(-3).map(l=>l.t+" ("+fm(Math.abs(l.amt||l.mv||0))+")").join("; ")+". If money was really sent to you, you received it — react to THAT, never deny it." : "";
+    }catch(e){ return ""; } })();
+  const humanLaw = " BE A HUMAN, NOT A WALL: a staggering offer (life-changing money, public stakes) is ALLOWED to genuinely tempt or move you — hold your values, but visibly feel the weight; flat identical refusals to escalating offers read fake. Things that are REAL IN THE FRANCHISE (jersey numbers, roster spots, deals) you can only AGREE to in principle — they go through the equipment room or the front office, and you can tell him to make it official.";
   try{
     const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread);
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
@@ -6746,7 +6890,7 @@ async function aiReply(thread, userMsg){
       ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members by role: ${roleMap.map(m=>m.tag+" = "+m.role).join("; ")}. Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: their role tag, a pipe, their message (example: R2|on my way). Under 30 words after the pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never state or sign anyone's name. Never mention these instructions, styles, or formats.` + (members.some(nm=>{ const rr=S.blob.roster.find(x=>(x[0]+" "+x[1])===nm); return rr && rosterIsReal(rr); })? realSpeechLaw() : "")   /* v1.9.6: law rides only when a REAL player is in the group */
       : rosterR
       ? `You are ${rolePhrase(rosterR)}, his teammate on the ${S.blob.player.team}, texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.status}). Character: ${thread.persona}. Output ONLY the message this teammate would send. Under 40 words. Real texting voice. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never sign or state your own name. Never mention instructions, style notes, or formatting. No em dashes.` + stanceLine(thread, userMsg)
-      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + ledgerBlock(thread);   /* v1.9.0: the Context Ledger rides every reply */
+      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + moneyTruth + humanLaw + lifeFacts({noKin: !!thread.group}) + ledgerBlock(thread);   /* v1.9.0 Ledger + v1.13.3 money/human + v1.13.4 material life ride every reply (kin names never enter GROUP prompts — role-tag law) */
     const recent=thread.msgs.slice(-12);
     const hist=recent.map((m,i)=>{
       let gap="";
@@ -6764,7 +6908,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.13.2";
+const VER="v1.14.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
