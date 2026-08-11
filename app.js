@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.13.0 (Aug 11 2026) — THE POWERHOUSE: the phone is the pen — checkpointed week runner + wake lock, midweek-as-a-step dead for keyed phones, media availability is a card, Move-on review before the save, full-week world call (prior: v1.12.4 midweek phone-first) */
+/* TyPhone app.js — v1.13.1 (Aug 11 2026) — THE ONE MEDIA SESSION + THE STRIPPED SYNC + THE OVERRULE (Ty's flow ruling: postgame+lookahead in one room at sync, no media card ever, unseen hand lives in the review page, coach calls deniable from upstairs, boot self-heal for silent weeks) (prior: v1.13.0 THE POWERHOUSE) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 const $ = s => document.querySelector(s);
@@ -585,6 +585,7 @@ function wkLabel(c){
   return c.seasonYear+" · "+(WKNAMES[c.weekType]||c.weekType);
 }
 function wkKey(c){ return c.seasonYear+"/"+c.weekType+"/"+c.week; }
+function wkKeyLabel(k){ const p=String(k||"").split("/"); return p.length===3? wkLabel({seasonYear:p[0], weekType:p[1], week:+p[2]}) : String(k); }   /* v1.13.1 (Ty: "PreSeason/1" vs "Pre Wk 2" read as two different weeks): one human format everywhere */
 function nextGame(){
   const c=S.blob.clock;
   const order = t => t==="PreSeason"?0 : t==="RegularSeason"?1 : 2;
@@ -3661,15 +3662,24 @@ async function presserQuestions(){
   return fallback();
 }
 async function presserSheet(){
+  /* v1.13.1 THE ONE MEDIA SESSION (Ty's flow ruling): postgame AND the week ahead in ONE room,
+     right after the sync. Answer or skip — either way media is DONE for the week, the Podium
+     never walls, and no midweek card ever appears again. No game played = no session at all. */
   const d=S.presserDue; if(!d) return;
   toast("The room settles\u2026");
-  const qs=await presserQuestions();
-  window._prQs=qs;
+  const wk=wkKey(S.blob.clock);
+  const wantAhead = (typeof midweekMediaOn==="function"? midweekMediaOn() : true) && !(S.midAvail&&S.midAvail[wk]);
+  const cached=(S.midAvailQs||{})[wk];
+  const [qs, aq] = await Promise.all([ presserQuestions(), wantAhead? ((cached&&cached.length)? Promise.resolve(cached) : midAvailQuestions()) : Promise.resolve([]) ]);
+  window._prQs=qs; window._prAq=aq;
   sheet(`<h3>Postgame press conference</h3><p class="sp">${d.home?"vs":"at"} ${esc(d.opp)} \u00b7 final ${d.score[0]}-${d.score[1]} \u00b7 you're ${esc(d.record_after)}. Answer any, no-comment any.</p>
   <div style="max-height:52vh;overflow:auto">
   ${qs.map((x,i)=>`<label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
     <textarea class="field" id="prA${i}" rows="2" placeholder="your words, on the record"></textarea>
     <label style="display:flex;gap:6px;align-items:center;font-size:12px;opacity:.75"><input type="checkbox" id="prN${i}"> No comment</label>`).join("")}
+  ${aq.length? `<p class="sp" style="margin-top:12px;font-weight:600">And looking ahead \u2014 the week to come:</p>
+  ${aq.map((x,i)=>`<label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
+    <textarea class="field" id="maA${i}" rows="2" placeholder="your words, on the record"></textarea>`).join("")}`:""}
   </div>
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="presserSave()">Done talking</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
@@ -3685,16 +3695,31 @@ function presserSave(){
   S.pressers=S.pressers||{}; S.pressers[d.gk]={record_after:d.record_after, qa, skipped_all:false, wk:d.wk};
   const yr=String((S.blob.clock||{}).seasonYear||"");
   S.askedQs=S.askedQs||{}; S.askedQs[yr]=(S.askedQs[yr]||[]).concat(qs.map(x=>x.q.slice(0,40))).slice(-40);
+  /* v1.13.1: the week-ahead half saves in the same breath — media DONE, Podium ungated */
+  const aq=window._prAq||[]; window._prAq=null;
+  const wk=wkKey(S.blob.clock);
+  if (aq.length){
+    const maQa=aq.map((x,i)=>{ const a=($("#maA"+i)&&$("#maA"+i).value.trim())||""; return a? {q:x.q, a} : {q:x.q, nc:true}; });
+    S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:maQa};
+    S.askedQs[yr]=(S.askedQs[yr]||[]).concat(aq.map(x=>x.q.slice(0,40))).slice(-40);
+  }
+  if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wk]=true; }
   S.presserDue=null; persist(); closeSheet();
   toast("On the record. The world can only quote what you actually said.");
-  if (curApp==="cal") renderApp("cal");
+  if (aiKey()) runWeek();
+  if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
 }
 function presserSkip(){
   const d=S.presserDue; if(!d) return;
   S.pressers=S.pressers||{}; S.pressers[d.gk]={record_after:d.record_after, qa:[], skipped_all:true, wk:d.wk};
+  /* v1.13.1: skipping the room skips BOTH halves — media done, episode writes without him */
+  const wk=wkKey(S.blob.clock);
+  S.midAvail=S.midAvail||{}; if(!S.midAvail[wk]) S.midAvail[wk]={qa:[], skipped:true};
+  if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wk]=true; }
   S.presserDue=null; persist();
   toast("Skipped availability. That gets noticed exactly once.");
-  if (curApp==="cal") renderApp("cal");
+  if (aiKey()) runWeek();
+  if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
 }
 /* ==================== v1.13.0 THE POWERHOUSE (Ty's ruling, the streamline chat) ====================
    THE PHONE IS THE PEN. One sync lands and the WHOLE week writes itself on the phone — a
@@ -4360,7 +4385,7 @@ RENDER.sync = b=>{
      the unseen hand live quietly underneath, forever. */
   const wizStep = (syncSetupOpen===true && syncSetupDone())? "verify" : !syncSetupDone()? "setup" : mailNextStep().k;
   let loopCard = "";
-  if (wizStep==="setup" && !mailOn()) loopCard = (midweekOwed()||!ordTotal())? syncMidweekCard() : syncOrdersCard();   // manual users (no mailbox, forever supported): the garden still walks midweek then orders; syncing lives in the manual row
+  if (wizStep==="setup" && !mailOn()) loopCard = aiKey()? syncOrdersCard() : ((midweekOwed()||!ordTotal())? syncMidweekCard() : syncOrdersCard());   // manual users (no mailbox, forever supported): the KEYLESS garden still walks midweek then orders; a keyed manual phone lives the powerhouse flow — one door, media in the press room (v1.13.1)
   else if (wizStep!=="setup" && wizStep!=="verify"){
     if (wizStep==="midweek") loopCard = syncMidweekCard();
     else if (wizStep==="send") loopCard = syncOrdersCard();
@@ -4370,8 +4395,8 @@ RENDER.sync = b=>{
   ${syncSetupHtml()}
   ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${(!weekRunBusy)? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="runWeek()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
   ${loopCard}
-  ${(aiKey() && wizStep!=="setup" && wizStep!=="verify" && wizStep!=="midweek" && midweekOwed())? syncMidweekCard() : ""}
-  <div class="synccard"><h4>The unseen hand</h4>
+
+  ${aiKey()? "" : `<div class="synccard"><h4>The unseen hand</h4>
   <p>Optional. The coach runs the building on his own \u2014 this is YOU forcing the building's hand when you want the wheel. You are not the coach and never will be: the STAFF makes these calls, the news breaks like it came from the facility, and the player finds out the way everyone else does. Queue moves here; when their turn comes, the step card above carries them back to the save.</p>
   <button class="mer-link" onclick="syncHandOpen=!syncHandOpen;renderApp('sync')">${syncHandOpen?"Hide the queue":"Open the queue"}</button>
   ${syncHandOpen? `<div id="ordList" style="margin-top:8px">${ordListHtml()}</div>
@@ -4385,8 +4410,8 @@ RENDER.sync = b=>{
     <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="ordSheet('resign')">Rewrite a real deal</button>
   </div>
   ${(S.orders&&S.orders.length)? `<button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94" onclick="S.orders=[];persist();renderApp('sync')">Clear your queue</button>`:""}`:""}
-  </div>
-  <div class="synccard" style="padding:10px 14px"><p style="margin:0;font-size:12.5px;color:var(--faint)">Applied weeks \u2014 ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}: ${S.appliedWeeks.map(esc).join(" \u00b7 ")}</p></div>
+  </div>`}
+  <div class="synccard" style="padding:10px 14px"><p style="margin:0;font-size:12.5px;color:var(--faint)">Applied weeks \u2014 ${esc(S.blob.player.first)} ${esc(S.blob.player.last)}: ${S.appliedWeeks.map(k=>esc(wkKeyLabel(k))).join(" \u00b7 ")}</p></div>
   <div class="synccard" style="padding:10px 14px">
   <p style="margin:0;font-size:12.5px">Manual copy-paste <span style="color:var(--faint)">\u00b7 always works</span> <button class="mer-link" style="float:right" onclick="syncManualOpen=!syncManualOpen;renderApp('sync')">${syncManualOpen?"Hide":"Show"}</button></p>
   ${syncManualOpen? `${!mailOn()? `<p style="font-size:11.5px;opacity:.6;margin:8px 0 0" id="lastRefreshLine">${lastRefreshLine()}</p>
@@ -4474,8 +4499,9 @@ function ordAdd(type){
     if (b<0||b>t) return toast("Bonus can't beat the total.");
     o={type, player:{name}, years:+$("#ordY").value, totalM:t, bonusM:b}; }
   if (!o) return;
-  S.orders=S.orders||[]; S.orders.push(o); persist(); closeSheet(); renderApp('sync');
+  S.orders=S.orders||[]; S.orders.push(o); persist(); closeSheet(); if(curApp==="sync") renderApp('sync');
   toast("Queued. The building will act on it.");
+  if (window.__rvBack){ window.__rvBack=0; reviewSheet(); }   /* v1.13.1: composed from the review page — land back on it */
 }
 /* v1.6.9 (Ty: "i dont need 2 ords just 1 merged one"): ONE code. The coach's rulings ride
    first (he outranks you), your queued moves follow, one TYORD1, one paste. */
@@ -4849,7 +4875,9 @@ function mailNextStep(){
     return {k:"send", t:ordTotal()+" change"+(ordTotal()===1?"":"s")+" queued for the save \u2014 review before anything is written.", btn:"Review & move on", fn:"reviewSheet()"};
   }
   if (st.ordersAppliedTs && (!st.syncTs || st.syncTs<st.ordersAppliedTs)) return {k:"resync", t:"The computer applied your orders \u2713 ("+mailTime(st.ordersAppliedTs)+"). YOUR TURN in Madden: fiddle with whatever you want first (practice, lineups, the shop), play your game, then ADVANCE THE WEEK (the week isn't over until you advance \u2014 an un-advanced save syncs as this same week again), then save. THEN on the COMPUTER: re-pick the save and Send sync ONLINE (the GREEN button), then tap Check here."};
-  if (st.syncTs) return {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). YOUR TURN in Madden: fiddle with whatever you want, play your game, then ADVANCE THE WEEK \u2014 the week isn't over until you advance; an un-advanced save syncs as this same week again \u2014 then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
+  if (st.syncTs) return aiKey()
+    ? {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). Live the week \u2014 when you're ready, the door below reviews anything headed for the save and hands you back to Madden.", btn:"On to the next game"+(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+g[3] : "";})(), fn:"reviewSheet()"}
+    : {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). YOUR TURN in Madden: fiddle with whatever you want, play your game, then ADVANCE THE WEEK \u2014 the week isn't over until you advance; an un-advanced save syncs as this same week again \u2014 then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
   return {k:"idle", t:"Nothing in the box yet. YOUR TURN in Madden: play your game, then ADVANCE THE WEEK, then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
 }
 /* v1.8.4: the AMBER step of the walled garden — everything going BACK to the save on one
@@ -4864,7 +4892,7 @@ function syncOrdersCard(){
   ${st.orders.length? `<p style="font-size:12.5px;margin:0 0 4px">${esc(coachName())} made these calls himself \u2014 announced in the building whether you like them or not; they ride the ONE order code below automatically.</p>
   ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.wk.split("/").slice(1).join(" wk "))} \u00b7 ${esc(o.why)}</span><button onclick="staffDismiss('${o.id}')" title="Dismiss after it's applied">\u2715</button></div>`).join("")}`:""}
   ${(S.orders&&S.orders.length)? S.orders.map(o=>`<div class="ordrow"><span>${esc(ordWords(o))}</span></div>`).join(""):""}
-  <button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="reviewSheet()">Review &amp; move on${(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+esc(g[3]) : "";})()}</button>
+  <button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="reviewSheet()">On to the next game${(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+esc(g[3]) : "";})()}</button>
   <p style="font-size:11.5px;opacity:.6;margin:8px 0 0">\u2715 a ruling only after it's been applied on the computer.</p>
   </div>`;
 }
@@ -4873,23 +4901,39 @@ function syncOrdersCard(){
    tap away. Approve and the ONE code goes; nothing enters the save without his finger on it.
    AI-suggested rows are PHASE 2, banked (the marker-auto-detect false-positive law). */
 function removeOrder(i){ if(S.orders&&S.orders[i]!==undefined){ S.orders.splice(i,1); persist(); reviewSheet(); if(curApp==="sync") renderApp("sync"); } }
+function denyStaffOrder(i){
+  /* v1.13.1 (Ty's ruling): the HUMAN is the all-seeing controller — the coach's call can be
+     overruled from upstairs before it ever reaches the save. The player still found out the
+     way everyone else did; realism is a discipline, not a cage. The log keeps the truth. */
+  const st=staffState();
+  if (st.orders[i]!==undefined){
+    const o=st.orders.splice(i,1)[0];
+    st.log.unshift({t:Date.now(), x:"Overruled from upstairs: "+(o.kind==="bench"?"the benching":"the demotion")+" ("+String(o.why||"").slice(0,60)+") never reaches the save."});
+    persist(); reviewSheet(); if(curApp==="sync") renderApp("sync");
+  }
+}
+const ORD_COMPOSE=[["depth","Depth chart call"],["status","Roster move"],["sign","New contract"],["depthoff","Off the rows"],["position","Position change"],["number","Number change"],["resign","Rewrite a real deal"]];
 function reviewSheet(){
   const st=staffState(); const g=nextGame();
   const dest=g? (g[4]?"vs ":"@ ")+g[3] : "the next game";
+  const compose=`<p style="font-size:12px;opacity:.7;margin:10px 0 4px">The unseen hand \u2014 add a move (the news breaks like it came from the facility):</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">${ORD_COMPOSE.map(x=>`<button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="window.__rvBack=1;ordSheet('${x[0]}')">${x[1]}</button>`).join("")}</div>`;
   if (!ordTotal()){
-    sheet(`<h3>Move on \u2014 ${esc(dest)}</h3><p class="sp">Nothing is queued for the save this week \u2014 clean week. In Madden: fiddle however you like, play, then <b>ADVANCE THE WEEK</b> (an un-advanced save syncs as this same week again), save, and Send sync ONLINE on the computer.</p>
-    <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Go play</button>`);
+    sheet(`<h3>On to the next game \u2014 ${esc(dest)}</h3><p class="sp">Nothing is queued for the save \u2014 clean week. In Madden: fiddle however you like, play, then <b>ADVANCE THE WEEK</b> (an un-advanced save syncs as this same week again), save, and Send sync ONLINE on the computer.</p>
+    ${compose}
+    <button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet()">Go play</button>`);
     return;
   }
-  sheet(`<h3>Before the save \u2014 ${esc(dest)}</h3><p class="sp">Everything below is about to ride the ONE code to the computer. Remove anything you don't want; the coach's own rulings ride regardless (the staff makes those calls).</p>
-  <div style="max-height:46vh;overflow:auto">
+  sheet(`<h3>Before the save \u2014 ${esc(dest)}</h3><p class="sp">Everything below is about to ride the ONE code to the computer. Remove any of yours; overrule the coach's if you must \u2014 your call, your kind of career.</p>
+  <div style="max-height:42vh;overflow:auto">
   ${st.orders.length? `<p style="font-size:12px;opacity:.7;margin:0 0 4px">The coach's calls (announced in the building):</p>
-  ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.why)}</span></div>`).join("")}`:""}
+  ${st.orders.map((o,i)=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.why)}</span><button onclick="denyStaffOrder(${i})" title="Overrule from upstairs \u2014 this never reaches the save">\u2715</button></div>`).join("")}`:""}
   ${(S.orders&&S.orders.length)? `<p style="font-size:12px;opacity:.7;margin:8px 0 4px">Your moves:</p>
   ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove from this week's code">\u2715</button></div>`).join("")}`:""}
   </div>
-  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet();mailSendOrders()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
-  : `<button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet();copyOrders()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
+  ${compose}
+  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();mailSendOrders()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
+  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();copyOrders()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
 }
 function mailCard(){
@@ -5306,6 +5350,11 @@ async function advanceTo(blob){
     events.push("Gameday "+(S.arrival.mode==="limo"?"limo":"Sprinter")+" "+fm(fee));
   }
   /* v1.7.4 THE PRESSER: a game the phone hadn't seen played is a podium owed */
+  if (!(last && !oldPlayed.has(last[2]+"|"+last[1]+"|"+last[0])) && aiKey()){
+    /* v1.13.1: no fresh game = no press room this week (preseason before game 1, quiet resyncs) —
+       media is done by definition; the episode writes without quotes; nothing walls. */
+    S.midweek=S.midweek||{}; S.midweek[wkKey(newC)]=true;
+  }
   if (last && !oldPlayed.has(last[2]+"|"+last[1]+"|"+last[0])){
     S.pressers=S.pressers||{};
     const gk="pr"+last[2]+"|"+last[1]+"|"+last[0];
@@ -5321,6 +5370,7 @@ async function advanceTo(blob){
         S.presserNone=null;
       } else {
         S.presserDue=null;
+        if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wkKey(newC)]=true; }   /* v1.13.1: no room this week — media done by definition, the episode writes without quotes */
         S.presserNone={wk:wkLabel(newC), why:gate.why||"the room wanted the starters"};
       }
     }
@@ -5334,7 +5384,11 @@ async function advanceTo(blob){
     if (ordTotal()>0) S.world.notifs.push({app:"sync", t:"Sync", p:"Last week's order code was never applied on the computer — your queue is intact; it re-sends fresh this week"});
   }
   /* v1.7.4: midweek matters to the sync loop — say so while it's pending */
-  S.world.notifs.push({app:"sync", t:"Sync", p:(typeof aiKey==="function"&&aiKey())? "Media availability is open for "+wkLabel(newC)+" \u2014 your call" : "Midweek hasn't been played for "+wkLabel(newC)});
+  if (!(typeof aiKey==="function"&&aiKey())) S.world.notifs.push({app:"sync", t:"Sync", p:"Midweek hasn't been played for "+wkLabel(newC)});   /* v1.13.1: keyed media lives in the press room at sync — the presser notif owns that moment; no second voice */
+  if (S.mailJobs && S.mailJobs.wk && S.mailJobs.wk!==wkKey(newC)){
+    S.mailJobs=null;
+    if (String(S.lastMidweek||"").startsWith("SENT")) S.lastMidweek=null;   /* v1.13.1: a stale desk stamp from a week the save left dies at the sync — the powerhouse has no computer desk */
+  }
   coachEvaluate("sync");                                              // v1.7.5: AFTER the notif reset — his ruling banner used to be wiped three lines up
   applySaveNotices(oldP, blob.player, newC);                          // v1.7.2: the save's truth gets announced
   homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
@@ -6679,7 +6733,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.13.0";
+const VER="v1.13.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -6752,6 +6806,9 @@ function recomputeTitles(blob){
   if (S) try{ pruneEmptyReplies(); }catch(e){}                     // v1.7.6: truncation husks already saved to disk are healed once at boot
   if (S) try{ if(homeFillPerception(S.perception, S.blob.player)) persist(); }catch(e){}   // v1.12.3: geography backfills at boot the moment a v1.7.1 blob is on file (blank-only, typed wins)
   if (S && S.weekJobs) setTimeout(()=>{ try{ runWeek(); }catch(e){} }, 900);   // v1.13.0: an interrupted week finishes itself at boot
+  if (S && !S.weekJobs && aiKey() && META.settings.autogen && (S.appliedWeeks||[]).length
+      && (!S.lastRefresh || S.lastRefresh.wk!==wkLabel(S.blob.clock)))
+    setTimeout(()=>{ try{ weekEnqueue(S.blob, lastPlayed()); }catch(e){} }, 1200);   /* v1.13.1 (Ty: "the save on the phone should generate me something, no?"): a keyed career whose CURRENT week never wrote — installed mid-career, pre-powerhouse blob, whatever — self-heals at boot. The runner is idempotent; a written week stamps lastRefresh and never re-enqueues. */
   if (S) try{ if(!S.articleFor){ S.articleFor={}; const l=lastPlayed(); if (l && (S.world.articles||[]).some(a=>a.kick!=="Midweek Notebook")) S.articleFor[gkey(l)]=1; } }catch(e){}   // v1.7.9: existing careers with a story on file don't get a duplicate offer; empty ones correctly read as owed
   applyWallpaper(); applyTheme();
   clockTick();
