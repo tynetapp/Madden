@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.1 (Aug 12 2026) — THE HONEST QUEUE PART TWO (applied orders leave the box via the send-time snapshot; coach rulings expire with their week; the count tells the truth) + THE COMPUTER-FIRST TEACH (sealed-week popup, wait/computer/idle states all spell Ty's exact order: Check the mailbox -> code box you don't touch -> plain-language plan -> close franchise -> APPLY -> reopen -> THEN Madden) + THE MINIMUM SCALE (minSalaryFor: $885k rookie 2026 -> $1.3M at 7+, whole scale +2%/yr past 2026; ghost card prices year-by-year) + NO SELF-BETTING (selfBet detector refuses markers, betLawLine makes every counterpart flatly deny — not allowed) + CLIENT SERVICES ON THE CARD (weekly lifestyle share rides payWithCard, checking fallback) + PODIUM HONESTY (walls until practice is LOGGED and the episode really exists) + a roomier week-restart link (prior: v1.16.0) */
+/* TyPhone app.js — v1.16.2 (Aug 12 2026) — DELETE ONE CAREER (Settings: a solitary career leaves the phone; others, settings, token, key all survive; its GitHub mailbox stays pull-back-able; last-career delete falls to the connect screen) + reset honesty (the save's truth never re-opens on a reset — the ghost card returns only while the save holds no paper; real deals redo via Rewrite a real deal) (prior: v1.16.1 THE HONEST QUEUE PART TWO) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -4324,6 +4324,7 @@ RENDER.settings = b=>{
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Career</h3></div>
   <button class="btn" style="background:rgba(255,255,255,.08)" onclick="location.hash='#debug';location.reload()">Debug readout</button>
   <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="resetCareer()">Reset this career</button>
+  <button class="btn" style="background:rgba(244,100,92,.20);color:#ffa8a0;margin-top:8px" onclick="deleteCareerSheet()">Delete this career…</button>
   <button class="btn" style="background:rgba(244,100,92,.28);color:#ffb3ab;margin-top:8px" onclick="erasePhoneSheet()">Erase this phone…</button>
   </div>`;
 };
@@ -4581,6 +4582,7 @@ function pickFromInput(inp, kind){
 }
 function resetCareer(){
   sheet(`<h3>Factory-reset this career?</h3><p class="sp">Everything phone-side for ${esc(S.blob.player.first)} ${esc(S.blob.player.last)} goes: messages, chirps, articles, threads, money moves, purchases, applied weeks, your profile answers. The phone comes back as a day-one phone — nothing from the old run survives. The baked save facts stay.</p>
+  <p class="sp" style="opacity:.7">The save's truth — your contract, position, stats — lives in Madden, not here, so a reset never re-opens the contract choice. If the save still holds no paper on you, the fix card returns on its own at Sync; a REAL deal gets redone with "Rewrite a real deal" on the review page.</p>
   <button class="btn" style="background:var(--bad);color:#fff" onclick="doResetCareer()">Reset it</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep everything</button>`);
 }
@@ -4590,6 +4592,38 @@ async function doResetCareer(){
   const blob=S.blob; S=newCareerState(blob, {generic:true});
   await idb.set("career/"+S.careerId, S);
   closeSheet(); toast("Factory reset. Day-one phone."); renderHome(); renderLock(); renderApp("settings");
+}
+
+/* ==================== v1.16.2 DELETE ONE CAREER (Ty: "you can reset a career, you can erase
+   the phone, but you can't delete a solitary career you no longer need and keep the others").
+   Deletes exactly this career's phone life — its idb record and its row on the lock screen.
+   Other careers, settings, the AI key, and the mailbox token all survive. The Madden save is
+   untouched, and the career's online mailbox stays on GitHub, so the lock screen's "+ Add a
+   career from the mailbox" can always pull it back fresh. ==================== */
+function deleteCareerSheet(){
+  const only = (META.careers||[]).length<=1;
+  sheet(`<h3>Delete this career?</h3><p class="sp"><b>${esc(S.blob.player.first)} ${esc(S.blob.player.last)}</b> leaves this phone for good — messages, money, purchases, applied weeks, all of it. ${only? "This is your ONLY career, so the phone comes back as an empty connect screen." : "Your other career"+((META.careers||[]).length>2?"s":"")+" stay exactly as they are."}</p>
+  <p class="sp" style="opacity:.7">Settings, your AI key, and the mailbox token survive. The Madden save on the computer is untouched, and this career's online mailbox stays on GitHub — the lock screen can pull it back later if you change your mind.</p>
+  <button class="btn" style="background:var(--bad);color:#fff" onclick="doDeleteCareer()">Delete it</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep it</button>`);
+}
+async function doDeleteCareer(){
+  const id=S.careerId, nm=S.blob.player.first+" "+S.blob.player.last;
+  try{ clearTimeout(saveTimer); }catch(e){}                        // a pending persist would resurrect the corpse
+  S=null;                                                          // career-lock spirit: nothing in flight can write to it now
+  META.careers=(META.careers||[]).filter(c=>c.id!==id);
+  await idb.del("career/"+id);
+  const next=(META.careers||[])[0]||null;
+  META.activeId=next? next.id : null;
+  await idb.set("meta", META);
+  closeSheet();
+  if (next){
+    S=await idb.get("career/"+next.id);
+    toast(nm+" deleted.");
+    lock(); renderHome();                                          // land on the lock screen — the picker shows what's left
+  } else {
+    location.reload();                                             // empty phone boots to the connect screen (v1.11.0 law)
+  }
 }
 
 /* v1.11.0 PRIVACY EDITION: the whole-phone wipe. "Reset this career" clears one career but
@@ -7249,7 +7283,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.1";
+const VER="v1.16.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
