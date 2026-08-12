@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.4 (Aug 12 2026) — THE SMARTER TABLE (age curve by position class hard-caps term and prices decline; production per team game vs starter benchmarks; room need from the real depth board; other-people-to-pay from the save's own nextYearCapRoom + dead money — all deterministic, all spoken aloud in the flavor line; the min floor rides the v1.16.1 scale) + per-save wallpaper/pfp (doors with legacy fallback; clear path fixed) + the Lock Screen pill in the banner + a visible whole-board pill + OpenAI adaptive token param (max_completion_tokens with one-shot fallback, remembered per session) (prior: v1.16.3) */
+/* TyPhone app.js — v1.16.5 (Aug 12 2026) — THE PLAYER'S ROUND OF TWELVE: draft-round picker for created players (one effective-round door feeds pull, seed money, the world's line, the perception story; real save rounds stay read-only), Client Services affordability gates (income camp/PS/active + card room + bank must cover the burn; card billing only under the total limit), loan desk truth (Prime 720/Standard 680/Rebuild 620; camp income counts light — stipend + half of projected season until the roster is real), moveApp is a pure SWAP, the coach toggle is gone (he always acts; the review \u2715 is the control), family facts cap at 140 with a live counter and Remove asks are-you-sure, starting balance says CHECKING ACCOUNT, calendar midweek notice deleted, messages unread dot grew (prior: v1.16.4) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -155,6 +155,18 @@ function runwayWeeks(){ const b=monthlyBurn(); if(b<=0) return 999; return Math.
 function psWeekly(){ return 6222; }
 function activeWeekly(pl){ const p=pl||S.blob.player; const c=p.contract; const yr=(c?.salary?.[c.currentYear])??p.capSalary; return Math.round(yr/18); }
 function grossFor(status, pl){ return status==="PracticeSquad" ? psWeekly() : activeWeekly(pl); }
+/* v1.16.5 (Ty): every CREATED player is a UDFA in the save (draftRound 63) with no in-game
+   edit — so the PHONE owns the story. ONE effective-round door: a REAL save round (1-7)
+   always wins and stays read-only; a created/UDFA save reads the player's OWN pick from
+   Settings (0 = UDFA). Everything downstream — pull, seed money, the world's prompt line,
+   the perception text — files through here. */
+function draftRoundEff(){
+  const p=S.blob.player, r=+p.draftRound;
+  if (r>=1 && r<=7) return r;
+  const pick=+(S.perception.draftRoundPick);
+  return (pick>=1 && pick<=7)? pick : 0;   // 0 = UDFA
+}
+function draftStoryText(r){ return r===0? "Undrafted free agent" : r===1? "First rounder" : r<=3? "Day 2 pick (round "+r+")" : r<=6? "Day 3 pick (round "+r+")" : "Seventh round flier"; }
 /* v1.12.2 THE FORMULA (Ty's spec): NFLPA dues = 3.75% of the ROOKIE MINIMUM, split across the
    18 game checks. The save carries its own rookie minimum (SalaryInfo.PlayerMinSalaryTable,
    exe v1.7.1 ships it as blob.minRookieSalary in dollars — $880,000 on his era = $1,833/check),
@@ -553,7 +565,8 @@ function bankSeason(oldBlob){
 function followerTarget(blob){
   const p=blob.player;
   const L = S.legacy || {seasons:0, wins:0, titles:0, yds:0, tds:0};
-  const draftBase = p.draftRound<=1? 160000 : p.draftRound===2? 55000 : p.draftRound===3? 22000 : p.draftRound<=5? 8000 : p.draftRound<=7? 3000 : 800;
+  const _dr=draftRoundEff()||63;   /* v1.16.5 */
+  const draftBase = _dr<=1? 160000 : _dr===2? 55000 : _dr===3? 22000 : _dr<=5? 8000 : _dr<=7? 3000 : 800;
   const ovrK = Math.max(0, (p.ovr||60)-62); let base = draftBase + ovrK*ovrK*22;
   base *= (MARKET[p.team]||1);
   base *= p.status==="PracticeSquad"? 0.25 : p.status==="Signed"? 1 : 0.6;
@@ -821,7 +834,7 @@ RENDER.messages = (b, sub)=>{
       let p=last[1]||"Say something."; if(t.group) p=splitGroupMsg(p, t.members).tx;
       return `<button class="thd" style="width:100%" onclick="renderApp('messages',{thread:'${t.id}'})">
         <span class="av" style="background:${t.color||avColor(t.name)}">${initials(t.name)}</span>
-        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6">•</span>':''}<time>${t.last?agoLabel(t.last):""}</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span>
+        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6;font-size:19px;line-height:0;vertical-align:-2px">●</span>':''}<time>${t.last?agoLabel(t.last):""}</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span>
         <span class="hact" style="font-size:15px;opacity:.4;padding:6px" onclick="event.stopPropagation();threadSheet('${t.id}')">⋯</span></button>`;
     };
     b.innerHTML = aphead("Messages", {act:"✓ all", actFn:"msgMarkAllRead()"}) + `<div class="apbody flush">
@@ -1631,7 +1644,7 @@ function merBody(){
       const ok = S.credit.score>=L.minScore;
       const advBlocked = L.trap && advTakenThisSync();   /* v1.15.0: one advance per sync */
       return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(L.n)}</span><span style="font-size:12px;opacity:.6">${L.apr.toFixed(1)}% · ${L.term}mo</span></div>
-      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(loanMax(L))}${L.trap?"":" (scales with your income)"}. ${L.trap? esc(L.note)+" One advance per sync.":""} ${!ok?"Requires score "+L.minScore+".":""}</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(loanMax(L))}${L.trap?"":" (scales with your income"+(S.blob.clock.weekType==="PreSeason"?" — camp money counts light until the roster is real":"")+")"}. ${L.trap? esc(L.note)+" One advance per sync.":""} ${!ok?"Requires score "+L.minScore+".":""}</div>
       ${ok? (advBlocked? `<div style="font-size:12.5px;opacity:.6">Advance already taken this week. The window reopens after the next sync.</div>`
         : `<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`):""}</div>`;
     }).join("")}</div>
@@ -1787,14 +1800,16 @@ function maybeMarkerOffer(t, msg){
 }
 (D.LOANS.find(l=>l.id==="adv")||{}).apr=32.0;   // v1.15.0 Ty ruling: the Salary Advance trap is 32% now (was 28) — data.js stays frozen, overrides ride here
 (D.LOANS.find(l=>l.id==="adv")||{}).max=50000;  // v1.15.0 Ty ruling: advance ceiling $50k (was 40)
-(D.LOANS.find(l=>l.id==="pl3")||{}).minScore=580; // v1.15.0 Ty ruling: even the Rebuild loan wants 580+ — tank the score far enough and NOBODY lends but the advance
+(D.LOANS.find(l=>l.id==="pl1")||{}).minScore=720; // v1.16.5 Ty ruling: Prime wants 720
+(D.LOANS.find(l=>l.id==="pl2")||{}).minScore=680; // v1.16.5 Ty ruling: Standard wants 680
+(D.LOANS.find(l=>l.id==="pl3")||{}).minScore=620; // v1.16.5 Ty ruling: Rebuild wants 620 (was 580 per v1.15.0) — tank the score far enough and NOBODY lends but the advance
 function loanMax(L){
   /* v1.15.0 (Ty): loan ceilings scale with INCOME, never net worth. Approval reads income
      TODAY (contract checks + endorsement money, same door the card tiers use); the autopay
      never shrinks afterward. Lose the sponsors or the salary after signing and you're still
      carrying payments sized to the money you used to have — that bind is the design. */
   if (L.trap) return L.max;                                        // the advance is flat $50k, always "approved"
-  const inc = cardAnnualIncome();
+  const inc = loanAnnualIncome();   /* v1.16.5: the loan desk reads camp vs season, PS vs active */
   const pct = L.id==="pl1"? 0.40 : L.id==="pl2"? 0.25 : 0.10;      // Prime 40% / Standard 25% / Rebuild 10% of annual income
   return Math.max(5000, Math.round(inc*pct/1000)*1000);
 }
@@ -2569,7 +2584,7 @@ function pullScore(){
     const pct=(arr,v)=>arr.length? arr.filter(x=>x<=v).length/arr.length : 0.5;
     const posPct=pct(room, p.ovr||60);
     const allPct=pct(roster.map(r=>r[3]).sort((a,b2)=>a-b2), p.ovr||60);
-    const dr=p.draftRound;
+    const dr=draftRoundEff()||63;   /* v1.16.5: the phone-chosen round counts when the save is a created UDFA */
     const draftPts = dr==null?0 : (dr>=63||dr<1)?1 : dr===1?12 : dr===2?9 : dr===3?7 : dr<=5?4 : 2;
     const cap=(((p.contract||{}).salary||[]).reduce((a,x)=>a+(+x||0),0)/Math.max(1,(p.contract||{}).length||1)) || p.capSalary || 0;
     const capPts = cap>=25e6?20 : cap>=15e6?16 : cap>=8e6?12 : cap>=4e6?8 : cap>=1.5e6?4 : 1;
@@ -3329,6 +3344,25 @@ const CARD_TIERS=[
   {id:"unlimited",n:"MERIDIAN UNLIMITED", apr:4.9, cb:5, mult:0, req:{score:800, nw:250000000, nwOnly:1}},
 ];
 function cardAnnualIncome(){ try{ return grossFor(S.blob.player.status)*18 + dealAnnual(); }catch(e){ return 0; } }
+/* v1.16.5 (Ty): the LOAN desk recognizes what season it is and what roster you're on.
+   Practice squad vs active already rides grossFor (PS $6,222/wk vs the contract split).
+   TRAINING CAMP is the new read: during the preseason the roster isn't real yet, so the bank
+   counts the $1,750 camp stipend as the only sure money and takes projected season checks at
+   HALF — make the team and the full number counts. */
+function loanAnnualIncome(){
+  try{
+    const isPre=(S.blob.clock||{}).weekType==="PreSeason";
+    const season=grossFor(S.blob.player.status)*18;
+    return (isPre? 1750*4 + Math.round(season*0.5) : season) + dealAnnual();
+  }catch(e){ return 0; }
+}
+function monthlyIncomeNow(){
+  try{
+    const isPre=(S.blob.clock||{}).weekType==="PreSeason";
+    const wkly=isPre? 1750 : grossFor(S.blob.player.status);
+    return Math.round(wkly*4.333 + dealAnnual()/12);
+  }catch(e){ return 0; }
+}
 function cardTier(){ return CARD_TIERS.find(t=>t.id===(S.credit.tier||"basic")) || CARD_TIERS[0]; }
 function cardTierEligible(t){
   const sc=S.credit.score, inc=cardAnnualIncome(), nw=netWorth();
@@ -3608,8 +3642,25 @@ RENDER.assist = b=>{
   </div>
   </div>`;
 };
-function setAssistCard(v){ S.assistCard=!!v; persist(); if(curApp==="assist") renderApp("assist"); toast(v? "Client Services rides the Meridian card now.":"Back to checking."); }   /* v1.16.1 (Ty): every Client Services dollar is card-eligible */
+function setAssistCard(v){
+  /* v1.16.5 (Ty): billing to the card only works if the lifestyle total fits UNDER the total
+     credit limit — a card that can't hold the month can't be the biller */
+  if (v && !cardUnlimited() && assistMonthly()>S.credit.cardLimit)
+    return toast("Your lifestyle total ("+fm(assistMonthly())+"/mo) is bigger than your whole "+cardTier().n+" limit ("+fm(S.credit.cardLimit)+"). Trim the tiers or grow the card first.");
+  S.assistCard=!!v; persist(); if(curApp==="assist") renderApp("assist"); toast(v? "Client Services rides the Meridian card now.":"Back to checking.");
+}   /* v1.16.1 (Ty): every Client Services dollar is card-eligible */
+function assistMonthlyWith(i,v){
+  const t=(S.assistTiers||D.ASSIST.cats.map(()=>0)).slice(); t[i]=v;
+  return D.ASSIST.cats.reduce((a,c,n)=>a+c[1][t[n]||0][1],0);
+}
 function setAssist(i, v){
+  /* v1.16.5 (Ty): you can only LIVE what the money covers. If income (camp stipend vs PS vs
+     active — the same truthful read the loan desk uses), the card's remaining room, and the
+     bank together can't cover the monthly burn this tier creates, the tier won't take. */
+  const newBurn = monthlyBurn() - assistMonthly() + assistMonthlyWith(i,v);
+  const resources = monthlyIncomeNow() + (cardUnlimited()? 1e12 : cardRoom()) + Math.max(0, liquid());
+  if (v>(S.assistTiers[i]||0) && resources < newBurn)
+    return toast("The math says no. That tier makes the month "+fm(newBurn)+" and your income + card room + bank covers "+fm(Math.round(resources))+". Earn more or live lighter.");
   S.assistTiers[i]=v; persist(); renderApp("assist"); renderWidget();
   toast("Noted. "+D.ASSIST.cats[i][1][v][0]+".");
 }
@@ -3946,7 +3997,6 @@ RENDER.cal = b=>{
     <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="presserSheet()">Take questions</button>
   </div>`:""}
   ${(!S.presserDue && S.presserNone && S.presserNone.wk===wkLabel(S.blob.clock))? `<p style="font-size:11.5px;opacity:.55;margin:14px 2px 0">No press conference this week — ${esc(S.presserNone.why)}.</p>`:""}
-  ${done? "" : `<p style="font-size:12px;color:var(--faint);margin:16px 2px 0">Midweek hasn't played out yet — it lives in the <b>Sync</b> app now (the green Midweek card).</p>`}
   </div>`;
 };
 let calBusy=false;
@@ -4358,8 +4408,11 @@ RENDER.settings = b=>{
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
   <label class="flabel">Monthly support you send home ($)</label>
   <input class="field" id="pcAsk" type="number" min="0" step="50" value="${pc.familyAsk||0}" onchange="savePerception()">
-  <label class="flabel">Draft story ${S.blob.player.draftRound!=null?'(read from the save)':''}</label>
-  <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>
+  ${(S.blob.player.draftRound>=1&&S.blob.player.draftRound<=7)? `<label class="flabel">Draft story (read from the save)</label>
+  <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>`
+  : `<label class="flabel">Draft story — your pick (the save lists every created player as a UDFA; the phone accounts for the round where it can)</label>
+  ${dd("pcDraftRound", ["UDFA — undrafted","Round 1","Round 2","Round 3","Round 4","Round 5","Round 6","Round 7"], (function(){const r=+(pc.draftRoundPick);return (r>=1&&r<=7)?"Round "+r:"UDFA — undrafted";})())}
+  <p style="font-size:11px;color:var(--faint);margin:-4px 0 8px">Feeds your standing at the table, the seed money math, and what the world says about you. No in-game effect — Madden never knew.</p>`}
   <label class="flabel">Public reputation (set by the league, not by you)</label>
   <div class="field" style="opacity:.75">${esc(autoReputation())}</div>
 
@@ -4380,24 +4433,21 @@ RENDER.settings = b=>{
   <p style="font-size:11.5px;color:var(--faint);margin:-4px 0 10px">An auto loan means a car exists. It parks in your Meridian garage when you lock, and the loan wears its name.</p>`:""}
   <button class="btn sm" style="background:rgba(127,212,160,.16);color:#7fd4a0" onclick="lockDebts()">Lock it in — this is permanent</button>
   <p style="font-size:11.5px;color:var(--faint);margin-top:6px">One-time. Once locked, the debt is real: it amortizes weekly and only payments make it smaller.</p>` : ""}`}
-  <div style="font-size:12px;color:var(--faint);margin-top:6px">${pc.seedLocked? `Starting balance: <b>${fm(pc.seedAmt||0)}</b> · locked in. One-time, like the debt — it only moves by spending it.`
-  : `Starting balance seeds from your profile (draft money, NIL, family): <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply &amp; lock</button>`:""}`}</div>
+  <div style="font-size:12px;color:var(--faint);margin-top:6px">${pc.seedLocked? `Starting CHECKING ACCOUNT balance: <b>${fm(pc.seedAmt||0)}</b> · locked in. Money IN the bank on day one — an asset, not a debt. It only moves by spending it.`
+  : `Starting CHECKING ACCOUNT balance — money IN the bank on day one (an asset, not another debt). Seeds from your profile (draft money, NIL, family): <b>${fm(startingCash(pc))}</b>${S.appliedWeeks.length<=1? ` · <button class="mer-link" style="color:#7fd4a0" onclick="applySeedCash()">apply &amp; lock</button>`:""}`}</div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Family</h3></div>
   <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:10px">Your people, written by you. The world only ever uses the family you put here — parents, siblings, significant others — and never invents anyone new. Facts are what the world is allowed to know.</p>
   ${(pc.familyPeople||[]).map((f,i)=>`<div class="famrow">
     <div class="famtop"><select class="field" style="width:46%;margin:0" onchange="famSet(${i},'rel',this.value)">${["Mother","Father","Stepmother","Stepfather","Brother","Sister","Significant other","Fiancée","Wife","Husband","Grandmother","Grandfather","Guardian","Other"].map(r=>`<option ${f.rel===r?"selected":""}>${r}</option>`).join("")}</select>
     <input class="field" style="width:50%;margin:0" placeholder="Name" value="${esc(f.name||"")}" onchange="famSet(${i},'name',this.value)"></div>
-    <input class="field" placeholder="Facts the world knows (job, city, vibe)" value="${esc(f.fact||"")}" onchange="famSet(${i},'fact',this.value)">
-    <button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94" onclick="famDel(${i})">Remove</button>
+    <input class="field" maxlength="140" placeholder="Facts the world knows (job, city, vibe)" value="${esc(f.fact||"")}" oninput="famCount(this,${i})" onchange="famSet(${i},'fact',this.value)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:-4px 0 2px"><span id="famCt${i}" style="font-size:10.5px;color:var(--faint)">${(f.fact||"").length}/140</span>
+    <button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94;margin:0" onclick="famDelAsk(${i})">Remove</button></div>
   </div>`).join("")}
   <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="famAdd()">+ Add family member</button>
 
-  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>The coach</h3></div>
-  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Practice and film-study picks moved out of Settings \u2014 you log the week inside the sync flow now (press room \u2192 log practice \u2192 locker questions).</p>
-  <label class="flabel" style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">The coach acts on his own (fines, benchings, demotions)
-  <input type="checkbox" ${S.staffAuto!==false?"checked":""} onchange="S.staffAuto=this.checked;persist()"></label>
-  <p style="font-size:11.5px;color:var(--faint);margin-top:2px">On: the staff disciplines you for bad practice weeks and public messes without asking. Off: the world only talks.</p>
+  
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Phone</h3></div>
   <label class="flabel" style="display:flex;justify-content:space-between;align-items:center">App theme
   <select class="field" style="width:auto;margin:0" onchange="META.settings.theme=this.value;saveMeta();applyTheme()"><option value="dark" ${META.settings.theme!=="light"?"selected":""}>Dark</option><option value="light" ${META.settings.theme==="light"?"selected":""}>Light</option></select></label>
@@ -4557,8 +4607,16 @@ function payDebtOffGo(i){
 }
 /* v1.6 (Ty #8): user-authored family ecosystem */
 function famAdd(){ const pc=S.perception; pc.familyPeople=pc.familyPeople||[]; pc.familyPeople.push({rel:"Mother",name:"",fact:""}); persist(); rerenderSettings(); }
-function famDel(i){ const pc=S.perception; (pc.familyPeople||[]).splice(i,1); persist(); rerenderSettings(); }
-function famSet(i,k,v){ const pc=S.perception; if(pc.familyPeople&&pc.familyPeople[i]){ pc.familyPeople[i][k]=v.trim(); persist(); } }
+/* v1.16.5 (Ty): removing a person is an are-you-sure, never a single mis-tap */
+function famDelAsk(i){
+  const f=(S.perception.familyPeople||[])[i]; if(!f) return;
+  sheet(`<h3>Remove ${esc(f.name||f.rel||"this person")}?</h3><p class="sp">They leave your family list — the world stops knowing them, and future mentions stop. Existing texts and history stay where they are.</p>
+  <button class="btn" style="background:var(--bad);color:#fff" onclick="famDel(${i})">Remove them</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep them</button>`);
+}
+function famDel(i){ const pc=S.perception; (pc.familyPeople||[]).splice(i,1); persist(); closeSheet(); rerenderSettings(); }
+function famCount(el,i){ const n=(el.value||"").length; const c=$("#famCt"+i); if(c){ c.textContent=n+"/140"; c.style.color=n>=140?"#ff9d94":"var(--faint)"; } }   /* v1.16.5: the fact line is a prompt fact, not an essay */
+function famSet(i,k,v){ const pc=S.perception; if(pc.familyPeople&&pc.familyPeople[i]){ pc.familyPeople[i][k]=(k==="fact"? String(v).slice(0,140):v).trim(); persist(); } }
 function familyLine(){
   const fp=(S.perception.familyPeople||[]).filter(f=>f.name);
   if (!fp.length) return "";
@@ -4573,6 +4631,8 @@ function savePerception(){
   pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
   pc.collegeName=gv("pcColName")??pc.collegeName;
   pc.college=gv("pcCol")||pc.college; pc.family=gv("pcFam")||pc.family;
+  const drp=gv("pcDraftRound");   /* v1.16.5: the chosen draft round */
+  if (drp!==null){ const m=/Round (\d)/.exec(drp); pc.draftRoundPick = m? +m[1] : 0; pc.draft=draftStoryText(draftRoundEff()); }
   const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=Math.max(0,+ask||0);
   const dt=gv("pcDebtTotal"); if(dt!==null) pc.debtTotal=Math.max(0,+dt||0);
   const ac=gv("pcAutoCar"); if(ac!==null) pc.autoLoanCar=ac.trim();
@@ -4611,21 +4671,24 @@ function moveApp(id, to){
   const gridIds = META.settings.order.filter(x=>!dock.includes(x));
   const from = gridIds.indexOf(id);
   if (from<0) return;
-  gridIds.splice(from,1); gridIds.splice(to,0,id);
+  /* v1.16.5 (Ty): a number change is a SWAP — the picked icon takes the chosen space and the
+     icon that lived there takes the vacant spot. Nothing else moves, ever. */
+  if (to<0||to>=gridIds.length||to===from){ renderHome(); rerenderSettings(); return; }
+  const tmp=gridIds[to]; gridIds[to]=gridIds[from]; gridIds[from]=tmp;
   // rebuild full order: docked ids keep their old positions appended at end (they don't render in grid anyway)
   META.settings.order = gridIds.concat(dock.filter(d=>!gridIds.includes(d)));
   saveMeta(); renderHome(); rerenderSettings();
 }
 function applySeedCash(){
   const pc=S.perception;
-  if (pc.seedLocked) return toast("Starting balance is already locked in.");
+  if (pc.seedLocked) return toast("Starting checking balance is already locked in.");
   const target=startingCash(pc);
   pc.seedLocked=1; pc.seedAmt=target;
   S.ledger=S.ledger.filter(l=>l.kind!=="seed");
   S.cash.checking=target;
   S.ledger=S.ledger.filter(l=>l.kind!=="seed");
-  S.ledger.push({t:"Starting balance (profile seed)", amt:target, kind:"seed"});
-  persist(); toast("Starting balance locked at "+fm(target)+"."); rerenderSettings(); renderWidget();
+  S.ledger.push({t:"Starting checking balance (profile seed)", amt:target, kind:"seed"});
+  persist(); toast("Starting checking balance locked at "+fm(target)+"."); rerenderSettings(); renderWidget();
 }
 function pickImage(kind){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
@@ -5603,7 +5666,7 @@ function autoFromSave(blob){
   const pc=S? S.perception : null; if(!pc) return;
   if (p.college && !pc.collegeName) pc.collegeName = p.college;
   if (p.draftRound!=null){
-    pc.draft = p.draftRound>=63||p.draftRound<1 ? "Undrafted free agent" : p.draftRound===1? "First rounder" : p.draftRound<=3? "Day 2 pick" : p.draftRound<=6? "Day 3 pick" : "Seventh round flier";
+    pc.draft = draftStoryText((p.draftRound>=1&&p.draftRound<=7)? p.draftRound : draftRoundEff());   /* v1.16.5: created players carry THEIR chosen story */
   }
   pc.rep = (typeof autoReputation==="function")? autoReputation() : pc.rep;
 }
@@ -6394,7 +6457,7 @@ function myStatLine(blob){
    Settings toggle turns it off.
    ===================================================================================== */
 function staffState(){ S.staff = S.staff || {orders:[], log:[], ruled:{}}; return S.staff; }
-function staffAutoOn(){ return S.staffAuto!==false; }
+function staffAutoOn(){ return true; }   /* v1.16.5 (Ty): the toggle is gone — the coach always acts on his own; anyone who dislikes a ruling crosses it out in the review before the code rides */
 function conductHot(){
   const recent=(S.chirp&&S.chirp.posts||[]).slice(-3).map(p=>p.t||"").join(" ").toLowerCase();
   return /trash|garbage|clown|terrible|hate|fire (him|the)|refs|cheated|quit|refus|sit(ting)? out|won'?t play|not playing|trade me/.test(recent);
@@ -6424,8 +6487,10 @@ function conductBlast(){
 function draftStory(){
   const p=S.blob.player;
   if (p.draftRound==null) return "";
-  if (p.draftRound>=63||p.draftRound<1) return " He went UNDRAFTED — no team spent a pick on him.";
-  return " He was drafted in round "+p.draftRound+(p.draftPick?" (pick "+p.draftPick+")":"")+(p.yearDrafted?" of "+p.yearDrafted:"")+".";
+  const er=draftRoundEff();   /* v1.16.5: a created UDFA carries the round the player chose */
+  if (er===0) return " He went UNDRAFTED — no team spent a pick on him.";
+  const real=(p.draftRound>=1&&p.draftRound<=7);
+  return " He was drafted in round "+er+((real&&p.draftPick)?" (pick "+p.draftPick+")":"")+((real&&p.yearDrafted)?" of "+p.yearDrafted:"")+".";
 }
 /* v1.7.4 (Ty: "film room wouldn't talk like that") — every reply must sound like WHO wrote
    it and obey the save facts. */
@@ -7444,7 +7509,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.4";
+const VER="v1.16.5";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
