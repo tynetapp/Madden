@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.5 (Aug 12 2026) — THE PLAYER'S ROUND OF TWELVE: draft-round picker for created players (one effective-round door feeds pull, seed money, the world's line, the perception story; real save rounds stay read-only), Client Services affordability gates (income camp/PS/active + card room + bank must cover the burn; card billing only under the total limit), loan desk truth (Prime 720/Standard 680/Rebuild 620; camp income counts light — stipend + half of projected season until the roster is real), moveApp is a pure SWAP, the coach toggle is gone (he always acts; the review \u2715 is the control), family facts cap at 140 with a live counter and Remove asks are-you-sure, starting balance says CHECKING ACCOUNT, calendar midweek notice deleted, messages unread dot grew (prior: v1.16.4) */
+/* TyPhone app.js — v1.16.7 (Aug 12 2026) — PRESEASON IS PRESEASON (one law in worldFacts rides every prompt: exhibition football, no 'home openers', muted hype; unlisted-on-depth = a CAMP BODY in the world's eyes whatever the contract says) + OVR OUT OF BUZZ (Ty's ruling: the world doesn't know he's a 99, only that he hasn't played — fame is body of work; the talent number stays with the building via pullScore) + depth-listed loan truth (an unlisted camp body banks ONLY the stipend) + the JERSEY-NUMBER LAW (numbers are currency; pushback is the norm) + family-row breathing room (prior: v1.16.6) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -567,7 +567,11 @@ function followerTarget(blob){
   const L = S.legacy || {seasons:0, wins:0, titles:0, yds:0, tds:0};
   const _dr=draftRoundEff()||63;   /* v1.16.5 */
   const draftBase = _dr<=1? 160000 : _dr===2? 55000 : _dr===3? 22000 : _dr<=5? 8000 : _dr<=7? 3000 : 800;
-  const ovrK = Math.max(0, (p.ovr||60)-62); let base = draftBase + ovrK*ovrK*22;
+  /* v1.16.7 (Ty's ruling, verbatim law): OVR NEVER drives buzz or endorsements — the world
+     doesn't know he's a 99, only that he hasn't played. Fame is body of work: draft pedigree,
+     production, wins, banked seasons, posts, market, status. The talent number belongs to
+     the BUILDING (pullScore keeps it — coaches watch film; fans watch games). */
+  let base = draftBase;
   base *= (MARKET[p.team]||1);
   base *= p.status==="PracticeSquad"? 0.25 : p.status==="Signed"? 1 : 0.6;
   base *= 1 + Math.min(p.yearsPro||0, 8)*0.18;
@@ -1305,7 +1309,9 @@ RENDER.chron = (b, sub)=>{
   if (!A){
     /* v1.7.9 (Ty): if a played game's story never wrote, say so — and offer to write it. */
     b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
-    <div class="apbody"><div class="empty">${storyOwed()? "Your last game is in the books, but its story never wrote \u2014 the sync's article pass failed." : "No stories on your career yet. The paper writes with your first sync."}</div>${chronRetryBtn()}</div>`;
+    <div class="apbody"><div class="empty">${storyOwed()? "Your last game is in the books, but its story never wrote \u2014 the sync’s article pass failed."
+      : (S.appliedWeeks||[]).length>=1? "You’re synced \u2713 \u2014 but no game has been played on this save yet. The Chronicle covers games: your first story writes on the sync after your first game."
+      : "No stories on your career yet. The paper writes with your first sync."}</div>${chronRetryBtn()}</div>`;
     return;
   }
   b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
@@ -1644,7 +1650,7 @@ function merBody(){
       const ok = S.credit.score>=L.minScore;
       const advBlocked = L.trap && advTakenThisSync();   /* v1.15.0: one advance per sync */
       return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(L.n)}</span><span style="font-size:12px;opacity:.6">${L.apr.toFixed(1)}% · ${L.term}mo</span></div>
-      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(loanMax(L))}${L.trap?"":" (scales with your income"+(S.blob.clock.weekType==="PreSeason"?" — camp money counts light until the roster is real":"")+")"}. ${L.trap? esc(L.note)+" One advance per sync.":""} ${!ok?"Requires score "+L.minScore+".":""}</div>
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(loanMax(L))}${L.trap?"":" (scales with your income"+(S.blob.clock.weekType==="PreSeason"? (depthListed()? " — camp money counts light until the roster is real" : " — you\u2019re not on the depth chart: the bank sees a camp body, and only the stipend counts") : "")+")"}. ${L.trap? esc(L.note)+" One advance per sync.":""} ${!ok?"Requires score "+L.minScore+".":""}</div>
       ${ok? (advBlocked? `<div style="font-size:12.5px;opacity:.6">Advance already taken this week. The window reopens after the next sync.</div>`
         : `<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`):""}</div>`;
     }).join("")}</div>
@@ -1712,6 +1718,9 @@ function selfBet(t){
   if (!/\b(i|i'?ll|i'?m|my|me|myself)\b/i.test(t)) return false;
   if (/\b(i\s+bet\b|bet\s+(?:you|ya|u)\b|wanna\s+bet|\$?\d[\d,]*\s+says\s+i|put\s+(?:money|\$\s?\d[\d,]*)\s+on\s+(?:me|myself)|odds\s+(?:that\s+)?i)\b/i.test(t)) return true;
   return /\b(score|throw|pass|rush|catch|sack|pick|intercept|kick|punt|td|touchdown|tds|yard|yards|tackle|field\s*goal|fg)\w*\b/i.test(t);
+}
+function numberLawLine(){
+  return " JERSEY-NUMBER LAW: a player's number is currency, and giving it up is a REAL ritual. If he asks a teammate for their number, the answer is almost never a plain instant yes: veterans and starters push back or want something real (a charity donation, a dinner, a watch, real money, or simple seniority respect), role players may haggle lightly or trade a favor, and only a genuinely warm relationship or a fringe player with no attachment says yes easily. Sometimes the answer is a flat no — the number means something to them. Play it by the person's tenure, personality, and the relationship ledger; a granted number can still become a promise on the books.";
 }
 function betLawLine(){
   return " GAMBLING LAW (absolute): if he proposes any bet, wager, or stakes on HIS OWN on-field performance, you REFUSE flatly and completely — league rules prohibit it and everyone around him knows it. You never take the bet, never agree to odds, never pay or promise money on it, and no amount of pushing changes your answer; each time, say in your own words that betting on his own play isn't allowed. Friendly non-money stakes talk can stay banter, but nothing that moves money ever forms.";
@@ -3349,10 +3358,17 @@ function cardAnnualIncome(){ try{ return grossFor(S.blob.player.status)*18 + dea
    TRAINING CAMP is the new read: during the preseason the roster isn't real yet, so the bank
    counts the $1,750 camp stipend as the only sure money and takes projected season checks at
    HALF — make the team and the full number counts. */
+/* v1.16.7 (Ty): the depth chart is the phone's roster truth. Listed at his position with a
+   number = "active roster" as far as the phone's world is concerned; UNLISTED = camp body,
+   whatever the contract says (the save's contract stands — this is the immersion layer). */
+function depthListed(){
+  try{ const p=S.blob.player; return ((S.blob.depth||{})[p.pos]||[]).includes(p.first+" "+p.last); }catch(e){ return false; }
+}
 function loanAnnualIncome(){
   try{
     const isPre=(S.blob.clock||{}).weekType==="PreSeason";
     const season=grossFor(S.blob.player.status)*18;
+    if (isPre && !depthListed()) return 1750*4 + dealAnnual();   /* v1.16.7: an UNLISTED camp body's season checks aren't bankable AT ALL — the stipend is the whole income */
     return (isPre? 1750*4 + Math.round(season*0.5) : season) + dealAnnual();
   }catch(e){ return 0; }
 }
@@ -4185,7 +4201,12 @@ function weekRunLine(){
   if (failed) return "The week's writing paused ("+failed.id+": "+esc(failed.err||"failed")+"). Tap Resume the week's writing.";
   const worldGated=W.jobs.find(j=>j.id==="world"&&j.st==="gated");
   const podGated=W.jobs.find(j=>j.id==="podium"&&j.st==="gated");
-  if (worldGated && !pracPicked()) return "The paper is out \u2713 \u00b7 the rest of the week writes after you log practice"+(mediaHandled()?"":" and handle the press room")+" \u2014 the card below is the door.";
+  if (worldGated && !pracPicked()){
+    const ps=paperState(); const tail="the rest of the week writes after you log practice"+(mediaHandled()?"":" and handle the press room")+" \u2014 the card below is the door.";
+    if (ps.k==="out") return "The paper is out \u2713 \u00b7 "+tail;
+    if (ps.k==="none-due") return "Nothing to print yet \u2014 the paper starts with your first played game \u00b7 "+tail;
+    return "The paper MISSED its run (the story pass failed \u2014 the Chronicle has a retry button) \u00b7 "+tail;   /* v1.16.6: never claim a paper that is not on file */
+  }
   if (podGated && !weekJobReady(podGated) && done===total-1) return "The week is written \u2713 \u00b7 the Podium episode writes itself after your media availability.";
   return "The week's writing will resume on its own \u2014 or tap Resume now.";
 }
@@ -4439,7 +4460,7 @@ RENDER.settings = b=>{
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Family</h3></div>
   <p style="font-size:12.5px;color:var(--faint);line-height:1.5;margin-bottom:10px">Your people, written by you. The world only ever uses the family you put here — parents, siblings, significant others — and never invents anyone new. Facts are what the world is allowed to know.</p>
   ${(pc.familyPeople||[]).map((f,i)=>`<div class="famrow">
-    <div class="famtop"><select class="field" style="width:46%;margin:0" onchange="famSet(${i},'rel',this.value)">${["Mother","Father","Stepmother","Stepfather","Brother","Sister","Significant other","Fiancée","Wife","Husband","Grandmother","Grandfather","Guardian","Other"].map(r=>`<option ${f.rel===r?"selected":""}>${r}</option>`).join("")}</select>
+    <div class="famtop" style="margin-bottom:9px"><select class="field" style="width:46%;margin:0" onchange="famSet(${i},'rel',this.value)">${["Mother","Father","Stepmother","Stepfather","Brother","Sister","Significant other","Fiancée","Wife","Husband","Grandmother","Grandfather","Guardian","Other"].map(r=>`<option ${f.rel===r?"selected":""}>${r}</option>`).join("")}</select>
     <input class="field" style="width:50%;margin:0" placeholder="Name" value="${esc(f.name||"")}" onchange="famSet(${i},'name',this.value)"></div>
     <input class="field" maxlength="140" placeholder="Facts the world knows (job, city, vibe)" value="${esc(f.fact||"")}" oninput="famCount(this,${i})" onchange="famSet(${i},'fact',this.value)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin:-4px 0 2px"><span id="famCt${i}" style="font-size:10.5px;color:var(--faint)">${(f.fact||"").length}/140</span>
@@ -6688,6 +6709,7 @@ NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
 MONEY: ${p.status==="PracticeSquad"? "practice squad $6,222/wk" : "active roster, "+fm(Math.round((((p.contract||{}).salary||[])[(p.contract||{}).currentYear||0] ?? p.capSalary)/18))+"/wk"}; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.
+${(S.blob.clock&&S.blob.clock.weekType==="PreSeason")? "IT IS THE PRESEASON — exhibition football: never call any preseason game a ‘home opener’ or ‘season opener’ (the season opens in Week 1 of the REGULAR season); stakes are roster auditions, stadiums run light, ticket demand is soft, the world's excitement is muted, and hype waits for real games."+(depthListed()? "" : " He is NOT on the depth chart at his position — in the world's eyes he is a CAMP BODY fighting for a roster spot, whatever his contract says.") : ""}
 PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${per.familyAsk?", sends home "+fm(per.familyAsk)+"/mo":""}${per.debtTotal?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+((per.debtShares||[])[3]>0&&per.autoLoanCar? "; the auto loan is on a "+per.autoLoanCar:"")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. ${SL(saveNoticesLine,"saveNoticesLine")} ${SL(markerLine,"markerLine")} ${SL(myPostsLine,"myPostsLine")} FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}).
 ${SL(familyLine,"familyLine")}
 ${SL(()=>myStatLine(blob),"myStatLine")}${SL(()=>awardsLine(blob),"awardsLine")}${SL(()=>coachLine(blob),"coachLine")}${SL(()=>champLine(blob),"champLine")}${SL(disciplineLine,"disciplineLine")}${SL(staffLine,"staffLine")}${SL(requestsLine,"requestsLine")}${SL(arrivalLine,"arrivalLine")}${SL(travelLine,"travelLine")}${SL(famSeatsLine,"famSeatsLine")}${SL(pressersLine,"pressersLine")}${SL(midAvailLine,"midAvailLine")}${SL(freshLine,"freshLine")}`;
@@ -6704,7 +6726,20 @@ function gkey(g){ return g[2]+"|"+g[1]+"|"+g[0]; }
    first"): the first sync generates now (addCareer runs eager gen), so the old appliedWeeks>1
    fence — built when adoption wrote nothing and pre-adoption games weren't owed — would leave
    a FAILED first story permanently unwritable. Any synced career (appliedWeeks>=1) is owed. */
-function storyOwed(){ const l=lastPlayed(); return (l && (S.appliedWeeks||[]).length>=1 && !(S.articleFor||{})[gkey(l)])? l : null; }
+/* v1.16.6 (Ty's field report: Sync said "the paper is out" while the Chronicle said "writes
+   with your first sync" — on a synced career): BOTH lines were assertions. "Paper is out"
+   came purely from the runner's sequence position, and the empty state only knew "never
+   synced." ONE truth door now: paperState() checks whether the last played game's story
+   actually sits on file. Three honest states — none-due (no game played yet), out (story on
+   file), missing (played + synced, story absent — INCLUDING the ghost case where the old
+   articleFor flag survived but the article didn't: the retry now appears there too). */
+function paperState(){
+  const l=lastPlayed(); if(!l) return {k:"none-due"};
+  const gk=gkey(l);
+  const has=(S.world.articles||[]).some(a=>a.gk===gk) || (!!(S.articleFor||{})[gk] && (S.world.articles||[]).length>0);
+  return has? {k:"out", l} : {k:"missing", l};
+}
+function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appliedWeeks||[]).length>=1)? ps.l : null; }
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
@@ -6715,7 +6750,7 @@ function intakeGameStory(art, byline, wkLbl, gk, _cid){
   /* v1.8.1: the story's intake is ONE door — the phone's own call and the computer's
      returned text both land here, so the byline/credit laws can never fork. */
   if (!(art && art.paras && art.paras.length)) throw new Error("the model returned no story");
-  art.by=byline+" \u00b7 United Chronicle Sports"; art.wk=wkLbl; art.ts=Date.now();
+  art.by=byline+" \u00b7 United Chronicle Sports"; art.wk=wkLbl; art.ts=Date.now(); if(gk) art.gk=gk;   /* v1.16.6: the story knows its game — existence checks stop trusting a flag */
   S.world.articles.unshift(art);
   S.articleFor=S.articleFor||{}; if (gk) S.articleFor[gk]=1;
   persist();
@@ -7482,7 +7517,7 @@ async function aiReply(thread, userMsg){
     }catch(e){ return ""; } })();
   const humanLaw = " BE A HUMAN, NOT A WALL: a staggering offer (life-changing money, public stakes) is ALLOWED to genuinely tempt or move you — hold your values, but visibly feel the weight; flat identical refusals to escalating offers read fake. Things that are REAL IN THE FRANCHISE (jersey numbers, roster spots, deals) you can only AGREE to in principle — they go through the equipment room or the front office, and you can tell him to make it official.";
   try{
-    const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine();   /* v1.16.1: the no-self-betting law rides every reply, every thread */
+    const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine() + numberLawLine();   /* v1.16.1 + v1.16.7: the gambling and jersey-number laws ride every reply, every thread */
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
        members become role tags (R1, R2...) the phone maps back to names at render; a roster
        1:1 is addressed purely by role. Generated people keep their named personas. */
@@ -7509,7 +7544,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.5";
+const VER="v1.16.7";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
