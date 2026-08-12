@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.2 (Aug 12 2026) — DELETE ONE CAREER (Settings: a solitary career leaves the phone; others, settings, token, key all survive; its GitHub mailbox stays pull-back-able; last-career delete falls to the connect screen) + reset honesty (the save's truth never re-opens on a reset — the ghost card returns only while the save holds no paper; real deals redo via Rewrite a real deal) (prior: v1.16.1 THE HONEST QUEUE PART TWO) */
+/* TyPhone app.js — v1.16.3 (Aug 12 2026) — THE SWEEP + THE JANITOR: the career lock closes its blind spots (reactive pens postWorldReact/lifeEventReact/lifePurchaseReact/aiPostReplies + the locker-question await all drop words for a career he left; runWeek survives a deleted career), mailSessionReset at every career-identity change (the old career's box never renders on the new one), and pruneLongRun — the longevity sim's verdict — caps the forever-growing arrays (huddle 150, chirps 250, ledger 500, card ledger 200, staff log 80, own posts 300, thread msgs 250) + sweeps week-keyed maps older than last season. Chronicle stays FOREVER per Ty's ruling. (prior: v1.16.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -720,7 +720,7 @@ function renderLock(){
     + (META.settings.mailToken? `<button class="career-pick" onclick="addCareerFromMailbox()"><span class="l"><h4>+ Add a career from the mailbox</h4><p>Any player synced on this token joins with one tap</p></span><span class="go">Scan</span></button>` : "");   /* v1.12.3 THE SECOND-CAREER DOOR */
 }
 async function switchCareer(id){
-  if (META.activeId!==id){ META.activeId=id; S = await idb.get("career/"+id); persist(); }
+  if (META.activeId!==id){ META.activeId=id; S = await idb.get("career/"+id); mailSessionReset(); persist(); }   /* v1.16.3: the old career's box never renders on the new one */
   unlock(); renderHome();
 }
 function openApp(id){
@@ -1109,6 +1109,7 @@ function insMention(inpId, h){
   if (box) box.innerHTML=""; inp.focus();
 }
 async function aiPostReplies(post, attempt){
+  const _cid=S&&S.careerId;   /* v1.16.3 career lock */
   if (!aiKey()) return;
   const f = S.chirp.followers||0;
   /* v1.6 (Ty #10): render only the 5-10 most popular replies for a loud account; small
@@ -1116,6 +1117,7 @@ async function aiPostReplies(post, attempt){
   const nReplies = Math.max(2, Math.min(10, Math.round(2 + Math.log10(f+10)*1.55)));
   try{
     const out = await callAI("You write replies on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented (naming a real TV network as the broadcast a game aired on is fine). "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers, buzz level: "+buzzTier(f)+") just posted: \""+post.t+"\". "+careerFactsLine()+lifeFacts()+" "+myPostsLine()+" "+accountVoiceLaw()+chPersonaNote(post.t)+" Write EXACTLY "+nReplies+" short realistic replies. These are the MOST POPULAR replies under the post, scaled to that follower count (a small account gets small-account energy, not viral treatment; a big account's top replies feel like a real viral reply section). Fans, media, or teammates. If a teammate handle is mentioned in the post, one reply MUST be from that teammate. Mixed tones, no em dashes. Output ONLY a JSON array, no prose, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (g: m male, f female, x fan/brand accounts; vf 1 ONLY for teammates, media outlets, and official accounts — fans 0)", "Write the replies now.", Math.max(600, 220+130*nReplies));
+  if (!S || S.careerId!==_cid){ console.log('career lock: replies for another save dropped'); return []; }
     let arr = parseModelJSON(out);                      // v1.6.2: same hardened ladder as the world call
     if (!Array.isArray(arr)){ arr = arr.replies||arr.items|| (Object.values(arr||{}).find(v=>Array.isArray(v))) || []; }
     if (Array.isArray(arr)) arr = arr.filter(r=>r&&String(r.x||"").trim()); // v1.7.6: a truncation-salvaged husk (author, no words) never gets stored
@@ -1138,9 +1140,11 @@ async function aiPostReplies(post, attempt){
    lost reaction costs nothing), keyed only. */
 async function postWorldReact(post){
   if (!aiKey()) return;
+  const _cid=S.careerId;   /* v1.16.3 career lock: the reactive pens were the lock's blind spot — a switch mid-await landed one save's fallout in another save's threads */
   try{
     const f=S.chirp.followers||0;
     const out=await callAI("You write the PRIVATE and COMMUNITY fallout of a social post in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers) just posted: \""+post.t+"\". "+careerFactsLine()+" React ONLY as much as this post genuinely would for WHO HE IS: a nothing post = empty arrays; a locker-room grenade = a teammate or agent text and a fan-forum thread. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. Output STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2],\"huddle\":[{\"id\":\"unique\",\"flair\":\"DISCUSSION\",\"u\":\"\",\"tm\":\"1h\",\"up\":0,\"h\":\"\",\"b\":\"\",\"cmts\":[{\"u\":\"\",\"tm\":\"\",\"up\":0,\"t\":\"\",\"r\":[]} x3-6]} x0-1]}"+threadCtx(), worldFacts(S.blob, lastPlayed())+"\nWrite the fallout now (or empty arrays if there is none).", 1500);
+    if (!S || S.careerId!==_cid){ console.log('career lock: post fallout for another save dropped at the door'); return; }
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
@@ -1161,10 +1165,12 @@ async function postWorldReact(post){
    fire-and-forget, model-scaled — a routine week writes nothing. */
 async function lifeEventReact(){
   if (!aiKey()) return;
+  const _cid=S.careerId;   /* v1.16.3 career lock */
   try{
     const ev=(S.saveNotices||[]).filter(n=>!/TRADED\/SIGNED/.test(n));
     if (!ev.length) return;
     const out=await callAI("An NFL life-sim. This week's REAL events for "+S.blob.player.first+" "+S.blob.player.last+" ("+povDesc()+", "+S.blob.player.team+"): "+ev.join(" | ")+"."+lifeFacts()+" Write the PRIVATE reactions from the people in his life — mom with a get-well if he's hurt, a teammate checking in, the agent on the business side — ONLY where an event genuinely warrants one; a routine week = EMPTY. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-3]}", "Write the reactions now (or empty).", 900);
+    if (!S || S.careerId!==_cid){ console.log('career lock: life-event fallout for another save dropped'); return; }
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
@@ -1179,9 +1185,11 @@ async function lifeEventReact(){
    about the car. Model-scaled by the SURPRISE LAW: a sensible buy is met with silence. */
 async function lifePurchaseReact(what, amt){
   if (!aiKey()) return;
+  const _cid=S.careerId;   /* v1.16.3 career lock */
   try{
     const liquid=(S.cash&&(S.cash.checking+S.cash.savings))||0;
     const out=await callAI("An NFL life-sim. "+S.blob.player.first+" "+S.blob.player.last+" ("+povDesc()+", "+S.blob.player.team+") just spent "+fm(amt)+" on: "+what+". He has "+fm(liquid)+" liquid left."+lifeFacts()+" Decide the PRIVATE fallout under the surprise law: sensible-for-his-station = EMPTY arrays; a flex above his pay or a buy that drains him = the agent office or his assistant texts about the finances, or a teammate ribs him. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2]}", "Write the fallout now (or empty).", 700);
+    if (!S || S.careerId!==_cid){ console.log('career lock: purchase fallout for another save dropped'); return; }
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
@@ -3947,8 +3955,10 @@ async function aheadFlow(){
     if(curApp==="sync") renderApp("sync"); return;                        // his standing draws no midweek media — honest silence
   }
   toast("Reporters at your locker\u2026");
+  const _cid=S.careerId;                                                   /* v1.16.3 career lock: the locker questions await the model too */
   const cached=(S.midAvailQs||{})[wk];
   _ahQs=(cached&&cached.length)? cached : await midAvailQuestions();
+  if (!S || S.careerId!==_cid){ _ahQs=null; _ahQa=null; return; }          /* the sheet never opens for a career he left */
   _ahQa=[]; aheadQSheet(0);
 }
 function aheadQSheet(i){
@@ -3968,6 +3978,7 @@ function aheadAns(i,nc){
   if (i+1<qs.length) aheadQSheet(i+1); else aheadDone();
 }
 function aheadWaveOff(){
+  if (!S){ _ahQs=null; _ahQa=null; closeSheet(); return; }   /* v1.16.3 */
   const wk=wkKey(S.blob.clock);
   S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:[], skipped:true};
   S.midweek=S.midweek||{}; S.midweek[wk]=true;
@@ -3976,6 +3987,7 @@ function aheadWaveOff(){
   runWeek(); if(curApp==="sync") renderApp("sync");
 }
 function aheadDone(){
+  if (!S){ _ahQs=null; _ahQa=null; closeSheet(); return; }   /* v1.16.3 */
   const wk=wkKey(S.blob.clock); const qs=_ahQs||[];
   S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:_ahQa||[]};
   const yr=String((S.blob.clock||{}).seasonYear||"");
@@ -4051,7 +4063,7 @@ async function runWeek(){
   weekRunBusy=true; await wakeAcquire(); if(curApp==="sync") renderApp("sync");
   const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   for (const j of S.weekJobs.jobs){
-    if (!S.weekJobs || S.careerId!==_cid) break;
+    if (!S || !S.weekJobs || S.careerId!==_cid) break;   /* v1.16.3: a deleted career mid-await can null S — the loop must survive it */
     if (j.st==="done") continue;
     if (j.st==="gated"){ if (weekJobReady(j)) j.st="todo"; else continue; }   /* v1.15.0: world ungates on the practice log; podium on media + practice */
     if (j.st!=="todo" && j.st!=="failed") continue;
@@ -4060,11 +4072,11 @@ async function runWeek(){
       else if (j.id==="article"){ const l=lastPlayed(); if (l && !(S.articleFor||{})[gkey(l)]) await writeGameStory(S.blob, l); }
       else if (j.id==="world"){ await generateWeek(S.blob, lastPlayed(), {local:true, noArticle:true, fullWeek:true}); }
       else if (j.id==="podium"){ await podiumJobRun(); }
-      if (S.careerId!==_cid) break;                                        /* v1.16.0: words for a career he left never mark done here */
+      if (!S || S.careerId!==_cid) break;                                  /* v1.16.0 career lock; v1.16.3: null-S (deleted career) counts as left */
       j.st="done"; delete j.err; persist(); if(curApp==="sync") renderApp("sync");
     }catch(e){ j.st="failed"; j.err=String(e.message||e).slice(0,90); persist(); if(curApp==="sync") renderApp("sync"); break; }
   }
-  if (S.weekJobs && S.weekJobs.jobs.every(x=>x.st==="done")){ S.weekJobs=null; S.world.notifs.push({app:"sync", t:"Sync", p:"The week is written \u2014 everything's on the phone"}); persist(); }
+  if (S && S.weekJobs && S.weekJobs.jobs.every(x=>x.st==="done")){ S.weekJobs=null; S.world.notifs.push({app:"sync", t:"Sync", p:"The week is written \u2014 everything's on the phone"}); persist(); }
   weekRunBusy=false; wakeRelease(); if(curApp==="sync") renderApp("sync");
 }
 document.addEventListener("visibilitychange", ()=>{ try{ if(!document.hidden && S && S.weekJobs) runWeek(); }catch(e){} });   /* v1.13.0: coming back resumes the week */
@@ -4590,6 +4602,7 @@ async function doResetCareer(){
   // v1.6.7 (Ty): a reset is a FACTORY reset — even the canon career comes back on the generic
   // day-one seed, never the old fixture world, so a cleared phone visibly reads as cleared.
   const blob=S.blob; S=newCareerState(blob, {generic:true});
+  mailSessionReset();   /* v1.16.3: the reset career re-checks its box clean (the latest sync code will re-offer — a day-one phone pulling the current truth back in is the point) */
   await idb.set("career/"+S.careerId, S);
   closeSheet(); toast("Factory reset. Day-one phone."); renderHome(); renderLock(); renderApp("settings");
 }
@@ -4611,6 +4624,7 @@ async function doDeleteCareer(){
   const id=S.careerId, nm=S.blob.player.first+" "+S.blob.player.last;
   try{ clearTimeout(saveTimer); }catch(e){}                        // a pending persist would resurrect the corpse
   S=null;                                                          // career-lock spirit: nothing in flight can write to it now
+  mailSessionReset();                                              /* v1.16.3: the dead career's box never renders on the survivor */
   META.careers=(META.careers||[]).filter(c=>c.id!==id);
   await idb.del("career/"+id);
   const next=(META.careers||[])[0]||null;
@@ -4878,6 +4892,37 @@ function clearAppliedOrders(via){
    really advances, rulings from a week it left expire into the log instead of haunting
    the box with a dead ✕. His own moves (contracts, positions, numbers) are not
    week-scoped and survive until applied or removed — the existing law. */
+/* ==================== v1.16.3 THE LONG-RUN JANITOR (the longevity sim's verdict) ====================
+   Ten simulated seasons through the real engine: total state grows linearly forever because
+   four arrays have no ceiling (huddle was the worst — two threads per sync, never pruned) and
+   the week-keyed maps accrete one entry per week for the life of the career. Caps keep the
+   NEWEST; the sweep drops week-keyed entries older than the PREVIOUS season. LAWS RESPECTED:
+   the Chronicle is FOREVER (Ty's ruling — articles never touched); T-Mail keeps its own
+   rolling 60; his OWN posts get a generous 300; per-thread messages cap at 250 newest (the
+   thread survives, the Ledger keeps the relationship truth — like any real phone, ancient
+   texts age off the screen). Runs once per real week turn; a same-week refresh never prunes. */
+function pruneLongRun(newC){
+  try{
+    const cap=(a,n)=>{ if(Array.isArray(a)&&a.length>n) a.length=n; };            // newest-first arrays (unshift-fed)
+    const capTail=(o,k,n)=>{ if(Array.isArray(o[k])&&o[k].length>n) o[k]=o[k].slice(-n); };  // newest-last arrays (push-fed)
+    capTail(S,"ledger",500);
+    cap(S.credit&&S.credit.ledger,200);
+    cap(S.world&&S.world.chirps,250);
+    cap(S.world&&S.world.huddle,150);
+    cap(S.staff&&S.staff.log,80);
+    cap(S.chirp&&S.chirp.posts,300);
+    for (const t of (S.world&&S.world.texts||[])) capTail(t,"msgs",250);
+    /* week-keyed maps: keep this season + last (wkKey = seasonYear/weekType/week) */
+    const yr=+(newC&&newC.seasonYear)||0;
+    const stale=k=>{ const y=+String(k).split("/")[0]; return y>0 && yr>0 && y<yr-1; };
+    for (const m of [S.pressers,S.midAvail,S.midAvailQs,S.prac,S.midSkip,S.midweek,(S.wl||{}).moves]){
+      if(m&&typeof m==="object") for(const k of Object.keys(m)) if(stale(k)) delete m[k];
+    }
+    if (S.staff&&S.staff.ruled) for(const k of Object.keys(S.staff.ruled)) if(stale(k)) delete S.staff.ruled[k];
+    if (S.askedQs){ const ks=Object.keys(S.askedQs).sort(); while(ks.length>2){ delete S.askedQs[ks.shift()]; } }
+    if (S.articleFor){ const ks=Object.keys(S.articleFor); if(ks.length>60) for(const k of ks.slice(0,ks.length-60)) delete S.articleFor[k]; }
+  }catch(e){ console.log("pruneLongRun skipped:", String(e.message||e)); }
+}
 function expireStaffOrders(newWk){
   const st=staffState(); let n=0;
   st.orders=st.orders.filter(o=>{ if(o.wk && o.wk!==newWk){ st.log.unshift({t:Date.now(), x:"Expired with its week: "+(o.kind==="bench"?"the benching":"the demotion")+" ("+String(o.why||"").slice(0,60)+") \u2014 that week is over"}); n++; return false; } return true; });
@@ -4980,6 +5025,12 @@ let refreshBusy=false;
 const MAIL_API="https://api.github.com";
 const mailDesc = () => "TyPhone mailbox \u2014 "+S.careerId;
 const mailOn = () => !!(META.settings&&META.settings.mailToken);
+/* v1.16.3 (fresh-eyes sweep): the mailbox SESSION state (mailInfo/throttle/errors/pending
+   apply) is global — switching, adding, deleting, resetting, or rewinding a career used to
+   leave the PREVIOUS career's box on screen for up to 30s (the throttle window): wrong
+   offers, wrong wait states, the exact cross-career lie the career-lock ruling bans. ONE
+   door clears the session at every career-identity change. */
+function mailSessionReset(){ mailInfo=null; mailLastCheck=0; mailErr=null; mailPendingApply=null; }
 function mailHdrs(){ return {"Authorization":"Bearer "+META.settings.mailToken,"Accept":"application/vnd.github+json","Content-Type":"application/json","X-GitHub-Api-Version":"2022-11-28"}; }
 async function mailJf(url,opt){ const r=await fetch(url,opt); if(!r.ok){ const t=await r.text().catch(()=>""); throw new Error("GitHub "+r.status+": "+String(t).slice(0,120)); } return r.json(); }
 async function mailGist(){
@@ -5611,7 +5662,7 @@ async function addCareer(blobOrJson){
   const st=newCareerState(blob);
   await idb.set("career/"+blob.careerId, st);
   META.careers.push({id:blob.careerId, label:blob.player.first+" "+blob.player.last, sub:blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock)});
-  META.activeId=blob.careerId; S=st; persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();
+  META.activeId=blob.careerId; S=st; mailSessionReset(); persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();   /* v1.16.3: a fresh career opens on a fresh mailbox session */
   if (curApp) renderApp(curApp);
   if (_mailBirthStamp){                                             /* v1.12.3: the mailbox-born career stamps its box at the real birth */
     const bs=_mailBirthStamp; _mailBirthStamp=null;
@@ -5652,7 +5703,7 @@ async function doRewind(blobOrJson){
   const blob = typeof blobOrJson==="string" ? JSON.parse(blobOrJson) : blobOrJson;
   // v1 rewind: reset to a fresh state at that blob, preserving settings/perception
   const per=S.perception; const st=newCareerState(blob); st.perception=per;
-  S=st; await idb.set("career/"+S.careerId, S);
+  S=st; mailSessionReset(); await idb.set("career/"+S.careerId, S);   /* v1.16.3 */
   const c=META.careers.find(x=>x.id===S.careerId); if(c) c.sub=blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock);
   persist(); closeSheet(); toast("Rewound to "+wkLabel(blob.clock)); renderHome(); if(curApp) renderApp(curApp);
 }
@@ -5898,6 +5949,7 @@ async function advanceTo(blob){
   lifeEventReact();                                                   // v1.13.5: the people who love him react to the sync's truth (injury, awards, moves) — model-scaled, get-well texts and all
   homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
   resolveRequests();                                                  // v1.7.4: the building answers formal asks
+  pruneLongRun(newC);                                                 // v1.16.3: the long-run janitor — the longevity sim proved four arrays grow forever; caps + stale-season sweep, laws respected
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
   syncTick();                                                         // v1.9.6: the sync clock ticks — anything owed lands now
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
@@ -7283,7 +7335,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.2";
+const VER="v1.16.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
