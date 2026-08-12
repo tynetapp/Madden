@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.3 (Aug 12 2026) — THE SWEEP + THE JANITOR: the career lock closes its blind spots (reactive pens postWorldReact/lifeEventReact/lifePurchaseReact/aiPostReplies + the locker-question await all drop words for a career he left; runWeek survives a deleted career), mailSessionReset at every career-identity change (the old career's box never renders on the new one), and pruneLongRun — the longevity sim's verdict — caps the forever-growing arrays (huddle 150, chirps 250, ledger 500, card ledger 200, staff log 80, own posts 300, thread msgs 250) + sweeps week-keyed maps older than last season. Chronicle stays FOREVER per Ty's ruling. (prior: v1.16.2) */
+/* TyPhone app.js — v1.16.4 (Aug 12 2026) — THE SMARTER TABLE (age curve by position class hard-caps term and prices decline; production per team game vs starter benchmarks; room need from the real depth board; other-people-to-pay from the save's own nextYearCapRoom + dead money — all deterministic, all spoken aloud in the flavor line; the min floor rides the v1.16.1 scale) + per-save wallpaper/pfp (doors with legacy fallback; clear path fixed) + the Lock Screen pill in the banner + a visible whole-board pill + OpenAI adaptive token param (max_completion_tokens with one-shot fallback, remembered per session) (prior: v1.16.3) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -332,6 +332,11 @@ function sheet(html){ $("#sheet").innerHTML=html; $("#dim").classList.remove("hi
 function closeSheet(){ $("#dim").classList.add("hidden"); if(typeof mailPendingApply!=="undefined") mailPendingApply=null; /* v1.8.0: a cancelled sheet abandons any mailbox apply-in-flight — both consume sites run BEFORE their closeSheet, so a completed apply is never touched */ }
 $("#dim") && document.addEventListener("click", e=>{ if(e.target.id==="dim") closeSheet(); });
 
+/* v1.16.4 (Ty): backgrounds and Chirper pfps are PER SAVE — different careers are different
+   people on different teams. Two doors: reads fall back to the old global (careers from
+   before this round keep their look until they change it); writes land on S. */
+function myWall(){ return (S && S.wallpaper!==undefined)? S.wallpaper : (META&&META.settings&&META.settings.wallpaper)||null; }
+function myPfp(){ return (S && S.pfp!==undefined)? S.pfp : (META&&META.settings&&META.settings.pfp)||null; }
 function clockTick(){
   if (!META) return; // interval can fire before boot finishes
   const d=phoneNow?phoneNow():new Date();
@@ -580,6 +585,16 @@ function renderWidget(){
   $("#wg-week").textContent = gameDate(S.blob.clock)+" · "+wkLabel(S.blob.clock);
   $("#wg-cash").textContent = rosterLabel();
   $("#wg-run").textContent = buzzTier(S.chirp?S.chirp.followers:0);
+  /* v1.16.4 (Ty): a Lock Screen pill in the banner's bottom-right corner, next to Buzz —
+     one tap back to the career picker instead of closing and reopening the app. Injected
+     here so index.html stays untouched. */
+  (function(){ const host=$("#hs-widget"); if(!host) return;
+    let lk=$("#wg-lock");
+    if(!lk){ lk=document.createElement("button"); lk.id="wg-lock"; lk.textContent="Lock Screen";
+      lk.style.cssText="position:absolute;right:10px;bottom:8px;z-index:3;font-size:10.5px;font-weight:600;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:inherit;backdrop-filter:blur(4px)";
+      lk.onclick=function(e){ e.stopPropagation(); lock(); };
+      if(getComputedStyle(host).position==="static") host.style.position="relative";
+      host.appendChild(lk); } })();
   const _bi=buzzIdx(); $("#wg-lv").textContent = "Level "+(_bi+1)+"/14";   // v1.6.2 (Ty): show the ladder
   renderNextBar(); renderTrophyBar();
 }
@@ -720,7 +735,7 @@ function renderLock(){
     + (META.settings.mailToken? `<button class="career-pick" onclick="addCareerFromMailbox()"><span class="l"><h4>+ Add a career from the mailbox</h4><p>Any player synced on this token joins with one tap</p></span><span class="go">Scan</span></button>` : "");   /* v1.12.3 THE SECOND-CAREER DOOR */
 }
 async function switchCareer(id){
-  if (META.activeId!==id){ META.activeId=id; S = await idb.get("career/"+id); mailSessionReset(); persist(); }   /* v1.16.3: the old career's box never renders on the new one */
+  if (META.activeId!==id){ META.activeId=id; S = await idb.get("career/"+id); mailSessionReset(); applyWallpaper(); persist(); }   /* v1.16.3+v1.16.4: fresh box AND this career\u2019s own wallpaper: the old career's box never renders on the new one */
   unlock(); renderHome();
 }
 function openApp(id){
@@ -938,7 +953,7 @@ function replyBadge(r){
   return {vf: w?1:0, tm:0};
 }
 function replyAvatar(r, bd){
-  if (r.h===S.handle && META.settings.pfp) return `<span class="av chav sm"><img src="${META.settings.pfp}"></span>`;
+  if (r.h===S.handle && myPfp()) return `<span class="av chav sm"><img src="${myPfp()}"></span>`;
   if (bd.tm) return `<span class="av chav sm" style="background:${avColor(r.a||"?")}">${initials(r.a||"?")}</span>`;
   return chAvatar({n:r.a, h:r.h, g:r.g}, true);
 }
@@ -983,7 +998,7 @@ RENDER.chirper = (b,sub)=>{
       if (c.id && aiKey() && (c.rc||0)>0 && !(c.replies||[]).length && !c._fetching) fetchReplies(c.id);   // v1.6.5 self-heal
       b.innerHTML = aphead("Post",{back:"chThread=null;renderApp('chirper')",backlabel:"Chirper"}) + `<div class="apbody flush" style="padding:0 16px 90px">
       <div class="chirp big">
-        <div class="ch-row">${c.n? chAvatar(c) : `<span class="av chav" style="background:${c.av||avColor("me")}">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span>`}<div class="ch-main">
+        <div class="ch-row">${c.n? chAvatar(c) : `<span class="av chav" style="background:${c.av||avColor("me")}">${myPfp()?`<img src="${myPfp()}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span>`}<div class="ch-main">
         <div class="ch-h"><b>${esc(c.n||S.blob.player.first+" "+S.blob.player.last)}</b>${(c.n? c.vf : myVF())?VF:""}<span>${esc(c.h||me)}</span></div></div></div>
         <p style="margin-top:8px">${chText(c.t)}</p>
         <div class="ch-meta">${fmFoll(c.li||0)} likes · ${fmFoll(Math.max(c.rc||0,(c.replies||[]).length))} replies · ${fmFoll(c.rp||0)} rechirps</div>
@@ -1007,21 +1022,21 @@ RENDER.chirper = (b,sub)=>{
   }
   b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><h1>Chirper</h1><button class="hact" onclick="editHandle()" style="font-size:12.5px">Edit @</button></div>
   <div class="ch-profile">
-    <button class="ch-av" onclick="pickPfpFromChirper()" title="Change photo">${META.settings.pfp?`<img src="${META.settings.pfp}">`:esc(S.blob.player.first[0]+S.blob.player.last[0])}</button>
+    <button class="ch-av" onclick="pickPfpFromChirper()" title="Change photo">${myPfp()?`<img src="${myPfp()}">`:esc(S.blob.player.first[0]+S.blob.player.last[0])}</button>
     <div class="ch-pinfo">
       <b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>
       <span><button class="hlink" onclick="editHandle()">${esc(me)} ✎</button> · ${esc(S.blob.player.pos)}, ${esc(S.blob.player.teamShort)}</span>
       <div class="ch-follow"><span><b>${fmFoll(S.chirp.followers)}</b> Followers ${S.chirp.delta? `<i class="${S.chirp.delta>0?"up2":"dn2"}">${S.chirp.delta>0?"+":""}${fmFoll(Math.abs(S.chirp.delta))} this wk</i>`:""}</span><span><b>${S.chirp.following}</b> Following</span></div>
     </div>
   </div>
-  <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
+  <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${myPfp()?`<img src="${myPfp()}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
   <div class="apbody flush" id="chList" style="padding:6px 16px 90px"></div>`;
   const el=$("#chList");
   const worldLen = S.world.chirps.length;
   const own = (S.chirp.posts||[]).slice().reverse().map(p=>({own:true, p, pos: Math.max(0, Math.min(worldLen, worldLen - (p.worldMark ?? worldLen)))}));
   const rows=[];
   const renderOwn = p => `<button class="chirp mine" onclick="renderApp('chirper',{t:'${p.id}'})">
-      <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${META.settings.pfp?`<img src="${META.settings.pfp}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
+      <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${myPfp()?`<img src="${myPfp()}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
       <div class="ch-h"><b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>${myVF()?VF:""}<span>${esc(me)} · you</span></div><p>${chText(p.t)}</p>
       <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${fmFoll(p.li||0)}</span> · ${fmFoll(Math.max(p.rc||0,(p.replies||[]).length))} replies · ${fmFoll(p.rp||0)} rechirps</div></div></div></button>`;
   const renderWorld = (c,i) => `<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
@@ -2942,7 +2957,7 @@ function depthChartHtml(){
   return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">The depth chart <span style="font-size:11px;opacity:.5;font-weight:400">save truth, this sync</span></div>
   <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${spots.length? "You sit "+spots.map(s=>s.pos+s.slot).join(", ")+" today." : "You're not on a depth row today \u2014 the building's call."} One player can hold rows on both sides of the ball; off-position listings are legal and shown as listed.</p>
   ${_dcOpen? keys.map(row).join("")+`<button class="btn sm" style="background:rgba(0,0,0,.08);margin-top:8px" onclick="_dcOpen=false;renderApp('apex')">Fold the board</button>${S.agent?`<button class="btn sm" style="background:var(--apx-acc);color:#fff;margin-top:8px" onclick="reqSheet('depth')">Want a different spot? Take it to the building</button>`:""}`
-    : `<button class="btn sm" style="background:rgba(0,0,0,.08)" onclick="_dcOpen=true;renderApp('apex')">Open the whole board \u2014 ${keys.length} lists</button>`}
+    : `<button class="btn sm" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28)" onclick="_dcOpen=true;renderApp('apex')">Open the whole board \u2014 ${keys.length} lists</button>`}
   </div>`;
 }
 
@@ -2955,12 +2970,81 @@ function depthChartHtml(){
    Deterministic: every number is seeded on careerId+week+round. No AI key needed. */
 function negState(){ S.negot=S.negot||{log:[]}; return S.negot; }
 function myContractReal(){ const c=S.blob.player.contract; return !!(c&&c.length); }
+/* ==================== v1.16.4 THE SMARTER TABLE (Ty: age, need, production, other people
+   to pay). Four new deterministic reads, ALL save truth, same seeded law as v1.12.0 — no AI
+   key, no re-rolls. Each returns a factor plus the WORDS for it, so the flavor line can say
+   exactly why the number is what it is. ==================== */
+function negAge(){
+  /* the age curve, position-classed: QBs and kickers age slow, backs age fast */
+  const p=S.blob.player, pos=p.pos, age=+p.age|| (22+(+p.yearsPro||0));
+  const cls = (pos==="QB"||pos==="K"||pos==="P")? {peak:30, decl:34}
+    : /^(LT|LG|C|RG|RT)$/.test(pos)? {peak:28, decl:32}
+    : pos==="HB"||pos==="FB"? {peak:25, decl:28}
+    : {peak:26, decl:30};
+  let f=1, why=null;
+  if (age<=cls.peak-3 && (+p.yearsPro||0)>=1){ f=1.05; why="their model has you ascending — the next contract buys your best years"; }
+  else if (age>cls.decl){ f=Math.max(0.6, 1-0.06*(age-cls.decl)); why="the age curve is in the room — at "+age+" they're pricing the decline, not the tape"; }
+  else if (age>=cls.decl-1){ f=0.96; why="you're on the front edge of the age curve for the position — they know it"; }
+  const maxYears=Math.max(1, Math.min(7, (cls.decl+1)-age));
+  return {f, maxYears, why};
+}
+function negProd(){
+  /* production per team game vs a starter benchmark, position-keyed; no stats = neutral */
+  try{
+    const p=S.blob.player, pos=p.pos;
+    const rows=S.blob.seasonStats||[]; let row=null;
+    for (const r of rows){ if(!row || (r.GAMESPLAYED||0)>(row.GAMESPLAYED||0)) row=r; }
+    const teamG=Math.max(1,(S.blob.schedule||[]).filter(g=>g[7]&&g[1]==="RegularSeason").length);
+    if (!row || !(row.GAMESPLAYED>0) || teamG<3) return {f:1, why:null};
+    const per=k=>((+row[k]||0)/teamG);
+    const B={QB:[["PASSYARDS",230],["PASSTDS",1.4]], HB:[["RUSHYARDS",58],["RUSHTDS",0.5]], FB:[["RUSHYARDS",12]],
+      WR:[["RECEIVEYARDS",50],["RECEIVETDS",0.4]], TE:[["RECEIVEYARDS",34],["RECEIVETDS",0.35]],
+      LE:[["DLINESACKS",0.5]], RE:[["DLINESACKS",0.5]], DT:[["DLINESACKS",0.3],["DEFTACKLES",3]],
+      LOLB:[["DLINESACKS",0.4],["DEFTACKLES",4]], ROLB:[["DLINESACKS",0.4],["DEFTACKLES",4]], OLB:[["DLINESACKS",0.4],["DEFTACKLES",4]],
+      MLB:[["DEFTACKLES",6]], LB:[["DEFTACKLES",6]], CB:[["DSECINTS",0.3],["DEFPASSDEFLECTIONS",0.7]],
+      FS:[["DSECINTS",0.25],["DEFTACKLES",4]], SS:[["DSECINTS",0.25],["DEFTACKLES",4]], K:[["FGMADE",1.4]]}[pos];
+    if (!B) return {f:1, why:null};
+    const score=B.reduce((a,[k,bench])=>a+Math.min(1.6, per(k)/bench), 0)/B.length;
+    if (score>=1.1) return {f:Math.min(1.12, 0.98+score*0.09), why:"the production column carries the ask — you're outplaying the room's benchmark"};
+    if (score<=0.45) return {f:0.92, why:"the production column is thin — the tape argument is doing all the work"};
+    return {f:1, why:null};
+  }catch(e){ return {f:1, why:null}; }
+}
+function negNeed(){
+  /* team need at the position: how thin is the room, and are there better options than you */
+  const p=S.blob.player, pos=p.pos, me=p.first+" "+p.last;
+  const list=(S.blob.depth||{})[pos]||[];
+  const room=S.blob.roster.filter(r=>r[2]===pos);
+  const bodies=Math.max(list.length, room.length);
+  const rank=list.indexOf(me);
+  const better=room.filter(r=>(+r[3]||0)>=(+p.ovr||0)+3).length;
+  if (bodies<=2 && (rank>=0? rank<2 : better===0)) return {f:1.08, yStretch:1, why:"the room behind you is thin — need is leverage, and they can count"};
+  if (bodies>=4 && better>=2) return {f:0.93, yStretch:0, why:"the room is crowded with "+better+" graded above you — replaceability is their leverage"};
+  return {f:1, yStretch:0, why:null};
+}
+function negFuture(){
+  /* other people to pay: the save's own next-year sheet + dead money shape term and mood */
+  const tc=S.blob.teamCap||{};
+  const now=+tc.capRoom||0, next=+tc.nextYearCapRoom||0, dead=+tc.thisYearPenalties||0;
+  const out={ceil:0, maxY:0, patDown:0, why:null, whyPat:null};
+  if (now>0 && next>0){
+    if (next<now){ out.ceil=-0.04; out.maxY=-1; out.why="next year's sheet is TIGHTER than this one — they'll shave term before they shave dollars"; }
+    else if (next>now*2){ out.ceil=0.02; out.maxY=1; out.why="next year's sheet opens way up — term is cheap for them right now, use it"; }
+  }
+  if (dead>40e6){ out.patDown=10; out.whyPat="the building is eating "+fm(dead)+" of dead money this year — the mood at the table starts sour"; }
+  return out;
+}
 function negFair(){
-  /* fair AAV: pull percentile against the position room's real cap hits, bounded by cap truth */
-  const pos=S.blob.player.pos, minSal=760000;
+  /* fair AAV: pull percentile against the position room's real cap hits, bounded by cap truth,
+     then shaped by the v1.16.4 reads — age curve, production column, room need. The league
+     minimum floor rides Ty's v1.16.1 scale, never a hardcode. */
+  const p=S.blob.player, pos=p.pos;
+  const minSal=minSalaryFor(p.yearsPro||0, (S.blob.clock||{}).seasonYear||2026);
   const caps=S.blob.roster.filter(r=>r[2]===pos && r.length>8 && +r[8]>0).map(r=>+r[8]).sort((a,b)=>b-a);
   const top=Math.max(caps[0]||0, minSal*4);
   let fair=minSal + Math.pow(pullScore()/100,1.25)*(top-minSal);
+  const shape=Math.max(0.55, Math.min(1.25, negAge().f * negProd().f * negNeed().f));
+  fair*=shape;
   const cap=S.blob.teamCap&&S.blob.teamCap.capRoom;
   if (cap>0) fair=Math.min(fair, cap*0.85);
   return Math.max(minSal, Math.round(fair/50000)*50000);
@@ -2983,7 +3067,7 @@ function negOfferAt(round){
   const open=0.74+negAgentEdge();
   const ceil=Math.min(1.05, 0.9+negAgentEdge()+0.025*Math.min(4,round));
   const frac=Math.min(ceil, open+round*0.05+rng()*0.02);
-  const yrs= pull>=65? 4 : pull>=45? 3 : pull>=25? 2 : 1;
+  const yrs= Math.max(1, Math.min(negAge().maxYears, (pull>=65? 4 : pull>=45? 3 : pull>=25? 2 : 1) + negNeed().yStretch));   /* v1.16.4: the age curve hard-caps term; a thin room stretches it */
   const aav=Math.round(fair*frac/50000)*50000;
   const bShare= pull>=65? 0.35 : pull>=45? 0.22 : pull>=25? 0.1 : 0;
   const round2=x=>Math.round(x*100)/100;
@@ -2994,9 +3078,10 @@ function negCeilFor(years){
   const o=negOfferAt(negState().round||0);
   /* dealbreaker shaping: a bonus-first file loosens structure, a total-first file buys a hair
      more ceiling, a years-first file tolerates longer asks */
-  const maxTotal=o.fair*o.ceil*years*(1+0.02*(w.total-1))/1e6;
+  const fut=negFuture();   /* v1.16.4: next year's sheet shapes term and ceiling */
+  const maxTotal=o.fair*(o.ceil+fut.ceil+((years>=3&&fut.ceil>0)?0.0:0))*years*(1+0.02*(w.total-1))/1e6;
   const bonusEase=Math.min(0.45, 0.28+0.08*(w.bonus-1));
-  const maxYears=Math.min(7, o.years + (w.years>1? 2:1));
+  const maxYears=Math.max(1, Math.min(7, Math.min(negAge().maxYears+1, o.years + (w.years>1? 2:1) + fut.maxY)));
   return { maxTotal:Math.round(maxTotal*100)/100, bonusEase, maxYears };
 }
 function negOpenGate(){
@@ -3011,11 +3096,16 @@ function negOpenGate(){
 function negOpen(){
   const g=negOpenGate(); if (g.no){ toast(g.no); return; }
   const st=negState(); const wk=wkKey(S.blob.clock);
-  if (st.wk!==wk){ st.wk=wk; st.round=0; st.patience=(()=>{ const r=negTruthMine(); const p=r&&r.pat; return (typeof p==="number"&&p>0)? Math.min(95,p) : 30+Math.round(pullScore()/2); })(); st.log=[]; }
+  if (st.wk!==wk){ st.wk=wk; st.round=0; st.patience=(()=>{ const r=negTruthMine(); const p=r&&r.pat; const base=(typeof p==="number"&&p>0)? Math.min(95,p) : 30+Math.round(pullScore()/2); return Math.max(8, base-negFuture().patDown); })(); st.log=[]; }   /* v1.16.4: a building eating dead money sits down sour */
   persist(); negSheet();
 }
 function negFlavor(){
   const {w,row}=negDb(); const bits=[];
+  /* v1.16.4: the smarter table SAYS its reasoning — age, production, need, the future sheet */
+  const a=negAge(); if(a.why) bits.push(a.why);
+  const pr=negProd(); if(pr.why) bits.push(pr.why);
+  const nd=negNeed(); if(nd.why) bits.push(nd.why);
+  const fu=negFuture(); if(fu.why) bits.push(fu.why); if(fu.whyPat) bits.push(fu.whyPat);
   if (w.bonus>1.3) bits.push("their file on you reads bonus-first \u2014 guaranteed money up front moves them more than headline total");
   if (w.total>1.3) bits.push("the building believes the headline number is what you play for");
   if (w.years>1.3) bits.push("term matters in your file \u2014 they'll stretch years before they stretch dollars");
@@ -4313,15 +4403,15 @@ RENDER.settings = b=>{
   <select class="field" style="width:auto;margin:0" onchange="META.settings.theme=this.value;saveMeta();applyTheme()"><option value="dark" ${META.settings.theme!=="light"?"selected":""}>Dark</option><option value="light" ${META.settings.theme==="light"?"selected":""}>Light</option></select></label>
   <label class="flabel">Wallpaper</label>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-    <span style="font-size:13px;color:${META.settings.wallpaper?'#7fd4a0':'var(--faint)'}">${META.settings.wallpaper?"Saved ✓":"Default"}</span>
-    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('wallpaper')">${META.settings.wallpaper?"Change":"Choose"}</button>
-    ${META.settings.wallpaper?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="META.settings.wallpaper=null;saveMeta();applyWallpaper();rerenderSettings();toast('Wallpaper reset.')">Reset</button>`:""}
+    <span style="font-size:13px;color:${myWall()?'#7fd4a0':'var(--faint)'}">${myWall()?"Saved ✓":"Default"}</span>
+    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('wallpaper')">${myWall()?"Change":"Choose"}</button>
+    ${myWall()?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="S.wallpaper=null;persist();applyWallpaper();rerenderSettings();toast('Wallpaper reset for this career.')">Reset</button>`:""}
   </div>
   <label class="flabel">Profile photo (used on Chirper)</label>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-    <span style="font-size:13px;color:${META.settings.pfp?'#7fd4a0':'var(--faint)'}">${META.settings.pfp?"Saved ✓":"Initials"}</span>
-    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('pfp')">${META.settings.pfp?"Change":"Choose"}</button>
-    ${META.settings.pfp?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="META.settings.pfp=null;saveMeta();rerenderSettings();toast('Back to initials.')">Reset</button>`:""}
+    <span style="font-size:13px;color:${myPfp()?'#7fd4a0':'var(--faint)'}">${myPfp()?"Saved ✓":"Initials"}</span>
+    <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="pickFile('pfp')">${myPfp()?"Change":"Choose"}</button>
+    ${myPfp()?`<button class="btn sm" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="S.pfp=null;persist();rerenderSettings();toast('Back to initials for this career.')">Reset</button>`:""}
   </div>
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Dock (bottom 4)</h3></div>
@@ -4551,8 +4641,8 @@ function pickImage(kind){
         g=x.createLinearGradient(0,h*0.80,0,h); g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(1,"#000"); x.fillStyle=g; x.fillRect(0,h*0.80,w,h*0.20);
       }
       const data=c.toDataURL("image/jpeg",0.82);
-      if (kind==="wall"){ META.settings.wallpaper=data; applyWallpaper(); toast("Wallpaper set, edges faded."); }
-      else { META.settings.pfp=data; toast("Profile photo set."); }
+      if (kind==="wall"){ S.wallpaper=data; persist(); applyWallpaper(); toast("Wallpaper set for this career, edges faded."); }
+      else { S.pfp=data; persist(); toast("Profile photo set for this career."); }
       persist();
     };
     img.src=URL.createObjectURL(f);
@@ -4560,9 +4650,14 @@ function pickImage(kind){
   inp.click();
 }
 function applyWallpaper(){
-  if (META.settings.wallpaper){
-    document.getElementById("screen").style.setProperty("--customwall", `url(${META.settings.wallpaper})`);
+  if (myWall()){
+    document.getElementById("screen").style.setProperty("--customwall", `url(${myWall()})`);
     document.getElementById("screen").classList.add("customwall");
+  } else {
+    /* v1.16.4: per-save look means the CLEAR path matters — a career with no wallpaper of
+       its own must not wear the last career's */
+    document.getElementById("screen").classList.remove("customwall");
+    document.getElementById("screen").style.removeProperty("--customwall");
   }
 }
 
@@ -4586,8 +4681,8 @@ function pickFromInput(inp, kind){
       g=x.createLinearGradient(0,h*0.80,0,h); g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(1,"#000"); x.fillStyle=g; x.fillRect(0,h*0.80,w,h*0.20);
     }
     const data=c.toDataURL("image/jpeg",0.82);
-    if (kind==="wall"){ META.settings.wallpaper=data; applyWallpaper(); toast("Wallpaper set, edges faded."); }
-    else { META.settings.pfp=data; toast("Profile photo set."); }
+    if (kind==="wall"){ S.wallpaper=data; persist(); applyWallpaper(); toast("Wallpaper set for this career, edges faded."); }
+    else { S.pfp=data; persist(); toast("Profile photo set for this career."); }
     persist();
   };
   img.src=URL.createObjectURL(f);
@@ -4633,6 +4728,7 @@ async function doDeleteCareer(){
   closeSheet();
   if (next){
     S=await idb.get("career/"+next.id);
+    applyWallpaper();   /* v1.16.4: the survivor\u2019s own look */
     toast(nm+" deleted.");
     lock(); renderHome();                                          // land on the lock screen — the picker shows what's left
   } else {
@@ -5662,7 +5758,7 @@ async function addCareer(blobOrJson){
   const st=newCareerState(blob);
   await idb.set("career/"+blob.careerId, st);
   META.careers.push({id:blob.careerId, label:blob.player.first+" "+blob.player.last, sub:blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock)});
-  META.activeId=blob.careerId; S=st; mailSessionReset(); persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();   /* v1.16.3: a fresh career opens on a fresh mailbox session */
+  META.activeId=blob.careerId; S=st; mailSessionReset(); applyWallpaper(); persist(); closeSheet(); teardownSetup(); toast("Career added."); renderHome(); renderLock();   /* v1.16.3: a fresh career opens on a fresh mailbox session */
   if (curApp) renderApp(curApp);
   if (_mailBirthStamp){                                             /* v1.12.3: the mailbox-born career stamps its box at the real birth */
     const bs=_mailBirthStamp; _mailBirthStamp=null;
@@ -6208,13 +6304,26 @@ async function callAI(system, user, maxTokens){
     return txt;
   }
   if (prov==="openai"){
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+aiKey() },
-      body: JSON.stringify({ model: D.AI.openai.models.includes(model)?model:"gpt-5.6-terra", max_tokens: maxTokens||8000,
-        stream:true, messages:[{role:"system",content:system},{role:"user",content:user}] })
-    });
-    if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+    /* v1.16.4 (Ty's field report, API 400): newer OpenAI models REJECT max_tokens and demand
+       max_completion_tokens; some older ones only know max_tokens. We lead with the modern
+       param and, on a 400 that names the token param, retry ONCE with the other one — then
+       remember which one worked for the rest of the session so every later call is one shot. */
+    const oaBody=(tokParam)=>{ const b={ model: D.AI.openai.models.includes(model)?model:"gpt-5.6-terra",
+      stream:true, messages:[{role:"system",content:system},{role:"user",content:user}] };
+      b[tokParam]=maxTokens||8000; return JSON.stringify(b); };
+    const oaCall=(tokParam)=>fetch("https://api.openai.com/v1/chat/completions", {
+      method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+aiKey() }, body:oaBody(tokParam) });
+    let tok=window._oaTok||"max_completion_tokens";
+    let r=await oaCall(tok);
+    if (!r.ok){
+      const e=await r.text();
+      const other= tok==="max_tokens"? "max_completion_tokens":"max_tokens";
+      if (r.status===400 && /max_tokens|max_completion_tokens/.test(e)){
+        r=await oaCall(other);
+        if (r.ok) window._oaTok=other;
+        else { const e2=await r.text(); throw new Error("API "+r.status+": "+e2.slice(0,120)); }
+      } else throw new Error("API "+r.status+": "+e.slice(0,120));
+    } else window._oaTok=tok;
     const txt = await readSSE(r, ev=> ev.choices?.[0]?.delta?.content || ev.choices?.[0]?.message?.content || "");
     if (!txt.trim()) throw new Error("model returned no text");
     return txt;
@@ -7335,7 +7444,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.3";
+const VER="v1.16.4";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
