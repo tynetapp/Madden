@@ -1,6 +1,36 @@
-/* TyPhone app.js — v1.14.0 (Aug 11 2026) — THE SPIDERWEB (career-first stat milestones + depth-chart moves enter the notices river and the whole web reacts; hometown kin from the banked geography; the book's line on his game rides every pen) (prior: v1.13.5) */
+/* TyPhone app.js — v1.15.0 (Aug 11 2026) — THE PLAYER'S WEEK (practice picks move into the sync flow: presser -> log practice -> post-practice questions one at a time; world+podium gate on the log; the paper stays Monday-morning) + MONEY TEETH (salary advance $50k/32%/one-per-sync; loan ceilings scale with INCOME never NW; rebuild loan needs 580) + THE SEALED WEEK notice + METROS (relocations land in the real city, nearest-metro hoods) + THE GHOST CONTRACT card (min-deal or cap-number rebuild, rides the ONE code) + Resume-button honesty (prior: v1.14.0) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
+/* ==================== v1.15.0 THE METROS RULING (Ty) ====================
+   The exe now ships the team's ACTUAL city from the save (Team.LongName) as
+   blob.player.teamCity, so relocations just work. Resolution order:
+   1. teamCity matches a D.METROS city -> that metro (label + hoods).
+   2. teamCity is a known relocation market -> label the REAL city, borrow the
+      NEAREST existing metro's hoods (Ty's ruling: map to nearest).
+   3. No teamCity on the blob (legacy codes) -> old nickname lookup, Jets fallback.
+   teamMetro(p?) is the ONE door; every D.METROS[team] read rides it now. */
+const NEAREST_METRO = { /* Madden relocation markets -> nearest existing metro's team key */
+  "London":"Jets", "Dublin":"Jets", "Toronto":"Bills", "Mexico City":"Texans",
+  "San Antonio":"Texans", "Austin":"Texans", "St. Louis":"Chiefs", "Saint Louis":"Chiefs",
+  "San Diego":"Chargers", "Oakland":"49ers", "Sacramento":"49ers", "Salt Lake City":"Broncos",
+  "Columbus":"Bengals", "Louisville":"Bengals", "Memphis":"Titans", "Orlando":"Buccaneers",
+  "Albuquerque":"Cardinals", "Portland":"Seahawks", "Vancouver":"Seahawks",
+  "Omaha":"Chiefs", "Oklahoma City":"Cowboys", "Tulsa":"Cowboys", "Virginia Beach":"Commanders",
+  "Birmingham":"Falcons", "Anchorage":"Seahawks", "Honolulu":"Rams", "Chicago":"Bears",
+  "Brooklyn":"Jets", "Houston":"Texans", "Los Angeles":"Rams" };
+function teamMetro(p){
+  p = p || (S && S.blob && S.blob.player) || {};
+  const city = p.teamCity && String(p.teamCity).trim();
+  if (city){
+    const hit = Object.keys(D.METROS).find(k=>D.METROS[k].city.toLowerCase()===city.toLowerCase());
+    if (hit) return D.METROS[hit];
+    const nk = Object.keys(NEAREST_METRO).find(k=>k.toLowerCase()===city.toLowerCase());
+    const near = nk && NEAREST_METRO[nk];
+    if (near && D.METROS[near]) return {city:city, hoods:D.METROS[near].hoods};   /* real city label, borrowed hoods */
+    if (D.METROS[p.team]) return {city:city, hoods:D.METROS[p.team].hoods};       /* unknown market: real label, the franchise's old hoods */
+  }
+  return D.METROS[p.team] || D.METROS["Jets"];
+}
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -50,7 +80,7 @@ function newCareerState(blob, opts){
     invest: {}, // id -> {units, cost}
     investPx: seedPrices(blob.careerId),
     bills: [
-      {id:"stay", n:"Extended-stay hotel ("+(isCanon?"Florham Park":(D.METROS[p.team]?D.METROS[p.team].city:"team city"))+")", amt:3400, cat:"housing"},
+      {id:"stay", n:"Extended-stay hotel ("+(isCanon?"Florham Park":teamMetro(p).city)+")", amt:3400, cat:"housing"},
       {id:"phone", n:"Phone", amt:95, cat:"life"},
       {id:"stream", n:"Streaming bundle", amt:47, cat:"life"},
       {id:"food", n:"Food & groceries", amt:1400, cat:"life"},
@@ -94,7 +124,7 @@ function genericSeed(blob){
     ],
     articles: [], earlier: [],
     chirps: [
-      {n:team+" Videos", h:"@"+p.teamShort.toLowerCase()+"clips", vf:1, av:"#1a5a41", t:"Camp continues in "+(D.METROS[team]?D.METROS[team].city:team)+". Full "+team+" coverage all season.", li:412, rp:38, tm:"3h"}
+      {n:team+" Videos", h:"@"+p.teamShort.toLowerCase()+"clips", vf:1, av:"#1a5a41", t:"Camp continues in "+teamMetro(p).city+". Full "+team+" coverage all season.", li:412, rp:38, tm:"3h"}
     ],
     huddle: [
       {id:"gw1", flair:"DISCUSSION", u:"AutoModerator", tm:"6h", up:120,
@@ -448,6 +478,10 @@ function stampWorld(){
 function betaDials(){ S.beta = S.beta || {practice:5, film:5}; return S.beta; }
 function dialLabel(v){ return v<=1?"disastrous":v<=3?"poor":v<=4?"shaky":v<=6?"solid":v<=8?"sharp":"exceptional"; }
 function practiceLine(){
+  /* v1.15.0: the pick moved into the sync flow (presser -> log -> locker questions). Before
+     the player logs the week, the coach has nothing on paper — the pens must not invent
+     practice-quality talk. The paper (Monday morning) writes in this state by design. */
+  if (typeof aiKey==="function" && aiKey() && S && S.blob && !pracPicked()) return "PRACTICE THIS WEEK: not yet evaluated \u2014 the week of practice hasn't been logged. Do NOT invent practice-quality or meeting-room talk for this week.";   /* keyless phones keep the old neutral defaults below */
   const b=betaDials();
   return `PRACTICE THIS WEEK (coach's private evaluation, treat as ground truth that leaks into how insiders talk): on-field practice ${b.practice}/10 (${dialLabel(b.practice)}), film study / mental prep ${b.film}/10 (${dialLabel(b.film)}). Low numbers show up as coach frustration, lost reps, trade-rumor energy; high numbers as earned trust, first-team reps chatter, "coaches love him" energy. Scale the reaction to how extreme the number is, and ALWAYS judge relative to the player's actual ability level and role: a limited player's 10/10 week means effort, growth, and turning heads ("kid is outworking everyone"), never sudden stardom; a star's 3/10 week is an alarming story. Practice quality moves TRUST and OPPORTUNITY talk, not talent.`;
 }
@@ -1561,9 +1595,11 @@ function merBody(){
     <div class="mer-sechead">Products</div>
     <div class="acct-group">${D.LOANS.map(L=>{
       const ok = S.credit.score>=L.minScore;
+      const advBlocked = L.trap && advTakenThisSync();   /* v1.15.0: one advance per sync */
       return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(L.n)}</span><span style="font-size:12px;opacity:.6">${L.apr.toFixed(1)}% · ${L.term}mo</span></div>
-      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(L.max)}. ${L.trap? esc(L.note):""} ${!ok?"Requires score "+L.minScore+".":""}</div>
-      ${ok?`<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`:""}</div>`;
+      <div style="font-size:13px;opacity:.65;margin:4px 0 8px">Up to ${fm(loanMax(L))}${L.trap?"":" (scales with your income)"}. ${L.trap? esc(L.note)+" One advance per sync.":""} ${!ok?"Requires score "+L.minScore+".":""}</div>
+      ${ok? (advBlocked? `<div style="font-size:12.5px;opacity:.6">Advance already taken this week. The window reopens after the next sync.</div>`
+        : `<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`):""}</div>`;
     }).join("")}</div>
     ${S.debts.length?`<div class="mer-sechead">Your debts</div><div class="acct-group">${S.debts.map((d,i)=>{
       const payoffMo = d.pay>0? payoffMonths(d) : null;
@@ -1699,14 +1735,30 @@ function maybeMarkerOffer(t, msg){
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet();addMarkerSheet('${esc(t.name).replace(/'/g,"\\'")}','${esc(msg.slice(0,60)).replace(/'/g,"\\'")}','${t.id}')">Log a marker</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Just talk</button>`); }, 350);
 }
-(D.LOANS.find(l=>l.id==="adv")||{}).apr=28.0; // v1.6.8 Ty ruling: the Salary Advance trap is 28% — data.js stays frozen, the override rides here
+(D.LOANS.find(l=>l.id==="adv")||{}).apr=32.0;   // v1.15.0 Ty ruling: the Salary Advance trap is 32% now (was 28) — data.js stays frozen, overrides ride here
+(D.LOANS.find(l=>l.id==="adv")||{}).max=50000;  // v1.15.0 Ty ruling: advance ceiling $50k (was 40)
+(D.LOANS.find(l=>l.id==="pl3")||{}).minScore=580; // v1.15.0 Ty ruling: even the Rebuild loan wants 580+ — tank the score far enough and NOBODY lends but the advance
+function loanMax(L){
+  /* v1.15.0 (Ty): loan ceilings scale with INCOME, never net worth. Approval reads income
+     TODAY (contract checks + endorsement money, same door the card tiers use); the autopay
+     never shrinks afterward. Lose the sponsors or the salary after signing and you're still
+     carrying payments sized to the money you used to have — that bind is the design. */
+  if (L.trap) return L.max;                                        // the advance is flat $50k, always "approved"
+  const inc = cardAnnualIncome();
+  const pct = L.id==="pl1"? 0.40 : L.id==="pl2"? 0.25 : 0.10;      // Prime 40% / Standard 25% / Rebuild 10% of annual income
+  return Math.max(5000, Math.round(inc*pct/1000)*1000);
+}
+function advTakenThisSync(){ return !!(S && S.advWk && S.blob && S.advWk===wkKey(S.blob.clock)); }   /* v1.15.0: ONE advance per sync — the stamp is the week key, so a same-week refresh never re-opens the window */
 function takeLoan(id){
   const L=D.LOANS.find(x=>x.id===id); const amt=+$("#ln-"+id).value;
   if(!amt||amt<1000) return toast("Minimum $1,000.");
-  if(amt>L.max) return toast("Max "+fm(L.max)+" on this product.");
+  if (L.trap && advTakenThisSync()) return toast("One advance per sync. The window reopens after the next sync.");   /* v1.15.0 */
+  const mx=loanMax(L);
+  if(amt>mx) return toast("Max "+fm(mx)+" on this product"+(L.trap?".":" at your income."));
   const r=L.apr/100/12, n=L.term, pay=Math.round(amt*r/(1-Math.pow(1+r,-n)));
   S.debts.push({n:L.n, bal:amt, orig:amt, apr:L.apr, pay, kind:"personal"});
   S.cash.checking+=amt; S.ledger.push({t:L.n+" funded", amt:amt, kind:"income"});
+  if (L.trap) S.advWk=wkKey(S.blob.clock);   /* v1.15.0: the one-per-sync stamp */
   creditTouch(L.trap?-25:-8); persist(); merBody(); renderWidget();
   toast(L.trap? "Advance funded. That APR is real." : "Loan funded.");
 }
@@ -1773,7 +1825,7 @@ function planeArt(seedStr){
    <div class="tail" style="background:#dde3ea"></div><div class="wing" style="background:#cdd5de"></div></div></div>`;
 }
 function genHomes(){
-  const T = D.METROS[S.blob.player.team] || D.METROS["Jets"];
+  const T = teamMetro();   /* v1.15.0: relocations land in the real city */
   const wk = wkKey(S.blob.clock);
   const infl = Math.pow(1.035, Math.max(0,(S.blob.clock.seasonYear||2026)-2026));
   const out=[];
@@ -1848,7 +1900,7 @@ function genPlanes(){
    security deposit at signing, replaces the extended-stay bill, deposit comes back when the
    lease ends (or at closing on a bought home). A trade auto-ends the lease. */
 function rentInfo(){
-  const T=D.METROS[S.blob.player.team]||D.METROS["Jets"];
+  const T=teamMetro();   /* v1.15.0 */
   const minIdx=Math.min.apply(null, T.hoods.map(h=>h[1]));
   const rent=Math.round((800+1900*minIdx)/25)*25;
   return {city:T.city, rent, dep:rent};
@@ -1878,14 +1930,14 @@ function endLease(quiet){
   S.rental=null;
   S.bills=S.bills.filter(x=>x.id!=="rent");
   if (!S.properties.length && !S.bills.find(x=>x.id==="stay"))
-    S.bills.push({id:"stay", n:"Extended-stay hotel ("+((D.METROS[S.blob.player.team]||{}).city||"team city")+")", amt:3400, cat:"housing"});
+    S.bills.push({id:"stay", n:"Extended-stay hotel ("+teamMetro().city+")", amt:3400, cat:"housing"});
   persist();
   if (!quiet){ closeSheet(); toast("Lease ended. Deposit back, hotel bill returns."); if(curApp==="keystone") renderApp("keystone"); renderWidget(); }
 }
 let keyMode="browse";
 RENDER.keystone = (b,sub)=>{
   b.className="keystone lightapp";
-  const homes=genHomes(); const T=D.METROS[S.blob.player.team]||D.METROS["Jets"];
+  const homes=genHomes(); const T=teamMetro();   /* v1.15.0 */
   if (sub && sub.h){
     const H=homes.find(x=>x.id===sub.h);
     b.innerHTML = aphead("Keystone",{back:"renderApp('keystone')",backlabel:"Listings"}) + `<div class="apbody">
@@ -1943,7 +1995,7 @@ RENDER.keystone = (b,sub)=>{
   kb.innerHTML=html;
 };
 function priceBuild(){
-  const T=D.METROS[S.blob.player.team]||D.METROS["Jets"];
+  const T=teamMetro();   /* v1.15.0 */
   const hood=T.hoods[+$("#bHood").value]; const lot=+$("#bLot").value;
   const beds=+$("#bBeds").value, baths=+$("#bBaths").value, sq=+$("#bSq").value, fin=+$("#bFin").value;
   if(!sq||sq<800) return toast("Square footage too small to permit.");
@@ -2330,7 +2382,7 @@ RENDER.apex = (b,sub)=>{
       <div style="font-size:12px;opacity:.5;margin-bottom:8px">${esc(o.cat)} category · offer expires at next sync</div>
       ${S.deals.find(d=>d.id===o.id)? '<div style="font-size:13px;color:#2e7d32">Signed.</div>' :
         `<button class="btn sm" style="background:var(--apx-acc);color:#fff" onclick="signOffer('${o.id}')">${S.agent? "Sign — "+o.years+"yr / "+fm(o.perYear)+"/yr" : "Need an agent first"}</button>`}</div>`).join("");})()}
-    <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">${esc((D.METROS[S.blob.player.team]||{city:"Local"}).city)} Deli — name & likeness</div>
+    <div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:17px">${esc(teamMetro().city)} Deli — name & likeness</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 8px">$4,500 flat for a sandwich named after you. The "Number ${S.blob.player.jersey}": chicken cutlet, vodka sauce, fresh mozz.</div>
       ${S.deals.find(d=>d.id==="deli")? '<div style="font-size:13px;color:#2e7d32">Signed. The sandwich is in rotation.</div>' :
       `<button class="btn sm" style="background:var(--apx-acc);color:#fff" onclick="signDeli()">${S.agent? "Sign it — $4,500" : "Need an agent first"}</button>`}</div>
@@ -2345,10 +2397,10 @@ RENDER.apex = (b,sub)=>{
 function signDeli(){
   if (!S.agent) return toast("Pick an agent first. This is what they are for.");
   if (S.deals.find(d=>d.id==="deli")) return;
-  S.deals.push({id:"deli", n:(D.METROS[S.blob.player.team]||{city:"Local"}).city+" Deli", amt:4500});
+  S.deals.push({id:"deli", n:teamMetro().city+" Deli", amt:4500});
   const cut = Math.round(4500*(S.agent.fee/100));
   S.cash.checking += 4500-cut;
-  S.ledger.push({t:(D.METROS[S.blob.player.team]||{city:"Local"}).city+" Deli — name & likeness", amt:4500, kind:"income"});
+  S.ledger.push({t:teamMetro().city+" Deli — name & likeness", amt:4500, kind:"income"});
   if (cut) S.ledger.push({t:"Apex commission — deli deal", amt:-cut, kind:"spend"});
   persist(); toast("Signed. The Number "+S.blob.player.jersey+" is in rotation. "+fm(4500-cut)+" after the fee.");
   renderApp("apex");
@@ -3768,24 +3820,19 @@ async function presserQuestions(){
   return fallback();
 }
 async function presserSheet(){
-  /* v1.13.1 THE ONE MEDIA SESSION (Ty's flow ruling): postgame AND the week ahead in ONE room,
-     right after the sync. Answer or skip — either way media is DONE for the week, the Podium
-     never walls, and no midweek card ever appears again. No game played = no session at all. */
+  /* v1.15.0 (Ty's calendar ruling, replacing v1.13.1's one combined room): the podium room is
+     POSTGAME ONLY again. The player's week now runs in order — press conference (if it
+     triggered), THEN log how practice/meetings went, THEN the post-practice locker questions
+     one at a time. The chain out of this sheet drives it. No game played = no room at all. */
   const d=S.presserDue; if(!d) return;
   toast("The room settles\u2026");
-  const wk=wkKey(S.blob.clock);
-  const wantAhead = (typeof midweekMediaOn==="function"? midweekMediaOn() : true) && !(S.midAvail&&S.midAvail[wk]);
-  const cached=(S.midAvailQs||{})[wk];
-  const [qs, aq] = await Promise.all([ presserQuestions(), wantAhead? ((cached&&cached.length)? Promise.resolve(cached) : midAvailQuestions()) : Promise.resolve([]) ]);
-  window._prQs=qs; window._prAq=aq;
+  const qs=await presserQuestions();
+  window._prQs=qs;
   sheet(`<h3>Postgame press conference</h3><p class="sp">${d.home?"vs":"at"} ${esc(d.opp)} \u00b7 final ${d.score[0]}-${d.score[1]} \u00b7 you're ${esc(d.record_after)}. Answer any, no-comment any.</p>
   <div style="max-height:52vh;overflow:auto">
   ${qs.map((x,i)=>`<label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
     <textarea class="field" id="prA${i}" rows="2" placeholder="your words, on the record"></textarea>
     <label style="display:flex;gap:6px;align-items:center;font-size:12px;opacity:.75"><input type="checkbox" id="prN${i}"> No comment</label>`).join("")}
-  ${aq.length? `<p class="sp" style="margin-top:12px;font-weight:600">And looking ahead \u2014 the week to come:</p>
-  ${aq.map((x,i)=>`<label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
-    <textarea class="field" id="maA${i}" rows="2" placeholder="your words, on the record"></textarea>`).join("")}`:""}
   </div>
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="presserSave()">Done talking</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
@@ -3801,31 +3848,95 @@ function presserSave(){
   S.pressers=S.pressers||{}; S.pressers[d.gk]={record_after:d.record_after, qa, skipped_all:false, wk:d.wk};
   const yr=String((S.blob.clock||{}).seasonYear||"");
   S.askedQs=S.askedQs||{}; S.askedQs[yr]=(S.askedQs[yr]||[]).concat(qs.map(x=>x.q.slice(0,40))).slice(-40);
-  /* v1.13.1: the week-ahead half saves in the same breath — media DONE, Podium ungated */
-  const aq=window._prAq||[]; window._prAq=null;
-  const wk=wkKey(S.blob.clock);
-  if (aq.length){
-    const maQa=aq.map((x,i)=>{ const a=($("#maA"+i)&&$("#maA"+i).value.trim())||""; return a? {q:x.q, a} : {q:x.q, nc:true}; });
-    S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:maQa};
-    S.askedQs[yr]=(S.askedQs[yr]||[]).concat(aq.map(x=>x.q.slice(0,40))).slice(-40);
-  }
-  if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wk]=true; }
   S.presserDue=null; persist(); closeSheet();
   toast("On the record. The world can only quote what you actually said.");
-  if (aiKey()) runWeek();
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
+  if (aiKey()) pracFlow();   /* v1.15.0: the room empties -> log the practice week -> post-practice questions -> the week writes */
 }
 function presserSkip(){
   const d=S.presserDue; if(!d) return;
   S.pressers=S.pressers||{}; S.pressers[d.gk]={record_after:d.record_after, qa:[], skipped_all:true, wk:d.wk};
-  /* v1.13.1: skipping the room skips BOTH halves — media done, episode writes without him */
-  const wk=wkKey(S.blob.clock);
-  S.midAvail=S.midAvail||{}; if(!S.midAvail[wk]) S.midAvail[wk]={qa:[], skipped:true};
-  if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wk]=true; }
+  /* v1.15.0: skipping the PODIUM skips only the podium — the practice log and the locker
+     questions are their own beats now; the chain still runs. */
   S.presserDue=null; persist();
   toast("Skipped availability. That gets noticed exactly once.");
-  if (aiKey()) runWeek();
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
+  if (aiKey()) pracFlow();
+}
+/* ==================== v1.15.0 THE PLAYER'S WEEK (Ty's calendar ruling) ====================
+   The paper is Monday morning: strictly the last game and the next one, written at the sync.
+   The podcast is Wednesday afternoon: a look back and a look ahead — so it may reference the
+   practice week. The player OWNS practice for now (Lane A stays banked): after the podium
+   questions (if they triggered), he logs how practice/meetings went — the two 0-10 picks that
+   used to live in Settings — right in the sync flow, then answers the post-practice locker
+   questions ONE AT A TIME. The world + podium jobs gate on the log; the article never does. */
+function pracFlow(){
+  if (!aiKey()) return;
+  if (!pracPicked()) return pracSheet();
+  aheadFlow();
+}
+function pracSheet(){
+  const b=betaDials();
+  sheet(`<h3>The practice week</h3><p class="sp">How did practice and the meeting rooms go this week? The coach's evaluation is treated as ground truth by everyone who talks. 0 is a disaster, 10 is the best week of your life.</p>
+  ${["practice","film"].map(k=>`<label class="flabel">${k==="practice"?"On-field practice":"Film study / meetings"} \u00b7 <b id="bd-${k}-lbl">${b[k]}/10 ${dialLabel(b[k])}</b></label>
+  <div class="dialrow" id="bd-${k}">${Array.from({length:11},(_,v)=>`<button class="${b[k]===v?"on":""}" onclick="setDial('${k}',${v})">${v}</button>`).join("")}</div>`).join("")}
+  <button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="pracSave()">That was the week</button>`);
+}
+function pracSave(){
+  const wk=wkKey(S.blob.clock); const b=betaDials();
+  S.prac=S.prac||{}; S.prac[wk]={p:b.practice, f:b.film};
+  persist(); closeSheet(); toast("Logged. The building saw the same week you did.");
+  runWeek(); if(curApp==="sync") renderApp("sync");
+  aheadFlow();
+}
+let _ahQs=null, _ahQa=null;
+async function aheadFlow(){
+  /* the post-practice locker questions, one at a time — they feed the Podium's look-ahead half */
+  const wk=wkKey(S.blob.clock);
+  if (S.midweek&&S.midweek[wk]){ runWeek(); return; }                     // media already handled (no room earned, or answered)
+  if (!midweekMediaOn()){
+    S.midAvail=S.midAvail||{}; if(!S.midAvail[wk]) S.midAvail[wk]={qa:[]};
+    S.midweek=S.midweek||{}; S.midweek[wk]=true; persist(); runWeek();
+    if(curApp==="sync") renderApp("sync"); return;                        // his standing draws no midweek media — honest silence
+  }
+  toast("Reporters at your locker\u2026");
+  const cached=(S.midAvailQs||{})[wk];
+  _ahQs=(cached&&cached.length)? cached : await midAvailQuestions();
+  _ahQa=[]; aheadQSheet(0);
+}
+function aheadQSheet(i){
+  const qs=_ahQs||[]; if(!qs.length) return aheadDone();
+  const x=qs[i];
+  sheet(`<h3>At your locker \u2014 post-practice</h3><p class="sp">Question ${i+1} of ${qs.length} \u00b7 the week ahead only. Whatever you type IS your midweek quote.</p>
+  <label class="flabel" style="margin-top:8px">${esc(x.q)}</label>
+  <textarea class="field" id="ahA" rows="3" placeholder="your words, on the record"></textarea>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="aheadAns(${i},false)">${i+1<qs.length?"Answer \u00b7 next question":"Answer \u00b7 done talking"}</button>
+  <button class="btn" style="background:rgba(255,255,255,.12)" onclick="aheadAns(${i},true)">No comment${i+1<qs.length?" \u00b7 next":""}</button>
+  ${i===0? `<button class="btn" style="background:rgba(255,255,255,.08)" onclick="aheadWaveOff()">Wave them all off</button>`:""}`);
+}
+function aheadAns(i,nc){
+  const qs=_ahQs||[]; const x=qs[i]; if(!x) return aheadDone();
+  const a=nc? "" : (($("#ahA")&&$("#ahA").value.trim())||"");
+  _ahQa.push(a? {q:x.q, a} : {q:x.q, nc:true});
+  if (i+1<qs.length) aheadQSheet(i+1); else aheadDone();
+}
+function aheadWaveOff(){
+  const wk=wkKey(S.blob.clock);
+  S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:[], skipped:true};
+  S.midweek=S.midweek||{}; S.midweek[wk]=true;
+  _ahQs=null; _ahQa=null;
+  persist(); closeSheet(); toast("Waved off. That reads standoffish, once.");
+  runWeek(); if(curApp==="sync") renderApp("sync");
+}
+function aheadDone(){
+  const wk=wkKey(S.blob.clock); const qs=_ahQs||[];
+  S.midAvail=S.midAvail||{}; S.midAvail[wk]={qa:_ahQa||[]};
+  const yr=String((S.blob.clock||{}).seasonYear||"");
+  S.askedQs=S.askedQs||{}; S.askedQs[yr]=(S.askedQs[yr]||[]).concat(qs.map(x=>x.q.slice(0,40))).slice(-40);
+  S.midweek=S.midweek||{}; S.midweek[wk]=true;
+  _ahQs=null; _ahQa=null;
+  persist(); closeSheet(); toast("On the record. The episode writes with your words.");
+  runWeek(); if(curApp==="sync") renderApp("sync");
 }
 /* ==================== v1.13.0 THE POWERHOUSE (Ty's ruling, the streamline chat) ====================
    THE PHONE IS THE PEN. One sync lands and the WHOLE week writes itself on the phone — a
@@ -3841,31 +3952,53 @@ let weekRunBusy=false, _wakeLock=null;
 async function wakeAcquire(){ try{ if(navigator.wakeLock && !_wakeLock){ _wakeLock=await navigator.wakeLock.request("screen"); _wakeLock.addEventListener("release",()=>{_wakeLock=null;}); } }catch(e){ console.log("wake lock unavailable:", String(e.message||e)); } }
 function wakeRelease(){ try{ if(_wakeLock){ _wakeLock.release(); _wakeLock=null; } }catch(e){} }
 function mediaHandled(){ const wk=wkKey(S.blob.clock); return !!((S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk])); }
+function pracPicked(wk){ return !!(S && S.prac && S.prac[wk||wkKey(S.blob.clock)]); }   /* v1.15.0: the player logged this week's practice/meetings */
 function weekEnqueue(blob, last){
-  /* keyed phones only — the runner IS the pen. Enqueue replaces any older week's leftovers. */
+  /* keyed phones only — the runner IS the pen. Enqueue replaces any older week's leftovers.
+     v1.15.0 (Ty's calendar): the PAPER is Monday morning — the article writes at the sync,
+     strictly last game + next game, never practice. The WORLD and the PODIUM are Wednesday —
+     they gate until the player logs how practice/meetings went (and, for the podium, until
+     the press room is handled), so the episode can reference the practice week honestly. */
   S.weekJobs={wk:wkKey(blob.clock), gk:last?gkey(last):null,
-    jobs:[{id:"questions",st:"todo"},{id:"article",st:"todo"},{id:"world",st:"todo"},{id:"podium",st:"gated"}]};
+    jobs:[{id:"questions",st:"todo"},{id:"article",st:"todo"},{id:"world",st:"gated"},{id:"podium",st:"gated"}]};
   persist(); runWeek();
 }
+function weekJobReady(j){
+  /* v1.15.0: is a gated job's gate actually open? (Also decides whether Resume can help.) */
+  if (j.st==="todo"||j.st==="failed") return true;
+  if (j.st!=="gated") return false;
+  if (j.id==="world") return pracPicked();
+  if (j.id==="podium") return mediaHandled() && pracPicked();
+  return false;
+}
+function weekResumeShows(){
+  /* v1.15.0 (Ty's field report: "The week is written ✓" + a Resume button that did nothing):
+     the button only renders when pressing it can actually move a job. A week waiting on the
+     practice log or the press room has nothing to resume — the line says what it's waiting for. */
+  const W=S&&S.weekJobs; return !!(W && !weekRunBusy && W.jobs.some(weekJobReady));
+}
+function resumeWeekClick(){ toast("Picking the week back up\u2026"); runWeek(); }   /* v1.15.0: the click answers instantly even if the retry fails fast */
 function weekRunLine(){
   const W=S&&S.weekJobs; if(!W) return "";
   const done=W.jobs.filter(j=>j.st==="done").length, total=W.jobs.length;
   const failed=W.jobs.find(j=>j.st==="failed");
-  const gated=W.jobs.find(j=>j.id==="podium"&&j.st==="gated");
   if (weekRunBusy) return "Writing the week\u2026 "+done+" of "+total+" done \u00b7 set the phone down, the screen stays awake \u00b7 if you leave, it resumes when you're back.";
   if (failed) return "The week's writing paused ("+failed.id+": "+esc(failed.err||"failed")+"). Tap Resume the week's writing.";
-  if (gated && done===total-1) return "The week is written \u2713 \u00b7 the Podium episode writes itself after your media availability.";
+  const worldGated=W.jobs.find(j=>j.id==="world"&&j.st==="gated");
+  const podGated=W.jobs.find(j=>j.id==="podium"&&j.st==="gated");
+  if (worldGated && !pracPicked()) return "The paper is out \u2713 \u00b7 the rest of the week writes after you log practice"+(mediaHandled()?"":" and handle the press room")+" \u2014 the card below is the door.";
+  if (podGated && !weekJobReady(podGated) && done===total-1) return "The week is written \u2713 \u00b7 the Podium episode writes itself after your media availability.";
   return "The week's writing will resume on its own \u2014 or tap Resume now.";
 }
 async function runWeek(){
   if (weekRunBusy || !S || !S.weekJobs) return;
   if (!aiKey()) return;                                                    // keyless never runs the phone pen
-  if (S.weekJobs.wk!==wkKey(S.blob.clock)){ S.weekJobs=null; persist(); return; }   // a week the save left dies quietly
+  if (S.weekJobs.wk!==wkKey(S.blob.clock)){ S.weekJobs=null; persist(); if(curApp==="sync") renderApp("sync"); return; }   // a week the save left dies quietly — and the card dies WITH it (v1.15.0: the stale card used to linger with a dead Resume button)
   weekRunBusy=true; await wakeAcquire(); if(curApp==="sync") renderApp("sync");
   for (const j of S.weekJobs.jobs){
     if (!S.weekJobs) break;
     if (j.st==="done") continue;
-    if (j.id==="podium"){ if (j.st==="gated"){ if (mediaHandled()) j.st="todo"; else continue; } }
+    if (j.st==="gated"){ if (weekJobReady(j)) j.st="todo"; else continue; }   /* v1.15.0: world ungates on the practice log; podium on media + practice */
     if (j.st!=="todo" && j.st!=="failed") continue;
     try{
       if (j.id==="questions"){ const qs=await midAvailQuestions(); S.midAvailQs=S.midAvailQs||{}; S.midAvailQs[S.weekJobs.wk]=qs; }
@@ -4087,10 +4220,8 @@ RENDER.settings = b=>{
   </div>`).join("")}
   <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="famAdd()">+ Add family member</button>
 
-  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Beta: practice dials</h3></div>
-  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Testing controls for the future practice engine. The world treats these as the coach's honest evaluation of your week. 0 is a disaster, 10 is the best week of your life. Tap a number.</p>
-  ${["practice","film"].map(k=>`<label class="flabel">${k==="practice"?"On-field practice":"Film study / mental prep"} · <b id="bd-${k}-lbl">${betaDials()[k]}/10 ${dialLabel(betaDials()[k])}</b></label>
-  <div class="dialrow" id="bd-${k}">${Array.from({length:11},(_,v)=>`<button class="${betaDials()[k]===v?"on":""}" onclick="setDial('${k}',${v})">${v}</button>`).join("")}</div>`).join("")}
+  <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>The coach</h3></div>
+  <p style="font-size:12px;color:var(--faint);margin:0 0 10px">Practice and film-study picks moved out of Settings \u2014 you log the week inside the sync flow now (press room \u2192 log practice \u2192 locker questions).</p>
   <label class="flabel" style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">The coach acts on his own (fines, benchings, demotions)
   <input type="checkbox" ${S.staffAuto!==false?"checked":""} onchange="S.staffAuto=this.checked;persist()"></label>
   <p style="font-size:11.5px;color:var(--faint);margin-top:2px">On: the staff disciplines you for bad practice weeks and public messes without asking. Off: the world only talks.</p>
@@ -4499,7 +4630,11 @@ RENDER.sync = b=>{
   }
   b.innerHTML = aphead("Sync") + `<div class="apbody">
   ${syncSetupHtml()}
-  ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${(!weekRunBusy)? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="runWeek()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
+  ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${weekResumeShows()? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="resumeWeekClick()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
+  ${(aiKey() && S.weekJobs && !pracPicked() && !S.presserDue)? `<div class="synccard" style="border:1px solid rgba(122,220,150,.35)"><h4>Practice week</h4>
+    <p style="margin:4px 0 8px">How did the week of practice and meetings go? The coach's evaluation feeds everything that writes next${midweekMediaOn()&&!mediaHandled()?" \u2014 and the reporters are waiting at your locker after":""}.</p>
+    <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="pracSheet()">Log the practice week</button></div>`:""}
+  ${ghostCard()}
   ${loopCard}
 
   ${aiKey()? "" : `<div class="synccard"><h4>The unseen hand</h4>
@@ -5031,7 +5166,7 @@ function reviewSheet(){
   if (!ordTotal()){
     sheet(`<h3>On to the next game \u2014 ${esc(dest)}</h3><p class="sp">Nothing is queued for the save \u2014 clean week. In Madden: fiddle however you like, play, then <b>ADVANCE THE WEEK</b> (an un-advanced save syncs as this same week again), save, and Send sync ONLINE on the computer.</p>
     ${compose}
-    <button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet()">Go play</button>`);
+    <button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet();finishNotice()">Go play</button>`);
     return;
   }
   sheet(`<h3>Before the save \u2014 ${esc(dest)}</h3><p class="sp">Everything below is about to ride the ONE code to the computer. Remove any of yours; overrule the coach's if you must \u2014 your call, your kind of career.</p>
@@ -5042,9 +5177,56 @@ function reviewSheet(){
   ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove from this week's code">\u2715</button></div>`).join("")}`:""}
   </div>
   ${compose}
-  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();mailSendOrders()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
-  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();copyOrders()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
+  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();mailSendOrders();finishNotice()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
+  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();copyOrders();finishNotice()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
+}
+function finishNotice(){
+  /* v1.15.0 (Ty): drive home what the button MEANS — approving/finishing the week seals the
+     phone's side. Shown once per week, after Approve or Go play. */
+  const wk=wkKey(S.blob.clock);
+  if (S.finNotedWk===wk) return; S.finNotedWk=wk; persist();
+  setTimeout(()=>{ sheet(`<h3>The week is sealed</h3>
+  <p class="sp">You're done on the phone \u2014 for all intents and purposes. <b>Nothing you do here from this point will reach the game</b> until you play, <b>ADVANCE THE WEEK</b>, save, and the next sync is uploaded from the computer.</p>
+  <p class="sp" style="opacity:.75">The phone keeps living \u2014 texts, posts, purchases still happen in the world \u2014 but the save can't hear any of it until next week's code rides over.</p>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet()">Got it \u2014 go play</button>`); }, 350);
+}
+/* ==================== v1.15.0 THE GHOST CONTRACT (Ty's probe save, answered) ====================
+   A freshly CREATED player can carry ContractStatus=Signed with a NULL Player.Contract ref —
+   no PlayerContract row exists at all, so the franchise screens show zeros everywhere. The exe
+   flags it at sync (blob.player.ghostContract = {capSalary}); this card offers the fix at
+   initial setup, Ty's ruling: HIS CHOICE of (a) a real league-minimum deal (the save's own
+   minimum table, blob.minRookieSalary) or (b) a deal rebuilt from the cap number the game
+   stamped on him at creation (PLYR_CAPSALARY — the deal he actually chose). Either way it
+   queues the EXISTING sign order — the writer that already allocates a real contract row via
+   the table's own allocator — and rides the ONE code like everything else. */
+function ghostMoney(mode){
+  const g=S.blob&&S.blob.player&&S.blob.player.ghostContract; if(!g) return null;
+  /* cap mode files the creation-time number AS-IS (the deal he actually chose — the save
+     tolerated it at creation, so the rebuild honors it, even below the league minimum) */
+  const yr = mode==="cap"? (g.capSalary||0) : (S.blob.minRookieSalary||880000);
+  const y1 = Math.round(yr*1.045/10000)*10000;                      // modest year-2 escalation, real-deal shaped
+  return { years:2, total: yr+y1, totalM: Math.round((yr+y1)/10000)/100, yr };
+}
+function ghostQueued(){ return !!(S.orders||[]).some(o=>o.__ghost); }
+function ghostCard(){
+  const g=S&&S.blob&&S.blob.player&&S.blob.player.ghostContract;
+  if (!g || ghostQueued()) return "";
+  const mn=ghostMoney("min"), cp=ghostMoney("cap");
+  const capKnown = g.capSalary>0;
+  return `<div class="synccard" style="border:1px solid rgba(244,180,92,.5)"><h4>Your contract never made the books</h4>
+  <p style="margin:4px 0 8px">The save says you're signed, but the league office holds NO paper \u2014 that's why the franchise screens show zeros. File a real deal now; it rides the ONE code and the books catch up.</p>
+  <button class="btn sm" style="background:var(--ok);color:#04170d;margin-bottom:6px" onclick="queueGhostFix('min')">File the league-minimum deal \u2014 2yr, ${fm(mn.total)}</button>
+  ${capKnown? `<button class="btn sm" style="background:rgba(255,255,255,.14)" onclick="queueGhostFix('cap')">Rebuild the deal you created \u2014 2yr at ${fm(cp.yr)}/yr (${fm(cp.total)})</button>`
+   : `<p style="font-size:11.5px;opacity:.55;margin:2px 0 0">The save carries no cap number for you \u2014 the minimum deal is the honest rebuild.</p>`}</div>`;
+}
+function queueGhostFix(mode){
+  const m=ghostMoney(mode); if(!m) return;
+  const p=S.blob.player;
+  S.orders=S.orders||[];
+  S.orders.push({type:"sign", player:{name:p.first+" "+p.last}, years:m.years, totalM:m.totalM, bonusM:0, __ghost:1});
+  persist(); if(curApp==="sync") renderApp("sync");
+  toast("Filed. It rides the ONE code \u2014 approve it at On to the next game.");
 }
 function mailCard(){
   /* v1.8.3 (Ty's reorg): the mailbox IS the sync now — this GREEN card is the default and
@@ -5347,12 +5529,12 @@ function applySaveNotices(oldP, newP, newC){
     const th=S.world.texts.find(t=>t.id==="agent");
     if (th){ th.msgs.push(["them","It's done. The "+oldP.team+" send you to the "+newP.team+". Flights and the housing move are handled — new city, same rules: don't buy anything with a motor yet.",Date.now()]); th.last=Date.now(); delete S.reads["t:agent"]; }
     const stay=S.bills.find(b=>b.id==="stay");
-    if (stay) stay.n="Extended-stay hotel ("+((D.METROS[newP.team]||{}).city||newP.team)+")";
+    if (stay) stay.n="Extended-stay hotel ("+teamMetro(newP).city+")";
     if (S.rental){ /* v1.7.7: the lease doesn't move with you */
       const dep=S.rental.dep; S.cash.checking+=dep; S.rental=null;
       S.bills=S.bills.filter(b=>b.id!=="rent");
       if (!S.properties.length && !S.bills.find(b=>b.id==="stay"))
-        S.bills.push({id:"stay", n:"Extended-stay hotel ("+((D.METROS[newP.team]||{}).city||newP.team)+")", amt:3400, cat:"housing"});
+        S.bills.push({id:"stay", n:"Extended-stay hotel ("+teamMetro(newP).city+")", amt:3400, cat:"housing"});
       S.ledger.push({t:"Lease ended by the move — deposit returned", amt:dep, kind:"income"});
       notices.push("HOUSING: his apartment lease ended with the move; deposit returned, back in a hotel in the new city");
     }
@@ -5503,7 +5685,8 @@ async function advanceTo(blob){
         S.presserNone=null;
       } else {
         S.presserDue=null;
-        if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wkKey(newC)]=true; }   /* v1.13.1: no room this week — media done by definition, the episode writes without quotes */
+        if (aiKey()){ S.midweek=S.midweek||{}; S.midweek[wkKey(newC)]=true;   /* v1.13.1: no room this week — media done by definition, the episode writes without quotes */
+          S.world.notifs.push({app:"sync", t:"Sync", p:"Log your practice week \u2014 the phone writes the rest after"}); }   /* v1.15.0: with no press room, the practice log is the week's one door */
         S.presserNone={wk:wkLabel(newC), why:gate.why||"the room wanted the starters"};
       }
     }
@@ -5522,6 +5705,9 @@ async function advanceTo(blob){
     S.mailJobs=null;
     if (String(S.lastMidweek||"").startsWith("SENT")) S.lastMidweek=null;   /* v1.13.1: a stale desk stamp from a week the save left dies at the sync — the powerhouse has no computer desk */
   }
+  if (blob.player&&blob.player.ghostContract && !S.ghostNoted){ S.ghostNoted=1;
+    S.world.notifs.push({app:"sync", t:"Sync", p:"The league office holds no paper on your deal \u2014 the fix is one tap on the Sync screen"}); }   /* v1.15.0 */
+  else if (!(blob.player&&blob.player.ghostContract)) S.ghostNoted=0;   /* fixed (or never ghosted): re-arm for any future re-creation */
   coachEvaluate("sync");                                              // v1.7.5: AFTER the notif reset — his ruling banner used to be wiped three lines up
   try{   /* v1.14.0: a depth-chart rise or fall at HIS position is a life event like any other */
     const me=S.blob&&S.blob.player? S.blob.player.first+" "+S.blob.player.last : null;
@@ -6908,7 +7094,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.14.0";
+const VER="v1.15.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
