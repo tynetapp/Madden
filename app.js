@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.15.0 (Aug 11 2026) — THE PLAYER'S WEEK (practice picks move into the sync flow: presser -> log practice -> post-practice questions one at a time; world+podium gate on the log; the paper stays Monday-morning) + MONEY TEETH (salary advance $50k/32%/one-per-sync; loan ceilings scale with INCOME never NW; rebuild loan needs 580) + THE SEALED WEEK notice + METROS (relocations land in the real city, nearest-metro hoods) + THE GHOST CONTRACT card (min-deal or cap-number rebuild, rides the ONE code) + Resume-button honesty (prior: v1.14.0) */
+/* TyPhone app.js — v1.16.0 (Aug 11 2026) — THE CAREER LOCK (v1.15.0 was THE PLAYER'S WEEK: practice picks move into the sync flow: presser -> log practice -> post-practice questions one at a time; world+podium gate on the log; the paper stays Monday-morning) + MONEY TEETH (salary advance $50k/32%/one-per-sync; loan ceilings scale with INCOME never NW; rebuild loan needs 580) + THE SEALED WEEK notice + METROS (relocations land in the real city, nearest-metro hoods) + THE GHOST CONTRACT card (min-deal or cap-number rebuild, rides the ONE code) + Resume-button honesty (prior: v1.14.0) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -3497,7 +3497,7 @@ RENDER.podium = b=>{
     <div class="vd-title" style="font-size:16px;line-height:1.3">${esc(e.t)}</div>
     <div style="font-size:12px;opacity:.55;margin:4px 0 8px">${esc(e.wk|| (e.t.match(/(20\d\d \u00b7 .+)$/)||[])[1] || "")}${e.link?` \u00b7 <a href="${esc(e.link)}" target="_blank" style="color:#9db8ff">listen \u2197</a>`:""}</div>
     <p style="font-size:13px;line-height:1.5;opacity:.8">${esc(e.d)}</p>
-    ${e.script?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="showScript('${e.id}')">Read the brief</button><button class="btn sm" style="background:rgba(255,255,255,.08)" onclick="podiumRegen('${e.id}')">Regenerate</button></div>`:""}
+    ${e.script?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" style="background:var(--ok);color:#04170d" onclick="podCopySource('${e.id}')">Copy source</button><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="podCopyFocus('${e.id}')">Copy focus</button><button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="showScript('${e.id}')">Read the brief</button><button class="btn sm" style="background:rgba(255,255,255,.08)" onclick="podiumRegen('${e.id}')">Regenerate</button></div>`:""}
   </div>`).join("")}
   <div class="hoodhead" style="color:var(--ink);margin-top:16px"><h3>Make this week's episode</h3></div>
   ${(()=>{ /* v1.12.2 (Ty's ruling): the Podium records AFTER midweek — the make-episode section
@@ -3505,24 +3505,15 @@ RENDER.podium = b=>{
        stay readable forever; only the making walls. genEpisodeBrief guards at the engine door too. */
     const wk=wkKey(S.blob.clock); const mwDone=(S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk]);
     if(!mwDone) return `<div class="veh-detail"><p style="font-size:13px;line-height:1.6;opacity:.85;margin:0">The show tapes after your media availability. Open <b>Sync</b> and play out midweek first, or choose \u201cDon\u2019t talk to the media during the week\u201d \u2014 then this week's episode opens up here.</p></div></div>`;
-    return `<div class="veh-detail" style="margin-bottom:10px">
-    <div style="font-size:12px;opacity:.6;margin-bottom:6px">Episode length — your call, fresh every week. Never touches the save.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">${[["short","Short · 3-6 min"],["default","Default · 6-15 min"],["deep","Deep Dive · 15-25+ min"]].map(o=>`<button class="btn sm" style="background:${(S.podiumLen||"default")===o[0]?"var(--ok)":"rgba(255,255,255,.1)"};color:${(S.podiumLen||"default")===o[0]?"#04170d":"inherit"}" onclick="podSetLen('${o[0]}')">${o[1]}</button>`).join("")}</div>
-  </div>
-  <div class="veh-detail">
-    <p style="font-size:13px;line-height:1.7;opacity:.85">Exactly this, in the <b>Gemini Notebook</b> app:<br>
-    <b>1.</b> Tap <b>Generate episode source</b> below, then <b>Copy source</b>.<br>
-    <b>2.</b> Open the Gemini Notebook app \u2192 <b>+ Create New</b>.<br>
-    <b>3.</b> Tap <b>Copied text</b> \u2192 press and hold the <i>Paste text here</i> box \u2192 Paste \u2192 <b>Add</b>.<br>
-    <b>4.</b> Bottom bar \u2192 <b>Studio</b> \u2192 <b>Audio Overview</b> (tap the wand to customize).<br>
-    <b>5.</b> Length: <b>${podLenSpec().label}</b> (your pick above). In the <i>Prompt</i> box ("What should the AI hosts focus on?"), paste the <b>focus prompt</b> \u2014 second copy button below. Tap <b>Generate</b>.<br>
-    <b>6.</b> When it's done, share the audio and paste the link here so the episode lives in the feed.</p>
+    return `<div class="veh-detail">
+    <p style="font-size:13px;line-height:1.75;opacity:.85;margin-top:0">This week's brief already wrote itself \u2014 it's under <b>Episodes</b> above (tap <b>Regenerate</b> there any time for a fresh take). Then:<br>
+    <b>1.</b> Get Google's <b>NotebookLM</b> \u2014 the app from your phone's app store, or notebooklm.google.com on a computer \u2014 and sign in. (App and web layouts differ a little; these steps follow the phone app.)<br>
+    <b>2.</b> Under <b>Episodes</b> above, open this week's brief and press <b>Copy source</b>.<br>
+    <b>3.</b> In NotebookLM: <b>Create New</b> \u2192 <b>Copied text</b> \u2192 press and hold the box \u2192 Paste \u2192 <b>Add</b>.<br>
+    <b>4.</b> Bottom bar \u2192 <b>Studio</b> \u2192 tap the lines-and-star icon by <b>Audio Overview</b> \u2014 that's where you pick how long the podcast runs.<br>
+    <b>5.</b> Back here on the Podium: copy the <b>focus prompt</b> from the episode, paste it in NotebookLM's prompt box, and hit <b>Generate</b>. It takes a while.<br>
+    <b>6.</b> When it's done, hit share, copy the link, and paste it below to attach it to the episode.</p>
     <p style="font-size:12px;line-height:1.6;opacity:.6;margin:6px 0 0">Free NotebookLM generates up to <b>3 audios per 24 hours</b> (it resets, nothing is lost). Any other Notebook question \u2014 accounts, sharing, features \u2014 lives in <a href="https://support.google.com/notebooklm/answer/16213268" target="_blank" rel="noopener" style="color:#8fb8ff">Google's NotebookLM help</a>.</p>
-    <button class="btn" style="background:#4a3a76;color:#fff;margin-top:10px" onclick="genEpisodeBrief()">Generate episode source</button>
-    ${S.world.podium.eps[0]&&S.world.podium.eps[0].script? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-      <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="window._brief=S.world.podium.eps[0].script;navigator.clipboard.writeText(window._brief).then(()=>toast('Source copied. Step 2: Gemini Notebook, Create New.'))">Copy source (step 1)</button>
-      <button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="navigator.clipboard.writeText(S.world.podium.eps[0].focus||'Follow the source segments in order. Only discuss what the source contains.').then(()=>toast('Focus prompt copied. Paste it in the Prompt box (step 5).'))">Copy focus prompt (step 5)</button>
-    </div>`:""}
     <input class="field" id="epLink" placeholder="Paste the share link" style="margin-top:8px">
     <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="attachEpLink()">Attach to latest episode</button>
   </div>
@@ -3532,8 +3523,8 @@ function showScript(id){
   const e=S.world.podium.eps.find(x=>x.id===id);
   window._brief=e.script;
   sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(e.script)}</div>
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick="navigator.clipboard.writeText(window._brief).then(()=>toast('Source copied. Gemini Notebook: Create New, Copied text, paste, Add.'))">Copy source</button>
-  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="navigator.clipboard.writeText((S.world.podium.eps.find(x=>x.script===window._brief)||{}).focus||'Follow the source segments in order. Only discuss what the source contains.').then(()=>toast('Focus prompt copied for the Prompt box.'))">Copy focus prompt</button>
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="navigator.clipboard.writeText(window._brief).then(()=>toast('Source copied. NotebookLM: Create New, Copied text, paste, Add.'))">Copy source</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="navigator.clipboard.writeText((S.world.podium.eps.find(x=>x.script===window._brief)||{}).focus||'Follow the source segments in order. Only discuss what the source contains.').then(()=>toast('Focus prompt copied. Paste it in NotebookLM\\'s prompt box.'))">Copy focus prompt</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
 /* v1.6.3: the show tours the LEAGUE. Give the brief writer the real slate + standings so
@@ -3560,13 +3551,12 @@ function leagueDigest(){
    NotebookLM's 3/day resets forever and duration is free. The player picks a length each
    week; the brief's CONTENT LAWS are untouched, only word count and depth scale. Regeneration
    is always available, ungated, untracked — no budget UI anywhere, by design. */
-function podLenSpec(){
-  const l=S.podiumLen||"default";
-  if (l==="short") return {k:"short", label:"Shorter", ui:"Short · 3-6 min", words:"350-600 words", depth:"hit the week's headlines cleanly and get out — the biggest stories only, no filler"};
-  if (l==="deep") return {k:"deep", label:"Longer", ui:"Deep Dive · 15-25+ min", words:"1500-2500 words", depth:"wander the WHOLE league in depth — every division gets real attention, standings context, second-order storylines, and the kind of tangents two hosts actually take"};
-  return {k:"default", label:"Default", ui:"Default · 6-15 min", words:"700-1200 words", depth:"a full tour of the league's week — the real stories with room to breathe, no padding"};
-}
-function podSetLen(l){ S.podiumLen=l; persist(); renderApp("podium"); }
+/* v1.16.0 (Ty's ruling): the length dials are GONE — NotebookLM's Studio picks the audio
+   length, so the brief is the same full-week source material every time. */
+function podCopySource(id){ const e=S.world.podium.eps.find(x=>x.id===id); if(!e||!e.script) return;
+  window._brief=e.script; navigator.clipboard.writeText(e.script).then(()=>toast("Source copied. NotebookLM: Create New, Copied text, paste, Add.")).catch(()=>{}); }
+function podCopyFocus(id){ const e=S.world.podium.eps.find(x=>x.id===id); if(!e) return;
+  navigator.clipboard.writeText(e.focus||podFocus()).then(()=>toast("Focus prompt copied. Paste it in NotebookLM's prompt box and Generate.")).catch(()=>{}); }
 async function podiumRegen(id){
   /* free, always available — chasing a better take costs nothing real. The old audio link
      clears because it no longer matches the words. */
@@ -3574,17 +3564,23 @@ async function podiumRegen(id){
   if (!aiKey()) return toast("Add an API key first (Settings).");
   toast("Rewriting the brief…");
   try{
-    const out = await callAI(podBriefSys(), worldFacts(S.blob, lastPlayed())+leagueDigest()+"\nWrite this week's source document now.", podLenSpec().k==="deep"?4500:podLenSpec().k==="short"?1400:2600);
+    const _cid=S.careerId;                                               /* v1.16.0 career lock */
+    const out = await callAI(podBriefSys(), worldFacts(S.blob, lastPlayed())+leagueDigest()+"\nWrite this week's source material now.", 3600);
+    if (S.careerId!==_cid) return;
     e.script=out; e.focus=podFocus(); e.d=out.split("\n").find(l=>l.trim().length>40)||e.d; delete e.link;
     persist(); renderApp("podium"); toast("Fresh brief ready. Same steps, new take.");
   }catch(err){ toast("Regeneration failed: "+err.message); }
 }
 function podBriefSys(){
-  const L=podLenSpec();
-  return "You write the SOURCE DOCUMENT for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will read ONLY this document and talk from it. Hard rules: "+L.words+" of flowing prose — NO time marks, NO segment headers, NO bullets; the audio length is set separately and duration is free, so never compress for time. Depth for this episode: "+L.depth+". THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes.";
+  /* v1.16.0 (Ty's field report): the hosts kept citing "the document", "the author", and "the
+     date stamped at the top" — because the brief carried them. The source is now raw week
+     knowledge: no title, no byline, no date, nothing that reads as a text ABOUT the week
+     rather than the week itself. Length dials are gone with the Studio picking audio length. */
+  return "You write the source material for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will speak from this material as if it is simply what they know about the week. HARD FORM RULES: 800-1400 words of flowing prose. NO title, NO headline, NO byline, NO author name, NO date, NO dateline, NO headers, NO bullets, NO time marks. Start mid-world with the first story. Never label, introduce, or refer to this text, a document, notes, a source, or the show's production in any way — write the week's facts and color directly, in plain declarative third person, the way an insider would brief a friend. THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes.";
 }
 function podFocus(){
-  return "Two hosts of "+S.world.podium.show+". Work through the source in order. Talk ONLY about what the source contains. If a team or player is not in the source, they do not exist this episode. No outside NFL knowledge, no real-world events.";
+  /* v1.16.0: the hosts are insiders, never readers. */
+  return "Two hosts of "+S.world.podium.show+". You simply KNOW everything in the source \u2014 talk like insiders who watched the week, never like people reading a text. NEVER mention or allude to a document, source, notes, script, author, byline, headline, or date; never say things like \"according to\" or \"it says here\". Work through the week's stories in order. Talk ONLY about what the source contains \u2014 if a team or player is not in it, they do not exist this episode. No outside NFL knowledge, no real-world events.";
 }
 async function genEpisodeBrief(){
   /* v1.12.2 (Ty's ruling): the Podium is walled until midweek is handled — the engine door
@@ -3595,10 +3591,12 @@ async function genEpisodeBrief(){
   toast("Writing the brief…");
   try{
     const last = lastPlayed();
+    const _cid=S.careerId;                                               /* v1.16.0 career lock */
     const out = await callAI(podBriefSys(),
-      worldFacts(S.blob, last)+leagueDigest()+"\nWrite this week's source document now.", podLenSpec().k==="deep"?4500:podLenSpec().k==="short"?1400:2600);
+      worldFacts(S.blob, last)+leagueDigest()+"\nWrite this week's source material now.", 3600);
+    if (S.careerId!==_cid) return;
     const focus=podFocus();
-    const ep={id:"ep"+Date.now(), t:"Ep. "+(41+S.world.podium.eps.length), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};
+    const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};
     S.world.podium.eps.unshift(ep); persist(); renderApp("podium"); toast("Brief ready. Feed it to NotebookLM.");
   }catch(e){ toast("Generation failed: "+e.message); }
 }
@@ -3638,7 +3636,11 @@ function presserGate(g, d){
   const pos=S.blob.player.pos;
   const rng=seedRng(S.careerId+"|pod|"+g[2]+g[1]+g[0]);
   if (d){
-    if (!(d.GAMESPLAYED>0)) return {yes:false, why:"you didn't get in the game"};
+    if (!(d.GAMESPLAYED>0)){
+      const tq=pullTier();
+      if (tq.score>=45) return {yes:true, pull:true, didPlay:false};   /* v1.16.0 (Ty's benched kicker): the noise outranks the box score — a player in the news gets a room even from the bench */
+      return {yes:false, why:"you didn't get in the game"};
+    }
     const off=(d.PASSYARDS||0)+(d.RUSHYARDS||0)+(d.RECEIVEYARDS||0);
     const tds=(d.PASSTDS||0)+(d.RUSHTDS||0)+(d.RECEIVETDS||0)+(d.DSECINTTDS||0);
     const splash=(d.DSECINTS||0)+(d.DLINESACKS||0)+(d.DLINEFORCEDFUMBLES||0)+(d.DLINEFUMBLERECOVERIES||0);
@@ -3651,7 +3653,7 @@ function presserGate(g, d){
     return {yes:false, why:(d.DEFTACKLES||0)===1? "one tackle isn't a press conference" : "a quiet stat line"};
   }
   const t=pullTier();
-  if (t.score>=45) return {yes:true};
+  if (t.score>=45) return {yes:true, pull:true, didPlay:false};   /* v1.16.0: no stat line + a big pull = the room came for the NOISE, and the questions must know it */
   if (pos==="QB") return {yes: rng()<0.5, why:"the room wanted the starters"};
   return {yes: rng()<0.25, why:"the room wanted the starters"};
 }
@@ -3797,7 +3799,7 @@ RENDER.cal = b=>{
   </div>`}).join("")}
   ${S.presserDue? `<div class="hoodhead" style="color:var(--ink);margin-top:18px"><h3>Postgame press conference</h3><span style="color:var(--faint)">the room won't leave</span></div>
   <div class="synccard" style="margin:0 0 6px;border:1px solid rgba(244,180,92,.35)">
-    <p style="margin-top:0">${S.presserDue.home?"vs":"at"} ${esc(S.presserDue.opp)} went final ${S.presserDue.score[0]}-${S.presserDue.score[1]}. The room is waiting. Whatever you say here IS your postgame quote — the paper, the feeds, and the shows can only use these words.</p>
+    <p style="margin-top:0">${S.presserDue.home?"vs":"at"} ${esc(S.presserDue.opp)} went final ${S.presserDue.score[0]}-${S.presserDue.score[1]}. ${S.presserDue.pull?"They didn't come for the box score — they came for the noise around you. ":""}The room is waiting. Whatever you say here IS your postgame quote — the paper, the feeds, and the shows can only use these words.</p>
     <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="presserSheet()">Take questions</button>
   </div>`:""}
   ${(!S.presserDue && S.presserNone && S.presserNone.wk===wkLabel(S.blob.clock))? `<p style="font-size:11.5px;opacity:.55;margin:14px 2px 0">No press conference this week — ${esc(S.presserNone.why)}.</p>`:""}
@@ -3812,7 +3814,7 @@ async function presserQuestions(){
   const fallback=()=>pressTemplates({opp:d.opp, score:d.score}, d.record_after);
   if (!aiKey()) return fallback();
   try{
-    const out=await callAI("You write 4 postgame press-conference questions for the player described. Questions address ONLY the game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+"."+freshLine()+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
+    const out=await callAI("You write 4 postgame press-conference questions for the player described. The game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+"."+(d.pull? " THE ROOM CAME FOR THE NOISE, NOT THE GAME: the player is in the news for his own public words and standing (the facts carry it) — at least two questions press him directly on that noise"+(d.didPlay===false?", and he DID NOT play in this game, so never ask about his in-game performance":"")+"; the rest can touch the team's result." : " Questions address ONLY the game just played.")+freshLine()+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
       worldFacts(S.blob, lastPlayed())+"\n\nWrite the four questions now.", 500);
     const arr=parseModelJSON(out);
     if (Array.isArray(arr)&&arr.length) return arr.slice(0,5).filter(x=>x&&x.q);
@@ -3990,13 +3992,21 @@ function weekRunLine(){
   if (podGated && !weekJobReady(podGated) && done===total-1) return "The week is written \u2713 \u00b7 the Podium episode writes itself after your media availability.";
   return "The week's writing will resume on its own \u2014 or tap Resume now.";
 }
+/* ==================== v1.16.0 THE CAREER LOCK (Ty's field report) ====================
+   He swapped saves mid-generation and one save's paper leaked into the other: every runner
+   job AWAITS the model then writes into the LIVE global S — switch careers during the await
+   and the words land in whichever career is open when the model answers. The law: every
+   generation captures its careerId at birth and DROPS its words silently if the phone is
+   standing in a different career when they arrive. The orphaned week resumes untouched the
+   moment its own career is reopened (visibilitychange/runWeek pick it back up). */
 async function runWeek(){
   if (weekRunBusy || !S || !S.weekJobs) return;
   if (!aiKey()) return;                                                    // keyless never runs the phone pen
   if (S.weekJobs.wk!==wkKey(S.blob.clock)){ S.weekJobs=null; persist(); if(curApp==="sync") renderApp("sync"); return; }   // a week the save left dies quietly — and the card dies WITH it (v1.15.0: the stale card used to linger with a dead Resume button)
   weekRunBusy=true; await wakeAcquire(); if(curApp==="sync") renderApp("sync");
+  const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   for (const j of S.weekJobs.jobs){
-    if (!S.weekJobs) break;
+    if (!S.weekJobs || S.careerId!==_cid) break;
     if (j.st==="done") continue;
     if (j.st==="gated"){ if (weekJobReady(j)) j.st="todo"; else continue; }   /* v1.15.0: world ungates on the practice log; podium on media + practice */
     if (j.st!=="todo" && j.st!=="failed") continue;
@@ -4005,6 +4015,7 @@ async function runWeek(){
       else if (j.id==="article"){ const l=lastPlayed(); if (l && !(S.articleFor||{})[gkey(l)]) await writeGameStory(S.blob, l); }
       else if (j.id==="world"){ await generateWeek(S.blob, lastPlayed(), {local:true, noArticle:true, fullWeek:true}); }
       else if (j.id==="podium"){ await podiumJobRun(); }
+      if (S.careerId!==_cid) break;                                        /* v1.16.0: words for a career he left never mark done here */
       j.st="done"; delete j.err; persist(); if(curApp==="sync") renderApp("sync");
     }catch(e){ j.st="failed"; j.err=String(e.message||e).slice(0,90); persist(); if(curApp==="sync") renderApp("sync"); break; }
   }
@@ -4012,17 +4023,30 @@ async function runWeek(){
   weekRunBusy=false; wakeRelease(); if(curApp==="sync") renderApp("sync");
 }
 document.addEventListener("visibilitychange", ()=>{ try{ if(!document.hidden && S && S.weekJobs) runWeek(); }catch(e){} });   /* v1.13.0: coming back resumes the week */
+/* v1.16.0 (Ty's field report): the fallback door — when a week hangs or its words look wrong
+   (a leak, a bad generation), one tap re-enqueues the WHOLE week and writes it fresh. This
+   week's article stamp clears so the paper rewrites too. */
+function weekRestart(){
+  if (!aiKey()) return toast("Keyless weeks are written by the computer \u2014 re-run the phone jobs there.");
+  const l=lastPlayed(); if (l && S.articleFor) delete S.articleFor[gkey(l)];
+  S.weekJobs=null; weekEnqueue(S.blob, l);
+  toast("Rewriting the week from the top.");
+  runWeek();
+}
 async function podiumJobRun(){
   /* the episode writes ITSELF after media availability (quote law: his real answers exist first) */
+  const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   const last=lastPlayed();
-  const out=await callAI(podBriefSys(), worldFacts(S.blob, last)+leagueDigest()+"\nWrite this week's source document now.", podLenSpec().k==="deep"?4500:podLenSpec().k==="short"?1400:2600);
+  const out=await callAI(podBriefSys(), worldFacts(S.blob, last)+leagueDigest()+"\nWrite this week's source material now.", 3600);
+  if (S.careerId!==_cid){ console.log('career lock: an episode written for another save was dropped at the door'); return; }
   const focus=podFocus();
-  const ep={id:"ep"+Date.now(), t:"Ep. "+(41+S.world.podium.eps.length), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};
+  const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};   /* v1.16.0 (Ty): episode numbers are the career's OWN count — a first show is Ep. 1, the canon feed continues from its seeded history */
   S.world.podium.eps.unshift(ep);
   S.world.notifs.unshift({app:"podium", t:"Podium", p:"This week's episode brief wrote itself"});
 }
 async function midweekTick(){
   if (!aiKey() && !laneCOn()) return toast("Add an API key in Sync first.");   // v1.8.1: the computer's key covers the heavies
+  const _mwCid=S.careerId;                                                 /* v1.16.0 career lock */
   const wk = wkKey(S.blob.clock);
   S.midweek = S.midweek||{};
   if (S.midweek[wk] || calBusy) return;
@@ -4053,7 +4077,7 @@ async function midweekTick(){
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x1-3],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x0-1],
 "huddle":[{"id":"unique","flair":"DISCUSSION","u":"","tm":"2h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[]} x6-9]} x1, a practice-week fan thread],
-"podium":{"t":"episode title","brief":"a ${podLenSpec().words} source brief for the show, flowing prose with NO time marks and NO segment headers (the audio length is set separately; never compress for time; depth: ${podLenSpec().depth}), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment."}}` + threadCtx() + inboundPlan();
+"podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment."}}` + threadCtx() + inboundPlan();
   try{
     /* v1.8.1 LANE C: the midweek heavyweight rides the mailbox when the toggle is on; the
        intake below is UNTOUCHED — it runs when the computer's text comes home instead. */
@@ -4064,12 +4088,13 @@ async function midweekTick(){
       if (handled){ calBusy=false; if(curApp==="cal") renderApp("cal"); return; }
     }
     const j = await aiJSON(sys, worldFacts(S.blob, lastPlayed())+"\n\nWrite the midweek beat now.", 6000);
-    intakeMidweek(j, wk);
+    intakeMidweek(j, wk, _mwCid);
   }catch(e){
     /* v1.7.6 (Ty: coach word arrived, nothing else did): a failed generation used to leave only
        a vanishing toast — a half-empty midweek could pass for a quiet one. The failure now leaves
        a persistent notification and an honest stamp; the Calendar card stays up for a retry. */
     const d=new Date();
+    if (S.careerId!==_mwCid){ console.log("career lock: a midweek for another save was dropped"); return; }
     S.lastMidweek = "FAILED "+d.toLocaleDateString([], {month:"short",day:"numeric"})+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" — "+String(e.message||e).slice(0,90)+" — tap Play midweek to retry";
     S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"sync", t:"Sync", p:"Midweek didn't generate — tap Play midweek in Sync to retry"});
     persist();
@@ -4077,7 +4102,8 @@ async function midweekTick(){
   }
   calBusy=false; if(curApp==="cal") renderApp("cal");
 }
-function intakeMidweek(j, wk){
+function intakeMidweek(j, wk, _cid){
+  if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a midweek for another save was dropped at the door'); return; }
   /* v1.8.1: the midweek intake is ONE door — husks, dupes, notebook voice, and the earned
      scrum auto-pop fire identically whether the phone or the computer wrote the JSON. */
   const f=S.chirp.followers||0;
@@ -4631,6 +4657,7 @@ RENDER.sync = b=>{
   b.innerHTML = aphead("Sync") + `<div class="apbody">
   ${syncSetupHtml()}
   ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${weekResumeShows()? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="resumeWeekClick()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
+  ${aiKey()? `<p style="font-size:11px;opacity:.45;margin:6px 4px 0"><a href="#" onclick="weekRestart();return false" style="color:inherit">Week look wrong or stuck? Rewrite this week from the top.</a></p>`:""}
   ${(aiKey() && S.weekJobs && !pracPicked() && !S.presserDue)? `<div class="synccard" style="border:1px solid rgba(122,220,150,.35)"><h4>Practice week</h4>
     <p style="margin:4px 0 8px">How did the week of practice and meetings go? The coach's evaluation feeds everything that writes next${midweekMediaOn()&&!mediaHandled()?" \u2014 and the reporters are waiting at your locker after":""}.</p>
     <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="pracSheet()">Log the practice week</button></div>`:""}
@@ -4751,7 +4778,11 @@ function ordTotal(){ return staffState().orders.length + (S.orders||[]).length; 
 function copyOrders(){
   if (!ordTotal()) return;
   const code=ordersCode();
-  const done=()=>toast("Order code copied. Paste it into the exe's Coach orders box.");
+  /* v1.16.0 (Ty's field report): after the week wraps, the wizard told him to GO PLAY and the
+     computer step needed a second tap. The copy IS the handoff moment — stamp it, and the
+     wizard's next card is the COMPUTER until the queue changes (hash law, same as WAIT). */
+  S.ordersCopied={ts:Date.now(), hash:codeHash(code), wk:wkKey(S.blob.clock)}; persist();
+  const done=()=>{ toast("Order code copied. Paste it into the exe's Coach orders box."); if(curApp==="sync") renderApp("sync"); };
   if (navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done).catch(()=>ordFallbackCopy(code,done));
   else ordFallbackCopy(code,done);
 }
@@ -5108,6 +5139,10 @@ function mailNextStep(){
     && (!S.mailOrdersSentHash || S.mailOrdersSentHash===codeHash(ordersCode()));
   if (sent) return {k:"wait", t:"Orders sent "+mailTime(S.mailOrdersSent)+" \u2713. Now on the COMPUTER: 1) open TyPhone Sync \u00b7 2) Pull orders from the phone (the AMBER box) \u00b7 "+(S.mailJobs?"3) Run phone jobs (the BLUE box) \u00b7 4) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 5) Send sync ONLINE (GREEN)":"3) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 4) Send sync ONLINE (GREEN)")+". Then come back here and tap Check."};
   if (S.mailJobs) return {k:"jobs", t:"The "+(S.mailJobs.kind==="midweek"?"midweek":S.mailJobs.kind==="story"?"game story's":"week's")+" writing is on the computer's desk (sent "+mailTime(S.mailJobs.sentAt)+"). On the COMPUTER: open TyPhone Sync \u2192 Run phone jobs (the BLUE box). Then come back here and tap Check."};
+  /* v1.16.0 (Ty): THE code in hand means the next step is the COMPUTER — never "go play".
+     Self-invalidates the moment the queue changes (hash law). */
+  if (ordTotal()>0 && S.ordersCopied && S.ordersCopied.hash===codeHash(ordersCode()))
+    return {k:"computer", t:"THE code is in your hand \u2713 (copied "+mailTime(S.ordersCopied.ts)+"). On the COMPUTER: open TyPhone Sync \u2192 paste THE code in the Coach orders box \u2192 Validate \u2192 Apply. Then in Madden: advance the week, play, save \u2014 and send the sync back.", btn:"Open the review again", fn:"reviewSheet()"};
   if (mailInfo && mailInfo.noBox) return {k:"nobox", t:"No mailbox exists yet. One-time, on the COMPUTER: TyPhone Sync \u2192 save the token (the PURPLE box) \u2192 pick save + player \u2192 Send sync ONLINE (GREEN). That creates the box."};
   if (!aiKey() && midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};   /* v1.13.0: a KEYED phone has no midweek step — media availability is a card, not a gate */
   if (ordTotal()>0){
@@ -5680,7 +5715,7 @@ async function advanceTo(blob){
       const d=(oldC.seasonIndex===newC.seasonIndex && Object.keys(nSS).length)? statDelta(oldSS,nSS) : null;
       const gate=presserGate(last, d);
       if (gate.yes){
-        S.presserDue={gk, opp:last[3], home:!!last[4], score:last[7], record_after:recordAfter(blob.schedule,last), wk:wkLabel(newC)};
+        S.presserDue={gk, opp:last[3], home:!!last[4], score:last[7], record_after:recordAfter(blob.schedule,last), wk:wkLabel(newC), pull:gate.pull||false, didPlay:gate.didPlay!==false};
         S.world.notifs.push({app:"cal", t:"Media", p:"Postgame press conference — the room is waiting"});
         S.presserNone=null;
       } else {
@@ -6301,7 +6336,8 @@ function storySys(wByline){
      computer job carry the identical instruction. */
   return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
-function intakeGameStory(art, byline, wkLbl, gk){
+function intakeGameStory(art, byline, wkLbl, gk, _cid){
+  if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
   /* v1.8.1: the story's intake is ONE door — the phone's own call and the computer's
      returned text both land here, so the byline/credit laws can never fork. */
   if (!(art && art.paras && art.paras.length)) throw new Error("the model returned no story");
@@ -6312,9 +6348,10 @@ function intakeGameStory(art, byline, wkLbl, gk){
   return art;
 }
 async function writeGameStory(blob, last){
+  const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   const wByline = chronWriter("game"+wkKey(blob.clock));
   const art = await aiJSON(storySys(wByline), worldFacts(blob,last)+"\n\nWrite the game story now.", 8000);
-  return intakeGameStory(art, wByline, wkLabel(blob.clock), last? gkey(last):null);
+  return intakeGameStory(art, wByline, wkLabel(blob.clock), last? gkey(last):null, _cid);
 }
 let chronBusy=false;
 async function queueStoryJob(last){
@@ -6342,6 +6379,7 @@ async function chronRetry(){
   chronBusy=false; if(curApp==="chron") renderApp("chron",{a:0});
 }
 async function generateWeek(blob, last, opts){
+  const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   opts=opts||{};
   if (laneCOn() && !opts.local) return queueWorldJobs(blob, last, opts);   // v1.8.1 LANE C: the heavy writing rides the mailbox
   toast("Generating the week's world…");
@@ -6363,6 +6401,7 @@ async function generateWeek(blob, last, opts){
   let j;
   try { j = await aiJSON(sys, worldFacts(blob,last)+"\n\nWrite this week's world.", 16000); }
   catch(e){ throw new Error("world call failed: "+String(e.message||e).slice(0,140)); }
+  opts=Object.assign({},opts,{_cid:_cid});   /* v1.16.0: the lock rides to the door */
   intakeWorld(j, wkLabel(blob.clock), last? gkey(last):null, opts);
 }
 function worldSys(opts){
@@ -6382,8 +6421,10 @@ function worldSys(opts){
 }
 function intakeWorld(j, wkLbl, gk, opts){
   /* v1.8.1: the world's intake is ONE door — dedupe, husks, and every merge law run
-     identically whether the JSON came from the phone's own call or the computer's job. */
+     identically whether the JSON came from the phone's own call or the computer's job.
+     v1.16.0: the door checks the LOCK — words written for one career never enter another. */
   opts=opts||{};
+  if (opts._cid!==undefined && opts._cid!==S.careerId){ console.log('career lock: a week generated for another save was dropped at the door'); return; }
   if (j.article && !opts.noArticle){ j.article.wk=wkLbl; S.world.articles.unshift(j.article); S.articleFor=S.articleFor||{}; if(gk) S.articleFor[gk]=1; }
   if (j.chirps) S.world.chirps=[...dedupeChirps(j.chirps, S.world.chirps), ...S.world.chirps].slice(0,40);   // v1.7.7: no repeat voices
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
@@ -7094,7 +7135,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.15.0";
+const VER="v1.16.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
