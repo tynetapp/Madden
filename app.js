@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.16.0 (Aug 11 2026) — THE CAREER LOCK (v1.15.0 was THE PLAYER'S WEEK: practice picks move into the sync flow: presser -> log practice -> post-practice questions one at a time; world+podium gate on the log; the paper stays Monday-morning) + MONEY TEETH (salary advance $50k/32%/one-per-sync; loan ceilings scale with INCOME never NW; rebuild loan needs 580) + THE SEALED WEEK notice + METROS (relocations land in the real city, nearest-metro hoods) + THE GHOST CONTRACT card (min-deal or cap-number rebuild, rides the ONE code) + Resume-button honesty (prior: v1.14.0) */
+/* TyPhone app.js — v1.16.1 (Aug 12 2026) — THE HONEST QUEUE PART TWO (applied orders leave the box via the send-time snapshot; coach rulings expire with their week; the count tells the truth) + THE COMPUTER-FIRST TEACH (sealed-week popup, wait/computer/idle states all spell Ty's exact order: Check the mailbox -> code box you don't touch -> plain-language plan -> close franchise -> APPLY -> reopen -> THEN Madden) + THE MINIMUM SCALE (minSalaryFor: $885k rookie 2026 -> $1.3M at 7+, whole scale +2%/yr past 2026; ghost card prices year-by-year) + NO SELF-BETTING (selfBet detector refuses markers, betLawLine makes every counterpart flatly deny — not allowed) + CLIENT SERVICES ON THE CARD (weekly lifestyle share rides payWithCard, checking fallback) + PODIUM HONESTY (walls until practice is LOGGED and the episode really exists) + a roomier week-restart link (prior: v1.16.0) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -161,6 +161,17 @@ function grossFor(status, pl){ return status==="PracticeSquad" ? psWeekly() : ac
    so the number scales with the franchise's cap growth forever. Legacy codes without the field
    fall back to the flat honest figure. ONE door: checkLines and the NFLPA welcome email both
    read here. */
+/* v1.16.1 (Ty's scale, verbatim): league MINIMUM salary — $885,000 for a rookie in a season
+   started in 2026, rising to $1.3M at seven-plus seasons; a franchise save sitting in 2027 or
+   beyond lifts the WHOLE scale 2% per year further out. ONE door for every minimum-contract
+   number on the phone (the ghost card files through it). NFLPA dues stay on their own
+   save-truth door (v1.12.2 ruling) — this scale never touches them. */
+function minSalaryFor(yearsPro, seasonYear){
+  const y=Math.max(0, Math.min(7, +yearsPro||0));
+  const base=885000 + Math.round((1300000-885000)*y/7/5000)*5000;
+  const out=Math.max(0, ((+seasonYear||2026)-2026));
+  return Math.round(base*Math.pow(1.02,out)/1000)*1000;
+}
 function nflpaDues(blob){
   const m = (blob && blob.minRookieSalary) || (typeof S!=="undefined" && S && S.blob && S.blob.minRookieSalary) || 0;
   return m>0 ? Math.round(m*0.0375/18) : 1845;
@@ -1655,6 +1666,20 @@ function threadMarkerNote(thread){
   if (!mine.length) return "";
   return " THIS conversation is party to these markers (you may bring them up naturally, nag about them, or joke about them): "+mine.map(m=>(m.dir==="owed"? "YOU owe him":"he owes YOU")+" — "+m.what+(m.amt>0?" ("+fm(m.amt)+")":" (amount still TBD)")).join("; ")+".";
 }
+/* v1.16.1 (Ty's ruling): NOBODY BOOKS ACTION ON HIS OWN PLAY. A wager on his own on-field
+   performance ("i bet i'll score 5 touchdowns") is detected two ways — the CODE refuses to
+   put it on the books (no marker, no money), and the AI LAW makes whoever he's talking to
+   flatly deny taking part, every time, citing that it isn't allowed. */
+function selfBet(t){
+  t=String(t||"");
+  if (!/\b(bet|wager|odds|parlay|stakes?|action)\b/i.test(t)) return false;
+  if (!/\b(i|i'?ll|i'?m|my|me|myself)\b/i.test(t)) return false;
+  if (/\b(i\s+bet\b|bet\s+(?:you|ya|u)\b|wanna\s+bet|\$?\d[\d,]*\s+says\s+i|put\s+(?:money|\$\s?\d[\d,]*)\s+on\s+(?:me|myself)|odds\s+(?:that\s+)?i)\b/i.test(t)) return true;
+  return /\b(score|throw|pass|rush|catch|sack|pick|intercept|kick|punt|td|touchdown|tds|yard|yards|tackle|field\s*goal|fg)\w*\b/i.test(t);
+}
+function betLawLine(){
+  return " GAMBLING LAW (absolute): if he proposes any bet, wager, or stakes on HIS OWN on-field performance, you REFUSE flatly and completely — league rules prohibit it and everyone around him knows it. You never take the bet, never agree to odds, never pay or promise money on it, and no amount of pushing changes your answer; each time, say in your own words that betting on his own play isn't allowed. Friendly non-money stakes talk can stay banter, but nothing that moves money ever forms.";
+}
 function markerLine(){
   const mk=markers(); if(!mk.length) return "";
   return "PROMISES ON THE BOOKS (the player's own word, logged by him; the world may bring these up naturally but they are UNPAID until he settles, and the world must NEVER invent other debts or promises): "
@@ -1684,6 +1709,7 @@ function addMarkerGo(){
   const sel=$("#mkWho"); const who=(sel.value||"").trim(), what=($("#mkWhat").value||"").trim();
   const tid=(sel.selectedOptions[0]&&sel.selectedOptions[0].dataset.tid)||"";
   if(!who||!what) return toast("Who and what, minimum.");
+  if (selfBet(what)) return toast("Nobody books action on your own play. League rules — it can't go on the books.");   /* v1.16.1 */
   const amt=Math.max(0, +$("#mkAmt").value||0);
   markers().push({id:"mk"+Date.now(), who, tid, what, amt, dir:$("#mkDir").value==="owed"?"owed":"owe", wk:wkLabel(S.blob.clock)});
   persist(); closeSheet(); toast("On the books. "+who+" knows."); if(curApp==="meridian") merBody();
@@ -1725,6 +1751,7 @@ function setMarkerAmtGo(i){
 function dropMarker(i){ markers().splice(i,1); persist(); if(curApp==="meridian") merBody(); toast("Off the books."); }
 function maybeMarkerOffer(t, msg){
   if (t.id==="coach") return;
+  if (selfBet(msg)) return;   /* v1.16.1: betting on his own play never becomes a marker offer — the counterpart's refusal (betLawLine) is the only answer */
   if (!/\b(i(?:'|\u2019)?ll (?:pay|cover|send|get|buy|handle)|i got ?(?:you|chu|u)\b|deal\b|\bbet\b|my treat|put it on me|i owe you|you owe me|tab(?:'s)? on me)\b/i.test(msg)) return;
   S._mkAsk=S._mkAsk||{}; const now=Date.now();
   if (S._mkAsk[t.id] && now-S._mkAsk[t.id]<10*60*1000) return;
@@ -3215,12 +3242,14 @@ function cardNaturalTier(){ let best=CARD_TIERS[0]; for (const t of CARD_TIERS) 
 function cardUnlimited(){ return cardTier().id==="unlimited"; }
 function cardRoom(){ return cardUnlimited()? Infinity : Math.max(0, S.credit.cardLimit - S.credit.cardBal); }
 function cardCanCharge(amt){ return cardUnlimited() || (S.credit.cardBal + amt) <= S.credit.cardLimit; }
-function payWithCard(amt, label){
+function payWithCard(amt, label, quiet){
   /* THE ONE CHARGE DOOR. A maxed card is a REAL decline — the toast names the shortfall,
      nothing posts. Interest can still push the balance over-limit; over-limit blocks all
-     card purchases until it's paid down. Cashback lands in CHECKING the same moment. */
+     card purchases until it's paid down. Cashback lands in CHECKING the same moment.
+     v1.16.1: quiet=true skips the decline TOAST (engine-time charges like the weekly burn
+     speak through notifs, not pop-ups over whatever screen he's on). */
   if (!cardCanCharge(amt)){
-    toast("Card declined. "+fm(amt)+" needs "+fm(Math.max(0,(S.credit.cardBal+amt)-S.credit.cardLimit))+" more room on your "+cardTier().n+" line ("+fm(S.credit.cardLimit)+").");
+    if (!quiet) toast("Card declined. "+fm(amt)+" needs "+fm(Math.max(0,(S.credit.cardBal+amt)-S.credit.cardLimit))+" more room on your "+cardTier().n+" line ("+fm(S.credit.cardLimit)+").");
     return false;
   }
   S.credit.cardBal += amt;
@@ -3475,8 +3504,13 @@ RENDER.assist = b=>{
     <div class="payline"><span>Fixed bills</span><span>${fm(S.bills.reduce((a,x)=>a+x.amt,0))}/mo</span></div>
     <div class="payline tot"><span>Total monthly burn</span><span>${fm(monthlyBurn())}/mo</span></div>
   </div>
+  <div class="veh-detail" style="margin-top:10px">
+    <button class="btn sm" style="background:${S.assistCard?"var(--ok)":"rgba(255,255,255,.12)"};color:${S.assistCard?"#04170d":"inherit"}" onclick="setAssistCard(${S.assistCard?0:1})">${S.assistCard? "\u2713 Billing to the Meridian card":"Bill Client Services to the Meridian card"}${cardTier().cb?" ("+cardTier().cb+"% back)":""}</button>
+    <p style="font-size:11.5px;opacity:.55;margin:6px 0 0">${S.assistCard? "Your lifestyle spend rides the card each week; cashback lands in checking the same moment. If the card is ever full, the week falls back to checking so the bills still get paid.":"All Client Services spending can ride the card — cashback included."}</p>
+  </div>
   </div>`;
 };
+function setAssistCard(v){ S.assistCard=!!v; persist(); if(curApp==="assist") renderApp("assist"); toast(v? "Client Services rides the Meridian card now.":"Back to checking."); }   /* v1.16.1 (Ty): every Client Services dollar is card-eligible */
 function setAssist(i, v){
   S.assistTiers[i]=v; persist(); renderApp("assist"); renderWidget();
   toast("Noted. "+D.ASSIST.cats[i][1][v][0]+".");
@@ -3505,6 +3539,17 @@ RENDER.podium = b=>{
        stay readable forever; only the making walls. genEpisodeBrief guards at the engine door too. */
     const wk=wkKey(S.blob.clock); const mwDone=(S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk]);
     if(!mwDone) return `<div class="veh-detail"><p style="font-size:13px;line-height:1.6;opacity:.85;margin:0">The show tapes after your media availability. Open <b>Sync</b> and play out midweek first, or choose \u201cDon\u2019t talk to the media during the week\u201d \u2014 then this week's episode opens up here.</p></div></div>`;
+    /* v1.16.1 (Ty's field report): the walkthrough claimed "the brief already wrote itself"
+       the moment the media step MARKED — but the episode only exists once the practice week
+       is LOGGED and the runner's podium job actually finishes. If he pressed the sync and
+       left the page mid-write, the claim was a lie. Two honest walls, keyed phones only:
+       first the practice log, then the episode's real existence on the feed. */
+    if (aiKey() && !pracPicked()) return `<div class="veh-detail"><p style="font-size:13px;line-height:1.6;opacity:.85;margin:0">The show tapes after the practice week is logged. Open <b>Sync</b> and log how practice and meetings went \u2014 the episode writes itself right after, and this page opens up.</p></div></div>`;
+    if (aiKey() && !S.world.podium.eps.some(e=>e.wk===wkLabel(S.blob.clock))){
+      const pj=S.weekJobs&&S.weekJobs.jobs&&S.weekJobs.jobs.find(j=>j.id==="podium");
+      const failed=pj&&pj.st==="failed";
+      return `<div class="veh-detail"><p style="font-size:13px;line-height:1.6;opacity:.85;margin:0">${failed? "The episode's writing paused ("+esc(pj.err||"failed")+"). Open <b>Sync</b> and tap <b>Resume the week's writing</b> \u2014 the brief lands here when it's done." : "The episode is still being written \u2014 keep the phone open a moment and it lands under <b>Episodes</b> above. If it seems stuck, <b>Sync</b> has a Resume button."}</p></div></div>`;
+    }
     return `<div class="veh-detail">
     <p style="font-size:13px;line-height:1.75;opacity:.85;margin-top:0">This week's brief already wrote itself \u2014 it's under <b>Episodes</b> above (tap <b>Regenerate</b> there any time for a fresh take). Then:<br>
     <b>1.</b> Get Google's <b>NotebookLM</b> \u2014 the app from your phone's app store, or notebooklm.google.com on a computer \u2014 and sign in. (App and web layouts differ a little; these steps follow the phone app.)<br>
@@ -4657,7 +4702,7 @@ RENDER.sync = b=>{
   b.innerHTML = aphead("Sync") + `<div class="apbody">
   ${syncSetupHtml()}
   ${(S.weekJobs && aiKey())? `<div class="synccard box-sync" style="padding:10px 14px"><p style="margin:0;font-size:12.5px">${weekRunLine()}</p>${weekResumeShows()? `<button class="btn sm" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="resumeWeekClick()">Resume the week\u2019s writing</button>`:""}</div>` : ""}
-  ${aiKey()? `<p style="font-size:11px;opacity:.45;margin:6px 4px 0"><a href="#" onclick="weekRestart();return false" style="color:inherit">Week look wrong or stuck? Rewrite this week from the top.</a></p>`:""}
+  ${aiKey()? `<p style="font-size:12.5px;line-height:1.6;opacity:.55;margin:14px 4px 8px;padding:2px 0"><a href="#" onclick="weekRestart();return false" style="color:inherit;display:inline-block;padding:4px 0">Week look wrong or stuck? Rewrite this week from the top.</a></p>`:""}
   ${(aiKey() && S.weekJobs && !pracPicked() && !S.presserDue)? `<div class="synccard" style="border:1px solid rgba(122,220,150,.35)"><h4>Practice week</h4>
     <p style="margin:4px 0 8px">How did the week of practice and meetings go? The coach's evaluation feeds everything that writes next${midweekMediaOn()&&!mediaHandled()?" \u2014 and the reporters are waiting at your locker after":""}.</p>
     <button class="btn sm" style="background:var(--ok);color:#04170d" onclick="pracSheet()">Log the practice week</button></div>`:""}
@@ -4775,13 +4820,43 @@ function ordAdd(type){
    first (he outranks you), your queued moves follow, one TYORD1, one paste. */
 function ordersCode(){ return "TYORD1"+JSON.stringify({orders:[...staffState().orders.map(o=>o.order), ...(S.orders||[])]}); }
 function ordTotal(){ return staffState().orders.length + (S.orders||[]).length; }
+/* ==================== v1.16.1 THE HONEST QUEUE, PART TWO (Ty: "does 'back to the save' stuff
+   ever go away?") ==================== It didn't — applied orders lived in the box forever,
+   the count lied ("5 queued" with nothing pending), and a week-old benching still wore an ✕.
+   Now: every send/copy SNAPSHOTS exactly what rode the code; the moment the computer's
+   applied handshake is seen (or the manual code's week turns), those exact entries leave
+   both queues — staff rulings retire into the coach's log, his moves just clear. Anything
+   queued AFTER the send survives untouched (the changed-queue hash law already re-offers it). */
+function snapOrders(code){
+  S.ordersSentSnap={h:codeHash(code), staffIds:staffState().orders.map(o=>o.id), own:(S.orders||[]).map(o=>JSON.stringify(o))};
+}
+function clearAppliedOrders(via){
+  const snap=S.ordersSentSnap; if(!snap) return false;
+  const st=staffState(); let n=0;
+  st.orders=st.orders.filter(o=>{ if(snap.staffIds.includes(o.id)){ st.log.unshift({t:Date.now(), x:"Applied to the save: "+(o.kind==="bench"?"the benching":"the demotion")+" ("+String(o.why||"").slice(0,60)+")"}); n++; return false; } return true; });
+  const want=snap.own.slice();
+  S.orders=(S.orders||[]).filter(o=>{ const j=JSON.stringify(o); const ix=want.indexOf(j); if(ix>=0){ want.splice(ix,1); n++; return false; } return true; });
+  S.ordersSentSnap=null; persist();
+  if (n && curApp==="sync") renderApp("sync");
+  return n>0;
+}
+/* coach rulings are WEEK-SCOPED — a benching was for THAT week's lineup. When the save
+   really advances, rulings from a week it left expire into the log instead of haunting
+   the box with a dead ✕. His own moves (contracts, positions, numbers) are not
+   week-scoped and survive until applied or removed — the existing law. */
+function expireStaffOrders(newWk){
+  const st=staffState(); let n=0;
+  st.orders=st.orders.filter(o=>{ if(o.wk && o.wk!==newWk){ st.log.unshift({t:Date.now(), x:"Expired with its week: "+(o.kind==="bench"?"the benching":"the demotion")+" ("+String(o.why||"").slice(0,60)+") \u2014 that week is over"}); n++; return false; } return true; });
+  if (n) persist();
+  return n;
+}
 function copyOrders(){
   if (!ordTotal()) return;
   const code=ordersCode();
   /* v1.16.0 (Ty's field report): after the week wraps, the wizard told him to GO PLAY and the
      computer step needed a second tap. The copy IS the handoff moment — stamp it, and the
      wizard's next card is the COMPUTER until the queue changes (hash law, same as WAIT). */
-  S.ordersCopied={ts:Date.now(), hash:codeHash(code), wk:wkKey(S.blob.clock)}; persist();
+  S.ordersCopied={ts:Date.now(), hash:codeHash(code), wk:wkKey(S.blob.clock)}; snapOrders(code); persist();   /* v1.16.1: manual copies clear their entries when the week really turns */
   const done=()=>{ toast("Order code copied. Paste it into the exe's Coach orders box."); if(curApp==="sync") renderApp("sync"); };
   if (navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done).catch(()=>ordFallbackCopy(code,done));
   else ordFallbackCopy(code,done);
@@ -4904,6 +4979,9 @@ async function mailCheck(force){
     else {
       const st=mailState(g);
       mailInfo={gistId:g.id, state:st};
+      /* v1.16.1: the applied handshake empties the box the moment it's seen — the AMBER card
+         stops listing paper the computer already wrote (Ty's lingering-benching report) */
+      if (st.ordersApplied && S.mailOrdersSent && st.ordersTs===S.mailOrdersSent) clearAppliedOrders("handshake");
       /* v1.8.5 (Ty's lock ruling): a sync he already handled — applied OR declined — is never
          offered again on reopen; only a strictly NEWER send offers. And while a decision sheet
          is up (mailPendingApply), a background check can't re-arm the offer under it. */
@@ -4966,7 +5044,7 @@ async function mailSendOrders(){
     else {
       const st={...mailState(g), careerId:S.careerId, ordersTs:Date.now(), ordersApplied:false};
       await mailJf(MAIL_API+"/gists/"+g.id,{method:"PATCH",headers:mailHdrs(),body:JSON.stringify({files:{"orders.txt":{content:code},"state.json":{content:JSON.stringify(st,null,1)}}})});
-      S.mailOrdersSent=st.ordersTs; S.mailOrdersSentHash=codeHash(code); persist();   /* v1.12.2: snapshot WHAT was sent — a queue that grows afterwards re-offers the send step honestly */
+      S.mailOrdersSent=st.ordersTs; S.mailOrdersSentHash=codeHash(code); snapOrders(code); persist();   /* v1.12.2: snapshot WHAT was sent — a queue that grows afterwards re-offers the send step honestly; v1.16.1: the entry-level snapshot clears exactly these when the applied handshake lands */
       if(mailInfo){ mailInfo.state=st; mailInfo.gistId=g.id; }
       toast("Orders sent to the computer's mailbox.");
     }
@@ -5137,12 +5215,12 @@ function mailNextStep(){
      silent under "Orders sent \u2713" forever. Changed queue = the send step, honestly worded. */
   const sent = ordTotal()>0 && S.mailOrdersSent && st.ordersTs===S.mailOrdersSent && !st.ordersApplied
     && (!S.mailOrdersSentHash || S.mailOrdersSentHash===codeHash(ordersCode()));
-  if (sent) return {k:"wait", t:"Orders sent "+mailTime(S.mailOrdersSent)+" \u2713. Now on the COMPUTER: 1) open TyPhone Sync \u00b7 2) Pull orders from the phone (the AMBER box) \u00b7 "+(S.mailJobs?"3) Run phone jobs (the BLUE box) \u00b7 4) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 5) Send sync ONLINE (GREEN)":"3) close the franchise \u2192 Validate \u2192 Apply (AMBER) \u00b7 4) Send sync ONLINE (GREEN)")+". Then come back here and tap Check."};
+  if (sent) return {k:"wait", t:"Orders sent "+mailTime(S.mailOrdersSent)+" \u2713. NOT Madden time yet \u2014 the COMPUTER goes first: 1) open TyPhone Sync \u00b7 2) hit Check the mailbox \u2014 it will Pull orders from the phone (the AMBER box); code fills the box (don't touch it) and your changes read in PLAIN LANGUAGE below it \u00b7 "+(S.mailJobs?"3) Run phone jobs (the BLUE box) \u00b7 4) close the franchise \u2192 Validate \u2192 APPLY (AMBER) \u00b7 5)":"3) close the franchise \u2192 Validate \u2192 APPLY (AMBER) \u00b7 4)")+" reopen Madden \u2014 the changes are in. NOW play, ADVANCE THE WEEK, save \u00b7 then on the computer: Send sync ONLINE (GREEN), and tap Check here."};
   if (S.mailJobs) return {k:"jobs", t:"The "+(S.mailJobs.kind==="midweek"?"midweek":S.mailJobs.kind==="story"?"game story's":"week's")+" writing is on the computer's desk (sent "+mailTime(S.mailJobs.sentAt)+"). On the COMPUTER: open TyPhone Sync \u2192 Run phone jobs (the BLUE box). Then come back here and tap Check."};
   /* v1.16.0 (Ty): THE code in hand means the next step is the COMPUTER — never "go play".
      Self-invalidates the moment the queue changes (hash law). */
   if (ordTotal()>0 && S.ordersCopied && S.ordersCopied.hash===codeHash(ordersCode()))
-    return {k:"computer", t:"THE code is in your hand \u2713 (copied "+mailTime(S.ordersCopied.ts)+"). On the COMPUTER: open TyPhone Sync \u2192 paste THE code in the Coach orders box \u2192 Validate \u2192 Apply. Then in Madden: advance the week, play, save \u2014 and send the sync back.", btn:"Open the review again", fn:"reviewSheet()"};
+    return {k:"computer", t:"THE code is in your hand \u2713 (copied "+mailTime(S.ordersCopied.ts)+"). NOT Madden time yet \u2014 On the COMPUTER: open TyPhone Sync \u2192 paste THE code in the Coach orders box (your changes read in plain language once it validates) \u2192 close the franchise \u2192 Validate \u2192 APPLY. Then reopen Madden \u2014 the changes are in. NOW play, ADVANCE THE WEEK, save \u2014 and send the sync back.", btn:"Open the review again", fn:"reviewSheet()"};
   if (mailInfo && mailInfo.noBox) return {k:"nobox", t:"No mailbox exists yet. One-time, on the COMPUTER: TyPhone Sync \u2192 save the token (the PURPLE box) \u2192 pick save + player \u2192 Send sync ONLINE (GREEN). That creates the box."};
   if (!aiKey() && midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};   /* v1.13.0: a KEYED phone has no midweek step — media availability is a card, not a gate */
   if (ordTotal()>0){
@@ -5152,7 +5230,7 @@ function mailNextStep(){
   }
   if (st.ordersAppliedTs && (!st.syncTs || st.syncTs<st.ordersAppliedTs)) return {k:"resync", t:"The computer applied your orders \u2713 ("+mailTime(st.ordersAppliedTs)+"). YOUR TURN in Madden: fiddle with whatever you want first (practice, lineups, the shop), play your game, then ADVANCE THE WEEK (the week isn't over until you advance \u2014 an un-advanced save syncs as this same week again), then save. THEN on the COMPUTER: re-pick the save and Send sync ONLINE (the GREEN button), then tap Check here."};
   if (st.syncTs) return aiKey()
-    ? {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). Live the week \u2014 when you're ready, the door below reviews anything headed for the save and hands you back to Madden.", btn:"On to the next game"+(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+g[3] : "";})(), fn:"reviewSheet()"}
+    ? {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). Live the week \u2014 when you're ready, the door below reviews anything headed for the save. Approving hands you to the COMPUTER first (Check the mailbox \u2192 Apply); Madden comes after.", btn:"On to the next game"+(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+g[3] : "";})(), fn:"reviewSheet()"}
     : {k:"idle", t:"All caught up \u2713 (last sync "+(st.syncWk? st.syncWk+" \u00b7 ":"")+mailTime(st.syncTs)+"). YOUR TURN in Madden: fiddle with whatever you want, play your game, then ADVANCE THE WEEK \u2014 the week isn't over until you advance; an un-advanced save syncs as this same week again \u2014 then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
   return {k:"idle", t:"Nothing in the box yet. YOUR TURN in Madden: play your game, then ADVANCE THE WEEK, then save. THEN on the COMPUTER: Send sync ONLINE (the GREEN button), then tap Check."};
 }
@@ -5212,19 +5290,31 @@ function reviewSheet(){
   ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove from this week's code">\u2715</button></div>`).join("")}`:""}
   </div>
   ${compose}
-  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();mailSendOrders();finishNotice()">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
-  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();copyOrders();finishNotice()">Approve \u2014 copy THE code (${ordTotal()})</button>`}
+  ${mailOn()? `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();mailSendOrders();finishNotice(1)">Approve \u2014 send THE code to the computer (${ordTotal()})</button>`
+  : `<button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="closeSheet();copyOrders();finishNotice(1)">Approve \u2014 copy THE code (${ordTotal()})</button>`}
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Not yet</button>`);
 }
-function finishNotice(){
+function finishNotice(codeRode){
   /* v1.15.0 (Ty): drive home what the button MEANS — approving/finishing the week seals the
      phone's side. Shown once per week, after Approve or Go play. */
   const wk=wkKey(S.blob.clock);
   if (S.finNotedWk===wk) return; S.finNotedWk=wk; persist();
+  /* v1.16.1 (Ty: "the week is sealed popup makes people think its time for madden. it isnt"):
+     when a code just rode out, the popup spells HIS exact order — the COMPUTER first (Check
+     the mailbox, the code box you don't touch, the plain-language plan, close the franchise,
+     APPLY, reopen), Madden LAST. A clean week keeps the go-play version. */
+  const codeOut = !!(codeRode || S.mailOrdersSent || S.ordersCopied);
   setTimeout(()=>{ sheet(`<h3>The week is sealed</h3>
-  <p class="sp">You're done on the phone \u2014 for all intents and purposes. <b>Nothing you do here from this point will reach the game</b> until you play, <b>ADVANCE THE WEEK</b>, save, and the next sync is uploaded from the computer.</p>
+  <p class="sp">You're done on the phone. <b>Nothing you do on TyPhone from this point reaches the game</b> until you play the next game, <b>ADVANCE THE WEEK</b>, save, and the next sync is uploaded from TyPhone Sync on the computer.</p>
+  ${codeOut? `<p class="sp"><b>Not Madden time yet.</b> Your code went to the computer \u2014 that's the next stop:</p>
+  <p class="sp" style="opacity:.85"><b>1.</b> On the computer, open TyPhone Sync and hit <b>Check the mailbox</b>.<br>
+  <b>2.</b> Code fills the orders box \u2014 don't touch it unless you know what you're doing.<br>
+  <b>3.</b> Your changes read in <b>plain language</b> below the box.<br>
+  <b>4.</b> Close your franchise (recommended), then hit <b>APPLY</b>.<br>
+  <b>5.</b> Reopen your franchise \u2014 the changes are in. <b>Now</b> play, ADVANCE THE WEEK, save, and Send sync ONLINE.</p>`
+  : `<p class="sp" style="opacity:.85">Nothing rode to the save this week \u2014 straight to Madden: play, <b>ADVANCE THE WEEK</b>, save, then Send sync ONLINE on the computer.</p>`}
   <p class="sp" style="opacity:.75">The phone keeps living \u2014 texts, posts, purchases still happen in the world \u2014 but the save can't hear any of it until next week's code rides over.</p>
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet()">Got it \u2014 go play</button>`); }, 350);
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="closeSheet()">${codeOut? "Got it \u2014 to the computer":"Got it \u2014 go play"}</button>`); }, 350);
 }
 /* ==================== v1.15.0 THE GHOST CONTRACT (Ty's probe save, answered) ====================
    A freshly CREATED player can carry ContractStatus=Signed with a NULL Player.Contract ref —
@@ -5239,8 +5329,11 @@ function ghostMoney(mode){
   const g=S.blob&&S.blob.player&&S.blob.player.ghostContract; if(!g) return null;
   /* cap mode files the creation-time number AS-IS (the deal he actually chose — the save
      tolerated it at creation, so the rebuild honors it, even below the league minimum) */
-  const yr = mode==="cap"? (g.capSalary||0) : (S.blob.minRookieSalary||880000);
-  const y1 = Math.round(yr*1.045/10000)*10000;                      // modest year-2 escalation, real-deal shaped
+  /* v1.16.1: the min deal prices YEAR BY YEAR on Ty's minimum scale — year one at his current
+     experience, year two a season older and a season further out (the 2% lift compounds). */
+  const p=S.blob.player||{}; const sy=(S.blob.clock&&S.blob.clock.seasonYear)||2026;
+  const yr = mode==="cap"? (g.capSalary||0) : minSalaryFor(p.yearsPro||0, sy);
+  const y1 = mode==="cap"? Math.round(yr*1.045/10000)*10000 : minSalaryFor((p.yearsPro||0)+1, sy+1);
   return { years:2, total: yr+y1, totalM: Math.round((yr+y1)/10000)/100, yr };
 }
 function ghostQueued(){ return !!(S.orders||[]).some(o=>o.__ghost); }
@@ -5730,10 +5823,23 @@ async function advanceTo(blob){
      order code from a previous week held the WAIT state over the NEW week's midweek forever
      (Ty's stuck screen). The week turned, so that handshake is over: clear the wait; the
      queue survives and the send step re-offers it fresh. Same-week refresh never clears. */
-  if (S.mailOrdersSent && !(mailInfo&&mailInfo.state&&mailInfo.state.ordersApplied)){
+  if (S.mailOrdersSent && mailInfo&&mailInfo.state&&mailInfo.state.ordersApplied && mailInfo.state.ordersTs===S.mailOrdersSent){
+    clearAppliedOrders("sync"); S.mailOrdersSent=null; S.mailOrdersSentHash=null;   /* v1.16.1: applied paper leaves the box with the week */
+  }
+  else if (S.mailOrdersSent && !(mailInfo&&mailInfo.state&&mailInfo.state.ordersApplied)){
     S.mailOrdersSent=null; S.mailOrdersSentHash=null;   /* v1.12.2: the snapshot dies with the handshake */
+    S.ordersSentSnap=null;                              /* v1.16.1: a never-applied send's entry snapshot dies with it — the queue survives whole */
     if (ordTotal()>0) S.world.notifs.push({app:"sync", t:"Sync", p:"Last week's order code was never applied on the computer — your queue is intact; it re-sends fresh this week"});
   }
+  /* v1.16.1: the manual path has no handshake — a copied code's week turning IS the signal.
+     The save either took the changes (they're in this blob) or the code is stale for a week
+     that's over; either way those exact entries leave the queue. */
+  if (!mailOn() && S.ordersCopied && S.ordersCopied.wk!==wkKey(newC)){
+    if (clearAppliedOrders("copied")) S.world.notifs.push({app:"sync", t:"Sync", p:"The copied code's changes cleared from the queue with the week \u2014 anything that never landed can be re-queued"});
+    S.ordersCopied=null;
+  }
+  if (S.ordersCopied && S.ordersCopied.wk!==wkKey(newC)) S.ordersCopied=null;   /* v1.16.1: a week-stamped hand-off never outlives its week */
+  expireStaffOrders(wkKey(newC));   /* v1.16.1: coach rulings are week-scoped — last week's benching can't haunt this week's box */
   /* v1.7.4: midweek matters to the sync loop — say so while it's pending */
   if (!(typeof aiKey==="function"&&aiKey())) S.world.notifs.push({app:"sync", t:"Sync", p:"Midweek hasn't been played for "+wkLabel(newC)});   /* v1.13.1: keyed media lives in the press room at sync — the presser notif owns that moment; no second voice */
   if (S.mailJobs && S.mailJobs.wk && S.mailJobs.wk!==wkKey(newC)){
@@ -5803,7 +5909,15 @@ function odNotice(){
   if (S.cash.checking>=0) S.odFlag=0;
 }
 function burnWeek(){
-  const wk=monthlyBurn()/4.333;
+  let wk=monthlyBurn()/4.333;
+  /* v1.16.1 (Ty): Client Services rides the Meridian card when toggled — the lifestyle share
+     goes through the ONE charge door (cashback, utilization, the works); a full card falls
+     back to checking with a notice so the bills still get paid (the chauffeur precedent). */
+  if (S.assistCard && assistMonthly()>0){
+    const asWk=Math.round(assistMonthly()/4.333);
+    if (payWithCard(asWk, "Client Services \u2014 weekly lifestyle", true)) wk-=asWk;   /* quiet: rollover speaks through the notif, never a pop-up */
+    else { S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"meridian", t:"Meridian", p:"The card was full \u2014 this week's Client Services spend came from checking; the bills still got paid"}); }
+  }
   S.cash.checking-=wk;
   S.ledger.push({t:"Weekly burn (bills, payments, life)", amt:-Math.round(wk), kind:"spend"});
   /* v1.7.6: overdraft protection — a real bank covers from savings first (small transfer fee),
@@ -7108,7 +7222,7 @@ async function aiReply(thread, userMsg){
     }catch(e){ return ""; } })();
   const humanLaw = " BE A HUMAN, NOT A WALL: a staggering offer (life-changing money, public stakes) is ALLOWED to genuinely tempt or move you — hold your values, but visibly feel the weight; flat identical refusals to escalating offers read fake. Things that are REAL IN THE FRANCHISE (jersey numbers, roster spots, deals) you can only AGREE to in principle — they go through the equipment room or the front office, and you can tell him to make it official.";
   try{
-    const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread);
+    const timeLaw = ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine();   /* v1.16.1: the no-self-betting law rides every reply, every thread */
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
        members become role tags (R1, R2...) the phone maps back to names at render; a roster
        1:1 is addressed purely by role. Generated people keep their named personas. */
@@ -7135,7 +7249,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.16.0";
+const VER="v1.16.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
