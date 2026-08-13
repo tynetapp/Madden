@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.3 (Aug 13 2026) — THE THINKING BUDGET (fixed on both sides after Ty's exe report): Google's models reason before they write and those tokens come out of maxOutputTokens, so a low ceiling gets spent entirely on thinking and the model answers with ZERO text (HTTP 200, finishReason MAX_TOKENS) — every Gemini call now floors the ceiling, budgets the thinking at half the room (never under the 128 the pro models demand), and retries once without thinkingConfig if a model refuses it; an empty 200 now CONFESSES why (token ceiling, safety block, no candidates) for all three providers instead of implying a bad key (prior: v1.17.2) */
+/* TyPhone app.js — v1.17.4 (Aug 13 2026) — THE REVEAL SWEEP + THE HONEST FEED + THE BANKED TWO (Ty's five-report round + both banked items): (1) THE RECORD LEAK — Madden sims the current week's other games before he lives them; the digest's record table counted every scored game with no reveal gate, so the Chronicle AND the Podium hung tomorrow's results on today's teams (Bengals "0-2", 49ers "2-0" off week-2 futures). Reveal law now rides the digest recs, THE WEEK AHEAD (15-of-16 current-week games were vanishing off the slate), bookLine, teamNeeds, and teamPower — the one gameRevealed() door, everywhere. (2) THE CHIRPER PIN + "you" — worldMark arithmetic broke at the 40-cap (pos clamped to 0 = pinned forever) and own posts carried no timestamp; the feed merges by ts now, posts stamp ts, stampWorld heals legacy posts, the "you" literal gave way to ago-labels. (3) THE PER-POSITION PROMOTION DOOR (banked Item 1): exe v1.8.5 ships B.room (the position room's real stat fields, production rows only) and every room's failure opens the door — QB INTs/sacks/completion floor, HB fumbles/ypc, WR-TE drops/catch rate, OL sacks allowed, K misses, P net floor, blanked-in-a-loss for the rest; a defender's INT line is picks MADE and never misreads as failure now. Readiness math untouched; excellence still never opens a door (Ty's call stands open). (4) THE PAPER TRAIL (banked Item 2): Problem B's TRUE root — the paycheck panel passed NO pl to checkLines, so STATE_TAX[""] missed and the home-state line never rendered there (the ledger side always passed pl and was always right); fixed, and the panel now shows the Auto-Sweep to Tax Hold / to Savings lines plus a true Lands-in-checking figure (30/10 sweep on the true net closes Ty's ,433-vs-8,374 case to the dollar). (5) SPOKEN RECORDS LAW on both podium pens (records read "oh and two", never "zero two") + sponsor-playstation.png from Ty's SVG. (prior: v1.17.3) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -498,7 +498,15 @@ function stampWorld(){
     const n=t.msgs.length;
     t.msgs.forEach((m,k)=>{ if(!m[2]) m[2] = t.last - (n-1-k)*240000; });
   }
-  for (const p of ((S.chirp&&S.chirp.posts)||[])) if (!p.ts) p.ts = base - 3600000;
+  /* v1.17.4 (Ty: "my posts are pinned to the top... they say you"): legacy own posts carry no
+     ts — heal each from its old worldMark anchor so it lands where the old interleave meant it
+     to sit, then it ages honestly like everything else. */
+  (function(){ const ch=S.world.chirps||[]; const wl=ch.length;
+    for (const p of ((S.chirp&&S.chirp.posts)||[])){ if (p.ts) continue;
+      const pos=Math.max(0, Math.min(wl, wl-(p.worldMark ?? wl)));
+      const anchor=ch[Math.min(pos, wl-1)];
+      p.ts = (anchor&&anchor.ts)? anchor.ts+1000 : base;
+    } })();
   for (const a of (S.world.articles||[])) if (!a.ts) a.ts = base - 86400000;
 }
 /* v1.4.2 BETA DIALS: hand-set practice/film meters (0-10) that the whole world treats as truth.
@@ -1152,22 +1160,25 @@ RENDER.chirper = (b,sub)=>{
   <div id="chSuggTop"></div><div class="ch-compose"><span class="av chav sm" style="background:#2b6b4f">${myPfp()?`<img src="${myPfp()}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><input id="chQuick" placeholder="What's happening, ${esc(me)}?" oninput="chMention(this)" onkeydown="if(event.key==='Enter')chQuickPost()"><button onclick="chQuickPost()">Post</button></div>
   <div class="apbody flush" id="chList" style="padding:6px 16px 90px"></div>`;
   const el=$("#chList");
-  const worldLen = S.world.chirps.length;
-  const own = (S.chirp.posts||[]).slice().reverse().map(p=>({own:true, p, pos: Math.max(0, Math.min(worldLen, worldLen - (p.worldMark ?? worldLen)))}));
-  const rows=[];
+  if ((S.chirp.posts||[]).some(p=>!p.ts)) stampWorld();   /* v1.17.4 sweep find: switchCareer loads S without the boot heal — a legacy post would sort to the bottom until the next reload. Idempotent; runs only when an unhealed post exists. */
+  /* v1.17.4 (Ty: "my posts are pinned to the top of chirper... they say 'you'"): the worldMark
+     arithmetic broke the moment the world feed hit its 40-cap — pos = worldLen - worldMark
+     clamps to 0 once worldMark >= the capped length, so every post pinned to the top forever.
+     The feed merges by TIMESTAMP now (posts stamp ts at posting; stampWorld heals legacy ones),
+     and the hardcoded "you" label gives way to the same ago-label the world wears. */
   const renderOwn = p => `<button class="chirp mine" onclick="renderApp('chirper',{t:'${p.id}'})">
       <div class="ch-row"><span class="av chav" style="background:#2b6b4f">${myPfp()?`<img src="${myPfp()}">`:initials(S.blob.player.first+" "+S.blob.player.last)}</span><div class="ch-main">
-      <div class="ch-h"><b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>${myVF()?VF:""}<span>${esc(me)} · you</span></div><p>${chText(p.t)}</p>
+      <div class="ch-h"><b>${esc(S.blob.player.first+" "+S.blob.player.last)}</b>${myVF()?VF:""}<span>${esc(me)}${p.ts?" · "+agoLabel(p.ts):""}</span></div><p>${chText(p.t)}</p>
       <div class="ch-meta"><span class="chlk" style="opacity:.8">♡ ${fmFoll(p.li||0)}</span> · ${fmFoll(Math.max(p.rc||0,(p.replies||[]).length))} replies · ${fmFoll(p.rp||0)} rechirps</div></div></div></button>`;
   const renderWorld = (c,i) => `<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
       <div class="ch-row">${chAvatar(c)}<div class="ch-main">
       <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${c.ts?agoLabel(c.ts):esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
       <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${fmFoll(c.li||0)}</span> · ${fmFoll(Math.max(c.rc||0,(c.replies||[]).length))} replies${c.rp? ` · ${fmFoll(c.rp)} rechirps`:""}</div></div></div></button>`;
-  for (let i=0;i<=worldLen;i++){
-    for (const o of own) if (o.pos===i) rows.push(renderOwn(o.p));
-    if (i<worldLen) rows.push(renderWorld(S.world.chirps[i], i));
-  }
-  el.innerHTML = rows.join("") || '<div class="empty">Quiet out there.</div>';
+  const entries=[];
+  (S.chirp.posts||[]).slice().reverse().forEach(p=>entries.push({ts:p.ts||0, html:renderOwn(p)}));
+  S.world.chirps.forEach((c,i)=>entries.push({ts:c.ts||0, html:renderWorld(c,i)}));
+  entries.sort((a,b)=>b.ts-a.ts);
+  el.innerHTML = entries.map(e=>e.html).join("") || '<div class="empty">Quiet out there.</div>';
 };
 function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
 function chLike(id){
@@ -1355,7 +1366,7 @@ function chQuickPost(){
   const el=$("#chQuick"); const txt=el&&el.value.trim(); if(!txt) return;
   S.chirp.posts=S.chirp.posts||[];
   const eng=postEngagement(txt);
-  const post={id:"me"+Date.now(), t:txt, li:eng.li, rc:eng.rc, rp:eng.rp, replies:[], worldMark:S.world.chirps.length};
+  const post={id:"me"+Date.now(), ts:Date.now(), t:txt, li:eng.li, rc:eng.rc, rp:eng.rp, replies:[], worldMark:S.world.chirps.length};   /* v1.17.4: own posts carry a real timestamp — the feed orders by it */
   S.chirp.posts.push(post);
   persist(); renderApp("chirper"); toast("Posted.");
   wlScanPost(post);                                  // v1.7.4: the book reads his posts
@@ -1372,7 +1383,7 @@ function chPost(){
   const txt=$("#chNew").value.trim(); if(!txt) return;
   S.chirp.posts=S.chirp.posts||[];
   const eng=postEngagement(txt);
-  const post={id:"me"+Date.now(), t:txt, li:eng.li, rc:eng.rc, rp:eng.rp, replies:[], worldMark:S.world.chirps.length};
+  const post={id:"me"+Date.now(), ts:Date.now(), t:txt, li:eng.li, rc:eng.rc, rp:eng.rp, replies:[], worldMark:S.world.chirps.length};   /* v1.17.4: own posts carry a real timestamp — the feed orders by it */
   S.chirp.posts.push(post);
   closeSheet(); persist(); renderApp('chirper'); toast("Posted.");
   wlScanPost(post);                                  // v1.7.4: the book reads his posts
@@ -1734,12 +1745,19 @@ function merBody(){
   }
   if (merTab==="paycheck"){
     const nx = nextGame(); const road = nx && !nx[4]; const st = road? STATE_TAX[nx[3]] : null;
-    const ck = checkLines(S.blob.player.status, road, st);
+    const ck = checkLines(S.blob.player.status, road, st, S.blob.player);   /* v1.17.4 (Ty's $63k panel report, Problem B ROOT CAUSE): the panel passed NO pl, so STATE_TAX[""] missed and the home-state line NEVER rendered here — the ledger's deposit (which passes pl) was always right. Not the teamNm shape after all. */
     const isPre = S.blob.clock.weekType==="PreSeason";
     m.innerHTML = `<div class="mer-sechead">${isPre?"Season-week check (preview)":"Next check"}</div>
     <div class="acct-group"><div class="acct">
       ${ck.lines.map(l=>`<div class="payline ${l[1]<0?"neg":""}"><span>${esc(l[0])}</span><span>${fm(l[1])}</span></div>`).join("")}
-      <div class="payline tot"><span>Net deposit</span><span>${fm(ck.net)}</span></div></div></div>
+      <div class="payline tot"><span>Net deposit</span><span>${fm(ck.net)}</span></div>
+      ${S.autosweep? (function(){ const tx=Math.round(ck.net*S.sweepPct.tax/100), sv=Math.round(ck.net*S.sweepPct.savings/100);
+        /* v1.17.4 (banked Item 2A, Ty's "$37,433 vs $18,374" report): the sweep was invisible —
+           the ledger records the POST-sweep landing while this panel projected the PRE-sweep net.
+           Same rounding as sweepNet, reporting only; the sweep math is untouched. */
+        return `<div class="payline neg"><span>Auto-Sweep to Tax Hold (${S.sweepPct.tax}%)</span><span>${fm(-tx)}</span></div>
+      <div class="payline neg"><span>Auto-Sweep to Savings (${S.sweepPct.savings}%)</span><span>${fm(-sv)}</span></div>
+      <div class="payline tot"><span>Lands in checking</span><span>${fm(ck.net-tx-sv)}</span></div>`; })() : ""}</div></div>
     <div class="mer-sechead">How you're paid</div>
     <div class="acct-group"><div class="acct"><div style="font-size:13.5px;line-height:1.55;opacity:.75">${S.blob.player.status==="PracticeSquad"? `Practice squad pays ${fm(psWeekly())} per week for 18 weeks (${fm(psWeekly()*18)} a season). A game-day elevation pays the active weekly rate of ${fm(activeWeekly())} for that week. Signing to the 53 switches every remaining week to the active rate.` : `Active roster: your contract cash lands as ${fm(activeWeekly())} per regular-season week across 18 checks.`} ${isPre?"Preseason pays a $1,750 weekly camp stipend; real checks start Week 1.":""}</div></div></div>
     <div class="mer-sechead">Deposit history</div>
@@ -2800,7 +2818,7 @@ function teamNeeds(pos){
   const recs={}; let any=false;
   for (const t of L.teams){ const n=t.n||t; if(n) recs[n]={w:0,l:0}; }
   for (const g of (L.games||[])){
-    if (!g || g.t!=="RegularSeason" || !(g.played||((g.hs||0)+(g.as||0)>0))) continue;
+    if (!g || g.t!=="RegularSeason" || !(g.played||((g.hs||0)+(g.as||0)>0)) || !gameRevealed(g.t,g.w)) continue;   /* v1.17.4 reveal law: the agent's need-reading never counts Madden's pre-simmed futures */
     if (!recs[g.h]||!recs[g.a]) continue;
     any=true;
     if (g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if (g.as>g.hs){recs[g.a].w++;recs[g.h].l++;}
@@ -3680,7 +3698,7 @@ function wlDelta(g){
 function teamPower(name){
   // power rating from league record if present, else seeded
   let w=0,l=0;
-  if (S.blob.league){ for(const g of S.blob.league.games){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)) continue;
+  if (S.blob.league){ for(const g of S.blob.league.games){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)||!gameRevealed(g.t,g.w)) continue;   /* v1.17.4 reveal law: the book's power ratings never peek at unlived finals */
     if(g.h===name){ g.hs>g.as?w++:l++; } if(g.a===name){ g.as>g.hs?w++:l++; } } }
   const base = seedRng("pow"+name+(S.blob.clock.seasonYear||2026))()*6-3;
   return base + (w+l>0 ? (w-l)*1.1 : 0);
@@ -3923,7 +3941,14 @@ function leagueDigest(){
   const ord=(t,w)=>(t==="PreSeason"?0:1)*100+w;
   const cOrd=(c.weekType==="PreSeason"?0:c.weekType==="RegularSeason"?1:2)*100+c.week;
   const all=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], hi:g[2], ai:g[3], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g);
-  const rs=all.filter(g=>g.t==="RegularSeason"&&g.played);
+  /* v1.17.4 (Ty: "united chronicle said bengals were 0-2... we only played one game" — the
+     paper AND the podcast both spoke week-2 futures): Madden sims the current week's other
+     games before he lives them, so league.games carries unlived finals. The box was already
+     reveal-gated in the exe; this record table was NOT — it counted every scored game, so
+     recOf() hung tomorrow's losses on today's teams everywhere the digest rides (Chronicle,
+     Podium, presser facts, world call, lane-C). REVEAL LAW through the ONE door: only games
+     from weeks strictly before the clock exist. */
+  const rs=all.filter(g=>g.t==="RegularSeason"&&g.played&&gameRevealed(g.t,g.w));
   const recs={};
   for (const g of rs){ recs[g.h]=recs[g.h]||{w:0,l:0}; recs[g.a]=recs[g.a]||{w:0,l:0};
     if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} }
@@ -3968,7 +3993,10 @@ function leagueDigest(){
       if (RB.season && Array.isArray(RB.season.league)) out+=" Season records: "+RB.season.league.slice(0,4).map(row).join("; ")+".";
     }
   }catch(e){}
-  const nextUp=all.filter(g=>!g.played && ord(g.t,g.w)>=cOrd).sort((x,y)=>ord(x.t,x.w)-ord(y.t,y.w));
+  /* v1.17.4: same leak, other direction — a current-week game Madden already simmed carried
+     played:true and vanished from THE WEEK AHEAD (15 of 16 games missing). The clock decides
+     what is ahead, never the leaked score; matchups only, recOf prints no futures now. */
+  const nextUp=all.filter(g=>ord(g.t,g.w)>=cOrd).sort((x,y)=>ord(x.t,x.w)-ord(y.t,y.w));
   if (nextUp.length){ const nOrd=ord(nextUp[0].t,nextUp[0].w);
     out+="\nTHE WEEK AHEAD (real schedule): "+nextUp.filter(g=>ord(g.t,g.w)===nOrd).slice(0,16).map(g=>{
       const div=(DIVISIONS[g.h]&&DIVISIONS[g.h]===DIVISIONS[g.a])?" [division]":"";
@@ -4007,7 +4035,7 @@ function podBriefSys(){
      date stamped at the top" — because the brief carried them. The source is now raw week
      knowledge: no title, no byline, no date, nothing that reads as a text ABOUT the week
      rather than the week itself. Length dials are gone with the Studio picking audio length. */
-  return "You write the source material for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will speak from this material as if it is simply what they know about the week. HARD FORM RULES: 800-1400 words of flowing prose. NO title, NO headline, NO byline, NO author name, NO date, NO dateline, NO headers, NO bullets, NO time marks. Start mid-world with the first story. Never label, introduce, or refer to this text, a document, notes, a source, or the show's production in any way — write the week's facts and color directly, in plain declarative third person, the way an insider would brief a friend. THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes.";
+  return "You write the source material for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will speak from this material as if it is simply what they know about the week. HARD FORM RULES: 800-1400 words of flowing prose. NO title, NO headline, NO byline, NO author name, NO date, NO dateline, NO headers, NO bullets, NO time marks. Start mid-world with the first story. Never label, introduce, or refer to this text, a document, notes, a source, or the show's production in any way — write the week's facts and color directly, in plain declarative third person, the way an insider would brief a friend. THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes. SPOKEN RECORDS LAW: two AI hosts read this text ALOUD, so a record written 0-2 gets read as zero two — write every team record phonetically the way a broadcaster says it (oh and two, three and one, ten and six), never as digits joined by a hyphen like 0-2 or 3-1; game scores stay numeric.";
 }
 function podFocus(){
   /* v1.16.0: the hosts are insiders, never readers. */
@@ -4531,7 +4559,7 @@ async function midweekTick(){
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x1-3],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x0-1],
 "huddle":[{"id":"unique","flair":"DISCUSSION","u":"","tm":"2h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[]} x6-9]} x1, a practice-week fan thread],
-"podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment."}}` + threadCtx() + inboundPlan();
+"podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment. SPOKEN RECORDS LAW: the hosts read this aloud — write every team record phonetically ('oh and two', 'three and one', 'ten and six'), never digits like 0-2 or 3-1; game scores stay numeric."}}` + threadCtx() + inboundPlan();
   try{
     /* v1.8.1 LANE C: the midweek heavyweight rides the mailbox when the toggle is on; the
        intake below is UNTOUCHED — it runs when the computer's text comes home instead. */
@@ -7000,15 +7028,64 @@ function coachPromotionScan(){
     const weLost=(g[0]===myTeamIdx? g[2]<g[3] : g[3]<g[2]);
     const line=(g[6]||[]).find(x=>x[0]===ahead);
     const myLine=(g[6]||[]).find(x=>x[0]===me);
-    const ints=line? (Number((String(line[3]).match(/(\d+) INT/)||[])[1])||0) : 0;
-    const fums=line? (Number((String(line[3]).match(/(\d+) fum/i)||[])[1])||0) : 0;
     const pre=B.t===0;
-    /* the door: a real failure by the man ahead */
+    /* v1.17.4 THE PER-POSITION FAILURE TABLE (banked at v1.17.3, agreed as the next build):
+       the door was quarterback-shaped — INTs and fumbles only, and the INT regex would even
+       read a defender's interceptions MADE as failure. Every room's real failure opens it now.
+       Exe v1.8.5 ships B.room — the position room's actual stat fields for the last completed
+       week (production rows only; the participation law rules: a bookkeeping row is not
+       evidence). Legacy blobs without the room pack fall back to the display-string parse
+       exactly as before. Ty's readiness math below is UNTOUCHED — only the trigger side grows.
+       Ty's open design question stays open by his ruling: playing well still never opens a
+       door by itself; sustained-excellence triggers are NOT built. */
+    const rr=((B.room||[]).find(r=>r&&r.n===ahead))||null;
+    const F=(rr&&rr.f)||{};
+    const nf=k=>Number(F[k])||0;
+    const txt=line? String(line[3]) : "";
+    const rx=re=>{ const m=txt.match(re); return m? Number(m[1]) : 0; };
+    const pos=p.pos;
+    const offBall = pos==="QB"||pos==="HB"||pos==="FB";
+    const ints = nf("pi") || (offBall? rx(/(\d+)\s*INT/i) : 0);   /* a defender's INT line is picks MADE — never failure */
+    const fums = nf("fu");                                          /* fumbles never rode the display string; save fields only */
+    const oneScore=Math.abs(g[2]-g[3])<=3;
     let why=null;
-    if (ints>=3) why="three interceptions by "+ahead;
-    else if (ints>=2 && (weLost||pre)) why=ints+" interceptions by "+ahead+(weLost?" in the loss":" in the exhibition");
-    else if (fums>=2 && weLost) why=ahead+" put the ball on the ground twice in the loss";
-    else if (weLost && !line && myLine) why=ahead+" gave the staff nothing in a loss while "+me.split(" ")[0]+" produced";
+    const inLoss=s=>s+(weLost?" in the loss":" in the exhibition");
+    if (pos==="QB"){
+      const pm=txt.match(/(\d+)\/(\d+),\s*\d+\s*pass/);
+      const att=nf("pa")||(pm?Number(pm[2]):0), cmp=nf("pc")||(pm?Number(pm[1]):0), sk=nf("sk");
+      if (ints>=3) why="three interceptions by "+ahead;
+      else if (ints>=2 && (weLost||pre)) why=inLoss(ints+" interceptions by "+ahead);
+      else if (fums>=2 && weLost) why=ahead+" put the ball on the ground twice in the loss";
+      else if (sk>=5 && weLost) why=ahead+" took "+sk+" sacks in the loss";
+      else if (att>=20 && cmp/att<0.45 && weLost) why=ahead+" completed under half his throws in the loss";
+    } else if (pos==="HB"||pos==="FB"){
+      const car=nf("ra")||rx(/(\d+)\s*car\b/i), yds=nf("ry")||rx(/(\d+)\s*rush yds/i);
+      if (fums>=2 && (weLost||pre)) why=inLoss(ahead+" put the ball on the ground twice");
+      else if (fums>=1 && weLost) why=ahead+" lost a fumble in the loss";
+      else if (car>=12 && yds/car<2.5 && weLost) why=ahead+" averaged under two and a half a carry on real volume in the loss";
+    } else if (pos==="WR"||pos==="TE"){
+      const dr=nf("dr"), rec=nf("rc")||rx(/(\d+)\s*rec\b/i);
+      if (dr>=3) why=ahead+" dropped three balls";
+      else if (dr>=2 && (weLost||pre)) why=inLoss(ahead+" dropped two");
+      else if (dr>=1 && rec+dr>=6 && rec/(rec+dr)<0.5 && weLost) why=ahead+" caught less than half of what hit his hands in the loss";
+    } else if (/^(LT|LG|C|RG|RT)$/.test(pos)){
+      const sa=nf("sa");
+      if (sa>=4) why=ahead+" surrendered four sacks";
+      else if (sa>=3 && (weLost||pre)) why=inLoss(ahead+" surrendered three sacks");
+    } else if (pos==="K"){
+      const km=txt.match(/(\d+)\/(\d+)\s*FG/);
+      const fgm=nf("fgm")||(km?Number(km[1]):0), fga=nf("fga")||(km?Number(km[2]):0);
+      const miss=Math.max(0, fga-fgm);
+      if (miss>=2) why=ahead+" missed two field goals";
+      else if (miss>=1 && weLost && oneScore) why=ahead+" missed a kick in a one-score loss";
+    } else if (pos==="P"){
+      const pu=nf("pu"), net=nf("pn");
+      if (pu>=3 && net/pu<32 && (weLost||pre)) why=inLoss(ahead+" averaged under thirty-two net on "+pu+" punts");
+    }
+    /* the door every room shares (DL, LB, CB, S included): loss + he blanked while I produced.
+       Star-line absence IS the blanked read — the participation law forbids reading a
+       bookkeeping row as either playing or sitting, so absence-of-production stays the test. */
+    if (!why && weLost && !line && myLine) why=ahead+" gave the staff nothing in a loss while "+me.split(" ")[0]+" produced";
     if (!why) return null;
     /* his readiness: does the staff believe the man behind is the answer */
     const b=betaDials(); const t=pullTier();
@@ -7101,7 +7178,7 @@ function bookLine(){
     const tn=L.teams;
     const all=L.games.map(x=>Array.isArray(x)? {t:x[0]===0?"PreSeason":"RegularSeason", w:x[1], h:tn[x[2]], a:tn[x[3]], hs:x[4], as:x[5], played:x[4]>=0} : x);
     const recs={};
-    for (const gm of all.filter(x=>x.t==="RegularSeason"&&x.played)){
+    for (const gm of all.filter(x=>x.t==="RegularSeason"&&x.played&&gameRevealed(x.t,x.w))){   /* v1.17.4 reveal law: the book's records never count Madden's pre-simmed futures */
       recs[gm.h]=recs[gm.h]||{w:0,l:0}; recs[gm.a]=recs[gm.a]||{w:0,l:0};
       if (gm.hs>gm.as){recs[gm.h].w++;recs[gm.a].l++;} else if(gm.as>gm.hs){recs[gm.a].w++;recs[gm.h].l++;}
     }
@@ -7996,7 +8073,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.3";
+const VER="v1.17.4";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
