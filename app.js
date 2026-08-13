@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.2 (Aug 12 2026) — OPTION A + THE MATCHUP BAR (Ty's four): STARTS ARE UNKNOWABLE (settled by the two-QBs finding — both QBs' per-game rows carried GAMESSTARTED:1 for the same game; the save simply does not record who starts): the stat left My Player and the legacy bank, no pen may claim a start or relief appearance, firstStart is retired, media-interest and the pull's role weight ride verified GP; the v1.17.1 correction door is retired unshipped + the next-game pill opens PYLON (nflsn was never an app id — that was the Coming Soon page) + the matchup bar reads AWAY @ HOME with both logos at standardized sizes (28px teams, 20px network marks) + the debug readout is a true toggle with breathing room from Reset (prior: v1.17.1) */
+/* TyPhone app.js — v1.17.3 (Aug 13 2026) — THE THINKING BUDGET (fixed on both sides after Ty's exe report): Google's models reason before they write and those tokens come out of maxOutputTokens, so a low ceiling gets spent entirely on thinking and the model answers with ZERO text (HTTP 200, finishReason MAX_TOKENS) — every Gemini call now floors the ceiling, budgets the thinking at half the room (never under the 128 the pro models demand), and retries once without thinkingConfig if a model refuses it; an empty 200 now CONFESSES why (token ceiling, safety block, no candidates) for all three providers instead of implying a bad key (prior: v1.17.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -699,7 +699,9 @@ function renderNextBar(){
    SuperBowl / ProBowl / OffSeason — label them like a human, and never append the raw
    global week number ("ProBowl 22") to a phase that IS the label. */
 const WKNAMES={WildcardPlayoff:"Wild Card",DivisionalPlayoff:"Divisional",ConferencePlayoff:"Conf. Championship",SuperBowl:"Super Bowl",ProBowl:"Pro Bowl",OffSeason:"Offseason"};
+function isCutWeek(c){ c=c||((S.blob||{}).clock)||{}; return (c.weekType||c.stage)==="PreSeason" && Number(c.week)>=3; }   /* v1.17.3 (Ty): only three preseason games exist; the fourth "preseason" week is the cut-down bye */
 function wkLabel(c){
+  if (isCutWeek(c)) return c.seasonYear+" · Cut-down Week";
   if (c.weekType==="PreSeason") return c.seasonYear+" · Pre Wk "+(c.week+1);
   if (c.weekType==="RegularSeason") return c.seasonYear+" · Week "+(c.week+1);
   return c.seasonYear+" · "+(WKNAMES[c.weekType]||c.weekType);
@@ -716,11 +718,11 @@ function articleWkLabel(){
     const c=S.blob.clock;
     if ((c.weekType||c.stage)==="OffSeason") return c.seasonYear+" Offseason";
     const numbered=t=>t==="PreSeason"||t==="RegularSeason";
-    const up=phaseName(c.weekType)+(numbered(c.weekType)?", Week "+(c.week+1):"");
+    const up=isCutWeek(c)? "Cut-down Week" : phaseName(c.weekType)+(numbered(c.weekType)?", Week "+(c.week+1):"");
     const l=lastPlayed();
     if (!l) return c.seasonYear+" "+up+" (Upcoming)";
     const done=phaseName(l[1])+(numbered(l[1])?", Week "+(l[0]+1):"");
-    if (l[1]===c.weekType && numbered(c.weekType))
+    if (l[1]===c.weekType && numbered(c.weekType) && !isCutWeek(c))
       return c.seasonYear+" "+phaseName(c.weekType)+", Week "+(l[0]+1)+" (Complete) · Week "+(c.week+1)+" (Upcoming)";
     return c.seasonYear+" "+done+" (Complete) · "+up+" (Upcoming)";
   }catch(e){ return wkLabel(S.blob.clock); }
@@ -970,7 +972,26 @@ function pfpFor(g, key){
   if (!n) return null;
   let h = 0; const k = String(key || "");
   for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
-  return "pfp-" + g + "-" + (1 + (h % n)) + ".jpg";
+  const nudge = (S && S.pfpNudge && S.pfpNudge[g+"|"+k]) || 0;   /* v1.17.3: collision nudge, banked per account so a face never changes later */
+  return "pfp-" + g + "-" + (1 + ((h + nudge) % n)) + ".jpg";
+}
+/* v1.17.3 (Ty: "2 different people had the same pfp... at least make sure theyre not the
+   same pfp within the same response or sync generation"): after each intake batch, fresh
+   accounts that hash-collide with a DIFFERENT account in the same batch get nudged to the
+   next open face; the nudge banks in S.pfpNudge so that account keeps its face forever. */
+function dedupeBatchPfps(items){
+  try{
+    const seen={};
+    for (const it of (items||[])){
+      const g=it.g||"x"; const k=String(it.h||it.n||it.a||""); if(!k) continue;
+      const acct=g+"|"+k; const n=PFP_COUNTS[g]||0; if(!n) continue;
+      let f=pfpFor(g,k), tries=0;
+      while (f && seen[f] && seen[f]!==acct && tries<n){
+        S.pfpNudge=S.pfpNudge||{}; S.pfpNudge[acct]=((S.pfpNudge[acct]||0)+1); f=pfpFor(g,k); tries++;
+      }
+      if (f) seen[f]=acct;
+    }
+  }catch(e){}
 }
 /* v1.17.1 (Ty: Minkah got a fan pfp): PLAYERS NEVER WEAR FAN PHOTOS — a chirper account
    belonging to a real player wears his team's logo. Names resolve through every player set
@@ -982,8 +1003,8 @@ function playerTeamLogoOf(name){
     for (const r of (S.blob.roster||[])) if ((r[0]+" "+r[1]).toLowerCase()===n) return teamLogo(S.blob.player.team);
     const me=(S.blob.player.first+" "+S.blob.player.last).toLowerCase(); if (n===me) return null;   /* his own pfp is his own business */
     const L=S.blob.league||{}; const tn=L.teams||[];
-    if (L.box) for (const g of (L.box.games||[])) for (const st of (g[6]||[])) if (String(st[0]||"").toLowerCase()===n) return teamLogo(tn[st[2]]);
-    if (L.injuries) for (const r of L.injuries) if (String(r[0]||"").toLowerCase()===n) return teamLogo(tn[r[2]]);
+    if (L.box) for (const g of (L.box.games||[])) for (const st of (g[6]||[])) if (String(st[0]||"").toLowerCase()===n) return teamLogo(teamNm(tn[st[2]]));
+    if (L.injuries) for (const r of L.injuries) if (String(r[0]||"").toLowerCase()===n) return teamLogo(teamNm(tn[r[2]]));
   }catch(e){}
   return null;
 }
@@ -1062,7 +1083,15 @@ function okEmail(m){ try{ const t=(String(m.from||"")+" "+String(m.subj||"")).to
    ONE DOOR — every reply merge already rides dedupeReplies, so the question filter lives
    here. A reply that asks HIM something directly (a question mark aimed at "you/your" or an
    @) is dropped; rhetorical crowd noise ("how is this guy on our team?") survives. */
-function okReply(x){ try{ const t=String(x||""); if(!/\?/.test(t)) return true; return !/(^|\W)(you|your|u|ur|@)/i.test(t); }catch(e){ return true; } }
+/* v1.17.3 (Ty: "Jets Weekly" asked for five minutes at his locker ON CHIRPER): the media
+   wall covers every surface now, not just email — no one asks him for time anywhere. */
+function isMediaAsk(x){ try{ return /interview|(\bfive|\bten|\b\d+)\s*(minutes|mins)\b|sit.?down (with|for)|at (your|his) locker.*\?|dm (us|me)\b|hit (my|our) dms|got a (minute|sec|moment) for/i.test(String(x||"")); }catch(e){ return false; } }
+function okReply(x){ try{ const t=String(x||""); if(!t.trim()) return false; if(isMediaAsk(t)) return false; if(!/\?/.test(t)) return true; return !/(^|\W)(you|your|u|ur|@)/i.test(t); }catch(e){ return true; } }
+/* v1.17.3 (Ty: "sometimes theres still a nonsensical chirp or blank huddle post"): every
+   feed item earns its place — a chirp needs an author and text, a Huddle post needs a title
+   and a body, comments need words, and NOTHING on any surface asks him for media time. */
+function scrubChirps(list){ try{ return (list||[]).filter(c=>c && String(c.t||"").trim() && String(c.n||c.a||"").trim() && !isMediaAsk(c.t)); }catch(e){ return list||[]; } }
+function scrubHuddle(list){ try{ return (list||[]).filter(h=>{ if(!h || !String(h.h||"").trim() || !String(h.b||"").trim() || isMediaAsk(String(h.h)+" "+String(h.b))) return false; h.cmts=(h.cmts||[]).filter(cm=>cm && String(cm.t||"").trim() && !isMediaAsk(cm.t)); return true; }); }catch(e){ return list||[]; } }
 function dedupeReplies(fresh, existing){
   fresh=(fresh||[]).filter(r=>r&&okReply(r.x));
   const seen=(existing||[]).map(r=>({h:String(r.h||"").toLowerCase(), t:normChText(r.x)}));
@@ -1483,7 +1512,7 @@ function pyBody(){
     if (S.blob.league && S.blob.league.games && S.blob.league.games.length){
       const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
       const tn=S.blob.league.teams;
-      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tn[g[2]], a:tn[g[3]], hs:g[4], as:g[5], played:g[4]>=0} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
+      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
       const card = (x, wkTag)=>{ const g=x.g;
         /* v1.6.2 (Ty): finals were dropping the broadcast chip and kickoff time — a played
            game still aired somewhere at some time. Keep both on every card. */
@@ -3847,7 +3876,7 @@ RENDER.podium = b=>{
 function showScript(id){
   const e=S.world.podium.eps.find(x=>x.id===id);
   window._brief=e.script;
-  sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(e.script)}</div>
+  sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(podTrim(e.script))}</div>   <!-- v1.17.3: render-time trim heals episodes stored before the trim existed (Opus-era eps + stream drops) -->
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="navigator.clipboard.writeText(window._brief).then(()=>toast('Source copied. NotebookLM: Create New, Copied text, paste, Add.'))">Copy source</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="navigator.clipboard.writeText((S.world.podium.eps.find(x=>x.script===window._brief)||{}).focus||'Follow the source segments in order. Only discuss what the source contains.').then(()=>toast('Focus prompt copied. Paste it in NotebookLM\\'s prompt box.'))">Copy focus prompt</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
@@ -3862,6 +3891,7 @@ function showScript(id){
    notes every press pen reads BEFORE writing — and tells the pen how news judgment works.
    Preseason is covered now (the old digest was regular-season only, which is why a preseason
    paper had nothing). Legacy blobs without box data fall back to revealed score lines. */
+function teamNm(x){ return typeof x==="string"? x : (x&&x.n)||""; }   /* v1.17.3 (promotion-probe find): the exe ships team STRINGS, the phone's intake enriches to {n,d} — every consumer reads through this ONE door */
 const DIVISIONS = {"Bills":"AFC East","Dolphins":"AFC East","Patriots":"AFC East","Jets":"AFC East",
   "Ravens":"AFC North","Bengals":"AFC North","Browns":"AFC North","Steelers":"AFC North",
   "Texans":"AFC South","Colts":"AFC South","Jaguars":"AFC South","Titans":"AFC South",
@@ -3892,7 +3922,7 @@ function leagueDigest(){
   const tn=L.teams||[]; const c=S.blob.clock;
   const ord=(t,w)=>(t==="PreSeason"?0:1)*100+w;
   const cOrd=(c.weekType==="PreSeason"?0:c.weekType==="RegularSeason"?1:2)*100+c.week;
-  const all=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], hi:g[2], ai:g[3], h:tn[g[2]], a:tn[g[3]], hs:g[4], as:g[5], played:g[4]>=0} : g);
+  const all=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], hi:g[2], ai:g[3], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g);
   const rs=all.filter(g=>g.t==="RegularSeason"&&g.played);
   const recs={};
   for (const g of rs){ recs[g.h]=recs[g.h]||{w:0,l:0}; recs[g.a]=recs[g.a]||{w:0,l:0};
@@ -3905,11 +3935,12 @@ function leagueDigest(){
     out+="\nLAST COMPLETED WEEK AROUND THE LEAGUE ("+phase+" week "+(B.w+1)+", every score real, quarter-by-quarter): ";
     out+=B.games.map(g=>{
       const flow=gameFlowTag(g[4],g[5],g[2],g[3]);
-      const div=(DIVISIONS[tn[g[0]]]&&DIVISIONS[tn[g[0]]]===DIVISIONS[tn[g[1]]])?" [division game]":"";
-      return tn[g[1]]+recOf(tn[g[1]])+" "+g[3]+" at "+tn[g[0]]+recOf(tn[g[0]])+" "+g[2]+(flow?" ("+flow+")":"")+div;
+      const hN=teamNm(tn[g[0]]), aN=teamNm(tn[g[1]]);
+      const div=(DIVISIONS[hN]&&DIVISIONS[hN]===DIVISIONS[aN])?" [division game]":"";
+      return aN+recOf(aN)+" "+g[3]+" at "+hN+recOf(hN)+" "+g[2]+(flow?" ("+flow+")":"")+div;
     }).join("; ")+".";
     const stars=[];
-    for (const g of B.games) for (const st of (g[6]||[])) stars.push(st[0]+" ("+st[1]+", "+(tn[st[2]]||"?")+"): "+st[3]);
+    for (const g of B.games) for (const st of (g[6]||[])) stars.push(st[0]+" ("+st[1]+", "+(teamNm(tn[st[2]])||"?")+"): "+st[3]);
     if (stars.length) out+="\nREAL PLAYER BOX-SCORE LINES from those games (the ONLY individual performances that exist this week — no other player did anything notable): "+stars.slice(0,40).join(" | ")+".";
   } else {
     const done=all.filter(g=>g.played && ord(g.t,g.w)<cOrd);   /* legacy blob: revealed weeks only — never spoil unlived finals */
@@ -3917,11 +3948,13 @@ function leagueDigest(){
       out+="\nLAST COMPLETED WEEK (scores only — this code predates box scores; re-sync with the current exe for player stats): "+done.filter(g=>ord(g.t,g.w)===lw).map(g=>g.a+" "+g.as+" at "+g.h+" "+g.hs).join("; ")+".";
     }
   }
-  if (L.injuries && L.injuries.length) out+="\nINJURY REPORT (league-wide, real): "+L.injuries.slice(0,18).map(r=>r[0]+" ("+r[1]+", "+(tn[r[2]]||"?")+") — "+r[3]+", "+r[4]).join("; ")+".";
+  if (L.injuries && L.injuries.length) out+="\nINJURY REPORT (league-wide, real): "+L.injuries.slice(0,18).map(r=>r[0]+" ("+r[1]+", "+(teamNm(tn[r[2]])||"?")+") — "+r[3]+", "+r[4]).join("; ")+".";
   if (c.weekType==="RegularSeason" && Object.keys(recs).length){
     const table=Object.entries(recs).sort((a,b)=>b[1].w-a[1].w);
     out+="\nSTANDINGS: best "+table.slice(0,5).map(([t,r])=>t+" "+r.w+"-"+r.l).join(", ")+" | worst "+table.slice(-3).map(([t,r])=>t+" "+r.w+"-"+r.l).join(", ")+".";
     if (c.week>=9) out+=" PLAYOFF RACE framing applies: contenders tighten, sellers look to next year.";
+  } else if (isCutWeek(c)){
+    out+="\nIT IS CUT-DOWN WEEK: the preseason is OVER (only three preseason games exist and all have been played). No games anywhere in the league this week \u2014 rosters trim to 53, bubble players sweat, veterans get calls. The next games played will be the REGULAR SEASON openers.";
   } else if (c.weekType==="PreSeason"){
     out+="\nIT IS THE PRESEASON: no standings matter; the league-wide stories are roster battles, rookie debuts, veterans on new teams, and injuries.";
   }
@@ -4528,13 +4561,13 @@ function intakeMidweek(j, wk, _cid){
   /* v1.8.1: the midweek intake is ONE door — husks, dupes, notebook voice, and the earned
      scrum auto-pop fire identically whether the phone or the computer wrote the JSON. */
   const f=S.chirp.followers||0;
-    if (j.chirps) S.world.chirps=[...dedupeChirps(j.chirps, S.world.chirps), ...S.world.chirps].slice(0,40);   // v1.7.7: no repeat voices
+    if (j.chirps){ const fresh=dedupeChirps(scrubChirps(j.chirps), S.world.chirps); dedupeBatchPfps(fresh); S.world.chirps=[...fresh, ...S.world.chirps].slice(0,40); }   // v1.7.7 no repeat voices; v1.17.3 blanks + media asks die, no twin faces in one batch
     if (j.myReplies && j.myReplies.length){
       const posts=(S.chirp.posts||[]).slice(-3);
       for (const r of j.myReplies){ if(!r||!String(r.x||"").trim()) continue; const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; if(dedupeReplies([r], p.replies).length){ p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } } }   // v1.7.6 husks + v1.7.7 dupes filtered
     }
     if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...sanitizeInMsgs(th, t.msgs)); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; } }   /* v1.9.5 same door, same law; v1.17.1: never as him */
-    if (j.huddle && j.huddle.length) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20); // v1.6.8 (Ty): the Huddle moves midweek too
+    if (j.huddle && j.huddle.length) S.world.huddle=[...scrubHuddle(j.huddle), ...S.world.huddle].slice(0,20); // v1.6.8 (Ty) midweek Huddle; v1.17.3 scrubbed
     if (j.emails) S.world.emails=[...j.emails.filter(okEmail), ...S.world.emails];
     stampWorld();
     /* v1.8.5 (Ty's ruling): NO articles midweek — the Midweek Notebook is retired; the
@@ -5737,7 +5770,7 @@ function syncOrdersCard(){
   ${(n&&n.k==="send")? `<p style="margin-top:0">${esc(n.t)}</p>`:""}
   <p>ONE code carries everything pending: the coach's rulings first, your queued moves after (10 max). Send it BEFORE you play \u2014 the computer writes it into the save with the franchise closed. On the computer this is the <span class="cw-ord">AMBER box</span> (Coach orders).</p>
   ${st.orders.length? `<p style="font-size:12.5px;margin:0 0 4px">${esc(coachName())} made these calls himself \u2014 announced in the building whether you like them or not; they ride the ONE order code below automatically.</p>
-  ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.wk.split("/").slice(1).join(" wk "))} \u00b7 ${esc(o.why)}</span><button onclick="staffDismiss('${o.id}')" title="Dismiss after it's applied">\u2715</button></div>`).join("")}`:""}
+  ${st.orders.map(o=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":o.kind==="promote"?"Elevated":"Demoted"} \u00b7 ${esc(o.wk.split("/").slice(1).join(" wk "))} \u00b7 ${esc(o.why)}</span><button onclick="staffDismiss('${o.id}')" title="Dismiss after it's applied">\u2715</button></div>`).join("")}`:""}
   ${(S.orders&&S.orders.length)? S.orders.map(o=>`<div class="ordrow"><span>${esc(ordWords(o))}</span></div>`).join(""):""}
   <button class="btn" style="background:var(--ok);color:#04170d;margin-top:8px" onclick="reviewSheet()">On to the next game${(function(){const g=nextGame();return g? " \u2014 "+(g[4]?"vs ":"@ ")+esc(g[3]) : "";})()}</button>
   <p style="font-size:11.5px;opacity:.6;margin:8px 0 0">\u2715 a ruling only after it's been applied on the computer.</p>
@@ -5785,7 +5818,7 @@ function reviewSheet(){
     <p class="sp">The week is sealed, but new moves landed after you locked it (the coach acts on his own). Send them back to the computer \u2014 nothing else reopens.</p>
     <div style="max-height:42vh;overflow:auto">
     ${st.orders.length? `<p style="font-size:12px;opacity:.7;margin:0 0 4px">The coach's calls:</p>
-    ${st.orders.map((o,i)=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.why)}</span><button onclick="denyStaffOrder(${i})" title="Overrule from upstairs">\u2715</button></div>`).join("")}`:""}
+    ${st.orders.map((o,i)=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":o.kind==="promote"?"Elevated":"Demoted"} \u00b7 ${esc(o.why)}</span><button onclick="denyStaffOrder(${i})" title="Overrule from upstairs">\u2715</button></div>`).join("")}`:""}
     ${(S.orders&&S.orders.length)? `<p style="font-size:12px;opacity:.7;margin:8px 0 4px">Your moves:</p>
     ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove">\u2715</button></div>`).join("")}`:""}
     </div>
@@ -5805,7 +5838,7 @@ function reviewSheet(){
   sheet(`<h3>Before the save \u2014 ${esc(dest)}</h3><p class="sp">Everything below is about to ride the ONE code to the computer. Remove any of yours; overrule the coach's if you must \u2014 your call, your kind of career.</p>
   <div style="max-height:42vh;overflow:auto">
   ${st.orders.length? `<p style="font-size:12px;opacity:.7;margin:0 0 4px">The coach's calls (announced in the building):</p>
-  ${st.orders.map((o,i)=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":"Demoted"} \u00b7 ${esc(o.why)}</span><button onclick="denyStaffOrder(${i})" title="Overrule from upstairs \u2014 this never reaches the save">\u2715</button></div>`).join("")}`:""}
+  ${st.orders.map((o,i)=>`<div class="ordrow"><span>${o.kind==="bench"?"Benched":o.kind==="promote"?"Elevated":"Demoted"} \u00b7 ${esc(o.why)}</span><button onclick="denyStaffOrder(${i})" title="Overrule from upstairs \u2014 this never reaches the save">\u2715</button></div>`).join("")}`:""}
   ${(S.orders&&S.orders.length)? `<p style="font-size:12px;opacity:.7;margin:8px 0 4px">Your moves:</p>
   ${S.orders.map((o,i)=>`<div class="ordrow"><span>${esc(ordWords(o))}</span><button onclick="removeOrder(${i})" title="Remove from this week's code">\u2715</button></div>`).join("")}`:""}
   </div>
@@ -6387,6 +6420,7 @@ async function advanceTo(blob){
   resolveRequests();                                                  // v1.7.4: the building answers formal asks
   pruneLongRun(newC);                                                 // v1.16.3: the long-run janitor — the longevity sim proved four arrays grow forever; caps + stale-season sweep, laws respected
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
+  try{ coachPromotionScan(); }catch(e){}                              // v1.17.3: the staff looks UP once per week — rival failure opens the door, his readiness decides
   payTaxesDue(newC);                                                  // v1.17.0: April passed? the season's tax bill comes due — hold first, checking for the rest
   syncTick();                                                         // v1.9.6: the sync clock ticks — anything owed lands now
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
@@ -6650,6 +6684,28 @@ async function readSSE(r, pick){
   out+=eat(buf);
   return out;
 }
+/* v1.17.3: an empty 200 must say WHY — the API always tells us (finishReason, or a prompt
+   blocked upstream). "Key didn't work" was pointing at the key when the key was fine. */
+function aiEmptyWhy(prov, data){
+  try{
+    if (prov==="google"){
+      const br=data.promptFeedback&&data.promptFeedback.blockReason;
+      if (br) return "the prompt was blocked ("+br+")";
+      const c=(data.candidates||[])[0]; const fr=c&&c.finishReason;
+      if (fr==="MAX_TOKENS") return "the model spent its whole token ceiling thinking and had none left to answer \u2014 raise the limit or pick a lighter model";
+      if (fr==="SAFETY"||fr==="PROHIBITED_CONTENT") return "a safety filter blocked the answer ("+fr+")";
+      if (fr) return "the model stopped early ("+fr+")";
+      if (!c) return "the API returned no candidates at all";
+    }
+    if (prov==="openai"){ const fr=((data.choices||[])[0]||{}).finish_reason;
+      if (fr==="length") return "the model hit its token ceiling before writing anything \u2014 raise the limit";
+      if (fr) return "the model stopped early ("+fr+")"; }
+    if (prov==="anthropic"){
+      if (data.stop_reason==="max_tokens") return "the model hit its token ceiling before writing anything \u2014 raise the limit";
+      if (data.stop_reason) return "the model stopped early ("+data.stop_reason+")"; }
+  }catch(e){}
+  return "the model returned an empty answer";
+}
 async function callAI(system, user, maxTokens){
   const prov = META.settings.provider||"anthropic";
   const model = META.settings.model || D.AI[prov].models[0];
@@ -6707,15 +6763,28 @@ async function callAI(system, user, maxTokens){
   }
   // google
   const gm = D.AI.google.models.includes(model)?model:"gemini-3.6-flash";
-  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+gm+":generateContent?key="+encodeURIComponent(aiKey()), {
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ system_instruction:{parts:[{text:system}]}, contents:[{role:"user",parts:[{text:user}]}],
-      generationConfig:{ maxOutputTokens: maxTokens||8000 } })
-  });
-  if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+  /* v1.17.3 THE THINKING BUDGET (Ty's field report on the exe, fixed both sides): Google's
+     models REASON before writing and those tokens come out of maxOutputTokens — a low ceiling
+     is spent entirely on thinking and the model answers with ZERO text parts (HTTP 200,
+     finishReason MAX_TOKENS). Floor the ceiling, budget the thinking at half the room (never
+     under the 128 the pro models demand), and retry once without thinkingConfig if a model
+     rejects it. */
+  const gmax=Math.max(Number(maxTokens)||0, 512);
+  const gbody=cfg=>({ system_instruction:{parts:[{text:system}]}, contents:[{role:"user",parts:[{text:user}]}],
+    generationConfig: cfg? { maxOutputTokens:gmax, thinkingConfig:{ thinkingBudget: Math.max(128, Math.floor(gmax/2)) } } : { maxOutputTokens:gmax } });
+  let r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+gm+":generateContent?key="+encodeURIComponent(aiKey()), {
+    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(gbody(true)) });
+  if (!r.ok){
+    const e=await r.text();
+    if (r.status===400 && /thinking/i.test(e)){
+      r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+gm+":generateContent?key="+encodeURIComponent(aiKey()), {
+        method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(gbody(false)) });
+      if (!r.ok){ const e2=await r.text(); throw new Error("API "+r.status+": "+e2.slice(0,120)); }
+    } else throw new Error("API "+r.status+": "+e.slice(0,120));
+  }
   const data=await r.json();
   const gtxt=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("\n");
-  if (!gtxt.trim()) throw new Error("model returned no text"+(data.candidates?.[0]?.finishReason? " (stop: "+data.candidates[0].finishReason+")":""));
+  if (!gtxt.trim()) throw new Error("no text back: "+aiEmptyWhy("google", data));
   return gtxt;
 }
 const callClaude = callAI; // legacy alias
@@ -6906,6 +6975,65 @@ function coachEvaluate(trigger){
   persist();
   return ruling;
 }
+/* v1.17.3 THE PROMOTION DOOR (Ty: "implement the coaches moves concerning my player based
+   of my performance and the performance of other people in my position group"). The staff
+   finally moves UP on its own. Rival failure OPENS the door — read from real save truth:
+   blob.depth names the man ahead, the league box carries his actual line (INTs parse from
+   the display string), the schedule carries the result. HIS readiness decides if he's the
+   beneficiary: practice dials, his own verified production, OVR proximity, and pull as a
+   thumb on the scale. Grants file a REAL depth order + a club letter, same machinery as
+   demotions. Active in preseason (auditions are exactly when a pick-six benches a man).
+   Never fires the same week as a discipline ruling. Once per week, seeded roll. */
+function coachPromotionScan(){
+  try{
+    if (!staffAutoOn() || !S.blob || !S.blob.depth) return null;
+    const st=staffState(); const wk=wkKey(S.blob.clock); const key=k=>wk+"|"+k;
+    if (st.ruled[key("promote")] || st.ruled[key("bench")] || st.ruled[key("demote")] || st.ruled[key("conduct")]) return null;
+    const p=S.blob.player; const me=p.first+" "+p.last;
+    const list=(S.blob.depth[p.pos]||[]).slice();
+    const myIdx=list.indexOf(me);
+    if (myIdx<1) return null;                                  // starter already, or off the list entirely
+    const ahead=list[myIdx-1];
+    const L=S.blob.league||{}; const B=L.box; if(!B||!B.games) return null;
+    const tn=L.teams||[]; const myTeamIdx=tn.findIndex(x=>teamNm(x)===p.team); if(myTeamIdx<0) return null;
+    const g=B.games.find(x=>x[0]===myTeamIdx||x[1]===myTeamIdx); if(!g) return null;
+    const weLost=(g[0]===myTeamIdx? g[2]<g[3] : g[3]<g[2]);
+    const line=(g[6]||[]).find(x=>x[0]===ahead);
+    const myLine=(g[6]||[]).find(x=>x[0]===me);
+    const ints=line? (Number((String(line[3]).match(/(\d+) INT/)||[])[1])||0) : 0;
+    const fums=line? (Number((String(line[3]).match(/(\d+) fum/i)||[])[1])||0) : 0;
+    const pre=B.t===0;
+    /* the door: a real failure by the man ahead */
+    let why=null;
+    if (ints>=3) why="three interceptions by "+ahead;
+    else if (ints>=2 && (weLost||pre)) why=ints+" interceptions by "+ahead+(weLost?" in the loss":" in the exhibition");
+    else if (fums>=2 && weLost) why=ahead+" put the ball on the ground twice in the loss";
+    else if (weLost && !line && myLine) why=ahead+" gave the staff nothing in a loss while "+me.split(" ")[0]+" produced";
+    if (!why) return null;
+    /* his readiness: does the staff believe the man behind is the answer */
+    const b=betaDials(); const t=pullTier();
+    const myRow=(S.blob.roster||[]).find(r=>(r[0]+" "+r[1])===me);
+    const hisRow=(S.blob.roster||[]).find(r=>(r[0]+" "+r[1])===ahead);
+    const ovrGap=(myRow&&hisRow)? (Number(hisRow[3])-Number(myRow[3])) : 99;
+    let chance=0.22;
+    if (b.practice>=8) chance+=0.25; else if (b.practice>=6) chance+=0.14; else if (b.practice<=3) chance-=0.20;
+    if (prodOf(mergedSS(S.blob))>0) chance+=0.10;
+    if (ovrGap<=3) chance+=0.18; else if (ovrGap<=8) chance+=0.10; else if (ovrGap>=15) chance-=0.18;
+    chance+=Math.min(0.15, t.score/400);
+    chance=Math.max(0.05, Math.min(0.85, chance));
+    const roll=seedRng(S.careerId+"|promo|"+wk)();
+    st.ruled[key("promote")]=Date.now();                       // one look per week, granted or not
+    if (roll>=chance) return null;                             // the staff saw it and stayed the course
+    const order={type:"depth", player:{name:me}, pos:p.pos, slot:myIdx};   // one rung up (1-based)
+    st.orders.push({id:"st"+Date.now(), wk, kind:"promote", why, order, ts:Date.now()});
+    st.log.unshift({wk, kind:"promote", why, ts:Date.now()});
+    clubMail("Roster Decision — Elevated at "+p.pos,
+      "This is formal notice from the club. By decision of "+coachName()+" and the coordinator, you have been elevated on the "+p.pos+" depth chart ("+why+"). The corresponding depth order has been filed and processes with the week. Earn the reps. This notice is one-way; direct any response through your representation.");
+    S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Roster decision: ELEVATED at "+p.pos+" — order waiting in Sync"});
+    persist();
+    return {kind:"promote", why};
+  }catch(e){ try{ window.__promoErr=String(e&&e.message||e); console.log("promotion scan skipped:", window.__promoErr); }catch(_){} return null; }   /* v1.17.3: the defensive-silence law — a swallowed door confesses */
+}
 function staffOrdersCode(){ const st=staffState(); return "TYORD1"+JSON.stringify({orders:st.orders.map(o=>o.order)}); }
 function staffDismiss(id){ const st=staffState(); st.orders=st.orders.filter(o=>o.id!==id); persist(); renderApp("sync"); }
 function staffLine(){
@@ -6913,7 +7041,7 @@ function staffLine(){
   const recent=st.log.filter(l=>Date.now()-l.ts < 21*24*3600*1000).slice(0,4);
   if (!recent.length) return "";
   return "\nSTAFF RULINGS (the coach's real decisions, treat as announced fact): "+recent.map(l=>
-    (l.kind==="fine"? "fined "+fm(l.amt) : l.kind==="bench"? "benched" : "demoted on the depth chart")+" ("+l.wk.split("/").slice(1).join(" wk ")+"; "+l.why+")").join("; ")+
+    (l.kind==="fine"? "fined "+fm(l.amt) : l.kind==="bench"? "benched" : l.kind==="promote"? "ELEVATED on the depth chart" : "demoted on the depth chart")+" ("+l.wk.split("/").slice(1).join(" wk ")+"; "+l.why+")").join("; ")+
     ". These are made and announced; the depth chart itself updates when the week processes. NEVER invent additional moves beyond these.";
 }
 function disciplineLine(){
@@ -7005,7 +7133,7 @@ STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${press? "" : lifeFacts()}${press? "" : bookLine()}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
@@ -7123,7 +7251,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; MEDIA NEVER EMAILS and no one ever asks him for an interview or his time by email (his media access is the midweek availability and the postgame Podium show, period). REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -7136,8 +7264,8 @@ function intakeWorld(j, wkLbl, gk, opts){
   opts=opts||{};
   if (opts._cid!==undefined && opts._cid!==S.careerId){ console.log('career lock: a week generated for another save was dropped at the door'); return; }
   if (j.article && !opts.noArticle){ j.article.wk=wkLbl; S.world.articles.unshift(j.article); S.articleFor=S.articleFor||{}; if(gk) S.articleFor[gk]=1; }
-  if (j.chirps) S.world.chirps=[...dedupeChirps(j.chirps, S.world.chirps), ...S.world.chirps].slice(0,40);   // v1.7.7: no repeat voices
-  if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
+  if (j.chirps){ const fresh=dedupeChirps(scrubChirps(j.chirps), S.world.chirps); dedupeBatchPfps(fresh); S.world.chirps=[...fresh, ...S.world.chirps].slice(0,40); }   // v1.7.7 no repeat voices; v1.17.3 blanks + media asks die, no twin faces in one batch
+  if (j.huddle) S.world.huddle=[...scrubHuddle(j.huddle), ...S.world.huddle].slice(0,20);   /* v1.17.3 scrubbed */
   if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...sanitizeInMsgs(th, t.msgs)); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; stampInbound(th.id); } }   /* v1.9.5 enforced; v1.17.0 cooldown; v1.17.1: never as him */
   if (j.emails) S.world.emails=[...j.emails.filter(okEmail), ...S.world.emails].slice(0,60);   /* v1.9.5 rolling window; v1.17.1: no press emails ever */
   if (j.myReplies && j.myReplies.length){ const f=S.chirp.followers||0; const posts=(S.chirp.posts||[]).slice(-3);
@@ -7868,7 +7996,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.2";
+const VER="v1.17.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
