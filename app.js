@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.1 (Aug 12 2026) — THE FIELD ROUND (Ty's twelve): PRACTICE PRIVACY (the agent/family were never at practice — no tape talk from outside the building) + MEDIA NEVER EMAILS (press access is the availability and the podium; interview emails die at the door) + REPLY LAW (reactions only under his posts — questions to him are filtered at the ONE dedupe door; rare @-mention easter eggs recount real fan moments) + PLAYERS WEAR THEIR TEAM (a real player's chirper account gets the team logo, never a fan pfp) + THE ME-ROLE COERCION (no pen ever speaks as him — inbound merges force "them", group messages under his name drop) + THE STARTS CORRECTION (the save's GS ledger can double-count after a crash reload; S.gsFix caps every pen with his truth) + the podium pen doubled to 8000 with sentence-trim (no more mid-word cutoffs) + the kicker chip is gone from Chronicle articles + the numbered continuation (3 Click Validate orders · 4 the plain-language read) + the next-game pill opens NFLSN + the credit minimum is once per week (prior: v1.17.0) */
+/* TyPhone app.js — v1.17.2 (Aug 12 2026) — OPTION A + THE MATCHUP BAR (Ty's four): STARTS ARE UNKNOWABLE (settled by the two-QBs finding — both QBs' per-game rows carried GAMESSTARTED:1 for the same game; the save simply does not record who starts): the stat left My Player and the legacy bank, no pen may claim a start or relief appearance, firstStart is retired, media-interest and the pull's role weight ride verified GP; the v1.17.1 correction door is retired unshipped + the next-game pill opens PYLON (nflsn was never an app id — that was the Coming Soon page) + the matchup bar reads AWAY @ HOME with both logos at standardized sizes (28px teams, 20px network marks) + the debug readout is a true toggle with breathing room from Reset (prior: v1.17.1) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -552,7 +552,7 @@ function bankSeason(oldBlob){
     const yr=(oldBlob.clock.seasonYear||0); const merged={};
     for (const s of (oldBlob.seasonStats||[])) for (const k in s){ if (k!=="table" && typeof s[k]==="number") merged[k]=Math.max(merged[k]||0, s[k]); }
     const LB={GAMESPLAYED:"GP",GAMESSTARTED:"GS",PASSYARDS:"Pass yds",PASSTDS:"Pass TD",PASSINTS:"INT",RUSHYARDS:"Rush yds",RUSHTDS:"Rush TD",RECEIVECATCHES:"Rec",RECEIVEYARDS:"Rec yds",RECEIVETDS:"Rec TD",DEFTACKLES:"Tackles",DLINESACKS:"Sacks",DSECINTS:"INTs",KICKFGMADE:"FG",PUNTATTEMPTS:"Punts",OLINEPANCAKES:"Pancakes"};
-    const rows=[["GP",merged.GAMESPLAYED||0],["GS",merged.GAMESSTARTED||0]];
+    const rows=[["GP",merged.GAMESPLAYED||0]];   /* v1.17.2 OPTION A: GS is not banked */
     for (const f of posStatFields(oldBlob.player.pos)) if (merged[f]) rows.push([LB[f]||f, merged[f]]);
     if (!S.legacy.years.find(x=>x.y===yr)) S.legacy.years.push({y:yr, team:oldBlob.player.team, rows:rows.slice(0,8)});
   }catch(e){}
@@ -675,16 +675,24 @@ function trophySheet(){
 }
 function renderNextBar(){
   const bar=$("#nextbar"); if(!bar) return;
-  bar.onclick=()=>openApp("nflsn"); bar.style.cursor="pointer";   /* v1.17.1 (Ty): the next-game pill opens NFLSN */
+  bar.onclick=()=>openApp("pylon"); bar.style.cursor="pointer";   /* v1.17.2 (Ty): the pill opens Pylon — the scores/schedule app; "nflsn" was never an app id and fell to Coming Soon */
   const g=nextGame();
   if(!g){ bar.classList.add("hidden"); return; }
   bar.classList.remove("hidden");
   const day=(g[5]||"Sunday").slice(0,3).toUpperCase();
   const time=fmClock(g[6]);
   const wx=gameWeather(g);
+  /* v1.17.2 (Ty): the matchup reads like a ticker — AWAY @ HOME with BOTH logos (his club
+     included, swapping sides by venue), "vs" retired, every mark standardized: team logos
+     28px square, network marks one 20px height. */
+  const big=h=>String(h||"").replace('<img ','<img style="height:28px;width:28px;object-fit:contain;vertical-align:middle" ');
+  const netStd=h=>String(h||"").replace('<img ','<img style="height:20px;width:auto;max-width:74px;object-fit:contain;vertical-align:middle" ');
+  const mine=tlogoImg(S.blob.player.team,"tlogo nb"), theirs=tlogoImg(g[3],"tlogo nb");
+  const matchup = g[4]? big(theirs)+`<b style="opacity:.85">@</b>`+big(mine) : big(mine)+`<b style="opacity:.85">@</b>`+big(theirs);
+  bar.style.gap="10px";
   bar.innerHTML = `<span class="nb-when"><b>${day}</b>${time?" "+time:""}</span>
-    <span class="nb-opp"><b>${g[4]?"vs":"@"}</b>${tlogoImg(g[3],"tlogo nb")}</span>
-    <span class="nb-net">${netChip(NETMAP(g))}</span>
+    <span class="nb-opp" style="display:inline-flex;align-items:center;gap:7px">${matchup}</span>
+    <span class="nb-net">${netStd(netChip(NETMAP(g)))}</span>
     ${wx? `<span class="nb-wx">${esc(wx.label)}</span>`:""}`;
 }
 /* v1.6.1: real saves carry WildcardPlayoff / DivisionalPlayoff / ConferencePlayoff /
@@ -1403,9 +1411,9 @@ function mySeasonStatRows(){
     const NOISE=new Set(["DOWNSPLAYED","STAT_KEEP","SEAS_YEAR","YEARBYYEARTEAMINDEX","GAMERATING","RUSHYARDSAFTER1STHIT","RECEIVEYARDSAFTER","RUSHBROKENTACKLES","RUSH20YARDRUNS","CTHALLOWED","DSECINTRETURNYARDS","DSECINTLONGESTRETURN","DLINEFUMBLERECOVERYYARDS","DLINEBLOCKS","DLINESAFETIES","DLINEFUMBLETDS","KICKNUMKICKOFFS","KICKTOUCHBACKS","PUNTTOUCHBACKS","PUNTBLOCKED","KICKFGBLOCKED","KICKEPBLOCKED","GAMEWINFGSMADE","GAMEWINFGATTEMPTS","KRETATTEMPTS","KRETLONGEST","PRETATTEMPTS","PRETLONGEST"]);
     const want = posStatFields(p.pos);
     const vOK = prodOf(merged)>0;   /* v1.17.0: the save's GP/GS tick as bookkeeping for zero-snap players — display the verified truth */
-    const rows = [["Games played", vOK? (merged.GAMESPLAYED||0):0],["Games started", vOK? Math.min((merged.GAMESSTARTED||0), (S.gsFix!=null&&S.gsFix>=0)?S.gsFix:1e9):0]];   /* v1.17.1: the correction caps the display too */
+    const rows = [["Games played", vOK? (merged.GAMESPLAYED||0):0]];   /* v1.17.2 OPTION A (Ty's call, the two-QBs-both-flagged finding): the save does not record who starts — the stat leaves the sheet */
     for (const f of want) rows.push([LBL[f]||f, merged[f]||0]);
-    const shown=new Set(["GAMESPLAYED","GAMESSTARTED",...want]);
+    const shown=new Set(["GAMESPLAYED","GAMESSTARTED",...want]);   /* GAMESSTARTED stays SUPPRESSED (in the set so the generic loop skips it, never renders it) */
     for (const k in merged){ if (!shown.has(k) && !NOISE.has(k) && merged[k]>0 && rows.length<12) rows.push([LBL[k]|| k.toLowerCase().replace(/^./,c=>c.toUpperCase()), merged[k]]); }
     return {rows, merged};
 }
@@ -1425,7 +1433,7 @@ function mySeasonSheet(){
     ${!merged.GAMESPLAYED?'<p style="font-size:12px;color:var(--faint)">Regular season stats populate as you sync played weeks.</p>':""}
     <div class="hoodhead" style="color:var(--ink);margin-top:10px"><h3>Past seasons</h3></div>
     ${yrs.length? yrs.slice().reverse().map(y=>`<div class="scorecard"><div class="st"><span>${y.y} · ${esc(y.team)}</span></div>
-      ${(y.rows||[]).map(r=>`<div class="tm"><span>${esc(r[0])}</span><b>${r[1]}</b></div>`).join("")||'<div class="tm"><span>No stat lines banked</span><b></b></div>'}</div>`).join("")
+      ${(y.rows||[]).filter(r=>r[0]!=="GS").map(r=>`<div class="tm"><span>${esc(r[0])}</span><b>${r[1]}</b></div>`).join("")||'<div class="tm"><span>No stat lines banked</span><b></b></div>'}</div>`).join("")
       : `<p style="font-size:12.5px;color:var(--faint)">Seasons bank here as each year rolls over. The phone can only keep the seasons it lived through.</p>`}
     <div class="hoodhead" style="color:var(--ink);margin-top:10px"><h3>Trophy case</h3></div>
     ${tp.length? tp.map(x=>`<div class="trophy-row"><span class="t-ic">${x.ic}</span><div><b>${esc(x.t)}</b><span>${esc(x.sub)}</span></div></div>`).join("")
@@ -2668,9 +2676,9 @@ function pullScore(){
     const draftPts = dr==null?0 : (dr>=63||dr<1)?1 : dr===1?12 : dr===2?9 : dr===3?7 : dr<=5?4 : 2;
     const cap=(((p.contract||{}).salary||[]).reduce((a,x)=>a+(+x||0),0)/Math.max(1,(p.contract||{}).length||1)) || p.capSalary || 0;
     const capPts = cap>=25e6?20 : cap>=15e6?16 : cap>=8e6?12 : cap>=4e6?8 : cap>=1.5e6?4 : 1;
-    let gp=0,gs=0; { const _m=mergedSS(b)||{}; if (prodOf(_m)>0){ gp=_m.GAMESPLAYED||0; gs=_m.GAMESSTARTED||0; } }   /* v1.17.0: bookkeeping GP/GS never inflate the pull */
+    let gp=0; { const _m=mergedSS(b)||{}; if (prodOf(_m)>0){ gp=_m.GAMESPLAYED||0; } }   /* v1.17.0 bookkeeping law; v1.17.2 OPTION A: GS is unknowable — participation carries the whole role weight */
     const teamG=Math.max(1,(b.schedule||[]).filter(g=>g[7]&&g[1]==="RegularSeason").length);
-    const rolePts = 20*Math.min(1,gs/teamG) + 6*Math.min(1,gp/teamG) + (p.status==="PracticeSquad"? -8 : 2);
+    const rolePts = 26*Math.min(1,gp/teamG) + (p.status==="PracticeSquad"? -8 : 2);
     const vetPts = Math.min(8,(p.yearsPro||0))*1.25;
     /* v1.9.6 (extractor additive, the long-queued cap-rank): when roster rows carry real
        teammate cap hits (idx 8, dollars), his standing ON THIS ROSTER's payroll adds up to
@@ -2680,7 +2688,7 @@ function pullScore(){
     const teamCaps = roster.filter(r=>r.length>8 && +r[8]>0).map(r=>+r[8]).sort((a,b2)=>a-b2);
     if (teamCaps.length>=10) capRankPts = 6*pct(teamCaps, cap);
     let s = 30*posPct + 12*allPct + capPts + draftPts + rolePts + vetPts + capRankPts;
-    if ((p.yearsPro||0)===0 && gs===0) s = Math.min(s, 8 + draftPts*0.8 + (gp>0?6:0)); // rookie gate
+    if ((p.yearsPro||0)===0 && gp===0) s = Math.min(s, 8 + draftPts*0.8); // rookie gate — v1.17.2 OPTION A: starts are unknowable, so verified PLAY springs a rookie loose (the try/catch hid the orphaned gs reference — the defensive-silence law strikes again)
     return Math.max(0, Math.min(100, Math.round(s)));
   }catch(e){ return 0; }
 }
@@ -4029,8 +4037,12 @@ function mergedSS(blob){ const m={}; for (const r of ((blob||{}).seasonStats||[]
 const SS_BOOKKEEPING = new Set(["GAMESPLAYED","GAMESSTARTED","DOWNSPLAYED","GAMERATING","SEAS_YEAR","STAT_KEEP","YEARBYYEARTEAMINDEX"]);
 function prodOf(m){ let p=0; for (const k in (m||{})){ if (!SS_BOOKKEEPING.has(k) && typeof m[k]==="number" && m[k]>0) p+=m[k]; } return p; }
 function verifiedGP(){ const m=mergedSS(S.blob)||{}; return prodOf(m)>0? (m.GAMESPLAYED||0) : 0; }
-function verifiedGS(){ const m=mergedSS(S.blob)||{}; const raw=prodOf(m)>0? (m.GAMESSTARTED||0) : 0; return (S.gsFix!=null && S.gsFix>=0)? Math.min(raw, S.gsFix) : raw; }   /* v1.17.1 (Ty: a crash-reload double-credited his starts): the save's starts ledger can lie — the correction door caps it with HIS truth */
-function fixStartsPrompt(){ const cur=verifiedGS(); const v=prompt("The save credits "+((mergedSS(S.blob)||{}).GAMESSTARTED||0)+" starts. How many games did you REALLY start this season? (Madden can double-credit after a crash reload; entering the truth caps every pen and display.)", String(cur)); if(v===null) return; const n=+v; if(!Number.isInteger(n)||n<0||n>25) return toast("A real number of starts, 0-25."); S.gsFix=n; persist(); renderApp(curApp); toast("The record is corrected: "+n+" start"+(n===1?"":"s")+". Every pen now carries it."); }
+/* v1.17.2 OPTION A (Ty's call, settled by the two-QBs finding: both Geno's and his per-game
+   rows carried GAMESSTARTED:1 for the SAME game — the save does not record who actually
+   starts, anywhere). Starts are UNKNOWABLE: the stat left My Player, no pen may claim a
+   start or a relief appearance, the firstStart milestone is retired, and every gate that
+   leaned on GS (media interest, the pull's role weight) rides verified GP instead. The
+   v1.17.1 correction door (verifiedGS/gsFix/fixStartsPrompt) is retired with it.*/
 function statDelta(a,b){ const d={}; for (const k in b){ const x=(b[k]||0)-((a||{})[k]||0); if (x>0) d[k]=x; } return d; }
 function presserGate(g, d){
   const pos=S.blob.player.pos;
@@ -4063,9 +4075,10 @@ function midweekMediaOn(){
   const c=S.blob.clock||{};
   if ((c.weekType||c.stage)==="OffSeason") return false;
   const t=pullTier(); if (t.score>=45) return true;
-  const gs=verifiedGS();   /* v1.17.0: a bookkeeping GS never earns a locker scrum */
+  if ((c.weekType||c.stage)==="PreSeason") return false;   /* v1.17.2: preseason scrums are for NAMES — the tier check above is the only door; participation ratios are meaningless with zero RS games in the denominator */
+  const gp=verifiedGP();   /* v1.17.2 OPTION A: starts are unknowable — playing half the season's games is the media-interest signal now */
   const teamG=Math.max(1,(S.blob.schedule||[]).filter(g=>g[7]&&g[1]==="RegularSeason").length);
-  return gs/teamG>=0.5;
+  return gp/teamG>=0.5;
 }
 function midTemplates(n){
   const opp=n?n[3]:"the next one";
@@ -4685,8 +4698,8 @@ RENDER.settings = b=>{
    <select class="field" style="width:76px;margin:0" onchange="moveApp('${a.id}', +this.value)">${gridApps().map((_,n)=>`<option value="${n}" ${i===n?"selected":""}>#${n+1}</option>`).join("")}</select></label>`).join("")}
 
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Career</h3></div>
-  <button class="btn" style="background:rgba(255,255,255,.08)" onclick="location.hash='#debug';location.reload()">Debug readout</button>
-  <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94" onclick="resetCareer()">Reset this career</button>
+  <button class="btn" style="background:rgba(255,255,255,.08);margin-bottom:8px" onclick="toggleDebug()">Debug readout (tap toggles)</button>
+  <button class="btn" style="background:rgba(244,100,92,.15);color:#ff9d94;margin-top:8px" onclick="resetCareer()">Reset this career</button>
   <button class="btn" style="background:rgba(244,100,92,.20);color:#ffa8a0;margin-top:8px" onclick="deleteCareerSheet()">Delete this career…</button>
   <button class="btn" style="background:rgba(244,100,92,.28);color:#ffb3ab;margin-top:8px" onclick="erasePhoneSheet()">Erase this phone…</button>
   </div>`;
@@ -6207,7 +6220,6 @@ function applySaveNotices(oldP, newP, newC){
     const M=mergedSS(S.blob)||{};
     const firsts=[
       ["firstGame","GAMESPLAYED",1,"FIRST NFL GAME: he played in his first professional game this week"],
-      ["firstStart","GAMESSTARTED",1,"FIRST NFL START: he started his first professional game this week"],
       ["firstPassTD","PASSTDS",1,"CAREER FIRST: his first NFL passing touchdown"],
       ["firstRushTD","RUSHTDS",1,"CAREER FIRST: his first NFL rushing touchdown"],
       ["firstRecTD","RECEIVETDS",1,"CAREER FIRST: his first NFL receiving touchdown"],
@@ -6741,8 +6753,8 @@ function myStatLine(blob){
   const prod=prodOf(merged);
   const gp=prod>0? (merged.GAMESPLAYED||0) : 0;
   if (!gp) return "SEASON STATS (save truth): no games played yet this season; do not invent statistics for him."+(((merged.GAMESPLAYED||0)>0)?" (The save's raw games-played counter ticked as roster bookkeeping, but he has ZERO production — he has NOT taken a snap. NEVER write him as having played, started, been rested, or been part of any game action.)":"");
-  const parts=[gp+" GP", (merged.GAMESSTARTED||0)+" GS"];
-  for (const f of posStatFields(blob.player.pos)){ if (merged[f]) parts.push(merged[f]+" "+(STATLBL[f]||f.toLowerCase())); }
+  const parts=[gp+" GP"];   /* v1.17.2 OPTION A: starts never reach a pen */
+  for (const f of posStatFields(blob.player.pos)){ if (f==="GAMESSTARTED") continue; if (merged[f]) parts.push(merged[f]+" "+(STATLBL[f]||f.toLowerCase())); }   /* v1.17.2: no starts claims, ever */
   return "SEASON STATS (save truth, this season, "+blob.player.pos+"-relevant): "+parts.join(", ")+". Never contradict these numbers.";
 }
 /* v1.6.2 (Ty: "if i practice bad will the coach automatically demote me?"): the staff has
@@ -7032,7 +7044,7 @@ function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appl
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
-  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
 function intakeGameStory(art, byline, wkLbl, gk, _cid){
   if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
@@ -7856,7 +7868,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.1";
+const VER="v1.17.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -7871,12 +7883,21 @@ if ("serviceWorker" in navigator){
     });
   }).catch(()=>{});
 }
-if (location.hash==="#debug"){
-  const d=document.createElement("div");
+/* v1.17.2 (Ty: "i cant turn it off by pressing the pill again"): the readout is a real
+   toggle now — the second tap removes it in place, no reload, no app close. */
+function mountDebug(){
+  if (document.getElementById("dbgHud")) return;
+  const d=document.createElement("div"); d.id="dbgHud";
   d.style.cssText="position:fixed;top:60px;left:10px;z-index:999;background:rgba(0,0,0,.8);color:#0f0;font:11px monospace;padding:6px;border-radius:6px;pointer-events:none";
   const upd=()=>{d.textContent=`inner ${innerWidth}x${innerHeight} dpr ${devicePixelRatio} vv ${visualViewport?visualViewport.width.toFixed(0)+"x"+visualViewport.height.toFixed(0):"-"} standalone ${navigator.standalone}`};
   upd(); addEventListener("resize",upd); document.body.appendChild(d);
 }
+function toggleDebug(){
+  const d=document.getElementById("dbgHud");
+  if (d){ d.remove(); try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} toast("Debug readout off."); }
+  else { mountDebug(); try{ location.hash="#debug"; }catch(e){} toast("Debug readout on."); }
+}
+if (location.hash==="#debug") mountDebug();
 function setVH(){ document.documentElement.style.setProperty("--vh", (window.innerHeight*0.01)+"px"); }
 setVH(); window.addEventListener("resize", setVH); window.addEventListener("orientationchange", ()=>setTimeout(setVH,300));
 /* v1.6 (Ty #13): champions read from YearSummary truth carried in blob.history
