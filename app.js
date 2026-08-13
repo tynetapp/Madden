@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.5 (Aug 13 2026) — THE PRIVATE SHEET + THE GIG WALL + THE LIVING THREADS (Ty's ten-report round): (1) DIAL PRIVACY LAW — a family member texted "10/10 week" the moment he set his dials; the numbers are the coach's private sheet now: no pen ever writes them, and family/agent/fans (not in the building) never comment on practice at all. (2) THE GIG WALL — a benefit-elections email and an agent "small money" appearance text implied mechanics that do not exist; EMAIL LAW extended (no administrative fiction: elections, enrollment, portals, forms, RSVPs) + NOBODY BOOKS HIM law on every writing surface (weekly, midweek, fallout, live texts), with isGigAsk as the suspenders on every intake door (media-wall pattern); endorsements live only in the Apex page; the mention easter egg stays. (3) AGENT ASKS — the page shows only the five newest (record keeps all); facts mark settled asks SETTLED with a never-re-answer law (the agent re-answered an old ask — an AI slip invited by unlabeled history, cured at the facts). (4) OLD-@ HEAL — handle edits remember history and stampWorld rewrites any historic @ across chirps/replies/huddle; facts state his handle TODAY. (5) LIVING THREADS — every world chirp carries a seeded reply COUNT scaled off its own likes (stable, no real replies needed); joining a thread (his first reply) pulls the section in: before-replies, after-replies, and reactions to HIS scaled by buzz from nothing to national; a LIKE is visible and can stir that thread (buzz + content scaled, once per chirp); both key-gated like the existing reply pen. (6) UI — NFLSN emblem 40px, wager-board logos 27px with flex spacing (tlogoImg grew an inline-style door for frozen-CSS surfaces), and the sealed-week card's step 2 ends with Click Validate orders. (prior: v1.17.4) */
+/* TyPhone app.js — v1.17.7 (Aug 13 2026) — THE ANNOUNCEMENT GATE + THE LETTERHEAD + THE HONEST BOOK (Ty's nine-report round; his elevation LIVED — Geno took 8 sacks and the v1.17.4 door opened): (1) THE ANNOUNCEMENT GATE — queued moves were invisible to the pens (practice never mentioned his elevation; the Podium never knew); before midweek writes, anything pending gets HIS call via a confirmation sheet: announce (announcedLine rides worldFacts — practice talk, beat, texts, Podium treat it as confirmed club news NOW) or keep quiet; the order rides the ONE code unchanged either way. (2) THE LETTERHEAD — mail bodies render white-space:pre-line (every mail was collapsing to one paragraph), the Elevated letter breathes in paragraphs, every club letter signs off through the clubMail door, and club mail wears the team crest + the shield he ALREADY ships (nflsn-emblem.png — one file, one place, his own pull-from-the-same-place ruling) under the from line. (3) Never-self-reply at the dedupeReplies door (his player replied to himself). (4) Rolls-Royce Boat Tail $28M via boot overlay (data.js stays frozen). (5) THE BANK LAW — a fake "Harbor Point" payroll email invented an account; emails never report money movement (no payroll, deposits, balances, account numbers, invented banks — Meridian alone is money truth), prompt law + okEmail wall. (6) ONE-SIDED LAW + sanitizeInMsgs clamps a 1:1 batch to two consecutive lines (threads were having conversations with themselves). (7) Standings align: fixed table layout, shared column widths across divisions. (8) THE HONEST BOOK — teamPower weighs capped average margin alongside record and fades its seeded preseason noise as revealed games accrue. (9) The exe packaging round rides separately (bat.txt dropped, no code change). (v1.17.7 over .6: the crest reuses his existing shield file — no second upload; prior: v1.17.5) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -527,6 +527,9 @@ function stampWorld(){
 /* v1.4.2 BETA DIALS: hand-set practice/film meters (0-10) that the whole world treats as truth.
    Placeholder for the future practice engine; lives per-career in S.beta. */
 function betaDials(){ S.beta = S.beta || {practice:5, film:5}; return S.beta; }
+/* v1.17.6 (Ty: "add the rolls royce boattail, 28 million"): data.js is FROZEN — additions
+   overlay at boot. baseK is thousands; 28000 = $28M, the coachbuilt one-of-few. */
+try{ if (D && D.CARDATA && !D.CARDATA.some(r=>r&&r[1]==="Boat Tail")) D.CARDATA.push(["Rolls-Royce","Boat Tail","coachbuilt drophead","hyper",28000,2021,2026]); }catch(e){}
 function dialLabel(v){ return v<=1?"disastrous":v<=3?"poor":v<=4?"shaky":v<=6?"solid":v<=8?"sharp":"exceptional"; }
 function practiceLine(){
   /* v1.15.0: the pick moved into the sync flow (presser -> log -> locker questions). Before
@@ -1096,13 +1099,13 @@ function sanitizeInMsgs(th, msgs){
     if (th && th.group){ if (who==="me" || who===me) continue; out.push([m[0], m[1], Date.now()]); }
     else out.push(["them", m[1], Date.now()]);
   }
-  return out;
+  return th && th.group? out : out.slice(0,2);   /* v1.17.6 (Ty: "two plus messages... like they're having conversations with themselves"): a 1:1 batch lands as at most two consecutive lines; groups keep their many voices */
 }
 /* v1.17.1 (Ty: "podium briefs keep cutting off mid word"): the press facts grew with the
    league desk and 3600 tokens stopped fitting — the pen doubles, and whatever still runs
    out trims back to the last finished sentence instead of dying mid-word. */
 function podTrim(t){ try{ t=String(t||""); if(!t) return t; if(/[.!?"\u201d)\]]\s*$/.test(t.trim())) return t; const i=Math.max(t.lastIndexOf(". "),t.lastIndexOf("! "),t.lastIndexOf("? "),t.lastIndexOf(".\n"),t.lastIndexOf("!\n"),t.lastIndexOf("?\n")); return i>40? t.slice(0,i+1) : t; }catch(e){ return t; } }
-function okEmail(m){ try{ const t=(String(m.from||"")+" "+String(m.subj||"")).toLowerCase(); return !/interview|chronicle|press|reporter|journalist|media request|profile piece|sit.?down|feature on you|benefit election|open enrollment|enrollment (window|period)|benefits (portal|enrollment)|appearance (request|fee)|booking/.test(t) && !isGigAsk(String(m.subj||"")+" "+String(m.body||"")); }catch(e){ return true; } }
+function okEmail(m){ try{ const t=(String(m.from||"")+" "+String(m.subj||"")).toLowerCase(); return !/interview|chronicle|press|reporter|journalist|media request|profile piece|sit.?down|feature on you|benefit election|open enrollment|enrollment (window|period)|benefits (portal|enrollment)|appearance (request|fee)|booking|payroll|direct deposit|has been (posted|deposited|credited)|deposit (posted|confirmation)|account (number|ending)|routing number/.test(t+" "+String(m.body||"").toLowerCase().slice(0,300)) && !isGigAsk(String(m.subj||"")+" "+String(m.body||"")); }catch(e){ return true; } }
 /* v1.17.1 (Ty: "reactions only, no questions to me" in replies — he cannot answer them):
    ONE DOOR — every reply merge already rides dedupeReplies, so the question filter lives
    here. A reply that asks HIM something directly (a question mark aimed at "you/your" or an
@@ -1121,7 +1124,10 @@ function isGigAsk(x){ try{ return /\b(appearance fee|autograph session|meet.?and
 function scrubChirps(list){ try{ return (list||[]).filter(c=>c && String(c.t||"").trim() && String(c.n||c.a||"").trim() && !isMediaAsk(c.t) && !isGigAsk(c.t)); }catch(e){ return list||[]; } }
 function scrubHuddle(list){ try{ return (list||[]).filter(h=>{ if(!h || !String(h.h||"").trim() || !String(h.b||"").trim() || isMediaAsk(String(h.h)+" "+String(h.b)) || isGigAsk(String(h.h)+" "+String(h.b))) return false; h.cmts=(h.cmts||[]).filter(cm=>cm && String(cm.t||"").trim() && !isMediaAsk(cm.t) && !isGigAsk(cm.t)); return true; }); }catch(e){ return list||[]; } }
 function dedupeReplies(fresh, existing){
-  fresh=(fresh||[]).filter(r=>r&&okReply(r.x));
+  /* v1.17.6 (Ty: "my player replied to myself"): no generated reply is ever HIM — his words
+     only enter a thread when he types them. One door: every reply merge rides this. */
+  const _meH=String(S.handle||"").toLowerCase(), _meN=(S.blob&&S.blob.player? (S.blob.player.first+" "+S.blob.player.last):"").toLowerCase();
+  fresh=(fresh||[]).filter(r=>r&&okReply(r.x)&&String(r.h||"").toLowerCase()!==_meH&&String(r.a||"").toLowerCase()!==_meN);
   const seen=(existing||[]).map(r=>({h:String(r.h||"").toLowerCase(), t:normChText(r.x)}));
   const out=[];
   for (const r of (fresh||[])){
@@ -1461,7 +1467,7 @@ RENDER.tmail = (b, sub)=>{
   if (sub && sub.mail){
     const m=S.world.emails.find(x=>x.id===sub.mail); m.unread=false; S.reads["e:"+m.id]=1; persist();
     b.innerHTML = aphead("T-Mail", {back:"renderApp('tmail')", backlabel:"Inbox"}) +
-      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoFull(m.ts):esc(m.time)}</div>${esc(m.body)}</div></div>`;
+      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoFull(m.ts):esc(m.time)}</div>${/Football Operations/.test(m.from)? `<div style="margin:8px 0 12px;display:flex;align-items:center;gap:10px">${tlogoImg(S.blob.player.team,"tlogo","height:30px;width:30px;margin:0")}<img src="nflsn-emblem.png" alt="" style="height:26px" onerror="if(!artE(this))this.remove()"></div>`:""}<div style="white-space:pre-line">${esc(m.body)}</div></div></div>`;   /* v1.17.6 (Ty: "one big paragraph... no signature"): every mail body keeps its line breaks now, and club mail wears the crest */
   } else {
     b.innerHTML = aphead("T-Mail") + `<div class="apbody flush">` + S.world.emails.map(m=>`
       <div class="mail ${m.unread&&!S.reads["e:"+m.id]?"unread":""}" onclick="renderApp('tmail',{mail:'${m.id}'})">
@@ -1629,9 +1635,9 @@ function pyBody(){
         if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} else {recs[g.h].ti++;recs[g.a].ti++;} }
       const divs={}; for(const n in recs){ (divs[recs[n].div]=divs[recs[n].div]||[]).push([n,recs[n]]); }
       m.innerHTML = Object.keys(divs).sort().map(d=>`<div class="hoodhead" style="color:#fff"><h3>${esc(d)}</h3></div>
-        <table class="stnd"><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th></tr>` +
+        <table class="stnd" style="table-layout:fixed;width:100%"><tr><th>Team</th><th style="width:36px;text-align:right">W</th><th style="width:36px;text-align:right">L</th><th style="width:54px;text-align:right">PCT</th></tr>` +
         divs[d].sort((a,b)=>{const pc=r=>((r.w+0.5*(r.ti||0))/((r.w+r.l+(r.ti||0))||1)); return pc(b[1])-pc(a[1]);}).map(x=>
-          `<tr class="${x[0]===T?"you":""}"><td><span class="stnd-team">${tlogoImg(x[0],"tlogo st")}${esc(x[0])}</span></td><td>${x[1].w}</td><td>${x[1].l}</td><td>${(x[1].w+x[1].l+(x[1].ti||0))?(((x[1].w+0.5*(x[1].ti||0))/(x[1].w+x[1].l+(x[1].ti||0))).toFixed(3)).replace(/^0/,""):".000"}</td></tr>`).join("") + `</table>`).join("");
+          `<tr class="${x[0]===T?"you":""}"><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="stnd-team">${tlogoImg(x[0],"tlogo st")}${esc(x[0])}</span></td><td style="text-align:right">${x[1].w}</td><td style="text-align:right">${x[1].l}</td><td style="text-align:right">${(x[1].w+x[1].l+(x[1].ti||0))?(((x[1].w+0.5*(x[1].ti||0))/(x[1].w+x[1].l+(x[1].ti||0))).toFixed(3)).replace(/^0/,""):".000"}</td></tr>`).join("") + `</table>`).join("");
     } else {
       const played = S.blob.schedule.filter(g=>g[7]&&g[1]==="RegularSeason");
       const rec = played.reduce((a,g)=>{g[7][0]>g[7][1]?a[0]++:a[1]++;return a},[0,0]);
@@ -3760,12 +3766,18 @@ function wlDelta(g){
   return {pts, why:[...new Set(why)]};
 }
 function teamPower(name){
-  // power rating from league record if present, else seeded
-  let w=0,l=0;
-  if (S.blob.league){ for(const g of S.blob.league.games){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)||!gameRevealed(g.t,g.w)) continue;   /* v1.17.4 reveal law: the book's power ratings never peek at unlived finals */
-    if(g.h===name){ g.hs>g.as?w++:l++; } if(g.a===name){ g.as>g.hs?w++:l++; } } }
+  /* v1.17.6 (Ty: "make sure a line takes into account prior scores and stats"): the rating
+     reads REVEALED results only (v1.17.4 law) and now weighs how games were won — record plus
+     capped average margin — while the seeded preseason noise fades as real games accrue. An
+     0-3 team blown out three times prices worse than an 0-3 team that lost three one-scores. */
+  let w=0,l=0,marg=0,n=0;
+  if (S.blob.league){ for(const g of S.blob.league.games){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)||!gameRevealed(g.t,g.w)) continue;
+    if(g.h===name){ g.hs>g.as?w++:l++; marg+=(g.hs-g.as); n++; }
+    if(g.a===name){ g.as>g.hs?w++:l++; marg+=(g.as-g.hs); n++; } } }
   const base = seedRng("pow"+name+(S.blob.clock.seasonYear||2026))()*6-3;
-  return base + (w+l>0 ? (w-l)*1.1 : 0);
+  const noiseFade = n>=4? 0.35 : n>=2? 0.6 : 1;   /* the book trusts tape over priors once it exists */
+  const margTerm = n? Math.max(-3, Math.min(3, (marg/n)*0.22)) : 0;
+  return base*noiseFade + (n>0 ? (w-l)*1.1 : 0) + margTerm;
 }
 function gameLines(list){
   return list.map(g=>{
@@ -4590,11 +4602,41 @@ async function podiumJobRun(){
   S.world.podium.eps.unshift(ep);
   S.world.notifs.unshift({app:"podium", t:"Podium", p:"This week's episode brief wrote itself"});
 }
+function annConfirm(yes){
+  const wk=wkKey(S.blob.clock);
+  (S.annAsked=S.annAsked||{})[wk]=1;
+  if (yes){ const pend=[...(staffState().orders||[]).map(o=>(o.kind==="bench"?"Benched":o.kind==="promote"?"Elevated":"Demoted")+" \u2014 "+o.why), ...((S.orders||[]).map(ordWords))];
+    (S.announced=S.announced||{})[wk]=pend; }
+  persist(); closeSheet(); midweekTick();
+}
+function announcedLine(){
+  const a=(S.announced||{})[wkKey(S.blob.clock)]||[];
+  if (!a.length) return "";
+  return "ANNOUNCED IN THE BUILDING THIS WEEK (confirmed club news, public and TRUE now \u2014 practice talk, the beat, texts, and the Podium all treat it as this week's story; it reaches the game itself at the next sync): "+a.join(". ")+".";
+}
 async function midweekTick(){
   if (!aiKey() && !laneCOn()) return toast("Add an API key in Sync first.");   // v1.8.1: the computer's key covers the heavies
   const _mwCid=S.careerId;                                                 /* v1.16.0 career lock */
   const wk = wkKey(S.blob.clock);
   S.midweek = S.midweek||{};
+  /* v1.17.6 THE ANNOUNCEMENT GATE (Ty: elevated after Geno's 8 sacks, then "nobody talked
+     about it" at practice and the podium never knew): queued moves are real THE MOMENT the
+     building decides them, but the pens only learn save truth — so before midweek writes,
+     anything pending gets HIS call: announce it (the world treats it as confirmed club news
+     NOW) or keep the building quiet. Either way the order stays queued and rides the ONE
+     code to the save exactly as before. Asked once per week; never asked when nothing waits. */
+  if (!(S.annAsked&&S.annAsked[wk])){
+    const pend=[...(staffState().orders||[]).map(o=>(o.kind==="bench"?"Benched":o.kind==="promote"?"Elevated":"Demoted")+" \u2014 "+o.why), ...((S.orders||[]).map(ordWords))];
+    if (pend.length){
+      sheet(`<h3>The building has news</h3>
+      <p class="sp">These are decided and queued for the save. Announce them now and the whole world \u2014 practice chatter, the beat, the Podium \u2014 treats them as this week's confirmed club news. Or keep the building quiet until the save makes them real.</p>
+      <div style="max-height:38vh;overflow:auto">${pend.map(x=>`<div class="payline"><span style="font-size:12.5px">${esc(x)}</span></div>`).join("")}</div>
+      <button class="btn" style="background:var(--ok);color:#04170d;margin-top:10px" onclick="annConfirm(1)">Announce it \u2014 let the world react</button>
+      <button class="btn" style="background:rgba(255,255,255,.1)" onclick="annConfirm(0)">Keep it in the building this week</button>`);
+      return;
+    }
+    (S.annAsked=S.annAsked||{})[wk]=1;
+  }
   if (S.midweek[wk] || calBusy) return;
   if (S.midSkip && S.midSkip[wk]) return toast("You chose not to talk to the media this week. That call is final; the next sync re-offers it fresh.");   // v1.8.5: the wave-off law, enforced at the engine too
   /* v1.13.0 THE POWERHOUSE: on a KEYED phone midweek is not a sync and not a write — the week
@@ -4617,7 +4659,7 @@ async function midweekTick(){
   if (ruled) toast("The club sent word. Check T-Mail.");
   const n=nextGame();
   const f=S.chirp.followers||0;
-  const sys = `You write the MIDWEEK beat of a fictional NFL life-sim phone. Everything anchors to the SAVE FACTS. No game has been played since the facts were written: the last game's result in the facts is LAST week, already lived; the coming matchup is the WEEK AHEAD. Chirps, texts, threads, and emails live in the practice week and look ahead; they never re-report the last game as news. Presser answers in the facts belong to the LAST game; MIDWEEK LOCKER-ROOM QUOTES belong to the week ahead; only the Podium episode may draw on both, per its spec below. NO articles of any kind midweek — the Chronicle writes on full week syncs only. NOBODY BOOKS HIM: no one — agent included — invites him to appearances, signings, events, or paid gigs of any size (endorsements live only in the Apex sports group page); emails read complete on their own, never administrative fiction (no benefit elections, enrollment windows, portals, forms, RSVPs). No em dashes. Output STRICT JSON only, no fences:
+  const sys = `You write the MIDWEEK beat of a fictional NFL life-sim phone. Everything anchors to the SAVE FACTS. No game has been played since the facts were written: the last game's result in the facts is LAST week, already lived; the coming matchup is the WEEK AHEAD. Chirps, texts, threads, and emails live in the practice week and look ahead; they never re-report the last game as news. Presser answers in the facts belong to the LAST game; MIDWEEK LOCKER-ROOM QUOTES belong to the week ahead; only the Podium episode may draw on both, per its spec below. NO articles of any kind midweek — the Chronicle writes on full week syncs only. NOBODY BOOKS HIM: no one — agent included — invites him to appearances, signings, events, or paid gigs of any size (endorsements live only in the Apex sports group page); emails read complete on their own, never administrative fiction (no benefit elections, enrollment windows, portals, forms, RSVPs) and never money movement — no payroll or deposit notices, no account numbers, no invented banks; Meridian is his only bank and money truth lives in that app alone. No em dashes. Output STRICT JSON only, no fences:
 {"chirps":[{"n":"","h":"@handle","vf":0,"t":"","li":0,"rp":0,"tm":"1h"} x3-5, practice reports, roster chatter, one about the coming game],
 "myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x1-3],
@@ -6994,7 +7036,9 @@ function clubMail(subj, body, from){
   /* v1.9.0 (Ty's ruling): agentless — self-represented or pre-pick — club mail drops the
      route-through-representation clause; "This notice is one-way." stands. ONE door. */
   if (!S.agent || S.agent.id==="self") body=String(body).split("; direct any response through your representation").join("");
-  const e={id:"fo"+Date.now()+Math.floor(Math.random()*900), from: from || ((S.blob&&S.blob.player&&S.blob.player.team||"Club")+" Football Operations"), subj, ts:Date.now(), unread:true, body};
+  const _team=(S.blob&&S.blob.player&&S.blob.player.team)||"Club";
+  body = String(body) + "\n\n\u2014 " + _team + " Football Operations";   /* v1.17.6 (Ty: "other emails have signature lines"): every club letter signs off, one door */
+  const e={id:"fo"+Date.now()+Math.floor(Math.random()*900), from: from || (_team+" Football Operations"), subj, ts:Date.now(), unread:true, body};
   S.world.emails=S.world.emails||[]; S.world.emails.unshift(e);
   return e;
 }
@@ -7169,7 +7213,7 @@ function coachPromotionScan(){
     st.orders.push({id:"st"+Date.now(), wk, kind:"promote", why, order, ts:Date.now()});
     st.log.unshift({wk, kind:"promote", why, ts:Date.now()});
     clubMail("Roster Decision — Elevated at "+p.pos,
-      "This is formal notice from the club. By decision of "+coachName()+" and the coordinator, you have been elevated on the "+p.pos+" depth chart ("+why+"). The corresponding depth order has been filed and processes with the week. Earn the reps. This notice is one-way; direct any response through your representation.");
+      "This is formal notice from the club.\n\nBy decision of "+coachName()+" and the coordinator, you have been elevated on the "+p.pos+" depth chart ("+why+"). The corresponding depth order has been filed and processes with the week.\n\nEarn the reps.\n\nThis notice is one-way; direct any response through your representation.");
     S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Roster decision: ELEVATED at "+p.pos+" — order waiting in Sync"});
     persist();
     return {kind:"promote", why};
@@ -7280,7 +7324,7 @@ KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
 ${press? "" : `MONEY: ${p.status==="PracticeSquad"? "practice squad $6,222/wk" : "active roster, "+fm(Math.round((((p.contract||{}).salary||[])[(p.contract||{}).currentYear||0] ?? p.capSalary)/18))+"/wk"}; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.`}
 ${(S.blob.clock&&S.blob.clock.weekType==="PreSeason")? "IT IS THE PRESEASON — exhibition football: never call any preseason game a ‘home opener’ or ‘season opener’ (the season opens in Week 1 of the REGULAR season); stakes are roster auditions, stadiums run light, ticket demand is soft, the world's excitement is muted, and hype waits for real games."+(depthListed()? "" : " He is NOT on the depth chart at his position — in the world's eyes he is a CAMP BODY fighting for a roster spot, whatever his contract says.") : ""}
-PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${(!press&&per.familyAsk)?", sends home "+fm(per.familyAsk)+"/mo":""}${(!press&&per.debtTotal)?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+((per.debtShares||[])[3]>0&&per.autoLoanCar? "; the auto loan is on a "+per.autoLoanCar:"")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. ${SL(saveNoticesLine,"saveNoticesLine")} ${press? "" : SL(markerLine,"markerLine")} ${SL(myPostsLine,"myPostsLine")} ${press? `PUBLIC PROFILE: his social presence reads as \"${buzzTier(S.chirp?S.chirp.followers:0)}\" — exact follower numbers are not printable information.` : `FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}). His Chirper handle TODAY is ${S.handle} — any @-mention of him uses EXACTLY this, never an earlier handle.`}
+PERCEPTION (who the world believes he is): ${per.draft||"Undrafted"}, grew up ${per.grew||"unknown"} in ${per.state||"?"}, HS: ${per.hs||"unranked"}, college: ${per.college||"unknown"}, family: ${per.family||"unknown"}${(!press&&per.familyAsk)?", sends home "+fm(per.familyAsk)+"/mo":""}${(!press&&per.debtTotal)?", carrying "+fm(per.debtTotal)+" of personal debt ("+(per.debtShares? D.DEBTCATS.filter((c,i)=>per.debtShares[i]>0).join(", "):"mixed")+((per.debtShares||[])[3]>0&&per.autoLoanCar? "; the auto loan is on a "+per.autoLoanCar:"")+")":""}. Public reputation: ${per.rep||"Complete unknown"}. ${SL(saveNoticesLine,"saveNoticesLine")} ${SL(announcedLine,"announcedLine")} ${press? "" : SL(markerLine,"markerLine")} ${SL(myPostsLine,"myPostsLine")} ${press? `PUBLIC PROFILE: his social presence reads as \"${buzzTier(S.chirp?S.chirp.followers:0)}\" — exact follower numbers are not printable information.` : `FOLLOWERS on Chirper: ${S.chirp?S.chirp.followers.toLocaleString():"n/a"} (${buzzTier(S.chirp?S.chirp.followers:0)}). His Chirper handle TODAY is ${S.handle} — any @-mention of him uses EXACTLY this, never an earlier handle.`}
 ${press? "" : SL(familyLine,"familyLine")}
 ${SL(()=>myStatLine(blob),"myStatLine")}${SL(()=>awardsLine(blob),"awardsLine")}${SL(()=>coachLine(blob),"coachLine")}${SL(()=>champLine(blob),"champLine")}${SL(disciplineLine,"disciplineLine")}${press? "" : SL(staffLine,"staffLine")}${press? "" : SL(requestsLine,"requestsLine")}${press? "" : SL(arrivalLine,"arrivalLine")}${press? "" : SL(travelLine,"travelLine")}${press? "" : SL(famSeatsLine,"famSeatsLine")}${SL(pressersLine,"pressersLine")}${SL(midAvailLine,"midAvailLine")}${press? "" : SL(freshLine,"freshLine")}${press? "\nPRESS PRIVACY LAW (absolute): his private texts and DMs, requests routed through his agent, personal finances, follower counts, family ticket or seating arrangements, and the coach's private evaluations are NOT visible to any reporter and never appear in print or on a show. Private life is not news. Only public facts, public posts, podium answers, and the league desk notes below are reportable."+SL(leagueDigest,"leagueDigest") : ""}`;
 }
@@ -7392,7 +7436,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click);  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each thread gets ONE self-contained message (at most two short consecutive lines from the same person that stand alone together); never write a message that answers something he did not say, never simulate a back-and-forth he was not part of. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -8137,7 +8181,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.5";
+const VER="v1.17.7";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
