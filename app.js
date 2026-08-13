@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.0 (Aug 12 2026) — THE TRUTH ROUND (Ty's ten): THE PARTICIPATION LAW (live-proven on CAREER-ZADEY1: Madden ticks GP/GS as roster BOOKKEEPING for zero-snap players — production is the only participation truth; milestones, My Player, myStatLine, media gates, and the pull all ride it, and falsely-won firstGame/firstStart heal at boot) + THE LEAGUE DESK (v1.8.2 exe ships league.box quarter scores + real star lines + league.injuries; leagueDigest rebuilt around them with news judgment, preseason coverage, records watch, and the week ahead — it rides the paper, the Podium, and the world write) + THE PRESS SCOPE (the paper and the show see a reporter's facts: no private texts, finances, follower counts, family seats, or coach's private evals — private life is not news) + the spelled-out Chronicle masthead ("2026 Preseason, Week 1 (Complete) · Week 2 (Upcoming)") + THE APRIL BILL (tracked season income comes due when April 15 passes: Tax Hold first, checking for the rest, refund if over-withheld) + THE COOLDOWN (unprompted inbound texts are earned — he starts ~4 in 5 conversations) + FAN LAW (fans never fly with the team) + PLAIN-HUMAN LAW (nobody parrots the notes) (prior: v1.16.7) */
+/* TyPhone app.js — v1.17.1 (Aug 12 2026) — THE FIELD ROUND (Ty's twelve): PRACTICE PRIVACY (the agent/family were never at practice — no tape talk from outside the building) + MEDIA NEVER EMAILS (press access is the availability and the podium; interview emails die at the door) + REPLY LAW (reactions only under his posts — questions to him are filtered at the ONE dedupe door; rare @-mention easter eggs recount real fan moments) + PLAYERS WEAR THEIR TEAM (a real player's chirper account gets the team logo, never a fan pfp) + THE ME-ROLE COERCION (no pen ever speaks as him — inbound merges force "them", group messages under his name drop) + THE STARTS CORRECTION (the save's GS ledger can double-count after a crash reload; S.gsFix caps every pen with his truth) + the podium pen doubled to 8000 with sentence-trim (no more mid-word cutoffs) + the kicker chip is gone from Chronicle articles + the numbered continuation (3 Click Validate orders · 4 the plain-language read) + the next-game pill opens NFLSN + the credit minimum is once per week (prior: v1.17.0) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -675,6 +675,7 @@ function trophySheet(){
 }
 function renderNextBar(){
   const bar=$("#nextbar"); if(!bar) return;
+  bar.onclick=()=>openApp("nflsn"); bar.style.cursor="pointer";   /* v1.17.1 (Ty): the next-game pill opens NFLSN */
   const g=nextGame();
   if(!g){ bar.classList.add("hidden"); return; }
   bar.classList.remove("hidden");
@@ -963,10 +964,27 @@ function pfpFor(g, key){
   for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
   return "pfp-" + g + "-" + (1 + (h % n)) + ".jpg";
 }
+/* v1.17.1 (Ty: Minkah got a fan pfp): PLAYERS NEVER WEAR FAN PHOTOS — a chirper account
+   belonging to a real player wears his team's logo. Names resolve through every player set
+   the blob carries: his roster, the box-score stars, and the injury report (each names a
+   team); a recognized player with no known team gets initials, never a headshot. */
+function playerTeamLogoOf(name){
+  try{
+    const n=String(name||"").toLowerCase(); if(!n) return null;
+    for (const r of (S.blob.roster||[])) if ((r[0]+" "+r[1]).toLowerCase()===n) return teamLogo(S.blob.player.team);
+    const me=(S.blob.player.first+" "+S.blob.player.last).toLowerCase(); if (n===me) return null;   /* his own pfp is his own business */
+    const L=S.blob.league||{}; const tn=L.teams||[];
+    if (L.box) for (const g of (L.box.games||[])) for (const st of (g[6]||[])) if (String(st[0]||"").toLowerCase()===n) return teamLogo(tn[st[2]]);
+    if (L.injuries) for (const r of L.injuries) if (String(r[0]||"").toLowerCase()===n) return teamLogo(tn[r[2]]);
+  }catch(e){}
+  return null;
+}
 function chAvatar(c, sm){
   const cls = "av chav" + (sm ? " sm" : "");
   const src = c.n? teamLogo((c.n||"").split(" ")[0]) : null; // "Jets Videos", "Jets" official
   if (src) return `<span class="${cls} teamav"><img src="${src}" alt="" onerror="if(!artE(this))this.parentNode.textContent='${(c.n||"?")[0]}'"></span>`;
+  const pl = playerTeamLogoOf(c.n);
+  if (pl) return `<span class="${cls} teamav"><img src="${pl}" alt="" onerror="if(!artE(this))this.parentNode.textContent='${(c.n||"?")[0]}'"></span>`;
   const p = pfpFor(c.g, c.h || c.n);
   if (p) return `<span class="${cls}" style="background:${c.av||avColor(c.n||"?")}"><img src="${p}" alt="" onerror="if(!artE(this))this.remove()"></span>`;
   return `<span class="${cls}" style="background:${c.av||avColor(c.n||"me")}">${initials(c.n||"?")}</span>`;
@@ -990,7 +1008,7 @@ function replyBadge(r){
 }
 function replyAvatar(r, bd){
   if (r.h===S.handle && myPfp()) return `<span class="av chav sm"><img src="${myPfp()}"></span>`;
-  if (bd.tm) return `<span class="av chav sm" style="background:${avColor(r.a||"?")}">${initials(r.a||"?")}</span>`;
+  if (bd.tm){ const pl=playerTeamLogoOf(r.a); if (pl) return `<span class="av chav sm teamav"><img src="${pl}" alt="" onerror="if(!artE(this))this.remove()"></span>`; return `<span class="av chav sm" style="background:${avColor(r.a||"?")}">${initials(r.a||"?")}</span>`; }
   return chAvatar({n:r.a, h:r.h, g:r.g}, true);
 }
 const VF = '<i class="vfk"><img src="chirper-verified.png" width="15" height="15" alt="" onerror="if(!artE(this))this.outerHTML=&quot;<svg viewBox=\'0 0 22 22\' width=\'15\' height=\'15\'><circle cx=\'11\' cy=\'11\' r=\'10.5\' fill=\'#1d9bf0\'/><path d=\'M6.2 11.4l3.1 3.1 6.3-6.6\' fill=\'none\' stroke=\'#fff\' stroke-width=\'2.2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/></svg>&quot;"></i>';
@@ -1009,7 +1027,36 @@ function dedupeChirps(fresh, existing){
   }
   return out;
 }
+/* v1.17.1 (Ty: "nobody should be emailing me from media asking for time to talk"): media
+   access is the midweek availability and the postgame podium — full stop. Any email that
+   smells like a press request dies at the door, whichever pen wrote it. */
+/* v1.17.1 (Ty: "the messages had my player responding to people. i did NOT send those
+   messages"): NO PEN EVER SPEAKS AS HIM. Inbound merges coerce every 1:1 message to "them";
+   in a group, a message under his name or "me" is dropped outright. Only his own thumbs
+   (sendText) and the delayed replies TO his words put ink in a thread as anyone but them. */
+function sanitizeInMsgs(th, msgs){
+  const me=(S.blob.player.first+" "+S.blob.player.last).toLowerCase();
+  const out=[];
+  for (const m of (msgs||[])){
+    if (!m || !String(m[1]||"").trim()) continue;
+    const who=String(m[0]||"").toLowerCase();
+    if (th && th.group){ if (who==="me" || who===me) continue; out.push([m[0], m[1], Date.now()]); }
+    else out.push(["them", m[1], Date.now()]);
+  }
+  return out;
+}
+/* v1.17.1 (Ty: "podium briefs keep cutting off mid word"): the press facts grew with the
+   league desk and 3600 tokens stopped fitting — the pen doubles, and whatever still runs
+   out trims back to the last finished sentence instead of dying mid-word. */
+function podTrim(t){ try{ t=String(t||""); if(!t) return t; if(/[.!?"\u201d)\]]\s*$/.test(t.trim())) return t; const i=Math.max(t.lastIndexOf(". "),t.lastIndexOf("! "),t.lastIndexOf("? "),t.lastIndexOf(".\n"),t.lastIndexOf("!\n"),t.lastIndexOf("?\n")); return i>40? t.slice(0,i+1) : t; }catch(e){ return t; } }
+function okEmail(m){ try{ const t=(String(m.from||"")+" "+String(m.subj||"")).toLowerCase(); return !/interview|chronicle|press|reporter|journalist|media request|profile piece|sit.?down|feature on you/.test(t); }catch(e){ return true; } }
+/* v1.17.1 (Ty: "reactions only, no questions to me" in replies — he cannot answer them):
+   ONE DOOR — every reply merge already rides dedupeReplies, so the question filter lives
+   here. A reply that asks HIM something directly (a question mark aimed at "you/your" or an
+   @) is dropped; rhetorical crowd noise ("how is this guy on our team?") survives. */
+function okReply(x){ try{ const t=String(x||""); if(!/\?/.test(t)) return true; return !/(^|\W)(you|your|u|ur|@)/i.test(t); }catch(e){ return true; } }
 function dedupeReplies(fresh, existing){
+  fresh=(fresh||[]).filter(r=>r&&okReply(r.x));
   const seen=(existing||[]).map(r=>({h:String(r.h||"").toLowerCase(), t:normChText(r.x)}));
   const out=[];
   for (const r of (fresh||[])){
@@ -1336,7 +1383,7 @@ RENDER.chron = (b, sub)=>{
   b.innerHTML = `<div class="aphead"><button class="back" onclick="closeApp()">‹ Home</button><span class="masthead">United Chronicle</span></div>
   <div class="dateline" style="margin-top:10px">${esc(A.wkFull||A.wk||"")} · Sports</div>
   <div class="apbody flush"><div class="art">
-    <div class="kick">${esc(A.kick)}</div><h1>${esc(A.head)}</h1>
+    <h1>${esc(A.head)}</h1>
     <div class="stand">${esc(A.stand)}</div><div class="byline">${esc(A.by)}</div>` +
     A.paras.map((p,i)=> (i===4&&A.pq?`<div class="pq">${esc(A.pq)}</div>`:"") + `<p>${esc(p)}</p>`).join("") +
   `</div><div class="more">${chronRetryBtn()}<h3>Earlier coverage</h3>` +
@@ -1356,7 +1403,7 @@ function mySeasonStatRows(){
     const NOISE=new Set(["DOWNSPLAYED","STAT_KEEP","SEAS_YEAR","YEARBYYEARTEAMINDEX","GAMERATING","RUSHYARDSAFTER1STHIT","RECEIVEYARDSAFTER","RUSHBROKENTACKLES","RUSH20YARDRUNS","CTHALLOWED","DSECINTRETURNYARDS","DSECINTLONGESTRETURN","DLINEFUMBLERECOVERYYARDS","DLINEBLOCKS","DLINESAFETIES","DLINEFUMBLETDS","KICKNUMKICKOFFS","KICKTOUCHBACKS","PUNTTOUCHBACKS","PUNTBLOCKED","KICKFGBLOCKED","KICKEPBLOCKED","GAMEWINFGSMADE","GAMEWINFGATTEMPTS","KRETATTEMPTS","KRETLONGEST","PRETATTEMPTS","PRETLONGEST"]);
     const want = posStatFields(p.pos);
     const vOK = prodOf(merged)>0;   /* v1.17.0: the save's GP/GS tick as bookkeeping for zero-snap players — display the verified truth */
-    const rows = [["Games played", vOK? (merged.GAMESPLAYED||0):0],["Games started", vOK? (merged.GAMESSTARTED||0):0]];
+    const rows = [["Games played", vOK? (merged.GAMESPLAYED||0):0],["Games started", vOK? Math.min((merged.GAMESSTARTED||0), (S.gsFix!=null&&S.gsFix>=0)?S.gsFix:1e9):0]];   /* v1.17.1: the correction caps the display too */
     for (const f of want) rows.push([LBL[f]||f, merged[f]||0]);
     const shown=new Set(["GAMESPLAYED","GAMESSTARTED",...want]);
     for (const k in merged){ if (!shown.has(k) && !NOISE.has(k) && merged[k]>0 && rows.length<12) rows.push([LBL[k]|| k.toLowerCase().replace(/^./,c=>c.toUpperCase()), merged[k]]); }
@@ -3517,7 +3564,7 @@ RENDER.card = b=>{
     ${!unl? `<div style="height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:10px;overflow:hidden"><div style="height:100%;width:${uPct}%;background:${u>0.9?"#c0392b":u>0.6?"#e8a13f":u>0.3?"#9aa2ac":"#2e9b63"}"></div></div>`:""}
     ${uLine? `<div style="font-size:12px;color:var(--dim);margin-top:6px;line-height:1.5">${uLine}</div>`:""}
     ${S.credit.cardBal>0?`<div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn sm" style="background:#cfd6df;color:#17191d" onclick="payCard(${min})">Pay minimum ${fm(min)}</button>
+      ${S.credit.minPaidWk===wkKey(S.blob.clock)? `<button class="btn sm" style="background:rgba(207,214,223,.25);color:#9aa2ac" disabled>Minimum paid \u2713</button>` : `<button class="btn sm" style="background:#cfd6df;color:#17191d" onclick="payCardMin(${min})">Pay minimum ${fm(min)}</button>`}
       <button class="btn sm" style="background:rgba(207,214,223,.15);color:#cfd6df" onclick="payCard(${S.credit.cardBal})">Pay in full</button></div>`:
       `<div style="font-size:13px;color:var(--dim);margin-top:6px">Zero balance. The card works at Octane, Harborline, Stratos, and marker settlements; autopay pulls the minimum monthly.</div>`}</div>
   <div class="mercard" style="background:#1e2126;border:1px solid #2c3037"><h4>Statement</h4>` +
@@ -3530,6 +3577,7 @@ RENDER.card = b=>{
     <div style="margin-top:8px">${CARD_TIERS.map(t=>`<div class="payline" style="${t.id===T.id?"color:#fff":"opacity:.45"}"><span>${t.id===T.id?"\u25b8 ":""}${t.n}</span><span>${t.apr}% · ${t.cb}% back</span></div>`).join("")}</div>
     <div style="font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.5">The tier moves at the weekly rollover with your score, income, and net worth. It only moves DOWN after a missed minimum or a real score collapse, never on a quiet week. Your line grows with income and net worth and never shrinks.</div></div></div>`;   /* v1.11.1 (Ty): the tier lives UNDER statement activity */
 };
+function payCardMin(min){ payCard(min); S.credit.minPaidWk=wkKey(S.blob.clock); persist(); renderApp("card"); }   /* v1.17.1 (Ty): the minimum is a once-per-week move — more than that is what Pay in full is for */
 function payCard(amt){
   amt=Math.min(amt, S.credit.cardBal);
   if (S.cash.checking<amt) return toast("Checking can't cover that payment.");
@@ -3907,7 +3955,7 @@ async function podiumRegen(id){
   toast("Rewriting the brief…");
   try{
     const _cid=S.careerId;                                               /* v1.16.0 career lock */
-    const out = await callAI(podBriefSys(), worldFacts(S.blob, lastPlayed(), {press:true})+"\nWrite this week's source material now.", 3600);
+    const out = await callAI(podBriefSys(), worldFacts(S.blob, lastPlayed(), {press:true})+"\nWrite this week's source material now.", 8000);
     if (S.careerId!==_cid) return;
     e.script=out; e.focus=podFocus(); e.d=out.split("\n").find(l=>l.trim().length>40)||e.d; delete e.link;
     persist(); renderApp("podium"); toast("Fresh brief ready. Same steps, new take.");
@@ -3935,10 +3983,10 @@ async function genEpisodeBrief(){
     const last = lastPlayed();
     const _cid=S.careerId;                                               /* v1.16.0 career lock */
     const out = await callAI(podBriefSys(),
-      worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 3600);
+      worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 8000);
     if (S.careerId!==_cid) return;
     const focus=podFocus();
-    const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};
+    const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podTrim(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podTrim(out), focus};
     S.world.podium.eps.unshift(ep); persist(); renderApp("podium"); toast("Brief ready. Feed it to NotebookLM.");
   }catch(e){ toast("Generation failed: "+e.message); }
 }
@@ -3981,7 +4029,8 @@ function mergedSS(blob){ const m={}; for (const r of ((blob||{}).seasonStats||[]
 const SS_BOOKKEEPING = new Set(["GAMESPLAYED","GAMESSTARTED","DOWNSPLAYED","GAMERATING","SEAS_YEAR","STAT_KEEP","YEARBYYEARTEAMINDEX"]);
 function prodOf(m){ let p=0; for (const k in (m||{})){ if (!SS_BOOKKEEPING.has(k) && typeof m[k]==="number" && m[k]>0) p+=m[k]; } return p; }
 function verifiedGP(){ const m=mergedSS(S.blob)||{}; return prodOf(m)>0? (m.GAMESPLAYED||0) : 0; }
-function verifiedGS(){ const m=mergedSS(S.blob)||{}; return prodOf(m)>0? (m.GAMESSTARTED||0) : 0; }
+function verifiedGS(){ const m=mergedSS(S.blob)||{}; const raw=prodOf(m)>0? (m.GAMESSTARTED||0) : 0; return (S.gsFix!=null && S.gsFix>=0)? Math.min(raw, S.gsFix) : raw; }   /* v1.17.1 (Ty: a crash-reload double-credited his starts): the save's starts ledger can lie — the correction door caps it with HIS truth */
+function fixStartsPrompt(){ const cur=verifiedGS(); const v=prompt("The save credits "+((mergedSS(S.blob)||{}).GAMESSTARTED||0)+" starts. How many games did you REALLY start this season? (Madden can double-credit after a crash reload; entering the truth caps every pen and display.)", String(cur)); if(v===null) return; const n=+v; if(!Number.isInteger(n)||n<0||n>25) return toast("A real number of starts, 0-25."); S.gsFix=n; persist(); renderApp(curApp); toast("The record is corrected: "+n+" start"+(n===1?"":"s")+". Every pen now carries it."); }
 function statDelta(a,b){ const d={}; for (const k in b){ const x=(b[k]||0)-((a||{})[k]||0); if (x>0) d[k]=x; } return d; }
 function presserGate(g, d){
   const pos=S.blob.player.pos;
@@ -4396,10 +4445,10 @@ async function podiumJobRun(){
   /* the episode writes ITSELF after media availability (quote law: his real answers exist first) */
   const _cid=S.careerId;                                                   /* v1.16.0 career lock */
   const last=lastPlayed();
-  const out=await callAI(podBriefSys(), worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 3600);
+  const out=await callAI(podBriefSys(), worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 8000);
   if (S.careerId!==_cid){ console.log('career lock: an episode written for another save was dropped at the door'); return; }
   const focus=podFocus();
-  const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:out.split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:out, focus};   /* v1.16.0 (Ty): episode numbers are the career's OWN count — a first show is Ep. 1, the canon feed continues from its seeded history */
+  const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podTrim(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podTrim(out), focus};   /* v1.16.0 (Ty): episode numbers are the career's OWN count — a first show is Ep. 1, the canon feed continues from its seeded history */
   S.world.podium.eps.unshift(ep);
   S.world.notifs.unshift({app:"podium", t:"Podium", p:"This week's episode brief wrote itself"});
 }
@@ -4471,14 +4520,14 @@ function intakeMidweek(j, wk, _cid){
       const posts=(S.chirp.posts||[]).slice(-3);
       for (const r of j.myReplies){ if(!r||!String(r.x||"").trim()) continue; const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; if(dedupeReplies([r], p.replies).length){ p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } } }   // v1.7.6 husks + v1.7.7 dupes filtered
     }
-    if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs.map(m=>[m[0],m[1],Date.now()])); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; } }   /* v1.9.5: same door, same law */
+    if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...sanitizeInMsgs(th, t.msgs)); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; } }   /* v1.9.5 same door, same law; v1.17.1: never as him */
     if (j.huddle && j.huddle.length) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20); // v1.6.8 (Ty): the Huddle moves midweek too
-    if (j.emails) S.world.emails=[...j.emails, ...S.world.emails];
+    if (j.emails) S.world.emails=[...j.emails.filter(okEmail), ...S.world.emails];
     stampWorld();
     /* v1.8.5 (Ty's ruling): NO articles midweek — the Midweek Notebook is retired; the
        Chronicle writes on full week syncs only. Old notebooks already in the feed stay. */
     if (j.podium && j.podium.brief){
-      S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:j.podium.brief.split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:j.podium.brief});
+      S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:podTrim(j.podium.brief).split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:podTrim(j.podium.brief)});
       S.world.notifs.unshift({app:"podium", t:"Podium", p:"New episode brief is up"});
     }
     S.midweek[wk]=true;
@@ -5651,7 +5700,7 @@ function mailNextStep(){
   /* v1.16.0 (Ty): THE code in hand means the next step is the COMPUTER — never "go play".
      Self-invalidates the moment the queue changes (hash law). */
   if (ordTotal()>0 && S.ordersCopied && S.ordersCopied.hash===codeHash(ordersCode()))
-    return {k:"computer", t:"THE code is in your hand \u2713 (copied "+mailTime(S.ordersCopied.ts)+"). NOT Madden time yet \u2014 On the COMPUTER: open TyPhone Sync \u2192 paste THE code in the Coach orders box (your changes read in plain language once it validates) \u2192 close the franchise \u2192 Validate \u2192 APPLY. Then reopen Madden \u2014 the changes are in. NOW play, ADVANCE THE WEEK, save \u2014 and send the sync back.", btn:"Open the review again", fn:"reviewSheet()"};
+    return {k:"computer", t:"THE code is in your hand \u2713 (copied "+mailTime(S.ordersCopied.ts)+"). NOT Madden time yet \u2014 On the COMPUTER: 3) paste THE code in the Coach orders box, close the franchise, and Click Validate orders \u00b7 4) your changes read back in plain language \u2014 check them, then APPLY writes them to the save. Then reopen Madden \u2014 the changes are in. NOW play, ADVANCE THE WEEK, save \u2014 and send the sync back.", btn:"Open the review again", fn:"reviewSheet()"};
   if (mailInfo && mailInfo.noBox) return {k:"nobox", t:"No mailbox exists yet. One-time, on the COMPUTER: TyPhone Sync \u2192 save the token (the PURPLE box) \u2192 pick save + player \u2192 Send sync ONLINE (GREEN). That creates the box."};
   if (!aiKey() && midweekOwed()) return {k:"midweek", t:"Midweek is this week's next step \u2014 play it out, or choose \u201cDon\u2019t talk to the media during the week\u201d; then the orders and the save."};   /* v1.13.0: a KEYED phone has no midweek step — media availability is a card, not a gate */
   if (ordTotal()>0){
@@ -7062,7 +7111,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; MEDIA NEVER EMAILS and no one ever asks him for an interview or his time by email (his media access is the midweek availability and the postgame Podium show, period). REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -7077,8 +7126,8 @@ function intakeWorld(j, wkLbl, gk, opts){
   if (j.article && !opts.noArticle){ j.article.wk=wkLbl; S.world.articles.unshift(j.article); S.articleFor=S.articleFor||{}; if(gk) S.articleFor[gk]=1; }
   if (j.chirps) S.world.chirps=[...dedupeChirps(j.chirps, S.world.chirps), ...S.world.chirps].slice(0,40);   // v1.7.7: no repeat voices
   if (j.huddle) S.world.huddle=[...j.huddle, ...S.world.huddle].slice(0,20);
-  if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...t.msgs.map(m=>[m[0],m[1],Date.now()])); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; stampInbound(th.id); } }   /* v1.9.5: the plan is ENFORCED here; v1.17.0: and the cooldown remembers */
-  if (j.emails) S.world.emails=[...j.emails, ...S.world.emails].slice(0,60);   /* v1.9.5: rolling window */
+  if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...sanitizeInMsgs(th, t.msgs)); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; stampInbound(th.id); } }   /* v1.9.5 enforced; v1.17.0 cooldown; v1.17.1: never as him */
+  if (j.emails) S.world.emails=[...j.emails.filter(okEmail), ...S.world.emails].slice(0,60);   /* v1.9.5 rolling window; v1.17.1: no press emails ever */
   if (j.myReplies && j.myReplies.length){ const f=S.chirp.followers||0; const posts=(S.chirp.posts||[]).slice(-3);
     for (const r of j.myReplies){ if(!r||!String(r.x||"").trim()) continue; const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; if(dedupeReplies([r], p.replies).length){ p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } } } }   /* v1.13.0 fullWeek: replies to HIS posts ride the week package (husks + dupes filtered) */
   stampWorld();
@@ -7775,7 +7824,12 @@ async function aiReply(thread, userMsg){
     }catch(e){ return ""; } })();
   const humanLaw = " BE A HUMAN, NOT A WALL: a staggering offer (life-changing money, public stakes) is ALLOWED to genuinely tempt or move you — hold your values, but visibly feel the weight; flat identical refusals to escalating offers read fake. Things that are REAL IN THE FRANCHISE (jersey numbers, roster spots, deals) you can only AGREE to in principle — they go through the equipment room or the front office, and you can tell him to make it official.";
   try{
-    const timeLaw = ` PLAIN-HUMAN LAW: never copy phrasing from these notes into the message; write like a real person, plainly — if a note cannot be said naturally, say something simpler.` + ` ${practiceLine()}` + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine() + numberLawLine();   /* v1.16.1 + v1.16.7: the gambling and jersey-number laws ride every reply, every thread */
+    /* v1.17.1 (Ty: "an agent really wouldnt say my practice tape looked good"): practice
+       details are inside-building knowledge. Teammates and coaches were THERE; the agent,
+       family, and outside world were not — they only know what he might have told them. */
+    const _inBldg = !/^(agent|mom|fam\d+|mara)$/.test(String(thread.id||""));
+    const pLine = _inBldg? ` ${practiceLine()}` : ` PRACTICE PRIVACY: this person was NOT at practice and has no access to tape, drills, or the coach's dials — they never comment on his practice specifics, only on his mood, his week, or what he might have told them.`;
+    const timeLaw = ` PLAIN-HUMAN LAW: never copy phrasing from these notes into the message; write like a real person, plainly — if a note cannot be said naturally, say something simpler.` + pLine + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine() + numberLawLine();   /* v1.16.1 + v1.16.7: the gambling and jersey-number laws ride every reply, every thread */
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
        members become role tags (R1, R2...) the phone maps back to names at render; a roster
        1:1 is addressed purely by role. Generated people keep their named personas. */
@@ -7802,7 +7856,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.0";
+const VER="v1.17.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
