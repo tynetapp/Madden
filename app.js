@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.9 (Aug 13 2026) — THE NICK BOSA LAW + THE FOLD KEEPS ITS PROMISE (Ty's Tyran Saint Jr round): (1) THE NICK BOSA LAW — the news reported an injury the game denies because the save's Injury table keeps HEALED rows (live-probed: 11 stale rows in the fixture, Bosa's LegGroinPull among them, every player Uninjured/Invalid_/no-IR); exe v1.8.7 ships a row only when the PLAYER record corroborates it, and the digest carries the belt both ways (the list is the ONLY injuries; an empty list means everyone is healthy — nothing carried from memory). (2) THE FOLD KEEPS ITS PROMISE — liking a counted world thread only ran the like-REACTION pen (correctly [] at low buzz) and never pulled the existing replies; _likeGen burned and the thread stuck on "still landing" forever. pullFold now lands the fold's own most-popular replies on like OR the Pull button (world ids ride fetchReplies), an empty pull re-arms, and the reaction pen rides after. (3) THE PODIUM DOES NOT OPEN THE PRACTICE SHEET — the v1.15.0 auto-pracFlow after the presser is dead at both doors (postgame is not midweek); the Sync card and calendar are the doors he presses, pracSave still runs the chain. (4) STREAK TRUTH — the paper invented "ended a stretch of narrow losses" behind back-to-back wins because the facts carried one game; FORM (last five real results with venues, scores, margins) + CURRENT STREAK + the streak law ride worldFacts now. (5) THE NAME LAW — the paper called him "the Jets quarterback"; he is covered BY NAME (full first, last after), a role tag may accompany but never replace it. (6) THE NETWORK REBRAND — the Pylon header is Ty's new banner alone (STATS NETWORK lives IN the art, filled into the red field); NFLSN text + hact span retired. Art shipped: nflsn-emblem.png (new banner), sponsor-prizepicks.png (his replacement mark). (prior: v1.17.8) */
+/* TyPhone app.js — v1.17.10 (Aug 13 2026) — THE DELIVERY DOOR + THE BANNER FILLS THE HEADER (Ty's eight-item round; charity + the HoF meter ride the NEXT chat by his ruling): (1) THE DELIVERY DOOR — his two notification reports were ONE root cause: sendText's completion force-rendered THAT thread whenever Messages was open (a reply landing after he backed out yanked him into the conversation) and never cleared the read stamp (so walking to the home screen meant no badge, no notification — the thread was still "read" from when he stood in it). deliverReply is the one door for every reply the phone writes: standing in the thread renders there and stays read; anywhere else clears the stamp, badges, notifies, and re-renders the screen he is ACTUALLY on. The owed-reply flush rides it too. (2) THE BANNER FILLS THE HEADER — art rebuilt from source at 4.6:1 with the shield full-strip-height, and the header runs it full width at 56px (styles.css stays frozen; sizing rides the inline door). (3) The "top replies are still landing" note is retired — the v1.17.9 Pull button is the honest door; the count stands alone. (4) RECORDS ON THE SCOREBOARD — pyRecs/pyRecTag hang (W-L) beside every team on both scorecards, built from revealed regular-season games only (the v1.17.4 reveal law), silent in preseason. (5) THE MINIMUM DEAL IS ONE YEAR — the created-player league-minimum rebuild files 1yr at the save's own minimum scale (his era: $890k; no hardcode, v1.16.1 stands); the CAP rebuild keeps two years, being the deal he actually created. (6) THE WORLD KNOWS HE IS HURT — the save's injury truth (IR + status/type/severity) shipped for rounds but no pen was ever told; hisInjuryLine rides worldFacts with the honest scale (IR is news, day-to-day is a locker aside, no invented timelines or injuries). (7) MONTHLY AWARDS TALLY — weekly awards already collapsed to ×N and yearly hardware already carried its year (Ty's confirmation, correct); only _of_Week matched, so monthlies listed one row per win — both the trophy case and the facts line count them now. (8) Audi mark replaced. (prior: v1.17.9) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -684,7 +684,7 @@ function trophyPieces(){
   const weekly={};
   for (const a of (b.awards||[])){
     if (!a||!a.type) continue;
-    if (/_of_Week$/i.test(a.type)) weekly[a.type]=(weekly[a.type]||0)+1;
+    if (/_of_(Week|Month)$/i.test(a.type)) weekly[a.type]=(weekly[a.type]||0)+1;   /* v1.17.10 (Ty confirming the rule): MONTHLY awards tally like weeklies (×N) — yearly hardware keeps its own year, one row each */
     else out.push({ic:"\u{1F3C5}", t:a.type.replace(/_/g," "), sub:(a.season!=null? String(a.season<100? base+a.season : a.season) : "")});
   }
   for (const [t,n] of Object.entries(weekly)) out.push({ic:"\u2B50", t:t.replace(/_/g," "), sub:n>1? "\u00d7"+n : ""});
@@ -944,9 +944,28 @@ async function sendText(tid){
       persist(); return;
     }
     const reply = await aiReply(t, v);
-    if (reply){ t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); ledgerTouchIn(t, reply); persist(); if(curApp==="messages") renderApp("messages",{thread:tid}); }
+    if (reply){ deliverReply(t, reply); }
     else maybeDeputy(t, v);   /* v1.9.4: the third time you trash the same guy, he doesn't reply — a teammate does */
   } else { toast("Delivered. Add an API key in Sync for replies."); }
+}
+/* v1.17.10 (Ty: "sending a message and going to the home screen doesnt get you a notification
+   button... leaving the message and then a message coming in pulls you right to it"): ONE
+   delivery door for every reply the phone writes. If he is STANDING IN that thread, it renders
+   there and stays read. If he is anywhere else — the thread list, another app, the home screen
+   — the read stamp clears (badge + notification center) and a notification lands; the screen
+   he is actually on is re-rendered in place, never replaced by the conversation. */
+function deliverReply(t, reply){
+  t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); delete t.hidden;
+  ledgerTouchIn(t, reply);
+  const looking = (curApp==="messages" && curMsgThread===t.id);
+  if (!looking){
+    delete S.reads["t:"+t.id];
+    S.world.notifs=S.world.notifs||[];
+    if (!S.world.notifs.some(n=>n.app==="messages" && n.t===t.name && n.p==="New message")) S.world.notifs.push({app:"messages", t:t.name, p:"New message"});
+  }
+  persist();
+  if (looking) renderApp("messages",{thread:t.id});
+  else { rerenderMessages(); if(curApp===null||curApp===undefined) renderHome(); }
 }
 async function maybeDeputy(target, userMsg){
   /* escalation, not repetition (Ty's spec 5): a silenced-by-streak teammate stays silent;
@@ -1192,7 +1211,7 @@ RENDER.chirper = (b,sub)=>{
          are dropped at render (which also heals husks already saved), and every reply-array
          intake filters them at the door. */
       const reps=(c.replies||[]).filter(r=>r&&String(r.x||"").trim());
-      return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? "the top replies are still landing" : "0")}</span></div>
+      return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? fmFoll(c.rc) : "0")}</span></div>
       ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0 && c.id? `<div class="empty">The reply section hasn't loaded. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${c.id}')">Fetch the top replies</button>` : "Add an API key in Sync to pull them."}</div>` : (c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${chThread}')">Pull the top replies</button>` : "Reply or like and the thread pulls in."}</div>` : '<div class="empty">No replies yet.</div>')}`;
       })()}
       </div>`;
@@ -1614,7 +1633,7 @@ function NETFALL(net){ return `<span class="net ${net}">${net==="PRIME"?"Prime V
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1 style="display:flex;align-items:center;min-width:0"><img class="nflsn-emblem" src="nflsn-emblem.png" alt="NFL Stats Network" style="height:40px;max-width:70vw;object-fit:contain" onerror="if(!artE(this))this.remove()"></h1></div>   <!-- v1.17.9 (Ty): the banner IS the wordmark now — NFLSN text and the hact span retired -->
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1 style="display:flex;align-items:center;min-width:0;flex:1 1 auto;margin:0"><img class="nflsn-emblem" src="nflsn-emblem.png" alt="NFL Stats Network" style="height:56px;width:100%;max-width:none;object-fit:contain;object-position:left center" onerror="if(!artE(this))this.remove()"></h1></div>   <!-- v1.17.10 (Ty: "way too small... cover most of the header"): the strip runs the full header width at 56px, shield full-bleed; art rebuilt 4.6:1. styles.css stays frozen — sizing rides the inline door -->
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["leaders","Leaders"],["records","Records"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -1622,17 +1641,46 @@ RENDER.pylon = b=>{
 function pyGo(t){ pyTab=t; pyBody(); $$(".espn .seg button").forEach((x,i)=>x.classList.toggle("on", ["scores","standings","leaders","records"][i]===t)); }
 let pyScope="career"; // v1.7.4 Records tab scope
 function pyScopeGo(s){ pyScope=s; pyBody(); }
+/* v1.17.10 (Ty: records in parentheses next to the teams on the scores page): one door,
+   built from the league's revealed regular-season games only — the v1.17.4 reveal law, so a
+   game Madden simmed ahead of his clock never prices a team's record here. Preseason and
+   unknown teams simply show nothing. */
+function pyRecs(){
+  try{
+    const L=S.blob.league; if(!L||!L.teams||!L.games) return {};
+    const tn=L.teams; const out={};
+    for (const g of L.games){
+      const a=Array.isArray(g);
+      const t=a? (g[0]===0?"PreSeason":"RegularSeason") : g.t, w=a? g[1] : g.w;
+      if (t!=="RegularSeason" || !gameRevealed(t,w)) continue;
+      const h=a? teamNm(tn[g[2]]) : g.h, aw=a? teamNm(tn[g[3]]) : g.a;
+      const hs=a? g[4] : g.hs, as=a? g[5] : g.as;
+      if (!(hs>=0 && as>=0) || (hs+as===0 && !(a? g[4]>=0 : g.played))) continue;
+      out[h]=out[h]||{w:0,l:0,t:0}; out[aw]=out[aw]||{w:0,l:0,t:0};
+      if (hs>as){ out[h].w++; out[aw].l++; } else if (as>hs){ out[aw].w++; out[h].l++; } else { out[h].t++; out[aw].t++; }
+    }
+    return out;
+  }catch(e){ return {}; }
+}
+function pyRecTag(name){
+  try{
+    if ((S.blob.clock||{}).weekType==="PreSeason") return "";
+    const r=(pyBody._recs||{})[name]; if(!r) return "";
+    return ` <span style="opacity:.6;font-weight:600">(${r.w}-${r.l}${r.t?"-"+r.t:""})</span>`;
+  }catch(e){ return ""; }
+}
 function pyBody(){
   const m=$("#pyMain"); if(!m) return;
   const T=S.blob.player.team;
+  pyBody._recs = pyRecs();   /* v1.17.10: computed once per render, read by every card */
   const gcard = g=>{ const them=g[3], home=g[4];
     const sc=g[7]; const w = sc && sc[0]>sc[1];
     const rowA = home? [them, sc?sc[1]:null, sc&&!w] : [T, sc?sc[0]:null, w];
     const rowH = home? [T, sc?sc[0]:null, w] : [them, sc?sc[1]:null, sc&&!w];
     const status = sc? "FINAL · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1) : g[5].slice(0,3).toUpperCase()+" · "+(g[1]==="PreSeason"?"PRE ":"")+"WK "+(g[0]+1);
     return `<div class="scorecard"><div class="st"><span>${status}</span>${netChip(NETMAP(g))}</div>
-      <div class="tm ${sc?(rowA[2]?"win":"lose"):""}"><span>${tlogoImg(rowA[0])}${esc(rowA[0])}</span><b>${rowA[1]??""}</b></div>
-      <div class="tm ${sc?(rowH[2]?"win":"lose"):""}"><span>${tlogoImg(rowH[0])}${esc(rowH[0])}</span><b>${rowH[1]??""}</b></div></div>`; };
+      <div class="tm ${sc?(rowA[2]?"win":"lose"):""}"><span>${tlogoImg(rowA[0])}${esc(rowA[0])}${pyRecTag(rowA[0])}</span><b>${rowA[1]??""}</b></div>
+      <div class="tm ${sc?(rowH[2]?"win":"lose"):""}"><span>${tlogoImg(rowH[0])}${esc(rowH[0])}${pyRecTag(rowH[0])}</span><b>${rowH[1]??""}</b></div></div>`; };
   if (pyTab==="scores"){
     /* v1.5.7 — character in world, not world around the character (Ty's law). Scores IS the
        league scoreboard: this week's full slate in broadcast order (THU, Sunday windows, SNF,
@@ -1647,8 +1695,8 @@ function pyBody(){
            game still aired somewhere at some time. Keep both on every card. */
         const status = g.played? `FINAL · ${x.day} ${x.time||""} · ${wkTag}` : `${x.day} ${x.time||""} · ${wkTag}`;
         return `<div class="scorecard"><div class="st"><span>${status}</span>${netChip(x.net)}</div>
-        <div class="tm ${g.played?(g.as>g.hs?"win":"lose"):""}"><span>${tlogoImg(g.a)}${esc(g.a)}</span><b>${g.played? g.as : ""}</b></div>
-        <div class="tm ${g.played?(g.hs>g.as?"win":"lose"):""}"><span>${tlogoImg(g.h)}${esc(g.h)}</span><b>${g.played? g.hs : ""}</b></div></div>`; };
+        <div class="tm ${g.played?(g.as>g.hs?"win":"lose"):""}"><span>${tlogoImg(g.a)}${esc(g.a)}${pyRecTag(g.a)}</span><b>${g.played? g.as : ""}</b></div>
+        <div class="tm ${g.played?(g.hs>g.as?"win":"lose"):""}"><span>${tlogoImg(g.h)}${esc(g.h)}${pyRecTag(g.h)}</span><b>${g.played? g.hs : ""}</b></div></div>`; };
       /* v1.6.1 (live-save bug): league games only carry Pre/RS weeks, so a postseason or
          offseason sync (P10 Pro Bowl, P11 OffSeason) rendered a totally empty slate. Once
          the calendar leaves the regular season, show the season's FINAL week instead. */
@@ -6081,7 +6129,11 @@ function ghostMoney(mode){
      experience, year two a season older and a season further out (the 2% lift compounds). */
   const p=S.blob.player||{}; const sy=(S.blob.clock&&S.blob.clock.seasonYear)||2026;
   const yr = mode==="cap"? (g.capSalary||0) : minSalaryFor(p.yearsPro||0, sy);
-  const y1 = mode==="cap"? Math.round(yr*1.045/10000)*10000 : minSalaryFor((p.yearsPro||0)+1, sy+1);
+  /* v1.17.10 (Ty's ruling): the league-minimum rebuild is ONE year at the save's own minimum
+     (his era prices it $890k) — a created player signs the smallest honest deal, not two years
+     of it. The CAP rebuild keeps its two-year shape: that is the deal he actually created. */
+  if (mode!=="cap") return { years:1, total: yr, totalM: Math.round(yr/10000)/100, yr };
+  const y1 = Math.round(yr*1.045/10000)*10000;
   return { years:2, total: yr+y1, totalM: Math.round((yr+y1)/10000)/100, yr };
 }
 function ghostQueued(){ return !!(S.orders||[]).some(o=>o.__ghost); }
@@ -6092,7 +6144,7 @@ function ghostCard(){
   const capKnown = g.capSalary>0;
   return `<div class="synccard" style="border:1px solid rgba(244,180,92,.5)"><h4>Your contract never made the books</h4>
   <p style="margin:4px 0 8px">The save says you're signed, but the league office holds NO paper \u2014 that's why the franchise screens show zeros. File a real deal now; it rides the ONE code and the books catch up.</p>
-  <button class="btn sm" style="background:var(--ok);color:#04170d;margin-bottom:6px" onclick="queueGhostFix('min')">File the league-minimum deal \u2014 2yr, ${fm(mn.total)}</button>
+  <button class="btn sm" style="background:var(--ok);color:#04170d;margin-bottom:6px" onclick="queueGhostFix('min')">File the league-minimum deal \u2014 1yr, ${fm(mn.total)}</button>
   ${capKnown? `<button class="btn sm" style="background:rgba(255,255,255,.14)" onclick="queueGhostFix('cap')">Rebuild the deal you created \u2014 2yr at ${fm(cp.yr)}/yr (${fm(cp.total)})</button>`
    : `<p style="font-size:11.5px;opacity:.55;margin:2px 0 0">The save carries no cap number for you \u2014 the minimum deal is the honest rebuild.</p>`}</div>`;
 }
@@ -7352,7 +7404,7 @@ function awardsLine(blob){
      for seeded pre-franchise history) and get a year. */
   const weekly={}, season=[];
   for (const a of aw){
-    if (/_of_Week$/i.test(a.type)) weekly[a.type]=(weekly[a.type]||0)+1;
+    if (/_of_(Week|Month)$/i.test(a.type)) weekly[a.type]=(weekly[a.type]||0)+1;   /* v1.17.10: the facts line tallies monthlies too — the pens see the same shape the case shows */
     else season.push(a.type.replace(/_/g," ")+(a.season!=null? " ("+(a.season<100? base+a.season : a.season)+")" : ""));
   }
   const parts=[...season, ...Object.entries(weekly).map(([t,n])=>t.replace(/_/g," ")+(n>1?" \u00d7"+n:""))];
@@ -7385,6 +7437,19 @@ function bookLine(){
    — if they're going to say that they need to track win and loss streaks"): FORM is save
    truth now. The last five results of the clock's phase, most recent first, with venue,
    score, and margin — and the streak stated in as many words, with the law attached. */
+/* v1.17.10 (Ty: "make sure the world knows when im injured"): the save carries his injury
+   truth (IsInjuredReserve + InjuryStatus/Type/Severity) and the extractor ships it, but no pen
+   was ever told — teammates, family, and the beat all wrote as if he were healthy. It rides
+   every pen now, with the honest scale: an IR stint is real news, a day-to-day tweak is a
+   locker-room aside, and nobody invents a timeline the save does not state. */
+function hisInjuryLine(blob){
+  const p=blob.player||{}; const inj=p.injury||{};
+  const st=String(inj.status||""), ty=String(inj.type||""), sev=String(inj.sev||"");
+  const hurt = !!p.isIR || (st && st!=="Uninjured" && st!=="Invalid_") || (ty && ty!=="Invalid_");
+  if (!hurt) return "";
+  const what=(ty && ty!=="Invalid_")? ty.replace(/([a-z])([A-Z])/g,"$1 $2") : "an injury";
+  return "HIS INJURY (save truth): he is "+(p.isIR? "ON INJURED RESERVE":"injured")+" \u2014 "+what+(sev&&sev!=="Invalid_"? " ("+sev.replace(/([a-z])([A-Z])/g,"$1 $2").toLowerCase()+")":"")+(st&&st!=="Invalid_"&&st!=="Uninjured"? ", status "+st:"")+". THE WORLD KNOWS: the people close to him check in, the building talks about the room without him, and the beat treats it as real news"+(p.isIR? " (an IR stint IS a story)":" only if it is more than a day-to-day tweak")+". Never write him practicing, playing, or performing while this stands, never invent a return date or a timeline the facts do not state, and never invent an injury he does not have.";
+}
 function hisFormLine(blob){
   const ph=(blob.clock&&blob.clock.weekType==="PreSeason")? "PreSeason":"RegularSeason";
   const played=(blob.schedule||[]).filter(g=>g[1]===ph && g[7]);
@@ -7416,6 +7481,7 @@ REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate co
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
 LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}
+${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
@@ -7965,10 +8031,7 @@ function deliverPending(){
       const t=S.world.texts.find(x=>x.id===p.tid); if(!t) continue;
       aiReply(t, p.msg).then(reply=>{
         if (!reply) return;
-        t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); delete S.reads["t:"+t.id]; delete t.hidden;
-        ledgerTouchIn(t, reply);
-        S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"messages", t:t.name, p:"New message"});
-        persist(); rerenderMessages();   /* v1.13.3: window._openThread was never set anywhere — THE boot. The tracked thread survives every inbound now. */
+        deliverReply(t, reply);   /* v1.17.10: the owed reply rides the same delivery door — badge and notification when he is away, no yank when he is not */
       }).catch(()=>{});
     }
     persist();
@@ -8285,7 +8348,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.9";
+const VER="v1.17.10";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
