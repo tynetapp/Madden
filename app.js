@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.8 (Aug 13 2026) — THE PAPER WAITS FOR THE PODIUM + THE FOOT LETTERHEAD + REAL WEATHER (Ty's nine-report round): (1) THE PAPER WAITS — the article job GATES on the press room now (his exact diagnosis: the story wrote at sync before his answers, so the pen truthfully saw no quotes and wrote him silent); presser answered or skipped unsticks it, lane C drops the art job until the room resolves (Chronicle owed/retry covers it), and storySys carries the belt: NEVER write that he declined or did not speak — no answers means the podium goes unmentioned. (2) THE FOOT LETTERHEAD — mailCrests, one render-time door on EVERY league/club letter (AI-written included): marks at the BOTTOM, homescreen-icon size (78px), centered; CLUB mail wears crest + NFL mark, LEAGUE mail (NFL office/NFLPA/commissioner) wears the NFL mark ALONE; the mail mark is nfl-logo.png (Ty's real NFL logo — nflsn-emblem.png is the NETWORK's and never rides mail again; missing art degrades per the art law). (3) REAL WEATHER — the save records the forecast (SeasonGame.Weather/Temperature, live-probed); exe v1.8.6 ships g[8]=[Weather,Temp]; the seeded city-climate fiction is DEAD — save truth or nothing, domes still say Dome. (4) ONE TEXT AT A TIME — sanitizeInMsgs clamps a 1:1 batch to ONE bubble; the ONE-SIDED law says exactly one. (5) THE ECHO BUG — sendText pushed his message into history AND the prompt appended it again; the model saw him say it twice and said so. History-only when already present. (6) SPOKEN RECORDS harder — the AND is mandatory in both pens' law, and spokenAnd/podHeal deterministically heals every brief at storage, render, and copy ("One Three" -> "one and three"; parenthesized digit records sum<=17 spelled out; defensive fronts excluded). (7) THE WEEK IS GIVEN — digest leads with THE CLOCK and stamps THE WEEK AHEAD with its real number; both pens forbidden from deriving weeks by arithmetic. (8) Standings W/L centered with breathing room before PCT. (prior: v1.17.7) */
+/* TyPhone app.js — v1.17.9 (Aug 13 2026) — THE NICK BOSA LAW + THE FOLD KEEPS ITS PROMISE (Ty's Tyran Saint Jr round): (1) THE NICK BOSA LAW — the news reported an injury the game denies because the save's Injury table keeps HEALED rows (live-probed: 11 stale rows in the fixture, Bosa's LegGroinPull among them, every player Uninjured/Invalid_/no-IR); exe v1.8.7 ships a row only when the PLAYER record corroborates it, and the digest carries the belt both ways (the list is the ONLY injuries; an empty list means everyone is healthy — nothing carried from memory). (2) THE FOLD KEEPS ITS PROMISE — liking a counted world thread only ran the like-REACTION pen (correctly [] at low buzz) and never pulled the existing replies; _likeGen burned and the thread stuck on "still landing" forever. pullFold now lands the fold's own most-popular replies on like OR the Pull button (world ids ride fetchReplies), an empty pull re-arms, and the reaction pen rides after. (3) THE PODIUM DOES NOT OPEN THE PRACTICE SHEET — the v1.15.0 auto-pracFlow after the presser is dead at both doors (postgame is not midweek); the Sync card and calendar are the doors he presses, pracSave still runs the chain. (4) STREAK TRUTH — the paper invented "ended a stretch of narrow losses" behind back-to-back wins because the facts carried one game; FORM (last five real results with venues, scores, margins) + CURRENT STREAK + the streak law ride worldFacts now. (5) THE NAME LAW — the paper called him "the Jets quarterback"; he is covered BY NAME (full first, last after), a role tag may accompany but never replace it. (6) THE NETWORK REBRAND — the Pylon header is Ty's new banner alone (STATS NETWORK lives IN the art, filled into the red field); NFLSN text + hact span retired. Art shipped: nflsn-emblem.png (new banner), sponsor-prizepicks.png (his replacement mark). (prior: v1.17.8) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1193,7 +1193,7 @@ RENDER.chirper = (b,sub)=>{
          intake filters them at the door. */
       const reps=(c.replies||[]).filter(r=>r&&String(r.x||"").trim());
       return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? "the top replies are still landing" : "0")}</span></div>
-      ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0 && c.id? `<div class="empty">The reply section hasn't loaded. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${c.id}')">Fetch the top replies</button>` : "Add an API key in Sync to pull them."}</div>` : (c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold — reply or like and the thread pulls in.</div>` : '<div class="empty">No replies yet.</div>')}`;
+      ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0 && c.id? `<div class="empty">The reply section hasn't loaded. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${c.id}')">Fetch the top replies</button>` : "Add an API key in Sync to pull them."}</div>` : (c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${chThread}')">Pull the top replies</button>` : "Reply or like and the thread pulls in."}</div>` : '<div class="empty">No replies yet.</div>')}`;
       })()}
       </div>`;
       return;
@@ -1244,6 +1244,7 @@ async function chLike(id){
   /* v1.17.5 (Ty: "same for liking something"): his like is VISIBLE. Liking a world chirp can
      stir that specific thread — from nothing at all to an aggregator noticing — scaled by his
      buzz AND what the post is. Once per chirp, likes only (an unlike stirs nothing). */
+  if (S.chirpLiked[id] && String(id).startsWith("w") && aiKey()) await pullFold(c, id);   /* v1.17.9: the fold's promise ("like and the thread pulls in") is kept — the existing replies land first */
   if (S.chirpLiked[id] && String(id).startsWith("w") && !c._likeGen && aiKey()){
     c._likeGen=1; persist();
     try{
@@ -1442,10 +1443,32 @@ async function lifePurchaseReact(what, amt){
 }
 /* v1.6.5: a post whose reply fetch failed (pre-armor API hiccup) can heal itself */
 function fetchReplies(id){
+  if (String(id).startsWith("w")){   /* v1.17.9: world threads pull their fold through the same button */
+    const c=chGet(id); if(!c||c._fetching) return; c._fetching=1;
+    toast("Pulling the reply section\u2026");
+    delete c._foldPull;
+    pullFold(c,id).finally(()=>{ delete c._fetching; });
+    return;
+  }
   const p=(S.chirp.posts||[]).find(x=>x.id===id); if(!p) return;
   if (p._fetching) return; p._fetching=1;
   toast("Pulling the reply section\u2026");
   aiPostReplies(p).finally(()=>{ delete p._fetching; });
+}
+/* v1.17.9 (Ty: "the replies never came, it just says they're coming"): the fold-pull pen —
+   the replies that were ALREADY under a counted world post. One door for the like path and
+   the Fetch button. An empty or failed pull re-arms itself so the thread is never stuck. */
+async function pullFold(c, key){
+  try{
+    if (!c || c._foldPull || !((c.rc||0)>0) || (c.replies||[]).filter(r=>r&&String(r.x||"").trim()).length) return;
+    if (!aiKey()) return;
+    c._foldPull=1; persist();
+    const out=await callAI("You write a reply section on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented. Original post by "+(c.n||"someone")+" ("+(c.h||"")+"): \""+c.t+"\". About "+String(c.rc||0)+" replies exist under it. "+careerFactsLine()+" "+accountVoiceLaw()+" Write the 3-6 MOST POPULAR replies that were ALREADY there before anything else happened — ordinary crowd reactions to the post itself, never about "+S.handle+" or anyone liking it. Mixed tones, no em dashes. Output ONLY a JSON array, no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (vf 1 ONLY for teammates, media outlets, and official accounts).", "Write the replies now.", 700);
+    const arr=JSON.parse(out.replace(/```json|```/g,"").trim());
+    const good=dedupeReplies((Array.isArray(arr)?arr:[]).filter(r=>r&&String(r.x||"").trim()), c.replies||[]).slice(0,6);
+    if (good.length){ c.replies=(c.replies||[]).concat(good); persist(); if(chThread===key) renderApp('chirper',{t:key}); }
+    else { delete c._foldPull; persist(); }
+  }catch(e){ try{ delete c._foldPull; persist(); }catch(_){} }
 }
 /* v1.6 (Ty #10): realistic engagement math. A post's TOTAL reply/rechirp counts scale with
    followers; the AI only writes the 5-10 most popular replies for a big account. */
@@ -1591,7 +1614,7 @@ function NETFALL(net){ return `<span class="net ${net}">${net==="PRIME"?"Prime V
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1><img class="nflsn-emblem" src="nflsn-emblem.png" alt="" style="height:40px;vertical-align:-11px" onerror="if(!artE(this))this.remove()">NFLSN</h1><span class="hact" style="opacity:.6;font-size:10px">NFL STATS NETWORK</span></div>
+  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1 style="display:flex;align-items:center;min-width:0"><img class="nflsn-emblem" src="nflsn-emblem.png" alt="NFL Stats Network" style="height:40px;max-width:70vw;object-fit:contain" onerror="if(!artE(this))this.remove()"></h1></div>   <!-- v1.17.9 (Ty): the banner IS the wordmark now — NFLSN text and the hact span retired -->
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["leaders","Leaders"],["records","Records"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -4075,7 +4098,8 @@ function leagueDigest(){
       out+="\nLAST COMPLETED WEEK (scores only — this code predates box scores; re-sync with the current exe for player stats): "+done.filter(g=>ord(g.t,g.w)===lw).map(g=>g.a+" "+g.as+" at "+g.h+" "+g.hs).join("; ")+".";
     }
   }
-  if (L.injuries && L.injuries.length) out+="\nINJURY REPORT (league-wide, real): "+L.injuries.slice(0,18).map(r=>r[0]+" ("+r[1]+", "+(teamNm(tn[r[2]])||"?")+") — "+r[3]+", "+r[4]).join("; ")+".";
+  if (L.injuries && L.injuries.length) out+="\nINJURY REPORT (league-wide, real): "+L.injuries.slice(0,18).map(r=>r[0]+" ("+r[1]+", "+(teamNm(tn[r[2]])||"?")+") — "+r[3]+", "+r[4]).join("; ")+". These are the ONLY injuries that exist anywhere in the league — every player not on this list is healthy, and no injury is ever carried, implied, or remembered beyond it.";
+  else out+="\nINJURY REPORT: the league has NO notable injuries this week — every player everywhere is healthy; never report, imply, or remember one.";   /* v1.17.9 (the Nick Bosa law): the save's Injury table keeps healed rows; exe v1.8.7 filters to player-corroborated truth, and the belt covers stale memories BOTH ways */
   if (c.weekType==="RegularSeason" && Object.keys(recs).length){
     const table=Object.entries(recs).sort((a,b)=>b[1].w-a[1].w);
     out+="\nSTANDINGS: best "+table.slice(0,5).map(([t,r])=>t+" "+r.w+"-"+r.l).join(", ")+" | worst "+table.slice(-3).map(([t,r])=>t+" "+r.w+"-"+r.l).join(", ")+".";
@@ -4430,7 +4454,9 @@ function presserSave(){
   toast("On the record. The world can only quote what you actually said.");
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
   runWeek();   /* v1.17.8: the paper was waiting on this room — it writes now, with his words */
-  if (aiKey()) pracFlow();   /* v1.15.0: the room empties -> log the practice week -> post-practice questions -> the week writes */
+  /* v1.17.9 (Ty: the practice scale popped uninvited after the podium): the v1.15.0 auto-open
+     is dead — postgame is not midweek. He logs practice from the Sync card or the calendar
+     when HE chooses; pracSave still runs the chain (world -> locker -> podium). */
 }
 function presserSkip(){
   const d=S.presserDue; if(!d) return;
@@ -4441,7 +4467,7 @@ function presserSkip(){
   toast("Skipped availability. That gets noticed exactly once.");
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
   runWeek();   /* v1.17.8: a skip resolves the room too — the paper writes (and honestly can't quote him) */
-  if (aiKey()) pracFlow();
+  /* v1.17.9: no auto practice sheet here either — same ruling as the answered door */
 }
 /* ==================== v1.15.0 THE PLAYER'S WEEK (Ty's calendar ruling) ====================
    The paper is Monday morning: strictly the last game and the next one, written at the sync.
@@ -7355,6 +7381,22 @@ function bookLine(){
     return "\nTHE BOOK'S LINE on the coming game: "+fav+" favored by "+Math.abs(spread)+(fav===S.blob.player.team? " (his side gives the points)" : " (his side are "+Math.abs(spread)+"-point underdogs)")+".";
   }catch(e){ return ""; }
 }
+/* v1.17.9 (Ty: "paper said I ended a stretch of narrow losses when I won the previous game
+   — if they're going to say that they need to track win and loss streaks"): FORM is save
+   truth now. The last five results of the clock's phase, most recent first, with venue,
+   score, and margin — and the streak stated in as many words, with the law attached. */
+function hisFormLine(blob){
+  const ph=(blob.clock&&blob.clock.weekType==="PreSeason")? "PreSeason":"RegularSeason";
+  const played=(blob.schedule||[]).filter(g=>g[1]===ph && g[7]);
+  if (!played.length) return "";
+  const rows=played.slice(-5).reverse().map(g=>{
+    const w=g[7][0]>g[7][1], m=Math.abs(g[7][0]-g[7][1]);
+    return (w?"W":"L")+" "+g[7][0]+"-"+g[7][1]+(g[4]?" vs ":" at ")+g[3]+" (by "+m+")";
+  });
+  let n=1; for (let i=played.length-2;i>=0;i--){ if ((played[i][7][0]>played[i][7][1])===(played[played.length-1][7][0]>played[played.length-1][7][1])) n++; else break; }
+  const won=played[played.length-1][7][0]>played[played.length-1][7][1];
+  return "FORM (his team, real, most recent first): "+rows.join("; ")+". CURRENT STREAK: "+(won?"won":"lost")+" "+n+" straight. STREAK LAW: any claim about a streak, stretch, run, drought, or \"ending\" one must match FORM and CURRENT STREAK exactly — a team that won its previous game has NOT broken a losing stretch; never invent an arc the results do not show.";
+}
 function worldFacts(blob, last, opts){
   /* v1.17.0 THE PRESS SCOPE (Ty: the paper printed his private number-ask, his follower count,
      his parents buying seats — "none of this has anything to do with a news article"): the
@@ -7374,6 +7416,7 @@ REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate co
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
 LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}
+${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
 KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
@@ -7412,7 +7455,7 @@ function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appl
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
-  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. NAME LAW: when the subject player is covered at all, he is covered BY NAME — full name on first mention, last name after; a bare role tag like "the Jets quarterback" may only ever ACCOMPANY his name, never replace it. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
 function intakeGameStory(art, byline, wkLbl, gk, _cid){
   if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
@@ -8242,7 +8285,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.8";
+const VER="v1.17.9";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
