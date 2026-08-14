@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.7 (Aug 13 2026) — THE ANNOUNCEMENT GATE + THE LETTERHEAD + THE HONEST BOOK (Ty's nine-report round; his elevation LIVED — Geno took 8 sacks and the v1.17.4 door opened): (1) THE ANNOUNCEMENT GATE — queued moves were invisible to the pens (practice never mentioned his elevation; the Podium never knew); before midweek writes, anything pending gets HIS call via a confirmation sheet: announce (announcedLine rides worldFacts — practice talk, beat, texts, Podium treat it as confirmed club news NOW) or keep quiet; the order rides the ONE code unchanged either way. (2) THE LETTERHEAD — mail bodies render white-space:pre-line (every mail was collapsing to one paragraph), the Elevated letter breathes in paragraphs, every club letter signs off through the clubMail door, and club mail wears the team crest + the shield he ALREADY ships (nflsn-emblem.png — one file, one place, his own pull-from-the-same-place ruling) under the from line. (3) Never-self-reply at the dedupeReplies door (his player replied to himself). (4) Rolls-Royce Boat Tail $28M via boot overlay (data.js stays frozen). (5) THE BANK LAW — a fake "Harbor Point" payroll email invented an account; emails never report money movement (no payroll, deposits, balances, account numbers, invented banks — Meridian alone is money truth), prompt law + okEmail wall. (6) ONE-SIDED LAW + sanitizeInMsgs clamps a 1:1 batch to two consecutive lines (threads were having conversations with themselves). (7) Standings align: fixed table layout, shared column widths across divisions. (8) THE HONEST BOOK — teamPower weighs capped average margin alongside record and fades its seeded preseason noise as revealed games accrue. (9) The exe packaging round rides separately (bat.txt dropped, no code change). (v1.17.7 over .6: the crest reuses his existing shield file — no second upload; prior: v1.17.5) */
+/* TyPhone app.js — v1.17.8 (Aug 13 2026) — THE PAPER WAITS FOR THE PODIUM + THE FOOT LETTERHEAD + REAL WEATHER (Ty's nine-report round): (1) THE PAPER WAITS — the article job GATES on the press room now (his exact diagnosis: the story wrote at sync before his answers, so the pen truthfully saw no quotes and wrote him silent); presser answered or skipped unsticks it, lane C drops the art job until the room resolves (Chronicle owed/retry covers it), and storySys carries the belt: NEVER write that he declined or did not speak — no answers means the podium goes unmentioned. (2) THE FOOT LETTERHEAD — mailCrests, one render-time door on EVERY league/club letter (AI-written included): marks at the BOTTOM, homescreen-icon size (78px), centered; CLUB mail wears crest + NFL mark, LEAGUE mail (NFL office/NFLPA/commissioner) wears the NFL mark ALONE; the mail mark is nfl-logo.png (Ty's real NFL logo — nflsn-emblem.png is the NETWORK's and never rides mail again; missing art degrades per the art law). (3) REAL WEATHER — the save records the forecast (SeasonGame.Weather/Temperature, live-probed); exe v1.8.6 ships g[8]=[Weather,Temp]; the seeded city-climate fiction is DEAD — save truth or nothing, domes still say Dome. (4) ONE TEXT AT A TIME — sanitizeInMsgs clamps a 1:1 batch to ONE bubble; the ONE-SIDED law says exactly one. (5) THE ECHO BUG — sendText pushed his message into history AND the prompt appended it again; the model saw him say it twice and said so. History-only when already present. (6) SPOKEN RECORDS harder — the AND is mandatory in both pens' law, and spokenAnd/podHeal deterministically heals every brief at storage, render, and copy ("One Three" -> "one and three"; parenthesized digit records sum<=17 spelled out; defensive fronts excluded). (7) THE WEEK IS GIVEN — digest leads with THE CLOCK and stamps THE WEEK AHEAD with its real number; both pens forbidden from deriving weeks by arithmetic. (8) Standings W/L centered with breathing room before PCT. (prior: v1.17.7) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -652,16 +652,23 @@ function fmClock(min){
 /* [dome, Jan avg F, Jul avg F] per team city — coarse climate, not a forecast */
 const TEAMWX={Bills:[0,25,71],Dolphins:[0,68,84],Patriots:[0,29,74],Jets:[0,33,77],Ravens:[0,35,80],Bengals:[0,32,77],Browns:[0,28,73],Steelers:[0,28,73],Texans:[1,53,85],Colts:[1,28,75],Jaguars:[0,53,82],Titans:[0,38,80],Broncos:[0,31,74],Chiefs:[0,31,81],Raiders:[1,48,92],Chargers:[1,57,70],Cowboys:[1,45,86],Giants:[0,33,77],Eagles:[0,33,78],Commanders:[0,36,80],Bears:[0,26,75],Lions:[1,26,74],Packers:[0,22,71],Vikings:[1,16,74],Falcons:[1,44,81],Panthers:[0,42,80],Saints:[1,54,84],Buccaneers:[0,61,83],Cardinals:[1,56,95],Rams:[1,58,74],"49ers":[0,50,67],Seahawks:[0,42,67]};
 function gameWeather(g){
+  /* v1.17.8 (Ty: "your weather says 63 and clear... in game it says chance of snow"): the
+     old label was SEEDED FICTION from city climate — and the save records the REAL forecast
+     (SeasonGame.Weather/Temperature, live-probed: HeavyRain 88, Clear 59). The exe (v1.8.6)
+     ships it as g[8]=[Weather,Temp]; the phone shows save truth or NOTHING — no weather is
+     better than wrong weather. Domes still say Dome (stadium truth). Pre-v1.8.6 blobs carry
+     no g[8] and show no weather until a resync. TEAMWX climate numbers are dead but stand
+     per the helper-deletion law (the dome flags still serve). */
   const host = g[4] ? S.blob.player.team : g[3];
-  const wx = TEAMWX[host]; if(!wx) return null;
-  if (wx[0]) return {dome:true, label:"Dome"};
-  const d = worldToday(S.blob.clock); const mo=d.getMonth();
-  const t = wx[1] + (wx[2]-wx[1]) * (1 - Math.abs(mo-6.5)/6.5);   // Jan<->Jul cosine-ish
-  const rng = seedRng(S.careerId+"|wx|"+host+wkKey(S.blob.clock));
-  const temp = Math.round(t + (rng()*14-7));
-  const roll = rng();
-  const cond = temp<=32 && roll<0.28 ? "Snow" : roll<0.14 ? "Rain" : roll<0.30 ? "Windy" : roll<0.58 ? "Partly cloudy" : roll<0.74 ? "Overcast" : "Clear";
-  return {dome:false, temp, cond, label: temp+"\u00B0F "+cond};
+  const wx = TEAMWX[host];
+  if (wx && wx[0]) return {dome:true, label:"Dome"};
+  if (g[8] && g[8][0] && g[8][0]!=="Invalid_"){
+    const c=String(g[8][0]).replace(/([a-z])([A-Z])/g,"$1 $2");
+    const cond=c.charAt(0)+c.slice(1).toLowerCase();
+    const t=Number(g[8][1]);
+    return {dome:false, temp:t, cond, label:(isFinite(t)? t+"\u00B0F ":"")+cond};
+  }
+  return null;
 }
 /* ---- v1.6.2 (Ty): the trophy case. A slim bar above the next-game strip; opens a sheet
    of what he actually won and when — rings from banked seasons matched against YearSummary
@@ -1099,11 +1106,29 @@ function sanitizeInMsgs(th, msgs){
     if (th && th.group){ if (who==="me" || who===me) continue; out.push([m[0], m[1], Date.now()]); }
     else out.push(["them", m[1], Date.now()]);
   }
-  return th && th.group? out : out.slice(0,2);   /* v1.17.6 (Ty: "two plus messages... like they're having conversations with themselves"): a 1:1 batch lands as at most two consecutive lines; groups keep their many voices */
+  return th && th.group? out : out.slice(0,1);   /* v1.17.8 (Ty: "one single text at a time"): a 1:1 batch lands as ONE message, ONE bubble; groups keep their many voices. Supersedes the v1.17.6 two-line allowance. */
 }
 /* v1.17.1 (Ty: "podium briefs keep cutting off mid word"): the press facts grew with the
    league desk and 3600 tokens stopped fitting — the pen doubles, and whatever still runs
    out trims back to the last finished sentence instead of dying mid-word. */
+/* v1.17.8 (Ty: hosts keep saying "One Three" instead of "one and three"): the deterministic
+   heal. (a) two adjacent spelled number-words (oh/zero..seventeen) get " and " between them —
+   defensive fronts ("three four defense", "four three front") are excluded; (b) a
+   parenthesized digit record like "(1-3)" — the digest's own format; sum<=17 is the record
+   invariant, and scores never ride parentheses — is spelled out as "(one and three)".
+   Rides podHeal (with podTrim) at every brief door: storage, render, both copy buttons. */
+const _NUMW="(oh|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen)";
+const _NUMWORD={0:"oh",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",10:"ten",11:"eleven",12:"twelve",13:"thirteen",14:"fourteen",15:"fifteen",16:"sixteen",17:"seventeen"};
+function spokenAnd(t){
+  try{
+    t=String(t||"");
+    const pair=new RegExp("\\b"+_NUMW+"[ ]+"+_NUMW+"\\b(?![ -]*(defense|defence|front|look|base|scheme|shell|alignment))","gi");
+    t=t.replace(pair,(m,a,b)=>a+" and "+b);
+    t=t.replace(/\((\d{1,2})-(\d{1,2})\)/g,(m,a,b)=>{ a=+a; b=+b; return (a+b<=17 && _NUMWORD[a]&&_NUMWORD[b])? "("+_NUMWORD[a]+" and "+_NUMWORD[b]+")" : m; });
+    return t;
+  }catch(e){ return t; }
+}
+function podHeal(t){ return spokenAnd(podTrim(t)); }
 function podTrim(t){ try{ t=String(t||""); if(!t) return t; if(/[.!?"\u201d)\]]\s*$/.test(t.trim())) return t; const i=Math.max(t.lastIndexOf(". "),t.lastIndexOf("! "),t.lastIndexOf("? "),t.lastIndexOf(".\n"),t.lastIndexOf("!\n"),t.lastIndexOf("?\n")); return i>40? t.slice(0,i+1) : t; }catch(e){ return t; } }
 function okEmail(m){ try{ const t=(String(m.from||"")+" "+String(m.subj||"")).toLowerCase(); return !/interview|chronicle|press|reporter|journalist|media request|profile piece|sit.?down|feature on you|benefit election|open enrollment|enrollment (window|period)|benefits (portal|enrollment)|appearance (request|fee)|booking|payroll|direct deposit|has been (posted|deposited|credited)|deposit (posted|confirmation)|account (number|ending)|routing number/.test(t+" "+String(m.body||"").toLowerCase().slice(0,300)) && !isGigAsk(String(m.subj||"")+" "+String(m.body||"")); }catch(e){ return true; } }
 /* v1.17.1 (Ty: "reactions only, no questions to me" in replies — he cannot answer them):
@@ -1467,7 +1492,7 @@ RENDER.tmail = (b, sub)=>{
   if (sub && sub.mail){
     const m=S.world.emails.find(x=>x.id===sub.mail); m.unread=false; S.reads["e:"+m.id]=1; persist();
     b.innerHTML = aphead("T-Mail", {back:"renderApp('tmail')", backlabel:"Inbox"}) +
-      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoFull(m.ts):esc(m.time)}</div>${/Football Operations/.test(m.from)? `<div style="margin:8px 0 12px;display:flex;align-items:center;gap:10px">${tlogoImg(S.blob.player.team,"tlogo","height:30px;width:30px;margin:0")}<img src="nflsn-emblem.png" alt="" style="height:26px" onerror="if(!artE(this))this.remove()"></div>`:""}<div style="white-space:pre-line">${esc(m.body)}</div></div></div>`;   /* v1.17.6 (Ty: "one big paragraph... no signature"): every mail body keeps its line breaks now, and club mail wears the crest */
+      `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoFull(m.ts):esc(m.time)}</div><div style="white-space:pre-line">${esc(m.body)}</div>${mailCrests(m)}</div></div>`;   /* v1.17.6: bodies keep their line breaks; v1.17.8 (Ty): the marks moved to the FOOT of the letter, homescreen-icon size, centered — mailCrests is the one door */
   } else {
     b.innerHTML = aphead("T-Mail") + `<div class="apbody flush">` + S.world.emails.map(m=>`
       <div class="mail ${m.unread&&!S.reads["e:"+m.id]?"unread":""}" onclick="renderApp('tmail',{mail:'${m.id}'})">
@@ -1635,9 +1660,9 @@ function pyBody(){
         if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} else {recs[g.h].ti++;recs[g.a].ti++;} }
       const divs={}; for(const n in recs){ (divs[recs[n].div]=divs[recs[n].div]||[]).push([n,recs[n]]); }
       m.innerHTML = Object.keys(divs).sort().map(d=>`<div class="hoodhead" style="color:#fff"><h3>${esc(d)}</h3></div>
-        <table class="stnd" style="table-layout:fixed;width:100%"><tr><th>Team</th><th style="width:36px;text-align:right">W</th><th style="width:36px;text-align:right">L</th><th style="width:54px;text-align:right">PCT</th></tr>` +
+        <table class="stnd" style="table-layout:fixed;width:100%"><tr><th>Team</th><th style="width:40px;text-align:center">W</th><th style="width:40px;text-align:center">L</th><th style="width:62px;text-align:right;padding-left:12px">PCT</th></tr>` +
         divs[d].sort((a,b)=>{const pc=r=>((r.w+0.5*(r.ti||0))/((r.w+r.l+(r.ti||0))||1)); return pc(b[1])-pc(a[1]);}).map(x=>
-          `<tr class="${x[0]===T?"you":""}"><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="stnd-team">${tlogoImg(x[0],"tlogo st")}${esc(x[0])}</span></td><td style="text-align:right">${x[1].w}</td><td style="text-align:right">${x[1].l}</td><td style="text-align:right">${(x[1].w+x[1].l+(x[1].ti||0))?(((x[1].w+0.5*(x[1].ti||0))/(x[1].w+x[1].l+(x[1].ti||0))).toFixed(3)).replace(/^0/,""):".000"}</td></tr>`).join("") + `</table>`).join("");
+          `<tr class="${x[0]===T?"you":""}"><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="stnd-team">${tlogoImg(x[0],"tlogo st")}${esc(x[0])}</span></td><td style="text-align:center">${x[1].w}</td><td style="text-align:center">${x[1].l}</td><td style="text-align:right;padding-left:12px">${(x[1].w+x[1].l+(x[1].ti||0))?(((x[1].w+0.5*(x[1].ti||0))/(x[1].w+x[1].l+(x[1].ti||0))).toFixed(3)).replace(/^0/,""):".000"}</td></tr>`).join("") + `</table>`).join("");
     } else {
       const played = S.blob.schedule.filter(g=>g[7]&&g[1]==="RegularSeason");
       const rec = played.reduce((a,g)=>{g[7][0]>g[7][1]?a[0]++:a[1]++;return a},[0,0]);
@@ -3969,8 +3994,8 @@ RENDER.podium = b=>{
 };
 function showScript(id){
   const e=S.world.podium.eps.find(x=>x.id===id);
-  window._brief=e.script;
-  sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(podTrim(e.script))}</div>   <!-- v1.17.3: render-time trim heals episodes stored before the trim existed (Opus-era eps + stream drops) -->
+  window._brief=podHeal(e.script);
+  sheet(`<h3 style="font-size:16px">${esc(e.t)}</h3><div style="max-height:50vh;overflow:auto;font-size:13px;line-height:1.55;white-space:pre-wrap">${esc(podHeal(e.script))}</div>   <!-- v1.17.3 render-time trim + v1.17.8 spoken heal: old episodes read right too -->
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="navigator.clipboard.writeText(window._brief).then(()=>toast('Source copied. NotebookLM: Create New, Copied text, paste, Add.'))">Copy source</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="navigator.clipboard.writeText((S.world.podium.eps.find(x=>x.script===window._brief)||{}).focus||'Follow the source segments in order. Only discuss what the source contains.').then(()=>toast('Focus prompt copied. Paste it in NotebookLM\\'s prompt box.'))">Copy focus prompt</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
@@ -4030,6 +4055,7 @@ function leagueDigest(){
     if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} }
   const recOf=t=>recs[t]? " ("+recs[t].w+"-"+recs[t].l+")" : "";
   let out="";
+  out+="\nTHE CLOCK (absolute truth): today is "+wkLabel(c)+". Week numbers in this digest are the ONLY week numbers that exist — never compute a week from records, games played, or arithmetic.";   /* v1.17.8 (Ty: the show called the coming week "week five" off a 1-3 record) */
   const B=L.box;
   if (B && B.games && B.games.length){
     const phase=B.t===0?"preseason":"regular season";
@@ -4074,7 +4100,8 @@ function leagueDigest(){
      what is ahead, never the leaked score; matchups only, recOf prints no futures now. */
   const nextUp=all.filter(g=>ord(g.t,g.w)>=cOrd).sort((x,y)=>ord(x.t,x.w)-ord(y.t,y.w));
   if (nextUp.length){ const nOrd=ord(nextUp[0].t,nextUp[0].w);
-    out+="\nTHE WEEK AHEAD (real schedule): "+nextUp.filter(g=>ord(g.t,g.w)===nOrd).slice(0,16).map(g=>{
+    const nPhase=nextUp[0].t==="PreSeason"?"preseason":"regular season";
+    out+="\nTHE WEEK AHEAD ("+nPhase+" week "+(nextUp[0].w+1)+" — this and only this is the coming week's number): "+nextUp.filter(g=>ord(g.t,g.w)===nOrd).slice(0,16).map(g=>{
       const div=(DIVISIONS[g.h]&&DIVISIONS[g.h]===DIVISIONS[g.a])?" [division]":"";
       return g.a+recOf(g.a)+" at "+g.h+recOf(g.h)+div; }).join("; ")+".";
   }
@@ -4089,7 +4116,7 @@ function leagueDigest(){
 /* v1.16.0 (Ty's ruling): the length dials are GONE — NotebookLM's Studio picks the audio
    length, so the brief is the same full-week source material every time. */
 function podCopySource(id){ const e=S.world.podium.eps.find(x=>x.id===id); if(!e||!e.script) return;
-  window._brief=e.script; navigator.clipboard.writeText(e.script).then(()=>toast("Source copied. NotebookLM: Create New, Copied text, paste, Add.")).catch(()=>{}); }
+  window._brief=podHeal(e.script); navigator.clipboard.writeText(podHeal(e.script)).then(()=>toast("Source copied. NotebookLM: Create New, Copied text, paste, Add.")).catch(()=>{}); }   /* v1.17.8: the copy IS what the hosts read — it rides the heal */
 function podCopyFocus(id){ const e=S.world.podium.eps.find(x=>x.id===id); if(!e) return;
   navigator.clipboard.writeText(e.focus||podFocus()).then(()=>toast("Focus prompt copied. Paste it in NotebookLM's prompt box and Generate.")).catch(()=>{}); }
 async function podiumRegen(id){
@@ -4102,7 +4129,7 @@ async function podiumRegen(id){
     const _cid=S.careerId;                                               /* v1.16.0 career lock */
     const out = await callAI(podBriefSys(), worldFacts(S.blob, lastPlayed(), {press:true})+"\nWrite this week's source material now.", 8000);
     if (S.careerId!==_cid) return;
-    e.script=out; e.focus=podFocus(); e.d=out.split("\n").find(l=>l.trim().length>40)||e.d; delete e.link;
+    e.script=podHeal(out); e.focus=podFocus(); e.d=podHeal(out).split("\n").find(l=>l.trim().length>40)||e.d; delete e.link;   /* v1.17.8: regen rides the trim + spoken heal like every other door */
     persist(); renderApp("podium"); toast("Fresh brief ready. Same steps, new take.");
   }catch(err){ toast("Regeneration failed: "+err.message); }
 }
@@ -4111,7 +4138,7 @@ function podBriefSys(){
      date stamped at the top" — because the brief carried them. The source is now raw week
      knowledge: no title, no byline, no date, nothing that reads as a text ABOUT the week
      rather than the week itself. Length dials are gone with the Studio picking audio length. */
-  return "You write the source material for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will speak from this material as if it is simply what they know about the week. HARD FORM RULES: 800-1400 words of flowing prose. NO title, NO headline, NO byline, NO author name, NO date, NO dateline, NO headers, NO bullets, NO time marks. Start mid-world with the first story. Never label, introduce, or refer to this text, a document, notes, a source, or the show's production in any way — write the week's facts and color directly, in plain declarative third person, the way an insider would brief a friend. THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes. SPOKEN RECORDS LAW: two AI hosts read this text ALOUD, so a record written 0-2 gets read as zero two — write every team record phonetically the way a broadcaster says it (oh and two, three and one, ten and six), never as digits joined by a hyphen like 0-2 or 3-1; game scores stay numeric.";
+  return "You write the source material for "+S.world.podium.show+", a fictional NFL podcast hosted by "+S.world.podium.hosts+". Two AI hosts will speak from this material as if it is simply what they know about the week. HARD FORM RULES: 800-1400 words of flowing prose. NO title, NO headline, NO byline, NO author name, NO date, NO dateline, NO headers, NO bullets, NO time marks. Start mid-world with the first story. Never label, introduce, or refer to this text, a document, notes, a source, or the show's production in any way — write the week's facts and color directly, in plain declarative third person, the way an insider would brief a friend. THE SHOW TOURS THE WHOLE LEAGUE: lead with whatever is genuinely relevant, popular, or a good story around the NFL this week from the real results given. "+S.blob.player.first+" "+S.blob.player.last+" and the "+S.blob.player.team+" appear ONLY if the given facts make them one of the league's stories this week; an irrelevant team is simply irrelevant and goes completely unmentioned, no courtesy nods, no name-drops"+(S.blob.player.status==="PracticeSquad"? " (a practice squad player earns at most a passing curiosity, most weeks nothing)":"")+". Cover BOTH sides of the week roughly half and half: the front half on what actually happened around the league, the back half on the week ahead. Tie every claim to the real scores and standings. Grounded and dry-funny. No em dashes. SPOKEN RECORDS LAW: two AI hosts read this text ALOUD, so a record written 0-2 gets read as zero two — write every team record phonetically the way a broadcaster says it, and the word AND between the two numbers is MANDATORY: 'one and three', 'oh and two', 'ten and six' — NEVER 'one three', never 'one-three', never digits like 0-2 or 3-1; game scores stay numeric. WEEK NUMBERS ARE GIVEN, NEVER COMPUTED: the clock line and the schedule labels in the facts are the only source for what week it is or what week is next — never derive a week number from a record, games played, or any arithmetic.";
 }
 function podFocus(){
   /* v1.16.0: the hosts are insiders, never readers. */
@@ -4131,7 +4158,7 @@ async function genEpisodeBrief(){
       worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 8000);
     if (S.careerId!==_cid) return;
     const focus=podFocus();
-    const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podTrim(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podTrim(out), focus};
+    const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podHeal(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podHeal(out), focus};
     S.world.podium.eps.unshift(ep); persist(); renderApp("podium"); toast("Brief ready. Feed it to NotebookLM.");
   }catch(e){ toast("Generation failed: "+e.message); }
 }
@@ -4402,6 +4429,7 @@ function presserSave(){
   S.presserDue=null; persist(); closeSheet();
   toast("On the record. The world can only quote what you actually said.");
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
+  runWeek();   /* v1.17.8: the paper was waiting on this room — it writes now, with his words */
   if (aiKey()) pracFlow();   /* v1.15.0: the room empties -> log the practice week -> post-practice questions -> the week writes */
 }
 function presserSkip(){
@@ -4412,6 +4440,7 @@ function presserSkip(){
   S.presserDue=null; persist();
   toast("Skipped availability. That gets noticed exactly once.");
   if (curApp==="cal") renderApp("cal"); if (curApp==="sync") renderApp("sync");
+  runWeek();   /* v1.17.8: a skip resolves the room too — the paper writes (and honestly can't quote him) */
   if (aiKey()) pracFlow();
 }
 /* ==================== v1.15.0 THE PLAYER'S WEEK (Ty's calendar ruling) ====================
@@ -4514,14 +4543,18 @@ function weekEnqueue(blob, last){
      strictly last game + next game, never practice. The WORLD and the PODIUM are Wednesday —
      they gate until the player logs how practice/meetings went (and, for the podium, until
      the press room is handled), so the episode can reference the practice week honestly. */
+  /* v1.17.8 (Ty's field report): the article wrote at sync, BEFORE he took podium questions
+     — so the pen truthfully saw no answers and wrote him as silent. The paper GATES on the
+     press room now (answered or skipped), exactly the podium pen's quote-law reasoning. */
   S.weekJobs={wk:wkKey(blob.clock), gk:last?gkey(last):null,
-    jobs:[{id:"questions",st:"todo"},{id:"article",st:"todo"},{id:"world",st:"gated"},{id:"podium",st:"gated"}]};
+    jobs:[{id:"questions",st:"todo"},{id:"article",st:"gated"},{id:"world",st:"gated"},{id:"podium",st:"gated"}]};
   persist(); runWeek();
 }
 function weekJobReady(j){
   /* v1.15.0: is a gated job's gate actually open? (Also decides whether Resume can help.) */
   if (j.st==="todo"||j.st==="failed") return true;
   if (j.st!=="gated") return false;
+  if (j.id==="article") return !S.presserDue;   /* v1.17.8: the paper waits for his podium words (or the skip) */
   if (j.id==="world") return pracPicked();
   if (j.id==="podium") return mediaHandled() && pracPicked();
   return false;
@@ -4539,6 +4572,8 @@ function weekRunLine(){
   const failed=W.jobs.find(j=>j.st==="failed");
   if (weekRunBusy) return "Writing the week\u2026 "+done+" of "+total+" done \u00b7 set the phone down, the screen stays awake \u00b7 if you leave, it resumes when you're back.";
   if (failed) return "The week's writing paused ("+failed.id+": "+esc(failed.err||"failed")+"). Tap Resume the week's writing.";
+  const artWaiting=W.jobs.find(j=>j.id==="article"&&j.st==="gated"&&!weekJobReady(j));
+  if (artWaiting) return "The paper is holding its front page for your podium words \u2014 take questions (or wave the room off) and it writes.";   /* v1.17.8 */
   const worldGated=W.jobs.find(j=>j.id==="world"&&j.st==="gated");
   const podGated=W.jobs.find(j=>j.id==="podium"&&j.st==="gated");
   if (worldGated && !pracPicked()){
@@ -4598,7 +4633,7 @@ async function podiumJobRun(){
   const out=await callAI(podBriefSys(), worldFacts(S.blob, last, {press:true})+"\nWrite this week's source material now.", 8000);
   if (S.careerId!==_cid){ console.log('career lock: an episode written for another save was dropped at the door'); return; }
   const focus=podFocus();
-  const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podTrim(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podTrim(out), focus};   /* v1.16.0 (Ty): episode numbers are the career's OWN count — a first show is Ep. 1, the canon feed continues from its seeded history */
+  const ep={id:"ep"+Date.now(), t:"Ep. "+(S.world.podium.eps.length+1), wk:wkLabel(S.blob.clock), dur:"", d:podHeal(out).split("\n").find(l=>l.trim().length>40)||"This week's episode.", script:podHeal(out), focus};   /* v1.16.0 (Ty): episode numbers are the career's OWN count — a first show is Ep. 1, the canon feed continues from its seeded history */
   S.world.podium.eps.unshift(ep);
   S.world.notifs.unshift({app:"podium", t:"Podium", p:"This week's episode brief wrote itself"});
 }
@@ -4665,7 +4700,7 @@ async function midweekTick(){
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x1-3],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x0-1],
 "huddle":[{"id":"unique","flair":"DISCUSSION","u":"","tm":"2h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[]} x6-9]} x1, a practice-week fan thread],
-"podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment. SPOKEN RECORDS LAW: the hosts read this aloud — write every team record phonetically ('oh and two', 'three and one', 'ten and six'), never digits like 0-2 or 3-1; game scores stay numeric."}}` + threadCtx() + inboundPlan();
+"podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment. SPOKEN RECORDS LAW: the hosts read this aloud — write every team record phonetically, and the word AND between the two numbers is MANDATORY: 'one and three', 'oh and two', 'ten and six', NEVER 'one three' or digits like 0-2; game scores stay numeric. WEEK NUMBERS ARE GIVEN, NEVER COMPUTED: the clock line and schedule labels in the facts are the only source for the current or coming week number — never derive one from records or games played."}}` + threadCtx() + inboundPlan();
   try{
     /* v1.8.1 LANE C: the midweek heavyweight rides the mailbox when the toggle is on; the
        intake below is UNTOUCHED — it runs when the computer's text comes home instead. */
@@ -4707,7 +4742,7 @@ function intakeMidweek(j, wk, _cid){
     /* v1.8.5 (Ty's ruling): NO articles midweek — the Midweek Notebook is retired; the
        Chronicle writes on full week syncs only. Old notebooks already in the feed stay. */
     if (j.podium && j.podium.brief){
-      S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:podTrim(j.podium.brief).split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:podTrim(j.podium.brief)});
+      S.world.podium.eps.unshift({id:"ep"+Date.now(), t:j.podium.t||("Midweek, "+wkLabel(S.blob.clock)), dur:"", d:podHeal(j.podium.brief).split("\n").find(l=>l.trim().length>30)||"This week's episode.", script:podHeal(j.podium.brief)});
       S.world.notifs.unshift({app:"podium", t:"Podium", p:"New episode brief is up"});
     }
     S.midweek[wk]=true;
@@ -5737,7 +5772,7 @@ async function queueWorldJobs(blob, last, opts){
   const byline=chronWriter("game"+wk);
   const facts=worldFacts(blob,last);
   const jobs=[];
-  if (!opts.noArticle) jobs.push({id:"art", max:8000, sys:storySys(byline), user:worldFacts(blob,last,{press:true})+"\n\nWrite the game story now."});
+  if (!opts.noArticle && !S.presserDue) jobs.push({id:"art", max:8000, sys:storySys(byline), user:worldFacts(blob,last,{press:true})+"\n\nWrite the game story now."});   /* v1.17.8: the paper waits for the podium on lane C too — the Chronicle's owed/retry door writes it after the room */
   jobs.push({id:"wld", max:16000, sys:worldSys(), user:facts+leagueDigest()+"\n\nWrite this week's world."});
   try{
     await mailSendJobs(jobs, {kind:"weekly", wk, opts:{noArticle:!!opts.noArticle}, gk:last? gkey(last):null, byline});
@@ -7032,6 +7067,26 @@ function coachName(){ const c=S.blob&&S.blob.player&&S.blob.player.coach; return
    staff member — coach, GM, assistant GM, owner, position coach — reaches out directly, it arrives
    as EMAIL from the club, one-way (T-Mail has no reply). The old coach text thread is retired and
    swept from existing careers at boot. */
+/* v1.17.8 (Ty's three-part mail ruling): (a) the emblems sit at the BOTTOM of the message,
+   the size of the homescreen icons (78px), centered; (b) a letter from the LEAGUE (NFL office,
+   NFLPA, commissioner) wears the NFL mark ALONE — the club crest never rides league mail; a
+   letter from the CLUB wears both; (c) the mail mark is nfl-logo.png — Ty's real NFL logo —
+   because nflsn-emblem.png is the NETWORK's mark ("stats network") and never appears on mail
+   again. Every league/club letter gets the foot, AI-written included (render-time, one door).
+   Missing art degrades silently per the art law. */
+function mailCrests(m){
+  try{
+    const from=String(m.from||"")+" "+String(m.subj||"");
+    const team=(S.blob&&S.blob.player&&S.blob.player.team)||"";
+    const isLeague = /NFL|League Office|NFLPA|Players Association|Commissioner/i.test(String(m.from||""));
+    const isTeam = !isLeague && ((team && String(m.from||"").includes(team)) || /Football Operations|Equipment Room|Coaching Staff|Front Office/i.test(from));
+    if (!isTeam && !isLeague) return "";
+    const px="height:78px;width:78px;object-fit:contain";
+    const nfl=`<img src="nfl-logo.png" alt="" style="${px}" onerror="if(!artE(this))this.remove()">`;
+    const crest=isTeam? tlogoImg(team,"tlogo",px+";margin:0") : "";
+    return `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin:28px 0 6px">${crest}${nfl}</div>`;
+  }catch(e){ return ""; }
+}
 function clubMail(subj, body, from){
   /* v1.9.0 (Ty's ruling): agentless — self-represented or pre-pick — club mail drops the
      route-through-representation clause; "This notice is one-way." stands. ONE door. */
@@ -7357,7 +7412,7 @@ function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appl
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
-  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
 function intakeGameStory(art, byline, wkLbl, gk, _cid){
   if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
@@ -7436,7 +7491,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each thread gets ONE self-contained message (at most two short consecutive lines from the same person that stand alone together); never write a message that answers something he did not say, never simulate a back-and-forth he was not part of. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -8170,7 +8225,13 @@ async function aiReply(thread, userMsg){
       if (i>0 && m[2] && recent[i-1][2] && (m[2]-recent[i-1][2])>7*86400000) gap="["+gapLabel(m[2]-recent[i-1][2]).replace(" later"," later")+"]\n";
       return gap+(m[0]==="me"?S.blob.player.first.toUpperCase()+": ":"THEM: ")+m[1];
     }).join("\n");
-    let out = await callAI(sys, hist+"\n"+S.blob.player.first.toUpperCase()+": "+userMsg+"\nReply now.", 200);
+    /* v1.17.8 THE ECHO BUG (Ty: "the person on the other side says I've said the same thing
+       twice"): sendText pushes his message into the thread BEFORE this call, so the history
+       already carried it — and the prompt tail appended it AGAIN. The model literally saw
+       him say it twice. If his message is already in the recent lines, the tail is history-
+       only; pendingReplies (his message deep in the thread by flush time) ride the same door. */
+    const _said = recent.some((m,i)=> i>=recent.length-4 && m[0]==="me" && String(m[1]).trim()===String(userMsg).trim());
+    let out = await callAI(sys, hist+(_said? "" : "\n"+S.blob.player.first.toUpperCase()+": "+userMsg)+"\nReply now.", 200);
     out = out.trim().replace(/^["']|["']$/g,"");
     if (thread.group){
       out = out.replace(/^R(\d+)\s*\|/, (m,i)=> (members[+i-1]||members[0])+"|");   /* v1.9.3: the phone puts the real name back */
@@ -8181,7 +8242,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.7";
+const VER="v1.17.8";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
