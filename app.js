@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.0 (Aug 14 2026) — THE FEBRUARY BILL + CHARITY + THE HALL OF FAME METER + THE MIDDLE NAME LAW (Ty’s redesign round): (1) THE FEBRUARY BILL — the April settlement is DEAD. The tax year closes when the calendar flips December→January: the state is whichever team he is on at the flip, and the rate RATCHETS — a mid-year move can raise it, never lower it (you cannot sign in Texas on December 31 and beat a California bill); charitable giving is the ONE thing that reduces the bill. At the flip the Current Tax Bill becomes the Final Tax Bill, the Tax Hold empties into it automatically, and the new tax year starts from $0; from January on, any money placed in the Tax Hold pays the final bill down first. February 1 collects whatever is left — checking eats the shortfall and the overdraft laws bite. Multi-year jumps: only the nearest year builds a real bill; earlier years are assumed settled from salary along the way (Ty’s ruling). (2) Position carries "Current Tax Bill for [Year]" with a yellow ⓘ opening the rules card (the Final Tax Bill lives inside the card, per the design). (3) CHARITY under contract talks — six weekly tiers ($1k Personal → $250k Foundation); giving reduces the ACTUAL tax bill; perception scales RELATIVE to earnings; a cushion never a shield; sustained-giving only (the anti-gaming rule — donating the week a story breaks moves nobody). (4) THE HALL OF FAME METER below the trophy case — 0-100%% save-truth bar: hardware weighs heaviest, then career production vs the position, rings, longevity; blunt tier read; a rookie reads LOW. (5) THE MIDDLE NAME LAW — a text pen invented a middle name for him; every pen now carries name truth: first + last exactly, no middle names or initials, ever. (6) The banner’s stray navy right-edge column is cropped out of the art itself. (prior: v1.17.10) */
+/* TyPhone app.js — v1.18.1 (Aug 14 2026) — THE READABLE CARD + THE HONEST DEDUCTION + PLAYOFF MONEY (Ty’s field reports on v1.18.0): (1) THE TAX CARD READS NOW — the info sheet borrowed Meridian’s LIGHT .acct classes inside the always-dark #sheet (white text on white cards); it rides the dark .scorecard components with explicit fixed ink now. (2) THE HONEST DEDUCTION — the MATH was always income-reduction (bill = (income − giving) × rate) but the COPY said "dollar-for-dollar", which is a different and wrong claim; every surface now says what the code does: giving reduces TAXABLE INCOME, like a real deduction. (3) Tier fixes (Ty): "State food banks" ($10k is a lot for one), "Youth sports" (high school + youth + alma mater, not just football), and Named scholarship ($75k) SWAPS PLACES with Children’s hospital ($150k). Donations charge on REGULAR-SEASON game weeks only, and the card says so. (4) The Stop-giving pill gets real contrast; the yellow ⓘ moves right. (5) PLAYOFF MONEY — the CBA share schedule (2025-season figures, the published schedule; it grows annually through 2030): Wild Card $58,500 hosting as a division winner / $53,500 otherwise (a first-round BYE also draws the $53,500 wild-card week share), Divisional $58,500, Conference Championship $81,000, Super Bowl $178,000 win / $103,000 loss. One payment per revealed playoff game, ever; deposits ride sweepNet so the tax year tracks them; PRACTICE SQUAD players draw no share — they keep their PS weekly rate through the run (also CBA truth). (prior: v1.18.0) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1941,7 +1941,7 @@ function merBody(){
       <div class="payline"><span>Invested</span><span>${fm(investValue())}</span></div>
       <div class="payline"><span>Net worth</span><span>${fmk(netWorth())}</span></div>
       <div class="payline"><span>Auto-Sweep</span><span><button class="mer-link" onclick="S.autosweep=!S.autosweep;persist();merBody()">${S.autosweep?"On · "+S.sweepPct.tax+"% tax / "+S.sweepPct.savings+"% savings":"Off · turn on"}</button></span></div>
-      <div class="payline"><span>Current Tax Bill for ${taxYearNow()}<button id="taxInfoBtn" onclick="taxInfoSheet()" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e6c229;color:#3a2f00;font-weight:700;font-style:italic;font-family:Georgia,serif;font-size:11px;border:none;margin-left:7px;vertical-align:-2px;cursor:pointer;padding:0">i</button></span><span>${fm(curTaxBill())}</span></div>
+      <div class="payline"><span>Current Tax Bill for ${taxYearNow()}<button id="taxInfoBtn" onclick="taxInfoSheet()" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e6c229;color:#3a2f00;font-weight:700;font-style:italic;font-family:Georgia,serif;font-size:11px;border:none;margin-left:12px;vertical-align:-2px;cursor:pointer;padding:0">i</button></span><span>${fm(curTaxBill())}</span></div>
     </div></div>
     <div class="mer-sechead">Bills on autopay</div>
     <div class="acct-group"><div class="acct">
@@ -2034,7 +2034,7 @@ function doTransfer(){
   persist(); merBody(); renderWidget(); toast("Moved "+fm(a)+(toBill? " — "+fm(toBill)+" went straight to the "+(S.taxFinal? S.taxFinal.y:"final")+" tax bill":""));
 }
 /* v1.18.0 CHARITY (Ty's parked design, built basic): six weekly tiers under contract talks.
-   Giving reduces the ACTUAL tax bill (the one exemption to the never-down rule). Perception
+   Giving reduces TAXABLE INCOME — a real deduction, the one exemption to the never-down rule. Perception
    scales RELATIVE to earnings — a practice-squad $1k reads more generous per dollar than a
    star's $1k. A CUSHION, never a shield: sustained giving softens ordinary bad news only,
    never a real scandal, and giving that just started earns no credit (the anti-gaming rule
@@ -2043,10 +2043,10 @@ function CHARITY_TIERS(){
   const last=(S.blob&&S.blob.player&&S.blob.player.last)||"Player";
   return [
     {n:"Personal giving", amt:1000, d:"Quiet checks to people and causes around you — not public knowledge", priv:1},
-    {n:"Community food bank", amt:10000, d:"A standing weekly commitment the neighborhood knows about"},
-    {n:"Youth football (hometown)", amt:35000, d:"Equipment, fields, and coaches back home"},
-    {n:"Children's hospital", amt:75000, d:"A named weekly gift the ward counts on"},
-    {n:"Named scholarship", amt:150000, d:"Full rides carrying your name"},
+    {n:"State food banks", amt:10000, d:"A standing weekly commitment spread across food banks statewide"},
+    {n:"Youth sports", amt:35000, d:"High school, youth, and alma mater programs — a massive number of initiatives"},
+    {n:"Named scholarship", amt:75000, d:"Full rides carrying your name"},
+    {n:"Children's hospital", amt:150000, d:"A named weekly gift the ward counts on"},
     {n:"The "+last+" Foundation", amt:250000, d:"Your own foundation — the biggest commitment there is"}
   ];
 }
@@ -2088,12 +2088,48 @@ function charityHtml(){
   const T=CHARITY_TIERS(); const cur=S.charityT!=null&&S.charityT>=0? S.charityT : -1;
   const wks=S.charityWks||0;
   return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">Giving — weekly commitment</div>
-  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${cur>=0? fm(T[cur].amt)+"/week to "+esc(T[cur].n)+" · "+wks+" straight week"+(wks===1?"":"s")+(wks>=4?" — the world calls this sustained":wks>0?" — too new for anyone to credit yet":"") : "Pick a weekly commitment. It comes out of checking every game week, reduces the year's tax bill dollar-for-dollar, and — only if you keep it up — slowly changes how the world reads you."}</p>
+  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${cur>=0? fm(T[cur].amt)+"/week to "+esc(T[cur].n)+" · "+wks+" straight week"+(wks===1?"":"s")+(wks>=4?" — the world calls this sustained":wks>0?" — too new for anyone to credit yet":"") : "Pick a weekly commitment. It comes out of checking every regular-season game week, reduces your TAXABLE INCOME like a real deduction (the bill drops by your rate on each dollar given), and — only if you keep it up — slowly changes how the world reads you."}</p>
   ${T.map((t,i)=>`<button class="veh-row light" onclick="charitySet(${i})" style="width:100%${i===cur?";outline:2px solid var(--apx-acc)":""}">
     <span class="vr-l"><b>${esc(t.n)} ${i===cur?"· ✓ giving":""}</b><small>${esc(t.d)}</small></span>
     <span class="vr-r" style="font-size:12px;opacity:.6">${fm(t.amt)}/wk</span></button>`).join("")}
-  ${cur>=0? `<button class="btn sm" style="background:rgba(0,0,0,.08);margin-top:6px" onclick="charityStop()">Stop giving</button>`:""}
-  <p style="font-size:11px;opacity:.5;margin:8px 0 0">A missed week (checking can't cover it) resets the streak. Sustained giving is a cushion for ordinary bad news, never a shield for a real scandal — and giving that starts the week a story breaks moves nobody.</p></div>`;
+  ${cur>=0? `<button class="btn sm" style="background:#8a2f27;color:#fff;margin-top:6px" onclick="charityStop()">Stop giving</button>`:""}
+  <p style="font-size:11px;opacity:.5;margin:8px 0 0">Donations charge on regular-season game weeks only. A missed week (checking can't cover it) resets the streak. Sustained giving is a cushion for ordinary bad news, never a shield for a real scandal — and giving that starts the week a story breaks moves nobody.</p></div>`;
+}
+/* v1.18.1 PLAYOFF MONEY (Ty: "theres a set cba amount for that stuff. find it online and
+   use it"): the CBA postseason share schedule — published 2025-season figures (the schedule
+   grows annually through 2030). Wild Card: $58,500 for division winners (the phone reads
+   HOSTING the wild-card game as division-winner truth — seeds 2-4 host), $53,500 for road
+   wild cards; a first-round BYE also draws the $53,500 wild-card week share without playing
+   (CBA truth). Divisional $58,500. Conference Championship $81,000. Super Bowl $178,000
+   winners / $103,000 losers. One payment per revealed playoff game, EVER (S.poPaid);
+   deposits ride sweepNet so the tax year tracks them. PRACTICE SQUAD players draw no
+   share — they keep their PS weekly rate through the run (also CBA truth). */
+const PO_SHARES={wcHost:58500, wc:53500, div:58500, conf:81000, sbWin:178000, sbLose:103000};
+function playoffShares(blob){
+  try{
+    S.poPaid=S.poPaid||{};
+    const ps=(blob.player.status==="PracticeSquad");
+    const po=(blob.schedule||[]).filter(g=>isPlayoffType(g[1])&&g[1]!=="ProBowl"&&g[7]).sort((a,b)=>a[0]-b[0]);
+    const hasWC=po.some(g=>g[1]==="WildcardPlayoff");
+    for (const g of po){
+      const gk="po|"+gkey(g); if (S.poPaid[gk]) continue; S.poPaid[gk]=1;
+      const t=g[1];
+      if (t==="DivisionalPlayoff" && !hasWC && !S.poPaid["po|bye|"+(blob.clock.seasonYear||0)]){
+        S.poPaid["po|bye|"+(blob.clock.seasonYear||0)]=1;
+        if (ps) deposit("Practice squad week — Wild Card (bye)", sweepNet(psWeekly()));
+        else { deposit("Playoff share — Wild Card week (first-round bye)", sweepNet(PO_SHARES.wc));
+               S.world.notifs.push({app:"meridian", t:"Meridian", p:"CBA playoff share: "+fm(PO_SHARES.wc)+" — the bye week still pays the Wild Card share"}); }
+      }
+      let amt=0, lbl="";
+      if (t==="WildcardPlayoff"){ amt=g[4]? PO_SHARES.wcHost : PO_SHARES.wc; lbl="Wild Card"+(g[4]?" (division winner)":""); }
+      else if (t==="DivisionalPlayoff"){ amt=PO_SHARES.div; lbl="Divisional"; }
+      else if (t==="ConferencePlayoff"){ amt=PO_SHARES.conf; lbl="Conference Championship"; }
+      else if (t==="SuperBowl"){ const won=g[7][0]>g[7][1]; amt=won? PO_SHARES.sbWin:PO_SHARES.sbLose; lbl="Super Bowl "+(won?"win":"loss"); }
+      if (!amt) continue;
+      if (ps){ deposit("Practice squad week — "+lbl, sweepNet(psWeekly())); S.world.notifs.push({app:"meridian", t:"Meridian", p:"Playoff week: practice squad rate paid — "+lbl}); }
+      else { deposit("Playoff share — "+lbl, sweepNet(amt)); S.world.notifs.push({app:"meridian", t:"Meridian", p:"CBA playoff share: "+fm(amt)+" — "+lbl}); }
+    }
+  }catch(e){}
 }
 /* v1.6.8 (Ty): MARKERS — your word is a debt. Rookie dinner tabs, jersey-number deals,
    "I'll send you something" texts, friendly bets: log them, the world remembers them, and
@@ -6685,7 +6721,7 @@ async function advanceTo(blob){
   /* v1.7.7 (Ty: "car value still drops weekly"): the zero-elapsed path ran a FULL weekly burn on
      every same-week re-sync, so the decay counter (and the burn, and debt amortization) counted
      SYNCS instead of game weeks. One burn per game week now, ever. */
-  if (!wksElapsed.length && S.lastBurnWk!==wkKey(newC)){ burnWeek(); charityWeekly(taxYearNow()); tickInvest(rng); }   /* v1.18.0: one donation per game week, same law as the burn */
+  if (!wksElapsed.length && S.lastBurnWk!==wkKey(newC)){ burnWeek(); if (newC.weekType==="RegularSeason") charityWeekly(taxYearNow()); tickInvest(rng); }   /* v1.18.1 (Ty): donations charge on REGULAR-SEASON game weeks only */
   S.lastBurnWk=wkKey(newC);
   // adopt the new truth
   const gameDelta = gameDateObj(newC) - gameDateObj(oldC);           // v1.4: how far the WORLD moved
@@ -6787,6 +6823,7 @@ async function advanceTo(blob){
   pruneLongRun(newC);                                                 // v1.16.3: the long-run janitor — the longevity sim proved four arrays grow forever; caps + stale-season sweep, laws respected
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
   try{ coachPromotionScan(); }catch(e){}                              // v1.17.3: the staff looks UP once per week — rival failure opens the door, his readiness decides
+  playoffShares(blob);                                                // v1.18.1: CBA playoff shares land before the tax cycle reads the year
   taxCycle(newC);                                                     // v1.18.0: the December→January flip closes the year's book; February 1 collects (the April bill is dead)
   syncTick();                                                         // v1.9.6: the sync clock ticks — anything owed lands now
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
@@ -6905,24 +6942,26 @@ function taxCycle(newC){
 }
 function payTaxesDue(newC){ return taxCycle(newC); }   /* v1.18.0: the old symbol stands (helper-deletion law) — it IS the new cycle */
 function taxInfoSheet(){
+  /* v1.18.1 (Ty: "cant be read... white on light grey"): the v1.18.0 card borrowed Meridian's
+     LIGHT .acct classes inside the ALWAYS-DARK #sheet. Dark .scorecard components + explicit
+     fixed ink now — readable in both themes because the sheet itself never changes color. */
   const y=taxYearNow(); const F=S.taxFinal;
   const gross=Math.round(((S.taxGross||{})[y])||0), giving=Math.round(((S.charityGiven||{})[y])||0);
   sheet(`<h3>Taxes — how the bill works</h3>
-  <div style="max-height:62vh;overflow:auto">
-  ${F? `<div class="acct-group"><div class="acct">
-    <div class="payline"><span><b>Final Tax Bill — ${F.y}</b></span><span></span></div>
-    <div class="payline"><span>Original bill</span><span>${fm(F.bill)}</span></div>
-    <div class="payline"><span>Paid so far</span><span>${fm(F.paid||0)}</span></div>
-    <div class="payline ${F.owed>0?"neg":""}"><span>${F.owed>0? "Still owed — due February 1, "+(F.y+1) : "PAID IN FULL"}</span><span>${F.owed>0? fm(F.owed):""}</span></div>
-  </div></div>`:""}
-  <div class="acct-group"><div class="acct">
-    <div class="payline"><span>Current Tax Bill for ${y}</span><span>${fm(curTaxBill())}</span></div>
-    <div class="payline"><span>Tracked income</span><span>${fm(gross)}</span></div>
-    ${giving? `<div class="payline"><span>Charitable giving (deducted)</span><span>${fm(-giving)}</span></div>`:""}
-    <div class="payline"><span>Rate (federal + state, ratcheted)</span><span>${Math.round((0.30+taxRateNow(y))*100)}%</span></div>
-  </div></div>
-  <div style="font-size:13px;line-height:1.6;opacity:.8;padding:2px 2px 0">
-  <p style="margin:0 0 8px"><b>The state.</b> Whatever team you're on when the calendar flips December to January is the state the year's taxes are due in. A mid-year move can RAISE the rate — the bill ratchets up — but it never goes down for a move: you can't sign with a Texas team on December 31 and beat a California bill. Charitable giving is the one exemption — every dollar given reduces the year's taxable income and the actual bill.</p>
+  <div style="max-height:62vh;overflow:auto;color:#e8eaed">
+  ${F? `<div class="scorecard"><div class="st"><span>Final Tax Bill — ${F.y}</span></div>
+    <div class="tm"><span>Original bill</span><b>${fm(F.bill)}</b></div>
+    <div class="tm"><span>Paid so far</span><b>${fm(F.paid||0)}</b></div>
+    <div class="tm"><span style="${F.owed>0?"color:#ff6f6f":""}">${F.owed>0? "Still owed — due February 1, "+(F.y+1) : "PAID IN FULL"}</span><b style="${F.owed>0?"color:#ff6f6f":""}">${F.owed>0? fm(F.owed):""}</b></div>
+  </div>`:""}
+  <div class="scorecard"><div class="st"><span>Current Tax Bill for ${y}</span></div>
+    <div class="tm"><span>The bill so far</span><b>${fm(curTaxBill())}</b></div>
+    <div class="tm"><span>Tracked income</span><b>${fm(gross)}</b></div>
+    ${giving? `<div class="tm"><span>Charitable giving (deducted from income)</span><b>${fm(-giving)}</b></div>`:""}
+    <div class="tm"><span>Rate (federal + state, ratcheted)</span><b>${Math.round((0.30+taxRateNow(y))*100)}%</b></div>
+  </div>
+  <div style="font-size:13px;line-height:1.6;color:#e8eaed;opacity:.92;padding:2px 2px 0">
+  <p style="margin:0 0 8px"><b>The state.</b> Whatever team you're on when the calendar flips December to January is the state the year's taxes are due in. A mid-year move can RAISE the rate — the bill ratchets up — but it never goes down for a move: you can't sign with a Texas team on December 31 and beat a California bill. Charitable giving is the one exemption — giving reduces your TAXABLE INCOME, so the bill drops by your rate on every dollar given, the way a real deduction works.</p>
   <p style="margin:0 0 8px"><b>January.</b> The year's book closes: the Current Tax Bill becomes the Final Tax Bill, everything in the Tax Hold pulls toward it automatically, and the new tax year starts again from $0. From January on, money placed in the Tax Hold pays the final bill down first.</p>
   <p style="margin:0 0 8px"><b>February 1.</b> Whatever's left is collected. If checking can't cover it, you go negative and the overdraft laws bite — protection pulls from Savings first ($12 fee), then $35 plus a credit hit at every weekly rollover until you're positive. Once it's paid, the cycle resets.</p>
   <p style="margin:0"><b>The hold.</b> Anything left in the Tax Hold after the bill is paid stays parked as next year's withholding.</p>
@@ -8542,7 +8581,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.0";
+const VER="v1.18.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
