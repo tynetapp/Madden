@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.2 (Aug 14 2026) — MULTI-CAUSE GIVING + TEXT DATES + THE MATCHED RED + HONEST LIKES + TEAM/LEAGUE FLAIRS + SLOT TRUTH + BUZZ GRAVITY (Ty’s eight): (1) Charity takes MULTIPLE elections — S.charityTs is a set; the week charges every elected cause (each its own ledger line), one streak, a miss on the TOTAL skips all and resets; adding a cause keeps the streak, stopping everything ends it. (2) Text threads show DATES, never "X days ago" — dateLabel() rides the thread list and the in-thread day chips (chirps/mail/huddle keep relative time; gapLabel stands per the helper law). (3) The NFL Stats header background is the BANNER’S OWN RED now — #d51126 sampled from the art itself, inline door (styles frozen). (4) HONEST LIKES — world-feed likes were keyed by ARRAY INDEX ("w"+i) while the feed unshifts, so every new chirp shifted his hearts onto posts he never touched; every world chirp now carries a stable cid, likes key on it, and legacy w-keys are purged once. (5) Huddle flairs: DISCUSSION is dead — TEAM for threads about his club, LEAGUE for threads spanning the league (pens instructed, legacy threads render TEAM). (6) SLOT TRUTH — wager lines + NFLSN put MY game in its REAL window (blob.schedule day/kick), the seeded scheduler fills the rest around it (one TNF/SNF/MNF), and the CBS/FOX split rides the real rule of thumb: the AWAY team’s conference decides — AFC on CBS, NFC on FOX. (7) New Costco + Volkswagen sponsor marks (Ty’s uploads, converted). (8) BUZZ GRAVITY — followers finally FALL: when the body-of-work target sits well below the count, fame bleeds 5%% of the gap weekly — three rings keep a floor forever (titles multiply the target), but a legend riding the bench quiets down. (prior: v1.18.1) */
+/* TyPhone app.js — v1.18.3 (Aug 14 2026) — THE SAVE KNOWS THE WINDOW + MARKERS SPLIT BY DIRECTION + GIFTS + THE SCROLL FIX (Ty’s six, one exe change): (1) SLOT TRUTH, FOR REAL — Ty’s screenshots proved the Madden save carries a day + kickoff for EVERY league game; exe v1.8.8 ships them (league rows [6]=day, [7]=timeOfDayMin) and weekWindows now READS the save instead of inventing windows — the seeded scheduler survives only as the fallback for legacy blobs without the fields. slotFor() is the one door: Thu→TNF/Prime, Mon→MNF/ESPN, Sat→NFLN, Sun 8pm+→SNF/NBC, Sunday afternoons→CBS/FOX by the away team’s conference. (2) MARKERS SPLIT BY DIRECTION (Ty) — what THEY owe (and unpriced promises) lives in markers; what YOU owe becomes a 0%%-APR, no-minimum entry in DEBTS the moment it has a number (TBD promises migrate when the number lands); paying it off fires the confirmation text and the settled-money memory, same as any settle. (3) GIFTS — a third direction: money moves NOW, no obligation, and the thank-you text SCALES with the amount ($100 gets a thanks, $1,000,000 gets a paragraph of disbelief), always quoting the exact figure. (4) Monthly support home moved from Settings to Meridian’s pay tab, under Recent activity. (5) THE SCROLL FIX — tapping a charity election re-rendered Apex and threw you to the top; the rerender keeps your scroll now. (6) New Dodge mark (Ty’s upload). (prior: v1.18.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1713,6 +1713,19 @@ function mySeasonSheet(){
 /* v1.18.2 (Ty): the CBS/FOX split rides the real rule of thumb — the AWAY team's conference
    decides: AFC road team on CBS, NFC road team on FOX. */
 function confNetFor(awayTeam){ return String(DIVISIONS[awayTeam]||"").indexOf("AFC")===0? "CBS":"FOX"; }
+/* v1.18.3 (Ty's screenshots): the save carries every league game's day + kickoff now (exe
+   v1.8.8, league rows [6]/[7]) — slotFor is the ONE door from (day, kickoff, away team) to
+   a broadcast window. The phone never invents a window it was told. */
+const DAY3={Thursday:"THU",Friday:"FRI",Saturday:"SAT",Sunday:"SUN",Monday:"MON",Tuesday:"TUE",Wednesday:"WED"};
+function slotFor(day, tmin, awayTeam, isPre){
+  const d3=DAY3[day]||String(day||"").slice(0,3).toUpperCase()||"SUN";
+  if (isPre) return {net:"NFLN", day:d3, ord:1};
+  if (day==="Thursday") return {net:"TNF", day:"THU", ord:0};
+  if (day==="Monday")   return {net:"MNF", day:"MON", ord:3};
+  if (day==="Saturday") return {net:"NFLN", day:"SAT", ord:1};
+  if (+tmin>=1200)      return {net:"SNF", day:d3, ord:2};
+  return {net:confNetFor(awayTeam), day:d3, ord:1};
+}
 const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
@@ -2004,7 +2017,13 @@ function merBody(){
       <button class="btn" style="background:#0b5cad;color:#fff" onclick="doTransfer()">Transfer</button>
     </div></div>
     <div class="mer-sechead">Recent activity</div>
-    <div class="acct-group"><div class="acct">${S.ledger.slice(-14).reverse().map(l=>{const a=l.kind==="move"?l.mv:l.amt;return `<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${a?fm(l.kind==="move"?a:l.amt):""}</span></div>`}).join("")}</div></div>`;
+    <div class="acct-group"><div class="acct">${S.ledger.slice(-14).reverse().map(l=>{const a=l.kind==="move"?l.mv:l.amt;return `<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${a?fm(l.kind==="move"?a:l.amt):""}</span></div>`}).join("")}</div></div>
+    <div class="mer-sechead">Monthly support home</div>
+    <div class="acct-group"><div class="acct">
+      <div style="font-size:12.5px;opacity:.6;margin-bottom:6px">Money you send the family every month. It rides the monthly burn, and the world knows he sends it home. (Moved here from Settings — v1.18.3, Ty.)</div>
+      <div style="display:flex;gap:8px"><input class="field" style="margin:0" id="supAmt" type="number" min="0" step="50" value="${S.perception.familyAsk||0}"><button class="btn sm" style="background:#0b5cad;color:#fff;white-space:nowrap" onclick="setSupport()">Set</button></div>
+    </div></div>
+  `;
   }
   if (merTab==="paycheck"){
     const nx = nextGame(); const road = nx && !nx[4]; const st = road? STATE_TAX[nx[3]] : null;
@@ -2034,13 +2053,13 @@ function merBody(){
     <div class="acct-group"><div class="acct">
     ${markers().length? markers().map((m,i)=>`<div class="payline"><span>${esc(m.dir==="owed"? m.who+" owes you":"You owe "+m.who)} · ${esc(m.what)}<br><small style="opacity:.55">${esc(m.wk)}</small></span>
       <span style="text-align:right">${m.amt>0? fm(m.amt):"TBD"}<br>${m.amt>0?"":`<button class="mer-link" style="color:#8fb8e8" onclick="setMarkerAmt(${i})">Set $</button> `}<button class="mer-link" style="color:#7fd4a0" onclick="settleMarker(${i})">Settle</button> <button class="mer-link" style="color:#ff9d94" onclick="dropMarker(${i})">✕</button></span></div>`).join("")
-    : `<div style="font-size:13px;opacity:.65">Nothing on your word yet. Rookie dinners, number deals, promises to family, locker-room bets — when a text turns into an obligation, log it and it lives here until you settle.</div>`}
+    : `<div style="font-size:13px;opacity:.65">Nothing owed to you and no unpriced promises. What YOU owe rides your Debts (0%, no minimum); gifts just go. Rookie dinners, number deals, locker-room bets — log them here.</div>`}
     <button class="btn sm" style="background:rgba(255,255,255,.1);margin-top:8px" onclick="addMarkerSheet()">+ Log a marker</button>
     </div></div>
     ${S.debts.length?`<div class="mer-sechead">Your debts</div><div class="acct-group">${S.debts.map((d,i)=>{
       const payoffMo = d.pay>0? payoffMonths(d) : null;
       const prog = d.orig? Math.max(0, Math.min(100, Math.round(100*(1-d.bal/d.orig)))) : null;
-      return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(d.n)}</span><span style="font-size:12px;opacity:.6">${d.apr}% APR · ${fm(d.pay)}/mo autopay</span></div>
+      return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(d.n)}</span><span style="font-size:12px;opacity:.6">${d.mk? "your word · no minimum" : d.apr+"% APR · "+fm(d.pay)+"/mo autopay"}</span></div>
       <div class="acct-bal" style="font-size:22px">${fm(Math.round(d.bal))}</div>
       ${prog!==null? `<div class="debtbar"><i style="width:${prog}%"></i></div><div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">${prog}% paid down${payoffMo!==null? " · ~"+payoffTxt(payoffMo)+" at this pace":""}</div>` : (payoffMo!==null? `<div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">~${payoffTxt(payoffMo)} at this pace</div>`:"")}
       <div style="display:flex;gap:8px"><button class="btn sm" style="background:#e7f0f8;color:#0b5cad" onclick="payDebtSheet(${i})">Pay extra</button>
@@ -2105,18 +2124,26 @@ function charityList(){
 function charityTiers(){ const T=CHARITY_TIERS(); return charityList().map(i=>T[i]).filter(Boolean); }
 function charityWeeklyTotal(){ return charityTiers().reduce((s,t)=>s+t.amt,0); }
 function charityTier(){ return charityTiers()[0]||null; }   /* the old symbol stands (helper law) — first elected */
+function apexKeepScroll(){
+  /* v1.18.3 (Ty: "clicking a charity election brings you back to the top of the page"):
+     the rerender keeps your place now. */
+  if (curApp!=="apex"){ return; }
+  const el=document.querySelector("#app-body .apbody"); const sc=el? el.scrollTop:0;
+  renderApp("apex");
+  requestAnimationFrame(()=>{ const e2=document.querySelector("#app-body .apbody"); if(e2) e2.scrollTop=sc; });
+}
 function charitySet(i){
   const L=charityList(); const at=L.indexOf(i);
   if (at>=0){ L.splice(at,1); if(!L.length) S.charityWks=0; }   // dropping the LAST cause ends the streak; trimming one of several keeps it
   else L.push(i);   // adding a cause keeps the streak — giving never stopped
   L.sort((a,b)=>a-b);
-  persist(); if(curApp==="apex") renderApp("apex");
+  persist(); apexKeepScroll();
   const T=CHARITY_TIERS();
   toast(at>=0? "Stopped: "+T[i].n : "Added: "+fm(T[i].amt)+"/wk to "+T[i].n+" — "+fm(charityWeeklyTotal())+"/wk total");
 }
 function charityStop(){
   const had=charityTiers().length; S.charityTs=[]; S.charityT=null; S.charityWks=0;
-  persist(); if(curApp==="apex") renderApp("apex");
+  persist(); apexKeepScroll();
   toast(had? "All giving stopped. The streak is over.":"Giving stopped.");
 }
 function charityWeekly(y){
@@ -2205,7 +2232,8 @@ function myPostsLine(){
   return "HIS RECENT PUBLIC POSTS (real, public, quotable as his own words; the world reacts to these and ONLY these; never invent posts he didn't make): "+posts.map(p=>'"'+p.t+'" ('+(p.li||0).toLocaleString()+" likes)").join(" | ")+".";
 }
 function threadMarkerNote(thread){
-  const mine=markers().filter(m=> m.tid===thread.id || m.who===thread.name || (thread.group && (thread.members||[]).includes(m.who)));
+  const mine=markers().filter(m=> m.tid===thread.id || m.who===thread.name || (thread.group && (thread.members||[]).includes(m.who)))
+    .concat((S.debts||[]).filter(d=>d.mk && (d.mk.tid===thread.id || d.mk.who===thread.name || (thread.group && (thread.members||[]).includes(d.mk.who)))).map(d=>({who:d.mk.who, what:d.mk.what, amt:Math.round(d.bal), dir:"owe"})));
   let out="";
   if (mine.length) out+=" THIS conversation is party to these markers (you may bring them up naturally, nag about them, or joke about them): "+mine.map(m=>(m.dir==="owed"? "YOU owe him":"he owes YOU")+" — "+m.what+(m.amt>0?" ("+fm(m.amt)+")":" (amount still TBD)")).join("; ")+".";
   /* v1.18.2 MONEY TRUTH (Ty: he gave $10,000, the text said $4,000): settled money is LEDGER
@@ -2238,7 +2266,8 @@ function betLawLine(){
   return " GAMBLING LAW (absolute): if he proposes any bet, wager, or stakes on HIS OWN on-field performance, you REFUSE flatly and completely — league rules prohibit it and everyone around him knows it. You never take the bet, never agree to odds, never pay or promise money on it, and no amount of pushing changes your answer; each time, say in your own words that betting on his own play isn't allowed. Friendly non-money stakes talk can stay banter, but nothing that moves money ever forms.";
 }
 function markerLine(){
-  const mk=markers(); if(!mk.length) return "";
+  const mk=markers().concat((S.debts||[]).filter(d=>d.mk).map(d=>({who:d.mk.who, what:d.mk.what, amt:Math.round(d.bal), dir:"owe"})));
+  if(!mk.length) return "";
   return "PROMISES ON THE BOOKS (the player's own word, logged by him; the world may bring these up naturally but they are UNPAID until he settles, and the world must NEVER invent other debts or promises): "
     + mk.map(m=>(m.dir==="owed"? m.who+" owes him":"he owes "+m.who)+" — "+m.what+(m.amt>0? " ("+fm(m.amt)+")":" (amount TBD)")).join("; ")+".";
 }
@@ -2258,7 +2287,7 @@ function addMarkerSheet(prefWho, prefWhat, prefTid){
   <label class="flabel">Who</label><select class="field" id="mkWho">${ppl.map(x=>`<option value="${esc(x.who).replace(/"/g,"&quot;")}" data-tid="${x.tid}" ${(prefTid&&x.tid===prefTid)||(!prefTid&&prefWho&&x.who===prefWho)?"selected":""}>${esc(x.who)} · ${esc(x.tag)}</option>`).join("")}</select>
   <label class="flabel">What you said</label><input class="field" id="mkWhat" value="${esc(prefWhat||"")}" placeholder="rookie dinner tab">
   <label class="flabel">Amount ($ — leave blank if TBD)</label><input class="field" id="mkAmt" type="number" min="0" placeholder="TBD">
-  <label class="flabel">Direction</label><select class="field" id="mkDir"><option value="owe" selected>I owe them</option><option value="owed">They owe me</option></select>
+  <label class="flabel">Direction</label><select class="field" id="mkDir"><option value="owe" selected>I owe them (lands in your DEBTS once it has a number — 0%, no minimum)</option><option value="owed">They owe me (lives in markers)</option><option value="gift">A gift — the money goes NOW, nobody owes anybody</option></select>
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="addMarkerGo()">Put it on the books</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Cancel</button>`);
 }
@@ -2268,10 +2297,46 @@ function addMarkerGo(){
   if(!who||!what) return toast("Who and what, minimum.");
   if (selfBet(what)) return toast("Nobody books action on your own play. League rules — it can't go on the books.");   /* v1.16.1 */
   const amt=Math.max(0, +$("#mkAmt").value||0);
-  const mk={id:"mk"+Date.now(), who, tid, what, amt, dir:$("#mkDir").value==="owed"?"owed":"owe", wk:wkLabel(S.blob.clock)};
+  logMarker({who, tid, what, amt, dir:$("#mkDir").value});
+}
+/* v1.18.3 (Ty): the book splits by DIRECTION now. What THEY owe (and any unpriced promise)
+   lives in markers; what YOU owe with a real number becomes a 0%-APR, NO-MINIMUM debt in
+   Meridian the moment it's logged (a TBD promise migrates the moment the number lands); and
+   a GIFT is a third thing entirely — the money moves NOW, no obligation, and the thank-you
+   scales with the amount. One headless door (logMarker) so the harness can drive it. */
+function logMarker(o){
+  const {who, tid, what} = o; const amt=Math.max(0, Math.round(o.amt||0));
+  if (o.dir==="gift"){
+    if (!(amt>0)) return toast("A gift needs a number.");
+    S.cash.checking-=amt;
+    S.ledger.push({t:"Gift to "+who+" — "+what, amt:-amt, kind:"spend"});
+    S.markersDone=(S.markersDone||[]).slice(-29); S.markersDone.push({who, tid, what, amt, dir:"gift", settledWk:wkLabel(S.blob.clock)});
+    try{ odNotice(); }catch(e){}
+    persist(); closeSheet(); toast("Sent "+fm(amt)+" to "+who+"."); if(curApp==="meridian") merBody(); renderWidget();
+    giftThanksText({who, tid, what}, amt);
+    return;
+  }
+  const dir=o.dir==="owed"?"owed":"owe";
+  if (dir==="owe" && amt>0){
+    S.debts.push({id:"mkd"+Date.now(), n:"Your word — "+who+" ("+what+")", bal:amt, orig:amt, apr:0, pay:0, mk:{who, tid, what}});
+    persist(); closeSheet(); toast("On your books as a debt — "+fm(amt)+" to "+who+". No minimum; pay it when you're ready."); if(curApp==="meridian") merBody();
+    markerAckText({who, tid, what, amt, dir});
+    return;
+  }
+  const mk={id:"mk"+Date.now(), who, tid, what, amt, dir, wk:wkLabel(S.blob.clock)};
   markers().push(mk);
   persist(); closeSheet(); toast("On the books. "+who+" knows."); if(curApp==="meridian") merBody();
   markerAckText(mk);   /* v1.18.2 (Ty): logging it draws a text — they SAY they know, in writing, with the number */
+}
+function giftThanksText(m, amt){
+  const a=fm(amt);
+  let body;
+  if (amt<250) body="just saw the "+a+" — thank you, appreciate you \ud83d\ude4f";
+  else if (amt<1000) body="you didn't have to do that. "+a+" for "+m.what+"?? thank you, for real. love you";
+  else if (amt<10000) body="I'm just seeing the "+a+" come through and I had to sit down for a second. For "+m.what+"... you didn't have to do that and you did it anyway. Thank you. I'm not going to forget this.";
+  else if (amt<100000) body="I keep staring at my phone. "+a+". "+a+"!! For "+m.what+". I don't even have the words right now — I called everybody, nobody can believe it. You have NO idea what this does for us. Thank you doesn't cover it but THANK YOU. I love you so much.";
+  else body="I am literally shaking writing this. I checked the account and I thought the bank made a mistake — "+a+". "+a+"!!! For "+m.what+". Do you understand what you just did?? That's not a gift, that's a different LIFE. I've been crying for an hour. Everybody's crying. I keep thinking about everything it took to get here and now you turn around and do THIS for us. You could have done anything with that money and you thought of us. I don't know what we did to deserve you but I thank God for you every single day. I love you more than you will ever know. EVERYTHING is different now because of you.";
+  markerSpeak(m, body);
 }
 /* v1.18.2 (Ty): markers speak. Logging one draws an acknowledgment text from the other side;
    settling one draws a confirmation the moment the money moves — deterministic, EXACT
@@ -2333,6 +2398,15 @@ function setMarkerAmt(i){
 function setMarkerAmtGo(i){
   const m=markers()[i]; if(!m) return;
   const a=Math.max(1,+$("#mkAmtEdit").value||0); if(!(a>0)) return toast("Needs a real number.");
+  if (m.dir==="owe"){
+    /* v1.18.3 (Ty): the number landed on something YOU owe — it stops being a marker and
+       becomes the 0%-no-minimum debt it always really was. */
+    markers().splice(i,1);
+    S.debts.push({id:"mkd"+Date.now(), n:"Your word — "+m.who+" ("+m.what+")", bal:a, orig:a, apr:0, pay:0, mk:{who:m.who, tid:m.tid, what:m.what}});
+    persist(); closeSheet(); if(curApp==="meridian") merBody(); toast(fm(a)+" — moved to your debts. No minimum; pay it when you're ready.");
+    markerSpeak(m, "so we're calling it "+fm(a)+" for the "+m.what+" — I've got it written down");
+    return;
+  }
   m.amt=a; persist(); closeSheet(); if(curApp==="meridian") merBody(); toast(fm(a)+" on the books.");
 }
 function dropMarker(i){ markers().splice(i,1); persist(); if(curApp==="meridian") merBody(); toast("Off the books."); }
@@ -4154,8 +4228,16 @@ function gameLines(list){
    split CBS/FOX; preseason is all NFLN. Ordering matches a real scoreboard: THU, SUN slate, SNF, MNF. */
 function weekWindows(games, seedKey){
   const out = games.map(g=>({g}));
+  /* v1.18.3: the SAVE speaks first — any game that shipped its real day/kickoff gets its
+     true window; only legacy blobs without the fields fall through to the seeded filler. */
+  out.forEach(x=>{
+    const g=x.g; if(!g.dy) return;
+    const sl=slotFor(g.dy, g.tm, g.a, g.t==="PreSeason");
+    x.net=sl.net; x.day=sl.day; x.ord=sl.ord; x.time=fmClock(g.tm)||"";
+  });
+  if (out.every(x=>x.net)) return out.sort((a,b)=>a.ord-b.ord || (+a.g.tm||0)-(+b.g.tm||0) || (a.g.played?0:1)-(b.g.played?0:1));
   if (games.length && games[0].t==="PreSeason"){
-    out.forEach(x=>{ x.net="NFLN"; x.day="FRI"; x.ord=1; x.time="7:00 PM"; });
+    out.forEach(x=>{ if(!x.net){ x.net="NFLN"; x.day="FRI"; x.ord=1; x.time="7:00 PM"; } });
     return out;
   }
   const rng=seedRng(String(seedKey)+"|windows");
@@ -4164,7 +4246,7 @@ function weekWindows(games, seedKey){
      FIRST and the seeded scheduler fills the league around it (still exactly one TNF, one
      SNF, one MNF a week). Afternoon CBS/FOX rides the away team's conference. */
   const mineTeam=(S.blob&&S.blob.player)? S.blob.player.team : null;
-  const idx=[...out.keys()];
+  const idx=[...out.keys()].filter(i=>!out[i].net);   /* v1.18.3: only unslotted games ride the seeded filler */
   let myI=-1, myNet=null;
   try{
     const tp=games[0].t, wk=games[0].w;
@@ -4182,9 +4264,10 @@ function weekWindows(games, seedKey){
     }
   }catch(e){}
   const pick=()=>idx.splice(Math.floor(rng()*idx.length),1)[0];
-  const tnf=(myNet!=="TNF" && out.length>3 && idx.length)? pick():-1;
-  const snf=(myNet!=="SNF" && out.length>1 && idx.length)? pick():-1;
-  const mnf=(myNet!=="MNF" && out.length>2 && idx.length)? pick():-1;
+  const hasN=k=>out.some(x=>x.net===k);   /* v1.18.3: a window the SAVE (or the anchor) already filled is taken — the filler never double-books it */
+  const tnf=(!hasN("TNF") && myNet!=="TNF" && out.length>3 && idx.length)? pick():-1;
+  const snf=(!hasN("SNF") && myNet!=="SNF" && out.length>1 && idx.length)? pick():-1;
+  const mnf=(!hasN("MNF") && myNet!=="MNF" && out.length>2 && idx.length)? pick():-1;
   out.forEach((x,i)=>{
     if (x.net) return;   // the anchored game keeps its truth
     if (i===tnf){ x.net="TNF"; x.day="THU"; x.ord=0; x.time="8:15 PM"; }
@@ -4207,7 +4290,7 @@ RENDER.wager = b=>{
     // league games are COMPACT ARRAYS [type(0 pre/1 reg), week, homeIdx, awayIdx, hs, as] — map first (v1.4 fix: filtering on .t/.w matched nothing, board collapsed to your game only)
     const tnames=S.blob.league.teams;
     const all=S.blob.league.games.map(g=>Array.isArray(g)
-      ? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tnames[g[2]], a:tnames[g[3]], hs:g[4], as:g[5], played:g[4]>=0}
+      ? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tnames[g[2]], a:tnames[g[3]], hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""}
       : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
     /* v1.7.8 (Ty: no spoilers): the CURRENT week's board is all open lines — the save may carry
        simmed finals, but nothing settles until the clock moves past the week. Last week's slate
@@ -5188,8 +5271,7 @@ RENDER.settings = b=>{
   <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px" id="colHint">Prestige reads automatically: ${esc(collegePrestige(pc.collegeName))}.${pc.collegeName?"":" The save's college slot is empty for created players (verified against the save itself) — pick yours here once and it sticks."}</div>
   <label class="flabel">College career</label>${dd("pcCol", ["Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"], pc.college||"Career backup")}
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
-  <label class="flabel">Monthly support you send home ($)</label>
-  <input class="field" id="pcAsk" type="number" min="0" step="50" value="${pc.familyAsk||0}" onchange="savePerception()">
+  <p style="font-size:12px;opacity:.55;margin:2px 0 10px">Monthly support home moved to Meridian → pay & transfer (v1.18.3, Ty).</p>
   ${(S.blob.player.draftRound>=1&&S.blob.player.draftRound<=7)? `<label class="flabel">Draft story (read from the save)</label>
   <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>`
   : `<label class="flabel">Draft story — your pick (the save lists every created player as a UDFA; the phone accounts for the round where it can)</label>
@@ -5366,7 +5448,7 @@ function payDebtExtra(i){
   S.cash.checking-=amt; d.bal=Math.max(0,d.bal-amt);
   S.ledger.push({t:"Extra principal — "+d.n, amt:-amt, kind:"spend"});
   creditTouch(2);
-  if (d.bal<=1){ S.ledger.push({t:d.n+" — paid in full", amt:0, kind:"move"}); S.debts.splice(i,1); toast(d.n+" is GONE."); }
+  if (d.bal<=1){ S.ledger.push({t:d.n+" — paid in full", amt:0, kind:"move"}); S.debts.splice(i,1); toast(d.n+" is GONE."); if(d.mk) markerDebtSettled(d); }
   else toast("Applied "+fm(amt)+" to principal.");
   persist(); closeSheet(); merBody(); renderWidget();
 }
@@ -5386,6 +5468,18 @@ function payDebtOffGo(i){
   S.ledger.push({t:d.n+" — paid in full", amt:0, kind:"move"});
   S.debts.splice(i,1); creditTouch(6);
   persist(); closeSheet(); merBody(); renderWidget(); toast(d.n+" is history.");
+  if (d.mk) markerDebtSettled(d);   /* v1.18.3: paying your word off IS the settlement — the confirmation text fires and the money is remembered */
+}
+function markerDebtSettled(d){
+  const a=Math.round(d.orig||d.bal||0);
+  S.markersDone=(S.markersDone||[]).slice(-29); S.markersDone.push({who:d.mk.who, tid:d.mk.tid, what:d.mk.what, amt:a, dir:"owe", settledWk:wkLabel(S.blob.clock)});
+  persist();
+  markerSettleText({who:d.mk.who, tid:d.mk.tid, what:d.mk.what, dir:"owe"}, a);
+}
+function setSupport(){
+  const v=Math.max(0, +($("#supAmt")&&$("#supAmt").value)||0);
+  S.perception.familyAsk=v; persist(); if(curApp==="meridian") merBody(); renderWidget();
+  toast(v? fm(v)+"/mo goes home now." : "Support home is off.");
 }
 /* v1.6 (Ty #8): user-authored family ecosystem */
 function famAdd(){ const pc=S.perception; pc.familyPeople=pc.familyPeople||[]; pc.familyPeople.push({rel:"Mother",name:"",fact:""}); persist(); rerenderSettings(); }
@@ -8708,7 +8802,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.2";
+const VER="v1.18.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
