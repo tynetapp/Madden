@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.17.10 (Aug 13 2026) — THE DELIVERY DOOR + THE BANNER FILLS THE HEADER (Ty's eight-item round; charity + the HoF meter ride the NEXT chat by his ruling): (1) THE DELIVERY DOOR — his two notification reports were ONE root cause: sendText's completion force-rendered THAT thread whenever Messages was open (a reply landing after he backed out yanked him into the conversation) and never cleared the read stamp (so walking to the home screen meant no badge, no notification — the thread was still "read" from when he stood in it). deliverReply is the one door for every reply the phone writes: standing in the thread renders there and stays read; anywhere else clears the stamp, badges, notifies, and re-renders the screen he is ACTUALLY on. The owed-reply flush rides it too. (2) THE BANNER FILLS THE HEADER — art rebuilt from source at 4.6:1 with the shield full-strip-height, and the header runs it full width at 56px (styles.css stays frozen; sizing rides the inline door). (3) The "top replies are still landing" note is retired — the v1.17.9 Pull button is the honest door; the count stands alone. (4) RECORDS ON THE SCOREBOARD — pyRecs/pyRecTag hang (W-L) beside every team on both scorecards, built from revealed regular-season games only (the v1.17.4 reveal law), silent in preseason. (5) THE MINIMUM DEAL IS ONE YEAR — the created-player league-minimum rebuild files 1yr at the save's own minimum scale (his era: $890k; no hardcode, v1.16.1 stands); the CAP rebuild keeps two years, being the deal he actually created. (6) THE WORLD KNOWS HE IS HURT — the save's injury truth (IR + status/type/severity) shipped for rounds but no pen was ever told; hisInjuryLine rides worldFacts with the honest scale (IR is news, day-to-day is a locker aside, no invented timelines or injuries). (7) MONTHLY AWARDS TALLY — weekly awards already collapsed to ×N and yearly hardware already carried its year (Ty's confirmation, correct); only _of_Week matched, so monthlies listed one row per win — both the trophy case and the facts line count them now. (8) Audi mark replaced. (prior: v1.17.9) */
+/* TyPhone app.js — v1.18.0 (Aug 14 2026) — THE FEBRUARY BILL + CHARITY + THE HALL OF FAME METER + THE MIDDLE NAME LAW (Ty’s redesign round): (1) THE FEBRUARY BILL — the April settlement is DEAD. The tax year closes when the calendar flips December→January: the state is whichever team he is on at the flip, and the rate RATCHETS — a mid-year move can raise it, never lower it (you cannot sign in Texas on December 31 and beat a California bill); charitable giving is the ONE thing that reduces the bill. At the flip the Current Tax Bill becomes the Final Tax Bill, the Tax Hold empties into it automatically, and the new tax year starts from $0; from January on, any money placed in the Tax Hold pays the final bill down first. February 1 collects whatever is left — checking eats the shortfall and the overdraft laws bite. Multi-year jumps: only the nearest year builds a real bill; earlier years are assumed settled from salary along the way (Ty’s ruling). (2) Position carries "Current Tax Bill for [Year]" with a yellow ⓘ opening the rules card (the Final Tax Bill lives inside the card, per the design). (3) CHARITY under contract talks — six weekly tiers ($1k Personal → $250k Foundation); giving reduces the ACTUAL tax bill; perception scales RELATIVE to earnings; a cushion never a shield; sustained-giving only (the anti-gaming rule — donating the week a story breaks moves nobody). (4) THE HALL OF FAME METER below the trophy case — 0-100%% save-truth bar: hardware weighs heaviest, then career production vs the position, rings, longevity; blunt tier read; a rookie reads LOW. (5) THE MIDDLE NAME LAW — a text pen invented a middle name for him; every pen now carries name truth: first + last exactly, no middle names or initials, ever. (6) The banner’s stray navy right-edge column is cropped out of the art itself. (prior: v1.17.10) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -690,6 +690,56 @@ function trophyPieces(){
   for (const [t,n] of Object.entries(weekly)) out.push({ic:"\u2B50", t:t.replace(/_/g," "), sub:n>1? "\u00d7"+n : ""});
   return out;
 }
+/* v1.18.0 THE HALL OF FAME METER (Ty's parked design): save truth only. Hardware weighs
+   heaviest (MVP > All-Pro > Pro Bowl, weeklies barely count), then career production against
+   the position's benchmarks, then rings, then longevity. Blunt tier read; a rookie reads
+   LOW — no teasing. */
+function hofScore(){
+  try{
+    const p=S.blob.player; const L=S.legacy||{seasons:0,wins:0,titles:0,yds:0,tds:0};
+    let mvp=0, ap=0, pb=0, roy=0, wkm=0;
+    for (const a of (S.blob.awards||[])){ const t=String((a&&a.type)||"");
+      if (!t) continue;
+      if (/MVP/i.test(t)) mvp++;
+      else if (/All.?Pro|First.?Team/i.test(t)) ap++;
+      else if (/Pro.?Bowl/i.test(t)) pb++;
+      else if (/Rookie/i.test(t)) roy++;
+      else if (/_of_(Week|Month)$/i.test(t)) wkm++;
+    }
+    const acc=Math.min(45, mvp*14 + ap*7 + pb*3 + roy*4 + Math.min(4, wkm*0.5));
+    // production vs the position (banked seasons + the live one; save truth only)
+    let cur={yds:0,tds:0}; try{ cur=seasonProd(S.blob); }catch(e){}
+    const offPts=(L.yds||0)+cur.yds + ((L.tds||0)+cur.tds)*100;
+    let defT=0,defS=0,defI=0;
+    for (const yr of (L.years||[])) for (const r of (yr.rows||[])){
+      if (r[0]==="Tackles") defT+=r[1]; else if (r[0]==="Sacks") defS+=r[1]; else if (r[0]==="INTs") defI+=r[1];
+    }
+    const defPts=defT*10+defS*180+defI*220;
+    const pos=String(p.pos||"");
+    let prod=0;
+    if (/QB/.test(pos)) prod=30*offPts/52000;
+    else if (/RB|HB|FB/.test(pos)) prod=30*offPts/14500;
+    else if (/WR/.test(pos)) prod=30*offPts/14000;
+    else if (/TE/.test(pos)) prod=30*offPts/10000;
+    else if (/DT|DE|LB|OLB|MLB|CB|FS|SS|DB/.test(pos)) prod=30*defPts/13000;
+    else prod=Math.min(30, (L.seasons||0)*2.2 + (L.wins||0)*0.15);   // trenches + specialists: the save keeps no clean counting stat
+    prod=Math.min(30, Math.max(0, prod));
+    const rings=Math.min(12, (L.titles||0)*6);
+    const lon=Math.min(13, (L.seasons||0)*1.3);
+    const score=Math.round(Math.min(100, acc+prod+rings+lon));
+    const tier= score>=85? "First ballot" : score>=65? "Should get in" : score>=40? "In the conversation" : score>=15? "Fringe case" : "Not on the radar";
+    return {score, tier};
+  }catch(e){ return {score:0, tier:"Not on the radar"}; }
+}
+function hofMeterHtml(){
+  const h=hofScore();
+  return `<div class="hoodhead" style="color:var(--ink);margin-top:10px"><h3>Hall of Fame</h3></div>
+  <div class="scorecard" id="hofmeter"><div style="display:flex;align-items:center;gap:10px;width:100%">
+    <img src="hof-logo.png" alt="" style="height:34px;width:34px;object-fit:contain;flex:0 0 auto" onerror="if(!artE(this))this.remove()">
+    <div style="flex:1;min-width:0"><div style="height:10px;border-radius:5px;background:rgba(127,127,127,.25);overflow:hidden"><i id="hofbar" style="display:block;height:100%;width:${h.score}%;background:#c9a227"></i></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span style="opacity:.7">${h.score}%</span><b>${esc(h.tier)}</b></div></div>
+  </div><p style="font-size:11px;opacity:.5;margin:8px 0 0;width:100%">Save truth only: hardware weighs heaviest, then career production against the position, rings, and longevity.</p></div>`;
+}
 function renderTrophyBar(){
   /* v1.7.4 (Ty): My Season took the trophy case's spot on the home strip — the case lives
      INSIDE the sheet now, with past seasons and availability. Element id keeps its name. */
@@ -702,7 +752,7 @@ function renderTrophyBar(){
 function trophySheet(){
   const p=trophyPieces();
   sheet(`<h3>Trophy case</h3>` + (p.length?
-    p.map(x=>`<div class="trophy-row"><span class="t-ic">${x.ic}</span><div><b>${esc(x.t)}</b><span>${esc(x.sub)}</span></div></div>`).join("") :
+    p.map(x=>`<div class="trophy-row"><span class="t-ic">${x.ic}</span><div><b>${esc(x.t)}</b><span>${esc(x.sub)}</span></div></div>`).join("")+hofMeterHtml() :
     `<p class="sp">Nothing in here yet. Rings and hardware land as you win them \u2014 the case only holds what the save says you took.</p>`) +
     `<button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
@@ -1615,6 +1665,7 @@ function mySeasonSheet(){
     <div class="hoodhead" style="color:var(--ink);margin-top:10px"><h3>Trophy case</h3></div>
     ${tp.length? tp.map(x=>`<div class="trophy-row"><span class="t-ic">${x.ic}</span><div><b>${esc(x.t)}</b><span>${esc(x.sub)}</span></div></div>`).join("")
       : `<p style="font-size:12.5px;color:var(--faint)">Nothing in the case yet. Rings and hardware land as you win them. It only holds what the save says you took.</p>`}
+    ${hofMeterHtml()}
     </div>
     <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
@@ -1890,6 +1941,7 @@ function merBody(){
       <div class="payline"><span>Invested</span><span>${fm(investValue())}</span></div>
       <div class="payline"><span>Net worth</span><span>${fmk(netWorth())}</span></div>
       <div class="payline"><span>Auto-Sweep</span><span><button class="mer-link" onclick="S.autosweep=!S.autosweep;persist();merBody()">${S.autosweep?"On · "+S.sweepPct.tax+"% tax / "+S.sweepPct.savings+"% savings":"Off · turn on"}</button></span></div>
+      <div class="payline"><span>Current Tax Bill for ${taxYearNow()}<button id="taxInfoBtn" onclick="taxInfoSheet()" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e6c229;color:#3a2f00;font-weight:700;font-style:italic;font-family:Georgia,serif;font-size:11px;border:none;margin-left:7px;vertical-align:-2px;cursor:pointer;padding:0">i</button></span><span>${fm(curTaxBill())}</span></div>
     </div></div>
     <div class="mer-sechead">Bills on autopay</div>
     <div class="acct-group"><div class="acct">
@@ -1978,7 +2030,70 @@ function doTransfer(){
   if(!a||a<=0) return toast("Pick a real amount.");
   if(S.cash[f]<a) return toast("Insufficient funds in that account.");
   S.cash[f]-=a; S.cash[t]+=a; S.ledger.push({t:`Transfer ${cap(f)} to ${cap(t)}`, amt:0, mv:a, from:f, to:t, kind:"move"});
-  persist(); merBody(); renderWidget(); toast("Moved "+fm(a));
+  let toBill=0; if (t==="tax"){ try{ toBill=taxSettleFromHold("Transfer"); }catch(e){} }   /* v1.18.0: hold money pays an open final bill first */
+  persist(); merBody(); renderWidget(); toast("Moved "+fm(a)+(toBill? " — "+fm(toBill)+" went straight to the "+(S.taxFinal? S.taxFinal.y:"final")+" tax bill":""));
+}
+/* v1.18.0 CHARITY (Ty's parked design, built basic): six weekly tiers under contract talks.
+   Giving reduces the ACTUAL tax bill (the one exemption to the never-down rule). Perception
+   scales RELATIVE to earnings — a practice-squad $1k reads more generous per dollar than a
+   star's $1k. A CUSHION, never a shield: sustained giving softens ordinary bad news only,
+   never a real scandal, and giving that just started earns no credit (the anti-gaming rule
+   — donating the week a story breaks moves nobody). A missed week resets the streak. */
+function CHARITY_TIERS(){
+  const last=(S.blob&&S.blob.player&&S.blob.player.last)||"Player";
+  return [
+    {n:"Personal giving", amt:1000, d:"Quiet checks to people and causes around you — not public knowledge", priv:1},
+    {n:"Community food bank", amt:10000, d:"A standing weekly commitment the neighborhood knows about"},
+    {n:"Youth football (hometown)", amt:35000, d:"Equipment, fields, and coaches back home"},
+    {n:"Children's hospital", amt:75000, d:"A named weekly gift the ward counts on"},
+    {n:"Named scholarship", amt:150000, d:"Full rides carrying your name"},
+    {n:"The "+last+" Foundation", amt:250000, d:"Your own foundation — the biggest commitment there is"}
+  ];
+}
+function charityTier(){ return (S.charityT!=null && S.charityT>=0)? CHARITY_TIERS()[S.charityT]||null : null; }
+function charitySet(i){
+  S.charityT=i; S.charityWks=0;   // a new (or changed) commitment starts its streak fresh — sustained means sustained
+  persist(); if(curApp==="apex") renderApp("apex");
+  toast("Weekly giving set: "+fm(CHARITY_TIERS()[i].amt)+" to "+CHARITY_TIERS()[i].n);
+}
+function charityStop(){
+  const t=charityTier(); S.charityT=null; S.charityWks=0;
+  persist(); if(curApp==="apex") renderApp("apex");
+  toast(t? "Giving stopped. The streak is over.":"Giving stopped.");
+}
+function charityWeekly(y){
+  try{
+    const t=charityTier(); if(!t) return;
+    if ((S.cash.checking||0) < t.amt){
+      S.charityWks=0;
+      S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"meridian", t:"Meridian", p:"This week's "+fm(t.amt)+" donation didn't go through — checking couldn't cover it. The giving streak resets."});
+      return;
+    }
+    S.cash.checking-=t.amt;
+    S.ledger.push({t:"Charitable giving — "+t.n, amt:-t.amt, kind:"spend"});
+    S.charityWks=(S.charityWks||0)+1; S.charityTotal=(S.charityTotal||0)+t.amt;
+    S.charityGiven=S.charityGiven||{}; S.charityGiven[y]=(S.charityGiven[y]||0)+t.amt;
+  }catch(e){}
+}
+function charityLine(press){
+  const t=charityTier(); const wks=S.charityWks||0;
+  if (!t || !wks) return "";
+  if (press && t.priv) return "";   // quiet personal giving is not printable news
+  let grossWk=6222; try{ grossWk=grossFor(S.blob.player.status, S.blob.player)||6222; }catch(e){}
+  const share=Math.round(t.amt*100/Math.max(1,grossWk));
+  const sust=wks>=4;
+  return "\nHIS GIVING (real, from the ledger): "+fm(t.amt)+"/week to "+t.n+", "+wks+" straight week"+(wks===1?"":"s")+" (~"+share+"% of his weekly pay). GIVING LAW: generosity is judged RELATIVE to earnings — a practice-squad player giving $1,000 a week reads more generous per dollar than a star giving the same. "+(sust? "This is SUSTAINED giving: it may genuinely soften how the world reads ORDINARY bad news about him (a rough game, a spending story) — a cushion, NEVER a shield: it does nothing against a real scandal." : "The giving only JUST STARTED: it earns him no public credit yet — donating the week a story breaks moves nobody; only sustained giving is respected.");
+}
+function charityHtml(){
+  const T=CHARITY_TIERS(); const cur=S.charityT!=null&&S.charityT>=0? S.charityT : -1;
+  const wks=S.charityWks||0;
+  return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">Giving — weekly commitment</div>
+  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${cur>=0? fm(T[cur].amt)+"/week to "+esc(T[cur].n)+" · "+wks+" straight week"+(wks===1?"":"s")+(wks>=4?" — the world calls this sustained":wks>0?" — too new for anyone to credit yet":"") : "Pick a weekly commitment. It comes out of checking every game week, reduces the year's tax bill dollar-for-dollar, and — only if you keep it up — slowly changes how the world reads you."}</p>
+  ${T.map((t,i)=>`<button class="veh-row light" onclick="charitySet(${i})" style="width:100%${i===cur?";outline:2px solid var(--apx-acc)":""}">
+    <span class="vr-l"><b>${esc(t.n)} ${i===cur?"· ✓ giving":""}</b><small>${esc(t.d)}</small></span>
+    <span class="vr-r" style="font-size:12px;opacity:.6">${fm(t.amt)}/wk</span></button>`).join("")}
+  ${cur>=0? `<button class="btn sm" style="background:rgba(0,0,0,.08);margin-top:6px" onclick="charityStop()">Stop giving</button>`:""}
+  <p style="font-size:11px;opacity:.5;margin:8px 0 0">A missed week (checking can't cover it) resets the streak. Sustained giving is a cushion for ordinary bad news, never a shield for a real scandal — and giving that starts the week a story breaks moves nobody.</p></div>`;
 }
 /* v1.6.8 (Ty): MARKERS — your word is a debt. Rookie dinner tabs, jersey-number deals,
    "I'll send you something" texts, friendly bets: log them, the world remembers them, and
@@ -2724,6 +2839,7 @@ RENDER.apex = (b,sub)=>{
     </div>`:""}
     ${depthChartHtml()}
     ${negTableHtml()}
+    ${charityHtml()}
     ${S.agent? `<button class="veh-row light" style="justify-content:center" onclick="window._apexRoster=!window._apexRoster;renderApp('apex')"><span class="vr-l"><b>Other agents at Apex — ${D.AGENTS.length-(S.agent&&S.agent.id!=="self"?1:0)} ${window._apexRoster?"\u25be":"\u25b8"}</b><small>switching is legal, common, and remembered</small></span></button>`
       : `<div class="hoodhead"><h3>The Roster</h3><span>12 agents at Apex</span></div>`}
     ${(!S.agent||window._apexRoster)&&!selfRepped()? `<button class="veh-row light" onclick="renderApp('apex',{a:'self'})">
@@ -2822,10 +2938,13 @@ function sweepNet(amt){
   /* v1.17.0 (Ty: "ensure that taxes get paid over the offseason when april passes"): every
      income stream through this door is TRACKED for the April bill, sweep on or off — the
      hold is withholding, not the liability. */
-  try{ const y=Number((S.blob&&S.blob.clock&&S.blob.clock.seasonYear)||0); if(y){ S.taxGross=S.taxGross||{}; S.taxGross[y]=(S.taxGross[y]||0)+Math.max(0,Math.round(amt)); } }catch(e){}
+  /* v1.18.0: income after a year is FINALIZED belongs to the NEXT tax year (taxYearNow) */
+  try{ const y=taxYearNow(); if(y){ S.taxGross=S.taxGross||{}; S.taxGross[y]=(S.taxGross[y]||0)+Math.max(0,Math.round(amt)); } }catch(e){}
   if (!S.autosweep) return amt;
   const tx=Math.round(amt*S.sweepPct.tax/100), sv=Math.round(amt*S.sweepPct.savings/100);
-  S.cash.tax+=tx; S.cash.savings+=sv; return amt-tx-sv;
+  S.cash.tax+=tx; S.cash.savings+=sv;
+  try{ taxSettleFromHold("Auto-Sweep"); }catch(e){}   /* v1.18.0: swept money chips at an open final bill first */
+  return amt-tx-sv;
 }
 function dealWeekPay(y, w){
   const gross=dealAnnual(); if(!gross) return;
@@ -6561,12 +6680,12 @@ async function advanceTo(blob){
     deposit("Game check — "+yTag+"Week "+(w+1)+(road?" (@ "+g[3]+")":""), net);
     events.push(yTag+"Week "+(w+1)+" check "+fm(net));
     dealWeekPay(y, w);                                             // v1.6: endorsement money rides the season weeks
-    burnWeek(); tickInvest(rng); cardCycle(w);
+    burnWeek(); charityWeekly(y); tickInvest(rng); cardCycle(w);   /* v1.18.0: the giving commitment rides every game week */
   }
   /* v1.7.7 (Ty: "car value still drops weekly"): the zero-elapsed path ran a FULL weekly burn on
      every same-week re-sync, so the decay counter (and the burn, and debt amortization) counted
      SYNCS instead of game weeks. One burn per game week now, ever. */
-  if (!wksElapsed.length && S.lastBurnWk!==wkKey(newC)){ burnWeek(); tickInvest(rng); }
+  if (!wksElapsed.length && S.lastBurnWk!==wkKey(newC)){ burnWeek(); charityWeekly(taxYearNow()); tickInvest(rng); }   /* v1.18.0: one donation per game week, same law as the burn */
   S.lastBurnWk=wkKey(newC);
   // adopt the new truth
   const gameDelta = gameDateObj(newC) - gameDateObj(oldC);           // v1.4: how far the WORLD moved
@@ -6668,7 +6787,7 @@ async function advanceTo(blob){
   pruneLongRun(newC);                                                 // v1.16.3: the long-run janitor — the longevity sim proved four arrays grow forever; caps + stale-season sweep, laws respected
   ledgerWeekly();                                                     // v1.9.1: cool-offs expire, warmth drifts home, a blocked friend reaches back
   try{ coachPromotionScan(); }catch(e){}                              // v1.17.3: the staff looks UP once per week — rival failure opens the door, his readiness decides
-  payTaxesDue(newC);                                                  // v1.17.0: April passed? the season's tax bill comes due — hold first, checking for the rest
+  taxCycle(newC);                                                     // v1.18.0: the December→January flip closes the year's book; February 1 collects (the April bill is dead)
   syncTick();                                                         // v1.9.6: the sync clock ticks — anything owed lands now
   events.forEach(e=>S.world.notifs.push({app:"meridian", t:"Meridian", p:e}));
   S.lastSyncAt={when:Date.now(), wk:wkLabel(newC), kind:"advance"};   // v1.7.9 (Ty): the sync gets its own timestamp, separate from the world's
@@ -6704,41 +6823,111 @@ function deposit(label, amt){ S.cash.checking+=amt; S.ledger.push({t:label, amt,
    existed, but it only bites at the weekly rollover and said nothing in the moment. Now the instant
    any charge drops checking below zero, one notification says so out loud (once per episode), and
    Meridian wears an OVERDRAWN banner until it's fixed. */
-/* v1.17.0 THE APRIL BILL (Ty): when the world's date passes April 15 after a season, the
-   taxes on that season's tracked income come DUE: roughly 30% federal-equivalent plus the
-   team state's rate (the same STATE_TAX the paycheck math uses). The Tax Hold pays first;
-   any shortfall hits checking (overdraft laws apply); if the hold over-withheld and no
-   further year is owed, the excess comes back as a refund. Multi-season jumps settle every
-   owed year in order. Deterministic, ledgered, announced. */
-function payTaxesDue(newC){
+/* v1.18.0 THE FEBRUARY BILL (Ty's redesign; the v1.17.0 April bill is DEAD): the tax year
+   closes when the calendar flips December→January. THE STATE LAW: the state is whichever
+   team he is on at the flip, and the rate RATCHETS through the year — a move can RAISE it,
+   never lower it (no signing in Texas on December 31 to beat a California bill); charitable
+   giving is the one exemption — every dollar given reduces the year's taxable income and
+   the ACTUAL bill. At the flip the Current bill becomes the FINAL TAX BILL, the Tax Hold
+   empties into it automatically, and the new tax year starts from $0; from January on, any
+   money placed in the Tax Hold pays the final bill down first. FEBRUARY 1 collects the
+   remainder — checking eats the shortfall and the overdraft laws bite at every rollover
+   until it's fixed. Paid = the cycle resets. Multi-year jumps: only the NEAREST year builds
+   a real bill; earlier years are assumed settled from salary along the way (Ty's ruling).
+   Excess left in the hold after the bill stays parked as next year's withholding. */
+function taxYearNow(){
+  const y=Number((S.blob&&S.blob.clock&&S.blob.clock.seasonYear)||0);
+  return Math.max(y, (S.taxFinzThrough||0)+1);
+}
+function taxRateNow(y){
+  const cur=((STATE_TAX[(S.blob&&S.blob.player||{}).team]||{}).rate)||0;
+  return Math.max(((S.taxRate||{})[y])||0, cur);   // the ratchet: never lower for a move
+}
+function curTaxBill(){
+  const y=taxYearNow();
+  const gross=Math.round(((S.taxGross||{})[y])||0);
+  const giving=Math.round(((S.charityGiven||{})[y])||0);
+  return Math.round(Math.max(0, gross-giving)*(0.30+taxRateNow(y)));
+}
+function taxSettleFromHold(src){
+  const F=S.taxFinal; if(!F || F.owed<=0) return 0;
+  const pay=Math.min(Math.max(0, S.cash.tax||0), F.owed);
+  if (pay<=0) return 0;
+  S.cash.tax-=pay; F.owed-=pay; F.paid=(F.paid||0)+pay;
+  S.ledger.push({t:"Tax payment — "+F.y+" final bill"+(src? " ("+src+")":""), amt:0, mv:pay, from:"tax", to:"tax", kind:"move"});
+  if (F.owed<=0) S.world.notifs.push({app:"meridian", t:"Meridian", p:"The "+F.y+" Final Tax Bill is PAID in full ("+fm(F.bill)+") — nothing comes due February 1"});
+  return pay;
+}
+function taxCycle(newC){
   try{
-    S.taxGross=S.taxGross||{};
-    const years=Object.keys(S.taxGross).map(Number).filter(y=>y>0).sort();
-    if (!years.length) return;
+    S.taxGross=S.taxGross||{}; S.taxRate=S.taxRate||{}; S.charityGiven=S.charityGiven||{};
     const now=gameDateObj(newC); if(!now) return;
-    let paidAny=false;
-    for (const y of years){
-      if (now < new Date(y+1, 3, 15)) continue;   // April 15 of the following calendar year
-      const gross=Math.round(S.taxGross[y]||0); delete S.taxGross[y];
-      if (gross<=0) continue;
-      const st=((STATE_TAX[(S.blob&&S.blob.player||{}).team]||{}).rate)||0;
-      const bill=Math.round(gross*(0.30+st));
-      if (bill<=0) continue;
-      const fromHold=Math.min(Math.max(0,S.cash.tax||0), bill);
-      S.cash.tax=(S.cash.tax||0)-fromHold;
-      const fromChk=bill-fromHold;
-      if (fromChk>0) S.cash.checking-=fromChk;
-      S.ledger.push({t:"Taxes paid — "+y+" season income (federal + state)", amt:-bill, kind:"spend"});
-      S.world.notifs.push({app:"meridian", t:"Meridian", p:"Tax season: "+fm(bill)+" paid on "+y+" income"+(fromChk>0? " — "+fm(fromChk)+" of it came out of checking":" — covered by your Tax Hold")});
-      paidAny=true;
+    // the ratchet rides every sync while the year is open
+    const curY=taxYearNow();
+    S.taxRate[curY]=taxRateNow(curY);
+    // FINALIZE: the December→January flip closes the year's book
+    const crossed=Object.keys(S.taxGross).map(Number).filter(y=>y>0 && now>=new Date(y+1,0,1)).sort((a,b)=>a-b);
+    if (crossed.length){
+      const newest=crossed[crossed.length-1];
+      for (const y of crossed.slice(0,-1)){   // multi-year jump: earlier years assumed settled from salary (Ty's ruling)
+        delete S.taxGross[y]; delete S.taxRate[y]; delete S.charityGiven[y];
+        S.ledger.push({t:"Taxes — "+y+" season settled from salary during the jump", amt:0, kind:"move"});
+      }
+      const gross=Math.round(S.taxGross[newest]||0); delete S.taxGross[newest];
+      const giving=Math.round(S.charityGiven[newest]||0);
+      const rate=Math.max(((S.taxRate||{})[newest])||0, taxRateNow(newest)); delete S.taxRate[newest];
+      S.taxFinzThrough=Math.max(S.taxFinzThrough||0, newest);
+      const bill=Math.round(Math.max(0, gross-giving)*(0.30+rate));
+      if (bill>0){
+        S.taxFinal={y:newest, bill, owed:bill, paid:0, rate};
+        S.world.notifs.push({app:"meridian", t:"Meridian", p:"Final Tax Bill: "+fm(bill)+" on "+newest+" income"+(giving? " (charitable giving trimmed it)":"")+" — due February 1. The Tax Hold pays it down automatically."});
+        taxSettleFromHold();
+      } else if (gross>0){
+        S.world.notifs.push({app:"meridian", t:"Meridian", p:"The "+newest+" tax year closed with nothing owed"+(giving? " — charitable giving covered the whole bill":"")});
+      }
+    } else { taxSettleFromHold(); }
+    // DUE: February 1 collects whatever is left
+    const F=S.taxFinal;
+    if (F && now>=new Date(F.y+1,1,1)){
+      taxSettleFromHold();
+      if (F.owed>0){
+        S.cash.checking-=F.owed;
+        S.ledger.push({t:"Taxes collected — "+F.y+" final bill balance", amt:-F.owed, kind:"spend"});
+        S.world.notifs.push({app:"meridian", t:"Meridian", p:"February 1: "+fm(F.owed)+" of unpaid "+F.y+" taxes came straight out of checking"});
+        F.owed=0;
+      } else {
+        S.world.notifs.push({app:"meridian", t:"Meridian", p:"February 1: the "+F.y+" tax bill was already settled — clean year"});
+      }
+      S.taxFinal=null;
+      try{ odNotice(); }catch(e){}
     }
-    if (paidAny && (S.cash.tax||0)>0 && !Object.keys(S.taxGross).length){
-      const r=Math.round(S.cash.tax); S.cash.tax=0; S.cash.checking+=r;
-      S.ledger.push({t:"Tax refund — over-withheld", amt:r, kind:"income"});
-      S.world.notifs.push({app:"meridian", t:"Meridian", p:"Refund: "+fm(r)+" over-withheld came back to checking"});
-    }
-    if (paidAny){ try{ odNotice(); }catch(e){} }
-  }catch(e){ console.log("tax settle skipped:", String(e&&e.message||e).slice(0,80)); }
+  }catch(e){ console.log("tax cycle skipped:", String(e&&e.message||e).slice(0,80)); }
+}
+function payTaxesDue(newC){ return taxCycle(newC); }   /* v1.18.0: the old symbol stands (helper-deletion law) — it IS the new cycle */
+function taxInfoSheet(){
+  const y=taxYearNow(); const F=S.taxFinal;
+  const gross=Math.round(((S.taxGross||{})[y])||0), giving=Math.round(((S.charityGiven||{})[y])||0);
+  sheet(`<h3>Taxes — how the bill works</h3>
+  <div style="max-height:62vh;overflow:auto">
+  ${F? `<div class="acct-group"><div class="acct">
+    <div class="payline"><span><b>Final Tax Bill — ${F.y}</b></span><span></span></div>
+    <div class="payline"><span>Original bill</span><span>${fm(F.bill)}</span></div>
+    <div class="payline"><span>Paid so far</span><span>${fm(F.paid||0)}</span></div>
+    <div class="payline ${F.owed>0?"neg":""}"><span>${F.owed>0? "Still owed — due February 1, "+(F.y+1) : "PAID IN FULL"}</span><span>${F.owed>0? fm(F.owed):""}</span></div>
+  </div></div>`:""}
+  <div class="acct-group"><div class="acct">
+    <div class="payline"><span>Current Tax Bill for ${y}</span><span>${fm(curTaxBill())}</span></div>
+    <div class="payline"><span>Tracked income</span><span>${fm(gross)}</span></div>
+    ${giving? `<div class="payline"><span>Charitable giving (deducted)</span><span>${fm(-giving)}</span></div>`:""}
+    <div class="payline"><span>Rate (federal + state, ratcheted)</span><span>${Math.round((0.30+taxRateNow(y))*100)}%</span></div>
+  </div></div>
+  <div style="font-size:13px;line-height:1.6;opacity:.8;padding:2px 2px 0">
+  <p style="margin:0 0 8px"><b>The state.</b> Whatever team you're on when the calendar flips December to January is the state the year's taxes are due in. A mid-year move can RAISE the rate — the bill ratchets up — but it never goes down for a move: you can't sign with a Texas team on December 31 and beat a California bill. Charitable giving is the one exemption — every dollar given reduces the year's taxable income and the actual bill.</p>
+  <p style="margin:0 0 8px"><b>January.</b> The year's book closes: the Current Tax Bill becomes the Final Tax Bill, everything in the Tax Hold pulls toward it automatically, and the new tax year starts again from $0. From January on, money placed in the Tax Hold pays the final bill down first.</p>
+  <p style="margin:0 0 8px"><b>February 1.</b> Whatever's left is collected. If checking can't cover it, you go negative and the overdraft laws bite — protection pulls from Savings first ($12 fee), then $35 plus a credit hit at every weekly rollover until you're positive. Once it's paid, the cycle resets.</p>
+  <p style="margin:0"><b>The hold.</b> Anything left in the Tax Hold after the bill is paid stays parked as next year's withholding.</p>
+  </div></div>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
 function odNotice(){
   if (!S || !S.cash) return;
@@ -7478,9 +7667,9 @@ function worldFacts(blob, last, opts){
 HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network).
 STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches, the GM, assistant GM, front office, the owner — NEVER text the player and have no text thread. Any direct staff outreach arrives only as a one-way club EMAIL the player cannot answer. Text threads belong to teammates, family, the agent, and friends only; never write a staff member into a text thread.
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
-${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last}, ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
+${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
@@ -7521,7 +7710,7 @@ function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appl
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
-  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. NAME LAW: when the subject player is covered at all, he is covered BY NAME — full name on first mention, last name after; a bare role tag like "the Jets quarterback" may only ever ACCOMPANY his name, never replace it. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. NAME LAW: when the subject player is covered at all, he is covered BY NAME — full name on first mention, last name after; a bare role tag like "the Jets quarterback" may only ever ACCOMPANY his name, never replace it; he has NO middle name on record — never invent a middle name or initial for him. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
 function intakeGameStory(art, byline, wkLbl, gk, _cid){
   if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
@@ -8281,6 +8470,11 @@ function convoInfo(tid){
   <p style="font-size:13.5px;line-height:1.6;opacity:.85">${txt}</p>
   <button class="btn" style="background:rgba(255,255,255,.1);margin-top:12px" onclick="closeSheet()">Close</button>`);
 }
+/* v1.18.0 THE MIDDLE NAME LAW (Ty: "a text reply fabricated a middle name for me"): his
+   name is save truth — first + last, exactly, nothing between them. Rides every text pen. */
+function nameTruthLine(){
+  try{ const p=S.blob.player; return " NAME TRUTH: his full legal name is EXACTLY \""+p.first+" "+p.last+"\" — he has NO middle name on record; NEVER invent or use a middle name, middle initial, or any name variant for him or anyone else."; }catch(e){ return ""; }
+}
 async function aiReply(thread, userMsg){
   if (ledgerSilent(thread) || ledgerBlockedNow(thread)) return null;   /* v1.9.1: not every message earns an answer */
   if (thread.id==="agent") thread.persona=agentPersona(); // v1.7.3: follows the signing, always current
@@ -8315,7 +8509,7 @@ async function aiReply(thread, userMsg){
        family, and outside world were not — they only know what he might have told them. */
     const _inBldg = !/^(agent|mom|fam\d+|mara)$/.test(String(thread.id||""));
     const pLine = _inBldg? ` ${practiceLine()}` : ` PRACTICE PRIVACY: this person was NOT at practice and has no access to tape, drills, or the coach's dials — they never comment on his practice specifics, only on his mood, his week, or what he might have told them.`;
-    const timeLaw = ` PLAIN-HUMAN LAW: never copy phrasing from these notes into the message; write like a real person, plainly — if a note cannot be said naturally, say something simpler.` + ` NOBODY BOOKS HIM: never invite him to an appearance, signing, event, or paid gig of any size — that business lives in the Apex sports group page, not in texts.` + pLine + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine() + numberLawLine();   /* v1.16.1 + v1.16.7: the gambling and jersey-number laws ride every reply, every thread */
+    const timeLaw = ` PLAIN-HUMAN LAW: never copy phrasing from these notes into the message; write like a real person, plainly — if a note cannot be said naturally, say something simpler.` + ` NOBODY BOOKS HIM: never invite him to an appearance, signing, event, or paid gig of any size — that business lives in the Apex sports group page, not in texts.` + pLine + ` TODAY in this world is ${gameDateLong(S.blob.clock)} (${wkLabel(S.blob.clock)}). Messages above may be from weeks, months, or seasons ago; [N later] markers show the gap. Old messages are the PAST. Never treat an old game, week, or season as current, and never re-answer something that clearly happened long ago.` + (markerLine()? " "+markerLine():"") + threadMarkerNote(thread) + betLawLine() + numberLawLine() + nameTruthLine();   /* v1.16.1 + v1.16.7 + v1.18.0: the gambling, jersey-number, and middle-name laws ride every reply, every thread */
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
        members become role tags (R1, R2...) the phone maps back to names at render; a roster
        1:1 is addressed purely by role. Generated people keep their named personas. */
@@ -8348,7 +8542,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.17.10";
+const VER="v1.18.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
