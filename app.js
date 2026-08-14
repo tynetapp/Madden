@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.1 (Aug 14 2026) — THE READABLE CARD + THE HONEST DEDUCTION + PLAYOFF MONEY (Ty’s field reports on v1.18.0): (1) THE TAX CARD READS NOW — the info sheet borrowed Meridian’s LIGHT .acct classes inside the always-dark #sheet (white text on white cards); it rides the dark .scorecard components with explicit fixed ink now. (2) THE HONEST DEDUCTION — the MATH was always income-reduction (bill = (income − giving) × rate) but the COPY said "dollar-for-dollar", which is a different and wrong claim; every surface now says what the code does: giving reduces TAXABLE INCOME, like a real deduction. (3) Tier fixes (Ty): "State food banks" ($10k is a lot for one), "Youth sports" (high school + youth + alma mater, not just football), and Named scholarship ($75k) SWAPS PLACES with Children’s hospital ($150k). Donations charge on REGULAR-SEASON game weeks only, and the card says so. (4) The Stop-giving pill gets real contrast; the yellow ⓘ moves right. (5) PLAYOFF MONEY — the CBA share schedule (2025-season figures, the published schedule; it grows annually through 2030): Wild Card $58,500 hosting as a division winner / $53,500 otherwise (a first-round BYE also draws the $53,500 wild-card week share), Divisional $58,500, Conference Championship $81,000, Super Bowl $178,000 win / $103,000 loss. One payment per revealed playoff game, ever; deposits ride sweepNet so the tax year tracks them; PRACTICE SQUAD players draw no share — they keep their PS weekly rate through the run (also CBA truth). (prior: v1.18.0) */
+/* TyPhone app.js — v1.18.2 (Aug 14 2026) — MULTI-CAUSE GIVING + TEXT DATES + THE MATCHED RED + HONEST LIKES + TEAM/LEAGUE FLAIRS + SLOT TRUTH + BUZZ GRAVITY (Ty’s eight): (1) Charity takes MULTIPLE elections — S.charityTs is a set; the week charges every elected cause (each its own ledger line), one streak, a miss on the TOTAL skips all and resets; adding a cause keeps the streak, stopping everything ends it. (2) Text threads show DATES, never "X days ago" — dateLabel() rides the thread list and the in-thread day chips (chirps/mail/huddle keep relative time; gapLabel stands per the helper law). (3) The NFL Stats header background is the BANNER’S OWN RED now — #d51126 sampled from the art itself, inline door (styles frozen). (4) HONEST LIKES — world-feed likes were keyed by ARRAY INDEX ("w"+i) while the feed unshifts, so every new chirp shifted his hearts onto posts he never touched; every world chirp now carries a stable cid, likes key on it, and legacy w-keys are purged once. (5) Huddle flairs: DISCUSSION is dead — TEAM for threads about his club, LEAGUE for threads spanning the league (pens instructed, legacy threads render TEAM). (6) SLOT TRUTH — wager lines + NFLSN put MY game in its REAL window (blob.schedule day/kick), the seeded scheduler fills the rest around it (one TNF/SNF/MNF), and the CBS/FOX split rides the real rule of thumb: the AWAY team’s conference decides — AFC on CBS, NFC on FOX. (7) New Costco + Volkswagen sponsor marks (Ty’s uploads, converted). (8) BUZZ GRAVITY — followers finally FALL: when the body-of-work target sits well below the count, fame bleeds 5%% of the gap weekly — three rings keep a floor forever (titles multiply the target), but a legend riding the bench quiets down. (prior: v1.18.1) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -127,7 +127,7 @@ function genericSeed(blob){
       {n:team+" Videos", h:"@"+p.teamShort.toLowerCase()+"clips", vf:1, av:"#1a5a41", t:"Camp continues in "+teamMetro(p).city+". Full "+team+" coverage all season.", li:412, rp:38, tm:"3h"}
     ],
     huddle: [
-      {id:"gw1", flair:"DISCUSSION", u:"AutoModerator", tm:"6h", up:120,
+      {id:"gw1", flair:"TEAM", u:"AutoModerator", tm:"6h", up:120,
        h:"Weekly "+team+" roster and camp thread",
        b:"Depth chart talk, camp reports, and whatever the coaches say that means the opposite. New faces get discussed here.",
        cmts:[
@@ -144,8 +144,20 @@ function seedPrices(cid){ const px={}; const rng=seedRng(cid+"px0");
 
 /* ---- economy ---- */
 function liquid(){ return S.cash.checking + S.cash.savings; }
+/* v1.18.2 (Ty: "the food and groceries and training and recovery should reflect the monthly
+   amounts based on what is in client services"): those two bill lines are DERIVED now —
+   the Client Services election IS the number, on the bill and in the burn, and the two
+   categories no longer double-ride the lifestyle total. Fresh tiers default to groceries +
+   a local gym so a new save still eats; existing saves migrate 0→1 once for the same
+   reason (the old static $1,400/$600 meant he was living, not fasting). */
+function assistCatMo(i){
+  if (!S.assistTiers) S.assistTiers=D.ASSIST.cats.map((_,n)=> (n===1||n===2)?1:0);
+  if (!S.billsLinked){ S.billsLinked=1; if(!(S.assistTiers[1]>0)) S.assistTiers[1]=1; if(!(S.assistTiers[2]>0)) S.assistTiers[2]=1; }
+  return D.ASSIST.cats[i][1][S.assistTiers[i]||0][1];
+}
+function billAmt(x){ return x.id==="food"? assistCatMo(1) : x.id==="train"? assistCatMo(2) : x.amt; }
 function monthlyBurn(){
-  let b = S.bills.reduce((a,x)=>a+x.amt,0);
+  let b = S.bills.reduce((a,x)=>a+billAmt(x),0);
   b += S.debts.reduce((a,d)=>a+(d.pay||0),0);
   b += S.perception.familyAsk||0;
   if (S.credit.cardBal>0) b += Math.max(35, S.credit.cardBal*0.03);
@@ -454,6 +466,14 @@ function gameDateObj(clock){
   return new Date(y+1,0,11 + Math.max(0,(clock.week||0)-18)*7); // playoffs / Pro Bowl (global week count)
 }
 /* v1.4: relative age labels for world content ("3w", "8mo", "2y") */
+function dateLabel(ts){
+  /* v1.18.2 (Ty: "text threads should just give a date"): a real date, never "X days ago".
+     Texts only — chirps, mail, and huddle keep relative time. */
+  if(!ts) return "";
+  const d=new Date(ts), now=new Date();
+  const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return MO[d.getMonth()]+" "+d.getDate()+(d.getFullYear()!==now.getFullYear()? ", "+d.getFullYear() : "");
+}
 function agoFull(ts){ const l=agoLabel(ts); return l==="now"? "now" : l+" ago"; }   /* v1.7.7 (Ty: an email said "now ago") */
 function agoLabel(ts){
   const d = Date.now()-ts;
@@ -618,6 +638,14 @@ function reseedFollowers(blob){
   const cur=S.chirp.followers||842;
   if (target>cur){
     const next = cur + Math.round((target-cur)*0.75);
+    S.chirp.delta = next-cur; S.chirp.followers = next;
+  } else if (target < cur*0.90){
+    /* v1.18.2 BUZZ GRAVITY (Ty: "does Buzz level ever go down?" — it never did): when the
+       body-of-work target sits WELL below the count (the 10% guard keeps weekly jitter from
+       bleeding a stable star), fame decays 5% of the gap per week. Three straight rings keep
+       a permanent floor — titles multiply the target itself — but a champion riding third
+       string quiets down season over season, exactly as Ty ordered. */
+    const next = Math.max(target, cur - Math.max(1, Math.round((cur-target)*0.05)));
     S.chirp.delta = next-cur; S.chirp.followers = next;
   } else S.chirp.delta = 0;
   S.chirp.seedv = 2;
@@ -921,7 +949,7 @@ RENDER.messages = (b, sub)=>{
         else if(!t.group && !me){ const g=splitGroupMsg(tx); if(g.who) tx=g.tx; } // v1.6.8: leaked pipe prefixes never render in 1:1
         let gap="";
         if (mi>0 && m[2] && t.msgs[mi-1][2] && (m[2]-t.msgs[mi-1][2])>7*86400000)
-          gap = `<div class="day">${gapLabel(m[2]-t.msgs[mi-1][2])}</div>`;
+          gap = `<div class="day">${dateLabel(m[2])}</div>`;   /* v1.18.2 (Ty): the chip is the DATE the thread picked back up, not "N days later" */
         return gap+`<div class="bub ${me?"me":"them"}">${who?`<span class="who">${esc(who)}</span>`:""}${esc(tx)}</div>`;
       }).join("") + `</div></div>
       ${t.id==="agent"&&S.agent? `<div style="padding:4px 12px 0"><button class="btn sm" style="background:rgba(127,212,160,.16);color:#7fd4a0;width:100%" onclick="reqChooser()">\u2691 Make something official</button></div>`:""}
@@ -951,7 +979,7 @@ RENDER.messages = (b, sub)=>{
       let p=last[1]||"Say something."; if(t.group) p=splitGroupMsg(p, t.members).tx;
       return `<button class="thd" style="width:100%" onclick="renderApp('messages',{thread:'${t.id}'})">
         <span class="av" style="background:${t.color||avColor(t.name)}">${initials(t.name)}</span>
-        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6;font-size:19px;line-height:0;vertical-align:-2px">●</span>':''}<time>${t.last?agoLabel(t.last):""}</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span>
+        <span class="tx"><h4>${esc(t.name)}${unread?' <span style="color:#2f7cf6;font-size:19px;line-height:0;vertical-align:-2px">●</span>':''}<time>${t.last?dateLabel(t.last):""}</time></h4><p>${esc((last[0]==="me"?"You: ":""))+esc(p)}</p></span>
         <span class="hact" style="font-size:15px;opacity:.4;padding:6px" onclick="event.stopPropagation();threadSheet('${t.id}')">⋯</span></button>`;
     };
     b.innerHTML = aphead("Messages", {act:"✓ all", actFn:"msgMarkAllRead()"}) + `<div class="apbody flush">
@@ -1293,14 +1321,26 @@ RENDER.chirper = (b,sub)=>{
   const renderWorld = (c,i) => `<button class="chirp" onclick="renderApp('chirper',{t:'w${i}'})">
       <div class="ch-row">${chAvatar(c)}<div class="ch-main">
       <div class="ch-h"><b>${esc(c.n)}</b>${c.vf?VF:""}<span>${esc(c.h)} · ${c.ts?agoLabel(c.ts):esc(c.tm||"")}</span></div><p>${chText(c.t)}</p>
-      <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["w"+i]?"on":""}" onclick="event.stopPropagation();chLike('w${i}')">${S.chirpLiked&&S.chirpLiked["w"+i]?"♥":"♡"} ${fmFoll(c.li||0)}</span> · ${fmFoll(Math.max(c.rc||0,(c.replies||[]).length))} replies${c.rp? ` · ${fmFoll(c.rp)} rechirps`:""}</div></div></div></button>`;
+      <div class="ch-meta"><span class="chlk ${S.chirpLiked&&S.chirpLiked["c"+c.cid]?"on":""}" onclick="event.stopPropagation();chLike('c${c.cid}')">${S.chirpLiked&&S.chirpLiked["c"+c.cid]?"♥":"♡"} ${fmFoll(c.li||0)}</span> · ${fmFoll(Math.max(c.rc||0,(c.replies||[]).length))} replies${c.rp? ` · ${fmFoll(c.rp)} rechirps`:""}</div></div></div></button>`;
   const entries=[];
   (S.chirp.posts||[]).slice().reverse().forEach(p=>entries.push({ts:p.ts||0, html:renderOwn(p)}));
   S.world.chirps.forEach((c,i)=>entries.push({ts:c.ts||0, html:renderWorld(c,i)}));
   entries.sort((a,b)=>b.ts-a.ts);
   el.innerHTML = entries.map(e=>e.html).join("") || '<div class="empty">Quiet out there.</div>';
 };
-function chGet(id){ if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)]; return (S.chirp.posts||[]).find(x=>x.id===id); }
+function chEnsureCids(){
+  /* v1.18.2 (Ty: "chirps are showing me as giving likes that i never made"): world likes were
+     keyed "w"+ARRAY INDEX while the feed unshifts — every new chirp slid his hearts onto
+     strangers' posts. Stable cids now; the legacy index-keys are purged ONCE (those marks
+     were already on the wrong posts — that is the bug, not data worth keeping). */
+  S.world.chirps.forEach(c=>{ if(!c.cid) c.cid="wc"+(S.chirpCid=(S.chirpCid||0)+1); });
+  if(!S.likeMigr){ S.likeMigr=1; for(const k of Object.keys(S.chirpLiked||{})) if(/^w\d+$/.test(k)) delete S.chirpLiked[k]; }
+}
+function chGet(id){
+  if(String(id).startsWith("c")) { chEnsureCids(); return S.world.chirps.find(x=>("c"+x.cid)===id); }
+  if(String(id).startsWith("w")) return S.world.chirps[+String(id).slice(1)];   /* legacy shape stands (helper law) */
+  return (S.chirp.posts||[]).find(x=>x.id===id);
+}
 async function chLike(id){
   const c=chGet(id); if(!c) return;
   S.chirpLiked=S.chirpLiked||{};
@@ -1313,8 +1353,8 @@ async function chLike(id){
   /* v1.17.5 (Ty: "same for liking something"): his like is VISIBLE. Liking a world chirp can
      stir that specific thread — from nothing at all to an aggregator noticing — scaled by his
      buzz AND what the post is. Once per chirp, likes only (an unlike stirs nothing). */
-  if (S.chirpLiked[id] && String(id).startsWith("w") && aiKey()) await pullFold(c, id);   /* v1.17.9: the fold's promise ("like and the thread pulls in") is kept — the existing replies land first */
-  if (S.chirpLiked[id] && String(id).startsWith("w") && !c._likeGen && aiKey()){
+  if (S.chirpLiked[id] && (String(id).startsWith("c")||String(id).startsWith("w")) && aiKey()) await pullFold(c, id);   /* v1.17.9: the fold's promise ("like and the thread pulls in") is kept — the existing replies land first */
+  if (S.chirpLiked[id] && (String(id).startsWith("c")||String(id).startsWith("w")) && !c._likeGen && aiKey()){
     c._likeGen=1; persist();
     try{
       const f=S.chirp.followers||0;
@@ -1454,7 +1494,7 @@ async function postWorldReact(post){
   const _cid=S.careerId;   /* v1.16.3 career lock: the reactive pens were the lock's blind spot — a switch mid-await landed one save's fallout in another save's threads */
   try{
     const f=S.chirp.followers||0;
-    const out=await callAI("You write the PRIVATE and COMMUNITY fallout of a social post in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers) just posted: \""+post.t+"\". "+careerFactsLine()+" React ONLY as much as this post genuinely would for WHO HE IS: a nothing post = empty arrays; a locker-room grenade = a teammate or agent text and a fan-forum thread. Every message must read like something a real person would actually type, plainly. Nobody invites him to appearances, gigs, or events — reactions only. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. Output STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2],\"huddle\":[{\"id\":\"unique\",\"flair\":\"DISCUSSION\",\"u\":\"\",\"tm\":\"1h\",\"up\":0,\"h\":\"\",\"b\":\"\",\"cmts\":[{\"u\":\"\",\"tm\":\"\",\"up\":0,\"t\":\"\",\"r\":[]} x3-6]} x0-1]}"+threadCtx(), worldFacts(S.blob, lastPlayed())+"\nWrite the fallout now (or empty arrays if there is none).", 1500);
+    const out=await callAI("You write the PRIVATE and COMMUNITY fallout of a social post in an NFL life sim. "+S.handle+" ("+povDesc()+", "+S.blob.player.team+", "+f.toLocaleString()+" followers) just posted: \""+post.t+"\". "+careerFactsLine()+" React ONLY as much as this post genuinely would for WHO HE IS: a nothing post = empty arrays; a locker-room grenade = a teammate or agent text and a fan-forum thread. Every message must read like something a real person would actually type, plainly. Nobody invites him to appearances, gigs, or events — reactions only. Texts go to EXISTING threads only: "+S.world.texts.map(t=>t.id).join("|")+". No em dashes. Output STRICT JSON only, no fences: {\"texts\":[{\"thread\":\"id\",\"msgs\":[[\"them\",\"...\"]]} x0-2],\"huddle\":[{\"id\":\"unique\",\"flair\":\"TEAM\",\"u\":\"\",\"tm\":\"1h\",\"up\":0,\"h\":\"\",\"b\":\"\",\"cmts\":[{\"u\":\"\",\"tm\":\"\",\"up\":0,\"t\":\"\",\"r\":[]} x3-6]} x0-1]}"+threadCtx(), worldFacts(S.blob, lastPlayed())+"\nWrite the fallout now (or empty arrays if there is none).", 1500);
     if (!S || S.careerId!==_cid){ console.log('career lock: post fallout for another save dropped at the door'); return; }
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
@@ -1670,10 +1710,15 @@ function mySeasonSheet(){
     <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
 /* Pylon — the sports network */
+/* v1.18.2 (Ty): the CBS/FOX split rides the real rule of thumb — the AWAY team's conference
+   decides: AFC road team on CBS, NFC road team on FOX. */
+function confNetFor(awayTeam){ return String(DIVISIONS[awayTeam]||"").indexOf("AFC")===0? "CBS":"FOX"; }
 const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
-  if (day==="Sunday"){ if (t>=1200) return "NBC"; return ["CBS","FOX"][g[0]%2]; } return "CBS"; };
+  if (day==="Sunday"){ if (t>=1200) return "NBC";
+    const away = g[4]? g[3] : ((S.blob&&S.blob.player&&S.blob.player.team)||g[3]);   // his schedule row: home game → the away side is the opponent; road game → it's him
+    return confNetFor(away); } return "CBS"; };
 const NETIMG = {ESPN:"net-espn", NBC:"net-nbc", CBS:"net-cbs-dark", FOX:"net-fox", PRIME:"net-prime", ABC:"net-abc", SNF:"broadcast-sunday-night-football", TNF:"broadcast-thursday-night-football", MNF:"broadcast-monday-night-football", NFLN:"broadcast-nfl-network"};
 function netChip(net){
   const f=NETIMG[net];
@@ -1684,7 +1729,7 @@ function NETFALL(net){ return `<span class="net ${net}">${net==="PRIME"?"Prime V
 let pyTab="scores";
 RENDER.pylon = b=>{
   b.className="espn";
-  b.innerHTML = `<div class="aphead pylon-head"><button class="back" onclick="closeApp()">‹ Home</button><h1 style="display:flex;align-items:center;min-width:0;flex:1 1 auto;margin:0"><img class="nflsn-emblem" src="nflsn-emblem.png" alt="NFL Stats Network" style="height:56px;width:100%;max-width:none;object-fit:contain;object-position:left center" onerror="if(!artE(this))this.remove()"></h1></div>   <!-- v1.17.10 (Ty: "way too small... cover most of the header"): the strip runs the full header width at 56px, shield full-bleed; art rebuilt 4.6:1. styles.css stays frozen — sizing rides the inline door -->
+  b.innerHTML = `<div class="aphead pylon-head" style="background:#d51126"><button class="back" onclick="closeApp()">‹ Home</button><h1 style="display:flex;align-items:center;min-width:0;flex:1 1 auto;margin:0"><img class="nflsn-emblem" src="nflsn-emblem.png" alt="NFL Stats Network" style="height:56px;width:100%;max-width:none;object-fit:contain;object-position:left center" onerror="if(!artE(this))this.remove()"></h1></div>   <!-- v1.17.10 (Ty: "way too small... cover most of the header"): the strip runs the full header width at 56px, shield full-bleed; art rebuilt 4.6:1. styles.css stays frozen — sizing rides the inline door -->
   <div class="seg segc" style="background:rgba(255,255,255,.08)">${[["scores","Scores"],["standings","Standings"],["leaders","Leaders"],["records","Records"]].map(t=>`<button class="${pyTab===t[0]?"on":""}" onclick="pyGo('${t[0]}')">${t[1]}</button>`).join("")}</div>
   <div class="apbody" id="pyMain"></div>`;
   pyBody();
@@ -1865,7 +1910,7 @@ RENDER.huddle = (b, sub)=>{
     const psc=score(P.up, P.id);
     b.innerHTML = aphead(esc(hudSub()), {back:"renderApp('huddle')", backlabel:"Feed"}) +
     `<div class="apbody flush"><div class="hpost">
-      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
+      <div class="meta"><span class="flair">${esc(P.flair==="DISCUSSION"?"TEAM":P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
       <h3>${esc(P.h)}</h3><div class="body">${esc(P.b)}</div>
       <div class="stats"><span>▲ ${psc>999?(psc/1000).toFixed(1)+"k":psc}</span><span>💬 ${countCmts(P)}</span><span>Share</span></div></div>
     <div class="hud-sort"><span class="on">Best</span><span>Top</span><span>New</span><span>Controversial</span></div>` +
@@ -1876,7 +1921,7 @@ RENDER.huddle = (b, sub)=>{
     <div class="apbody flush hlist">` + S.world.huddle.map(P=>{
       const psc=score(P.up,P.id);
       return `<div class="hpost" onclick="renderApp('huddle',{post:'${P.id}'})">
-      <div class="meta"><span class="flair">${esc(P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
+      <div class="meta"><span class="flair">${esc(P.flair==="DISCUSSION"?"TEAM":P.flair)}</span><b>u/${esc(P.u)}</b><span>· ${P.ts?agoLabel(P.ts):esc(P.tm)}</span></div>
       <h3>${esc(P.h)}</h3><div class="body">${esc(P.b)}</div>
       <div class="stats"><span>▲ ${psc>999?(psc/1000).toFixed(1)+"k":psc}</span><span>💬 ${countCmts(P)}</span></div></div>`;}).join("") + `</div>`;
   }
@@ -1945,7 +1990,7 @@ function merBody(){
     </div></div>
     <div class="mer-sechead">Bills on autopay</div>
     <div class="acct-group"><div class="acct">
-      ${S.bills.map(x=>`<div class="payline"><span>${esc(x.n)}</span><span>${fm(x.amt)}</span></div>`).join("")}
+      ${S.bills.map(x=>`<div class="payline"><span>${esc(x.n)}${(x.id==="food"||x.id==="train")?` <small style="opacity:.5">· set in Client Services</small>`:""}</span><span>${fm(billAmt(x))}</span></div>`).join("")}
       ${S.perception.familyAsk?`<div class="payline"><span>Family support</span><span>${fm(S.perception.familyAsk)}</span></div>`:""}
       ${S.debts.map(d=>`<div class="payline"><span>${esc(d.n)}</span><span>${fm(d.pay)}/mo</span></div>`).join("")}
     </div></div>`;
@@ -1953,8 +1998,8 @@ function merBody(){
   if (merTab==="pay"){
     m.innerHTML = `<div class="mer-sechead">Move money</div>
     <div class="acct-group"><div class="acct">
-      <label class="flabel">From</label><select id="tFrom" class="field"><option value="checking">Checking</option><option value="savings">Savings</option><option value="tax">Tax Hold</option></select>
-      <label class="flabel">To</label><select id="tTo" class="field"><option value="savings">Savings</option><option value="checking">Checking</option><option value="tax">Tax Hold</option></select>
+      <label class="flabel">From</label><select id="tFrom" class="field"><option value="checking">Checking — ${fm(S.cash.checking)}</option><option value="savings">Savings — ${fm(S.cash.savings)}</option><option value="tax">Tax Hold — ${fm(S.cash.tax)}</option></select>
+      <label class="flabel">To</label><select id="tTo" class="field"><option value="savings">Savings — ${fm(S.cash.savings)}</option><option value="checking">Checking — ${fm(S.cash.checking)}</option><option value="tax">Tax Hold — ${fm(S.cash.tax)}</option></select>
       <label class="flabel">Amount</label><input id="tAmt" class="field" type="number" placeholder="$0.00">
       <button class="btn" style="background:#0b5cad;color:#fff" onclick="doTransfer()">Transfer</button>
     </div></div>
@@ -1985,6 +2030,21 @@ function merBody(){
     m.innerHTML = `<div class="mer-sechead">Credit score</div>
     <div class="acct-group"><div class="acct"><div class="acct-bal" style="font-size:34px">${S.credit.score}</div>
     <div style="font-size:13px;opacity:.65">${S.credit.score>=740?"Excellent. Best rates unlock.":S.credit.score>=700?"Good. Prime offers available.":S.credit.score>=640?"Fair. Standard rates.":"Building. Expect painful APRs."}</div></div></div>
+    <div class="mer-sechead">Your word — markers</div>
+    <div class="acct-group"><div class="acct">
+    ${markers().length? markers().map((m,i)=>`<div class="payline"><span>${esc(m.dir==="owed"? m.who+" owes you":"You owe "+m.who)} · ${esc(m.what)}<br><small style="opacity:.55">${esc(m.wk)}</small></span>
+      <span style="text-align:right">${m.amt>0? fm(m.amt):"TBD"}<br>${m.amt>0?"":`<button class="mer-link" style="color:#8fb8e8" onclick="setMarkerAmt(${i})">Set $</button> `}<button class="mer-link" style="color:#7fd4a0" onclick="settleMarker(${i})">Settle</button> <button class="mer-link" style="color:#ff9d94" onclick="dropMarker(${i})">✕</button></span></div>`).join("")
+    : `<div style="font-size:13px;opacity:.65">Nothing on your word yet. Rookie dinners, number deals, promises to family, locker-room bets — when a text turns into an obligation, log it and it lives here until you settle.</div>`}
+    <button class="btn sm" style="background:rgba(255,255,255,.1);margin-top:8px" onclick="addMarkerSheet()">+ Log a marker</button>
+    </div></div>
+    ${S.debts.length?`<div class="mer-sechead">Your debts</div><div class="acct-group">${S.debts.map((d,i)=>{
+      const payoffMo = d.pay>0? payoffMonths(d) : null;
+      const prog = d.orig? Math.max(0, Math.min(100, Math.round(100*(1-d.bal/d.orig)))) : null;
+      return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(d.n)}</span><span style="font-size:12px;opacity:.6">${d.apr}% APR · ${fm(d.pay)}/mo autopay</span></div>
+      <div class="acct-bal" style="font-size:22px">${fm(Math.round(d.bal))}</div>
+      ${prog!==null? `<div class="debtbar"><i style="width:${prog}%"></i></div><div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">${prog}% paid down${payoffMo!==null? " · ~"+payoffTxt(payoffMo)+" at this pace":""}</div>` : (payoffMo!==null? `<div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">~${payoffTxt(payoffMo)} at this pace</div>`:"")}
+      <div style="display:flex;gap:8px"><button class="btn sm" style="background:#e7f0f8;color:#0b5cad" onclick="payDebtSheet(${i})">Pay extra</button>
+      <button class="btn sm" style="background:#0b5cad;color:#fff" onclick="payDebtOff(${i})">Pay off — ${fm(Math.round(d.bal))}</button></div></div>`;}).join("")}</div>`:""}
     <div class="mer-sechead">Products</div>
     <div class="acct-group">${D.LOANS.map(L=>{
       const ok = S.credit.score>=L.minScore;
@@ -1994,21 +2054,7 @@ function merBody(){
       ${ok? (advBlocked? `<div style="font-size:12.5px;opacity:.6">Advance already taken this week. The window reopens after the next sync.</div>`
         : `<div style="display:flex;gap:8px"><input class="field" style="margin:0" type="number" id="ln-${L.id}" placeholder="Amount"><button class="btn sm" style="background:${L.trap?"#c0392b":"#0b5cad"};color:#fff;white-space:nowrap" onclick="takeLoan('${L.id}')">Take loan</button></div>`):""}</div>`;
     }).join("")}</div>
-    ${S.debts.length?`<div class="mer-sechead">Your debts</div><div class="acct-group">${S.debts.map((d,i)=>{
-      const payoffMo = d.pay>0? payoffMonths(d) : null;
-      const prog = d.orig? Math.max(0, Math.min(100, Math.round(100*(1-d.bal/d.orig)))) : null;
-      return `<div class="acct"><div class="acct-top"><span class="acct-name">${esc(d.n)}</span><span style="font-size:12px;opacity:.6">${d.apr}% APR · ${fm(d.pay)}/mo autopay</span></div>
-      <div class="acct-bal" style="font-size:22px">${fm(Math.round(d.bal))}</div>
-      ${prog!==null? `<div class="debtbar"><i style="width:${prog}%"></i></div><div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">${prog}% paid down${payoffMo!==null? " · ~"+payoffTxt(payoffMo)+" at this pace":""}</div>` : (payoffMo!==null? `<div style="font-size:11.5px;opacity:.55;margin:2px 0 6px">~${payoffTxt(payoffMo)} at this pace</div>`:"")}
-      <div style="display:flex;gap:8px"><button class="btn sm" style="background:#e7f0f8;color:#0b5cad" onclick="payDebtSheet(${i})">Pay extra</button>
-      <button class="btn sm" style="background:#0b5cad;color:#fff" onclick="payDebtOff(${i})">Pay off — ${fm(Math.round(d.bal))}</button></div></div>`;}).join("")}</div>`:""}
-    <div class="mer-sechead">Your word — markers</div>
-    <div class="acct-group"><div class="acct">
-    ${markers().length? markers().map((m,i)=>`<div class="payline"><span>${esc(m.dir==="owed"? m.who+" owes you":"You owe "+m.who)} · ${esc(m.what)}<br><small style="opacity:.55">${esc(m.wk)}</small></span>
-      <span style="text-align:right">${m.amt>0? fm(m.amt):"TBD"}<br>${m.amt>0?"":`<button class="mer-link" style="color:#8fb8e8" onclick="setMarkerAmt(${i})">Set $</button> `}<button class="mer-link" style="color:#7fd4a0" onclick="settleMarker(${i})">Settle</button> <button class="mer-link" style="color:#ff9d94" onclick="dropMarker(${i})">✕</button></span></div>`).join("")
-    : `<div style="font-size:13px;opacity:.65">Nothing on your word yet. Rookie dinners, number deals, promises to family, locker-room bets — when a text turns into an obligation, log it and it lives here until you settle.</div>`}
-    <button class="btn sm" style="background:rgba(255,255,255,.1);margin-top:8px" onclick="addMarkerSheet()">+ Log a marker</button>
-    </div></div>`;
+`;
   }
   if (merTab==="invest"){
     const total=investValue();
@@ -2050,50 +2096,66 @@ function CHARITY_TIERS(){
     {n:"The "+last+" Foundation", amt:250000, d:"Your own foundation — the biggest commitment there is"}
   ];
 }
-function charityTier(){ return (S.charityT!=null && S.charityT>=0)? CHARITY_TIERS()[S.charityT]||null : null; }
+function charityList(){
+  /* v1.18.2 (Ty: "should be able to give to more causes than one"): S.charityTs is the set
+     of elected tier indices; the old single S.charityT migrates in once. */
+  if (S.charityTs==null) S.charityTs = (S.charityT!=null && S.charityT>=0)? [S.charityT] : [];
+  return S.charityTs;
+}
+function charityTiers(){ const T=CHARITY_TIERS(); return charityList().map(i=>T[i]).filter(Boolean); }
+function charityWeeklyTotal(){ return charityTiers().reduce((s,t)=>s+t.amt,0); }
+function charityTier(){ return charityTiers()[0]||null; }   /* the old symbol stands (helper law) — first elected */
 function charitySet(i){
-  S.charityT=i; S.charityWks=0;   // a new (or changed) commitment starts its streak fresh — sustained means sustained
+  const L=charityList(); const at=L.indexOf(i);
+  if (at>=0){ L.splice(at,1); if(!L.length) S.charityWks=0; }   // dropping the LAST cause ends the streak; trimming one of several keeps it
+  else L.push(i);   // adding a cause keeps the streak — giving never stopped
+  L.sort((a,b)=>a-b);
   persist(); if(curApp==="apex") renderApp("apex");
-  toast("Weekly giving set: "+fm(CHARITY_TIERS()[i].amt)+" to "+CHARITY_TIERS()[i].n);
+  const T=CHARITY_TIERS();
+  toast(at>=0? "Stopped: "+T[i].n : "Added: "+fm(T[i].amt)+"/wk to "+T[i].n+" — "+fm(charityWeeklyTotal())+"/wk total");
 }
 function charityStop(){
-  const t=charityTier(); S.charityT=null; S.charityWks=0;
+  const had=charityTiers().length; S.charityTs=[]; S.charityT=null; S.charityWks=0;
   persist(); if(curApp==="apex") renderApp("apex");
-  toast(t? "Giving stopped. The streak is over.":"Giving stopped.");
+  toast(had? "All giving stopped. The streak is over.":"Giving stopped.");
 }
 function charityWeekly(y){
   try{
-    const t=charityTier(); if(!t) return;
-    if ((S.cash.checking||0) < t.amt){
+    const list=charityTiers(); if(!list.length) return;
+    const total=charityWeeklyTotal();
+    if ((S.cash.checking||0) < total){
       S.charityWks=0;
-      S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"meridian", t:"Meridian", p:"This week's "+fm(t.amt)+" donation didn't go through — checking couldn't cover it. The giving streak resets."});
+      S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"meridian", t:"Meridian", p:"This week's "+fm(total)+" in donations didn't go through — checking couldn't cover the full commitment. Nothing was charged and the giving streak resets."});
       return;
     }
-    S.cash.checking-=t.amt;
-    S.ledger.push({t:"Charitable giving — "+t.n, amt:-t.amt, kind:"spend"});
-    S.charityWks=(S.charityWks||0)+1; S.charityTotal=(S.charityTotal||0)+t.amt;
-    S.charityGiven=S.charityGiven||{}; S.charityGiven[y]=(S.charityGiven[y]||0)+t.amt;
+    for (const t of list){
+      S.cash.checking-=t.amt;
+      S.ledger.push({t:"Charitable giving — "+t.n, amt:-t.amt, kind:"spend"});
+    }
+    S.charityWks=(S.charityWks||0)+1; S.charityTotal=(S.charityTotal||0)+total;
+    S.charityGiven=S.charityGiven||{}; S.charityGiven[y]=(S.charityGiven[y]||0)+total;
   }catch(e){}
 }
 function charityLine(press){
-  const t=charityTier(); const wks=S.charityWks||0;
-  if (!t || !wks) return "";
-  if (press && t.priv) return "";   // quiet personal giving is not printable news
+  let list=charityTiers(); const wks=S.charityWks||0;
+  if (press) list=list.filter(t=>!t.priv);   // quiet personal giving is not printable news
+  if (!list.length || !wks) return "";
+  const total=list.reduce((s,t)=>s+t.amt,0);
   let grossWk=6222; try{ grossWk=grossFor(S.blob.player.status, S.blob.player)||6222; }catch(e){}
-  const share=Math.round(t.amt*100/Math.max(1,grossWk));
+  const share=Math.round(total*100/Math.max(1,grossWk));
+  const causes=list.map(t=>t.n+" ("+fm(t.amt)+"/wk)").join(", ");
   const sust=wks>=4;
-  return "\nHIS GIVING (real, from the ledger): "+fm(t.amt)+"/week to "+t.n+", "+wks+" straight week"+(wks===1?"":"s")+" (~"+share+"% of his weekly pay). GIVING LAW: generosity is judged RELATIVE to earnings — a practice-squad player giving $1,000 a week reads more generous per dollar than a star giving the same. "+(sust? "This is SUSTAINED giving: it may genuinely soften how the world reads ORDINARY bad news about him (a rough game, a spending story) — a cushion, NEVER a shield: it does nothing against a real scandal." : "The giving only JUST STARTED: it earns him no public credit yet — donating the week a story breaks moves nobody; only sustained giving is respected.");
+  return "\nHIS GIVING (real, from the ledger): "+fm(total)+"/week across "+list.length+" cause"+(list.length===1?"":"s")+" — "+causes+" — "+wks+" straight week"+(wks===1?"":"s")+" (~"+share+"% of his weekly pay). GIVING LAW: generosity is judged RELATIVE to earnings — a practice-squad player giving $1,000 a week reads more generous per dollar than a star giving the same. "+(sust? "This is SUSTAINED giving: it may genuinely soften how the world reads ORDINARY bad news about him (a rough game, a spending story) — a cushion, NEVER a shield: it does nothing against a real scandal." : "The giving only JUST STARTED: it earns him no public credit yet — donating the week a story breaks moves nobody; only sustained giving is respected.");
 }
 function charityHtml(){
-  const T=CHARITY_TIERS(); const cur=S.charityT!=null&&S.charityT>=0? S.charityT : -1;
-  const wks=S.charityWks||0;
-  return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">Giving — weekly commitment</div>
-  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${cur>=0? fm(T[cur].amt)+"/week to "+esc(T[cur].n)+" · "+wks+" straight week"+(wks===1?"":"s")+(wks>=4?" — the world calls this sustained":wks>0?" — too new for anyone to credit yet":"") : "Pick a weekly commitment. It comes out of checking every regular-season game week, reduces your TAXABLE INCOME like a real deduction (the bill drops by your rate on each dollar given), and — only if you keep it up — slowly changes how the world reads you."}</p>
-  ${T.map((t,i)=>`<button class="veh-row light" onclick="charitySet(${i})" style="width:100%${i===cur?";outline:2px solid var(--apx-acc)":""}">
-    <span class="vr-l"><b>${esc(t.n)} ${i===cur?"· ✓ giving":""}</b><small>${esc(t.d)}</small></span>
+  const T=CHARITY_TIERS(); const L=charityList(); const wks=S.charityWks||0; const total=charityWeeklyTotal();
+  return `<div class="veh-detail light" style="margin-bottom:14px"><div class="vd-title" style="font-size:16px">Giving — weekly commitments</div>
+  <p style="font-size:12.5px;opacity:.7;margin:4px 0 8px">${L.length? fm(total)+"/week across "+L.length+" cause"+(L.length===1?"":"s")+" · "+wks+" straight week"+(wks===1?"":"s")+(wks>=4?" — the world calls this sustained":wks>0?" — too new for anyone to credit yet":"") : "Pick one or more weekly commitments. They come out of checking every regular-season game week, reduce your TAXABLE INCOME like a real deduction (the bill drops by your rate on each dollar given), and — only if you keep it up — slowly change how the world reads you."}</p>
+  ${T.map((t,i)=>`<button class="veh-row light" onclick="charitySet(${i})" style="width:100%${L.includes(i)?";outline:2px solid var(--apx-acc)":""}">
+    <span class="vr-l"><b>${esc(t.n)} ${L.includes(i)?"· ✓ giving":""}</b><small>${esc(t.d)}</small></span>
     <span class="vr-r" style="font-size:12px;opacity:.6">${fm(t.amt)}/wk</span></button>`).join("")}
-  ${cur>=0? `<button class="btn sm" style="background:#8a2f27;color:#fff;margin-top:6px" onclick="charityStop()">Stop giving</button>`:""}
-  <p style="font-size:11px;opacity:.5;margin:8px 0 0">Donations charge on regular-season game weeks only. A missed week (checking can't cover it) resets the streak. Sustained giving is a cushion for ordinary bad news, never a shield for a real scandal — and giving that starts the week a story breaks moves nobody.</p></div>`;
+  ${L.length? `<button class="btn sm" style="background:#8a2f27;color:#fff;margin-top:6px" onclick="charityStop()">Stop all giving</button>`:""}
+  <p style="font-size:11px;opacity:.5;margin:8px 0 0">Tap a cause to add it, tap again to drop it. Donations charge on regular-season game weeks only. A week checking can't cover the FULL commitment skips everything and resets the streak. Sustained giving is a cushion for ordinary bad news, never a shield for a real scandal — and giving that starts the week a story breaks moves nobody.</p></div>`;
 }
 /* v1.18.1 PLAYOFF MONEY (Ty: "theres a set cba amount for that stuff. find it online and
    use it"): the CBA postseason share schedule — published 2025-season figures (the schedule
@@ -2144,8 +2206,19 @@ function myPostsLine(){
 }
 function threadMarkerNote(thread){
   const mine=markers().filter(m=> m.tid===thread.id || m.who===thread.name || (thread.group && (thread.members||[]).includes(m.who)));
-  if (!mine.length) return "";
-  return " THIS conversation is party to these markers (you may bring them up naturally, nag about them, or joke about them): "+mine.map(m=>(m.dir==="owed"? "YOU owe him":"he owes YOU")+" — "+m.what+(m.amt>0?" ("+fm(m.amt)+")":" (amount still TBD)")).join("; ")+".";
+  let out="";
+  if (mine.length) out+=" THIS conversation is party to these markers (you may bring them up naturally, nag about them, or joke about them): "+mine.map(m=>(m.dir==="owed"? "YOU owe him":"he owes YOU")+" — "+m.what+(m.amt>0?" ("+fm(m.amt)+")":" (amount still TBD)")).join("; ")+".";
+  /* v1.18.2 MONEY TRUTH (Ty: he gave $10,000, the text said $4,000): settled money is LEDGER
+     truth and every thread pen carries it with the amounts spelled out — quoted EXACTLY. */
+  const done=(S.markersDone||[]).filter(m=> m.tid===thread.id || m.who===thread.name || (thread.group && (thread.members||[]).includes(m.who)));
+  const led=(S.ledger||[]).filter(l=> l.t && (l.t.indexOf("Settled with "+thread.name+" — ")===0 || l.t.indexOf("Collected from "+thread.name+" — ")===0)).slice(-6);
+  if (done.length || led.length){
+    const bits=[];
+    for (const m of done) bits.push((m.dir==="owed"? "he sent YOU ":"YOU sent him ")+fm(m.amt)+" for "+m.what+" ("+(m.settledWk||"settled")+")");
+    for (const l of led) if (!done.some(m=>l.t.indexOf(m.what)>=0)) bits.push((l.amt>0? "he sent YOU ":"YOU sent him ")+fm(Math.abs(l.amt))+" — "+l.t.split(" — ").slice(1).join(" — "));
+    if (bits.length) out+=" SETTLED MONEY (ledger truth — these amounts ACTUALLY moved; if money comes up, quote them EXACTLY to the dollar, never estimate, round, or invent a different number): "+bits.join("; ")+".";
+  }
+  return out;
 }
 /* v1.16.1 (Ty's ruling): NOBODY BOOKS ACTION ON HIS OWN PLAY. A wager on his own on-field
    performance ("i bet i'll score 5 touchdowns") is detected two ways — the CODE refuses to
@@ -2195,8 +2268,36 @@ function addMarkerGo(){
   if(!who||!what) return toast("Who and what, minimum.");
   if (selfBet(what)) return toast("Nobody books action on your own play. League rules — it can't go on the books.");   /* v1.16.1 */
   const amt=Math.max(0, +$("#mkAmt").value||0);
-  markers().push({id:"mk"+Date.now(), who, tid, what, amt, dir:$("#mkDir").value==="owed"?"owed":"owe", wk:wkLabel(S.blob.clock)});
+  const mk={id:"mk"+Date.now(), who, tid, what, amt, dir:$("#mkDir").value==="owed"?"owed":"owe", wk:wkLabel(S.blob.clock)};
+  markers().push(mk);
   persist(); closeSheet(); toast("On the books. "+who+" knows."); if(curApp==="meridian") merBody();
+  markerAckText(mk);   /* v1.18.2 (Ty): logging it draws a text — they SAY they know, in writing, with the number */
+}
+/* v1.18.2 (Ty): markers speak. Logging one draws an acknowledgment text from the other side;
+   settling one draws a confirmation the moment the money moves — deterministic, EXACT
+   amounts (the AI misquoted a $10,000 gift as $4,000; templates don't). */
+function markerThread(m){
+  if (m.tid){ const t=S.world.texts.find(x=>x.id===m.tid); if(t) return t; }
+  return S.world.texts.find(x=>!x.group && x.name===m.who) || S.world.texts.find(x=>x.name===m.who) || null;
+}
+function markerSpeak(m, body){
+  try{
+    const t=markerThread(m); if(!t) return;
+    const line = t.group? ((t.members&&t.members[0])||m.who)+": "+body : body;
+    if (typeof deliverReply==="function"){ deliverReply(t, line); }
+    else { t.msgs.push(["them", line, Date.now()]); t.last=Date.now(); persist(); }
+  }catch(e){}
+}
+function markerAckText(m){
+  const a=m.amt>0? fm(m.amt) : null;
+  markerSpeak(m, m.dir==="owed"
+    ? (a? "yeah I know I owe you "+a+" for the "+m.what+". I'm good for it" : "I know I owe you for the "+m.what+" — whatever it comes out to, I'm good for it")
+    : (a? "you're on the books for "+a+" for the "+m.what+" — no rush, I know you're good" : "got you down for the "+m.what+" — we'll settle the number later"));
+}
+function markerSettleText(m, a){
+  markerSpeak(m, m.dir==="owed"
+    ? "just sent the "+fm(a)+" for the "+m.what+". we're square"
+    : "got the "+fm(a)+" for the "+m.what+" — we're good. appreciate you");
 }
 function settleMarker(i){
   const m=markers()[i]; if(!m) return;
@@ -2218,7 +2319,9 @@ function settleMarkerGo(i, amt){
   else if (window._mkCard){ window._mkCard=false; if(!payWithCard(a, "Marker — "+m.who+" ("+m.what+")")) return; }   /* v1.10.0: settle on the card */
   else { S.cash.checking-=a; S.ledger.push({t:"Settled with "+m.who+" — "+m.what, amt:-a, kind:"spend"}); odNotice(); } // checking can go negative like any spend; weekly overdraft rules bite at the burn, the notice fires now
   markers().splice(i,1);
+  S.markersDone=(S.markersDone||[]).slice(-29); S.markersDone.push({who:m.who, tid:m.tid, what:m.what, amt:a, dir:m.dir, settledWk:wkLabel(S.blob.clock)});   /* v1.18.2: settled money is remembered — the pens quote it exactly */
   persist(); closeSheet(); toast(m.dir==="owed"? "Collected "+fm(a)+".":"Settled. Word kept."); if(curApp==="meridian") merBody(); renderWidget();
+  markerSettleText(m, a);   /* v1.18.2 (Ty): the confirmation text IS the settlement moment */
 }
 function setMarkerAmt(i){
   const m=markers()[i]; if(!m) return;
@@ -2346,7 +2449,7 @@ function genHomes(){
     const rng=seedRng(S.careerId+"|homes|"+H[0]+"|"+wk.split("/")[0]);
     for(let i=0;i<5;i++){
       const beds=2+Math.floor(rng()*7), baths=Math.max(1.5, beds-1+Math.round(rng())*.5);
-      const lot=+( (H[2]*(0.6+rng()*1.6)).toFixed(2) );
+      const lot=Math.max(0.15, +((H[2]*(0.6+rng()*1.6)).toFixed(2)));   /* v1.18.2 (Ty): no postage-stamp listings — the floor is a real 0.15 acres */
       const sq=1100+Math.floor(rng()*3400)+(H[1]>1.5?900:0);
       const base=H[1]*1e6;
       const lshare = Math.min(0.85, Math.max(0.12, 0.2 + 0.18*Math.log(H[1]) + 0.25*Math.min(1, 0.15/Math.max(H[2],0.02))));
@@ -4056,14 +4159,38 @@ function weekWindows(games, seedKey){
     return out;
   }
   const rng=seedRng(String(seedKey)+"|windows");
+  /* v1.18.2 (Ty: "none of the game networks times are correct"): MY game's window is SAVE
+     TRUTH — blob.schedule carries its real day and kickoff, so the board anchors it there
+     FIRST and the seeded scheduler fills the league around it (still exactly one TNF, one
+     SNF, one MNF a week). Afternoon CBS/FOX rides the away team's conference. */
+  const mineTeam=(S.blob&&S.blob.player)? S.blob.player.team : null;
   const idx=[...out.keys()];
+  let myI=-1, myNet=null;
+  try{
+    const tp=games[0].t, wk=games[0].w;
+    myI=out.findIndex(x=>x.g.h===mineTeam||x.g.a===mineTeam);
+    const sg=(S.blob.schedule||[]).find(s=>s[1]===tp && s[0]===wk);
+    if (myI>=0 && sg && sg[5]){
+      const t=+sg[6]||0; const x=out[myI];
+      if (sg[5]==="Thursday"){ x.net="TNF"; x.day="THU"; x.ord=0; }
+      else if (sg[5]==="Monday"){ x.net="MNF"; x.day="MON"; x.ord=3; }
+      else if (sg[5]==="Saturday"){ x.net="NFLN"; x.day="SAT"; x.ord=1; }
+      else if (t>=1200){ x.net="SNF"; x.day="SUN"; x.ord=2; }
+      else { x.net=confNetFor(x.g.a); x.day="SUN"; x.ord=1; }
+      x.time=fmClock(sg[6])||x.time; myNet=x.net;
+      idx.splice(idx.indexOf(myI),1);
+    }
+  }catch(e){}
   const pick=()=>idx.splice(Math.floor(rng()*idx.length),1)[0];
-  const tnf=out.length>3? pick():-1, snf=out.length>1? pick():-1, mnf=out.length>2? pick():-1;
+  const tnf=(myNet!=="TNF" && out.length>3 && idx.length)? pick():-1;
+  const snf=(myNet!=="SNF" && out.length>1 && idx.length)? pick():-1;
+  const mnf=(myNet!=="MNF" && out.length>2 && idx.length)? pick():-1;
   out.forEach((x,i)=>{
+    if (x.net) return;   // the anchored game keeps its truth
     if (i===tnf){ x.net="TNF"; x.day="THU"; x.ord=0; x.time="8:15 PM"; }
     else if (i===snf){ x.net="SNF"; x.day="SUN"; x.ord=2; x.time="8:20 PM"; }
     else if (i===mnf){ x.net="MNF"; x.day="MON"; x.ord=3; x.time="8:15 PM"; }
-    else { x.net = (i%2? "FOX":"CBS"); x.day="SUN"; x.ord=1; x.time = rng()<0.62? "1:00 PM" : (rng()<0.5? "4:05 PM":"4:25 PM"); }
+    else { x.net=confNetFor(x.g.a); x.day="SUN"; x.ord=1; x.time = rng()<0.62? "1:00 PM" : (rng()<0.5? "4:05 PM":"4:25 PM"); }
   });
   return out.sort((a,b)=>a.ord-b.ord || (a.g.played?0:1)-(b.g.played?0:1));
 }
@@ -4137,8 +4264,8 @@ RENDER.assist = b=>{
   ${D.ASSIST.cats.map((c,i)=>`<div class="hoodhead" style="color:var(--ink)"><h3>${esc(c[0])}</h3><span style="color:var(--faint)">${fm(c[1][S.assistTiers[i]][1])}/mo</span></div>
   <select class="field" onchange="setAssist(${i},+this.value)">${c[1].map((t,n)=>`<option value="${n}" ${S.assistTiers[i]===n?"selected":""}>${esc(t[0])} · ${t[1]?fm(t[1])+"/mo":"free"}</option>`).join("")}</select>`).join("")}
   <div class="veh-detail" style="margin-top:14px">
-    <div class="payline"><span>Lifestyle total</span><span>${fm(total)}/mo</span></div>
-    <div class="payline"><span>Fixed bills</span><span>${fm(S.bills.reduce((a,x)=>a+x.amt,0))}/mo</span></div>
+    <div class="payline"><span>Lifestyle total (excl. food + training — they ride the bills)</span><span>${fm(assistMonthly())}/mo</span></div>
+    <div class="payline"><span>Bills (incl. your food + training elections)</span><span>${fm(S.bills.reduce((a,x)=>a+billAmt(x),0))}/mo</span></div>
     <div class="payline tot"><span>Total monthly burn</span><span>${fm(monthlyBurn())}/mo</span></div>
   </div>
   <div class="veh-detail" style="margin-top:10px">
@@ -4162,7 +4289,7 @@ function setAssist(i, v){
   /* v1.16.5 (Ty): you can only LIVE what the money covers. If income (camp stipend vs PS vs
      active — the same truthful read the loan desk uses), the card's remaining room, and the
      bank together can't cover the monthly burn this tier creates, the tier won't take. */
-  const newBurn = monthlyBurn() - assistMonthly() + assistMonthlyWith(i,v);
+  const newBurn = monthlyBurn() - assistCatMo(i)*((i===1||i===2)?1:0) - (((i===1||i===2))?0:D.ASSIST.cats[i][1][S.assistTiers[i]||0][1]) + D.ASSIST.cats[i][1][v][1];   /* v1.18.2: per-category delta — works whether the category rides the bills or the lifestyle side */
   const resources = monthlyIncomeNow() + (cardUnlimited()? 1e12 : cardRoom()) + Math.max(0, liquid());
   if (v>(S.assistTiers[i]||0) && resources < newBurn)
     return toast("The math says no. That tier makes the month "+fm(newBurn)+" and your income + card room + bank covers "+fm(Math.round(resources))+". Earn more or live lighter.");
@@ -4171,7 +4298,7 @@ function setAssist(i, v){
 }
 function assistMonthly(){
   if (!S.assistTiers) return 0;
-  return D.ASSIST.cats.reduce((a,c,i)=>a+c[1][S.assistTiers[i]||0][1],0);
+  return D.ASSIST.cats.reduce((a,c,i)=> (i===1||i===2)? a : a+c[1][S.assistTiers[i]||0][1],0);   /* v1.18.2: food + training ride the BILL lines now — no double charge */
 }
 
 /* Podium — podcasts */
@@ -4928,7 +5055,7 @@ async function midweekTick(){
 "myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x1-3],
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x0-1],
-"huddle":[{"id":"unique","flair":"DISCUSSION","u":"","tm":"2h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[]} x6-9]} x1, a practice-week fan thread],
+"huddle":[{"id":"unique","flair":"TEAM|LEAGUE","u":"","tm":"2h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[]} x6-9]} x1, a practice-week fan thread — flair TEAM if it is about HIS club, LEAGUE only if it spans the league],
 "podium":{"t":"episode title","brief":"an 800-1400 word source brief for the show, flowing prose with NO time marks, NO segment headers, NO title, NO byline, NO author name, and NO date anywhere (the hosts speak from it as their own knowledge; the audio length is set separately in NotebookLM, never compress for time; tour the league week with the real stories and room to breathe), covering BOTH sides of the week roughly half and half — the front half reviews what actually happened around the league last week (the real results and standings in the facts), the back half turns to the week ahead league-wide${n? " (his team's is "+(n[4]?"home vs ":"the road trip to ")+n[3]+", mentioned only if it earns it)":""}. THE SHOW IS NATIONAL: it tours the whole NFL for whatever is genuinely interesting or a good story; the subject player and his team appear ONLY if the facts make them one of the league's stories, no courtesy nods, and a role player or specialist may go a whole season unmentioned — that is correct. If the facts carry THE PRESSER (his actual postgame answers) or MIDWEEK LOCKER-ROOM QUOTES (his actual locker answers), those are the ONLY words of his the hosts may quote or paraphrase; if neither exists he said nothing anywhere; HIS RECENT PUBLIC POSTS in the facts are also really his and quotable as social-media comment. SPOKEN RECORDS LAW: the hosts read this aloud — write every team record phonetically, and the word AND between the two numbers is MANDATORY: 'one and three', 'oh and two', 'ten and six', NEVER 'one three' or digits like 0-2; game scores stay numeric. WEEK NUMBERS ARE GIVEN, NEVER COMPUTED: the clock line and schedule labels in the facts are the only source for the current or coming week number — never derive one from records or games played."}}` + threadCtx() + inboundPlan();
   try{
     /* v1.8.1 LANE C: the midweek heavyweight rides the mailbox when the toggle is on; the
@@ -7021,7 +7148,7 @@ function placeholderWeek(blob, last){
   const won=last[7][0]>last[7][1];
   const team=blob.player.team, short=blob.player.teamShort, pos=blob.player.pos;
   S.world.chirps.unshift({n:team+" Videos",h:"@"+short.toLowerCase()+"clips",vf:1,av:"#1a5a41",t:"FINAL: "+(last[4]? team+" "+last[7][0]+", "+last[3]+" "+last[7][1] : last[3]+" "+last[7][1]+", "+team+" "+last[7][0])+".", li:800+((last[7][0]*37)%900), rp:120, tm:"1h"});
-  S.world.huddle.unshift({id:"pw"+wkKey(blob.clock).replace(/\W/g,""), flair:"DISCUSSION", u:"weekly_bot", tm:"5h", up:77,
+  S.world.huddle.unshift({id:"pw"+wkKey(blob.clock).replace(/\W/g,""), flair:"TEAM", u:"weekly_bot", tm:"5h", up:77,
     h:"Weekly practice squad + roster watch: who's trending",
     b:"Recurring thread. Elevations, injuries, snap counts, and whatever the coaches say that means the opposite.", cmts:[
     {u:"depth_chart_dan",tm:"4h",up:52,t:"reminder that elevations are capped at three per player. every one they burn is information"},
@@ -7830,7 +7957,7 @@ function worldSys(opts){
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
   return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
-"huddle":[{"id":"unique","flair":"DISCUSSION|GAME THREAD","u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
+"huddle":[{"id":"unique","flair":"TEAM|LEAGUE|GAME THREAD" (TEAM for threads about HIS club, LEAGUE for threads spanning the whole league, GAME THREAD for his game; never any other flair),"u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
 "emails":[{"id":"unique","from":"","subj":"","time":"","unread":true,"body":""} x1-2]${fwReplies}}` + threadCtx() + inboundPlan();
 }
@@ -8581,7 +8708,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.1";
+const VER="v1.18.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
