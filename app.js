@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.5 (Aug 14 2026) — THE DOOR STRIP (Ty’s field report: fresh v1.8.8 re-sync and the board still invented windows; the interleaved Sunday times in his screenshots are the seeded filler’s exact signature): normalizeLeague() runs on EVERY applied sync code, and its array→object map copied league rows [0..5] and DROPPED [6]=day [7]=kickoff — the exe’s fields died at the phone’s front door before the blob was ever stored, so v1.18.3’s save-truth windows never fired on a real phone. The lab never caught it because build-lab BAKES the blob, which skips applyCode entirely; new checks pin the APPLY DOOR itself. Also fixed: Pylon’s array map never carried dy/tm (only WagerLines got the v1.18.3 wiring) — both boards read the fields now. AFTER UPLOADING: one fresh sync code is REQUIRED — the blob already on the phone was stripped at intake and only a new code can carry the fields in (until then the board stays on the invented filler by design). No exe change — v1.8.8 was right all along. (prior: v1.18.4) */
+/* TyPhone app.js — v1.18.6 (Aug 15 2026) — THE BATCH (seven field reports): (1) THE JOIN THAT NEVER FIRED — chSendReply’s isWorld still read the legacy "w" ids; v1.18.2’s stable cids renamed world chirps to "cwc..." and the before/after thread-join went dead for every world reply since (chLike’s guard was churned that round, this one was missed). (2) PRESSER SENSE — THE COUNT LAW (question wording matches his real counts: four interceptions is FOUR, never "that interception") and THE SIDE-OF-BALL LAW (a defender’s unit stops the OPPOSING offense — never measured against the opponent’s point total, never asked to apologize for a WIN) now ride the presser and midweek prompts, with side-of-ball computed deterministically into worldFacts. (3) THE BAR SQUEEZE — pinned CSS made .nb-opp the only shrinkable span in #nextbar, so flexbox clipped the rightmost team logo; inline sizing door: logos never shrink, the weather ellipsizes. (4) MENTIONS ARE REAL — @-mentions of HIM (any handle he’s ever held) are tappable links to a profile sheet. (5) GIFTS READ THE ROOM — gift thanks ride the AI with the note, relationship, and thread voice behind THE AMOUNT WALL (any $-figure must equal the true amount or the v1.18.2 template speaks; MARKERS SPEAK upheld). (6) THE TABLE COPY — negWalk threatened a consequence that does not exist; honest copy. No exe change. (prior: v1.18.5) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -802,9 +802,9 @@ function renderNextBar(){
   const matchup = g[4]? big(theirs)+`<b style="opacity:.85">@</b>`+big(mine) : big(mine)+`<b style="opacity:.85">@</b>`+big(theirs);
   bar.style.gap="10px";
   bar.innerHTML = `<span class="nb-when"><b>${day}</b>${time?" "+time:""}</span>
-    <span class="nb-opp" style="display:inline-flex;align-items:center;gap:7px">${matchup}</span>
+    <span class="nb-opp" style="display:inline-flex;align-items:center;gap:7px;flex-shrink:0;overflow:visible">${matchup}</span>
     <span class="nb-net">${netStd(netChip(NETMAP(g)))}</span>
-    ${wx? `<span class="nb-wx">${esc(wx.label)}</span>`:""}`;
+    ${wx? `<span class="nb-wx" style="min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1">${esc(wx.label)}</span>`:""}   /* v1.18.6 THE BAR SQUEEZE: pinned CSS let only .nb-opp shrink — the logos got clipped; now the weather text is what gives */`;
 }
 /* v1.6.1: real saves carry WildcardPlayoff / DivisionalPlayoff / ConferencePlayoff /
    SuperBowl / ProBowl / OffSeason — label them like a human, and never append the raw
@@ -1268,8 +1268,16 @@ function dedupeReplies(fresh, existing){
   }
   return out;
 }
+function meHandle(h){ try{ const strip=x=>String(x||"").replace(/^@/,"").toLowerCase(); const hh=strip(h); if(hh && hh===strip(S.handle)) return true; return (S.handleHist||[]).some(o=>strip(o)===hh); }catch(e){ return false; } }
+function chProfileSheet(){
+  const f=(S.chirp&&S.chirp.followers)||0; const nm=S.blob.player.first+" "+S.blob.player.last;
+  const posts=((S.chirp&&S.chirp.posts)||[]).slice(-3).reverse();
+  sheet(`<h3>${esc(nm)}</h3><p class="sp" style="margin-top:2px">${esc(S.handle)} \u00b7 ${fmFoll(f)} followers \u00b7 ${esc(buzzTier(f))}</p>
+  ${posts.length? posts.map(p=>`<div class="chirp" style="margin-top:8px"><p>${chText(p.t)}</p><small style="color:#8b939c">\u2661 ${fmFoll(p.li||0)}</small></div>`).join("") : `<p class="sp">No posts yet.</p>`}
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
+}   /* v1.18.6 MENTIONS ARE REAL: tapping his @ lands somewhere */
 function chText(t){
-  return esc(t).replace(/@([A-Za-z0-9_]+)/g, '<span class="mention">@$1</span>');
+  return esc(t).replace(/@([A-Za-z0-9_]+)/g, (mm,hh)=>meHandle("@"+hh)? '<a class="mention" style="cursor:pointer" onclick="event.stopPropagation();chProfileSheet()">'+mm+'</a>' : '<span class="mention">'+mm+'</span>');
 }
 let chTab="feed"; let chThread=null;
 RENDER.chirper = (b,sub)=>{
@@ -1395,7 +1403,7 @@ async function chSendReply(){
   const tid=chThread;
   const c=chGet(tid);
   c.replies=c.replies||[];
-  const isWorld=String(tid).startsWith("w");
+  const isWorld=String(tid).startsWith("cwc")||String(tid).startsWith("w");   /* v1.18.6 THE JOIN THAT NEVER FIRED: v1.18.2’s stable cids renamed world ids to "cwc..." and this check still read legacy "w" — the before/after thread-join was dead for every world reply since */
   const firstJoin=isWorld && !c._joined;
   c.replies.push({a:S.blob.player.first+" "+S.blob.player.last, h:S.handle, x:txt, mine:1});
   ledgerPublicPost(txt);   /* v1.9.0: public replies count as public words */
@@ -2336,7 +2344,20 @@ function logMarker(o){
   persist(); closeSheet(); toast("On the books. "+who+" knows."); if(curApp==="meridian") merBody();
   markerAckText(mk);   /* v1.18.2 (Ty): logging it draws a text — they SAY they know, in writing, with the number */
 }
-function giftThanksText(m, amt){
+function giftAmtOk(body, amt){ try{ const nums=String(body||"").match(/\$\s?[\d,]+(?:\.\d{1,2})?/g)||[]; return nums.every(x=>String(Math.round(parseFloat(x.replace(/[^\d.]/g,""))))===String(Math.round(amt))); }catch(e){ return false; } }   /* v1.18.6 THE AMOUNT WALL: MARKERS SPEAK (v1.18.2) moved gift acks to templates because the AI misquoted a $10,000 gift as $4,000 — the AI voice returns ONLY behind this wall: every $-figure in the reply must equal the true amount or the template speaks */
+async function giftThanksText(m, amt){
+  if (aiKey()){
+    try{
+      const t=markerThread(m); const rel=(t&&t.name)||m.who;
+      const recent=t? (t.msgs||[]).slice(-6).map(mm=>(mm[0]==="me"?"HIM: ":rel+": ")+mm[1]).join(" / ") : "";
+      const out=await callAI("You write ONE text message in an NFL life sim. "+rel+" just RECEIVED a money transfer from the player: EXACTLY "+fm(amt)+", and his note on it says: \""+m.what+"\". Read the note like a human, not a receipt: affection gets affection back; a tiny amount with a teasing note (a few dollars 'for being a good backup') is a JOKE between people — return the joke, give him grief back, nobody thanks someone earnestly for $3; a real amount for something real lands with weight scaled to "+fm(amt)+". NEVER quote his note back verbatim ('oh, for love you, thank you' is exactly wrong) — respond to what it MEANS. "+(recent? "Recent thread, match this voice: "+recent+". ":"")+"If the message mentions the amount it must be EXACTLY "+fm(amt)+". You are "+rel+", never the player. No em dashes. Output ONLY the message text — no quotes, no JSON, no name prefix.", "Write the text now.", 260);
+      let body=String(out||"").trim().replace(/^["']+|["']+$/g,"");
+      if (body && body.length>2 && body.length<600 && giftAmtOk(body, amt) && !isMediaAsk(body)){ markerSpeak(m, body); return; }
+    }catch(e){}
+  }
+  giftThanksTmpl(m, amt);   /* the wall held or no key — the deterministic voice speaks */
+}
+function giftThanksTmpl(m, amt){
   const a=fm(amt);
   let body;
   if (amt<250) body="just saw the "+a+" — thank you, appreciate you \ud83d\ude4f";
@@ -3869,7 +3890,7 @@ function negAgree(t){
 }
 function negWalk(){
   const st=negState(); st.round=Math.max(0,(st.round||0)); persist(); closeSheet();
-  toast("You left the table. Their offer stands this week \u2014 the room remembers who stood up first.");
+  toast("You left the table \u2014 nothing changes and nothing is held against you. Their offer stands this week; come back to it in Apex any time.");   /* v1.18.6 (Ty: "hope it doesn’t affect the contract stuff"): it never did — negWalk changes no state; the old line threatened a memory that does not exist */
 }
 function negWalked(){
   const st=negState(); st.walkWk=wkKey(S.blob.clock); st.round=0; st.log=[];
@@ -4704,7 +4725,7 @@ async function midAvailQuestions(){
   const n=nextGame(); const fb=()=>midTemplates(n);
   if (!aiKey()) return fb();
   try{
-    const out=await callAI("You write 2 midweek locker-room questions for the player described. They are about THIS practice week and the game AHEAD"+(n? " ("+(n[4]?"home vs ":"road at ")+n[3]+")":"")+" — never the last game; the podium owned that."+freshLine()+" No reporter names or personas. Output ONLY a JSON array: [{\"q\":\"...\"}] x2, no fences.",
+    const out=await callAI("You write 2 midweek locker-room questions for the player described. They are about THIS practice week and the game AHEAD"+(n? " ("+(n[4]?"home vs ":"road at ")+n[3]+")":"")+" — never the last game; the podium owned that. THE COUNT LAW: any stat mentioned must match the facts' counts EXACTLY — never singular for a multiple. He plays "+sideOfBall(S.blob.player.pos)+"; frame his job by his side of the ball."+freshLine()+" No reporter names or personas. Output ONLY a JSON array: [{\"q\":\"...\"}] x2, no fences.",
       worldFacts(S.blob, lastPlayed())+String.fromCharCode(10)+"Write the two questions now.", 300);
     const arr=parseModelJSON(out);
     if (Array.isArray(arr)&&arr.length) return arr.slice(0,3).filter(x=>x&&x.q);
@@ -4835,7 +4856,7 @@ async function presserQuestions(){
   const fallback=()=>pressTemplates({opp:d.opp, score:d.score}, d.record_after);
   if (!aiKey()) return fallback();
   try{
-    const out=await callAI("You write 4 postgame press-conference questions for the player described. The game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+"."+(d.pull? " THE ROOM CAME FOR THE NOISE, NOT THE GAME: the player is in the news for his own public words and standing (the facts carry it) — at least two questions press him directly on that noise"+(d.didPlay===false?", and he DID NOT play in this game, so never ask about his in-game performance":"")+"; the rest can touch the team's result." : " Questions address ONLY the game just played.")+freshLine()+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
+    const out=await callAI("You write 4 postgame press-conference questions for the player described. The game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+". HIS TEAM "+(d.score[0]>d.score[1]?"WON":d.score[0]<d.score[1]?"LOST":"TIED")+" this game — questions carry that reality (a win is never framed as something to apologize for). THE COUNT LAW: his real stat line rides the facts — question wording must match those counts EXACTLY (four interceptions is FOUR interceptions, never \"that interception\"; one is one). THE SIDE-OF-BALL LAW: he plays "+sideOfBall(S.blob.player.pos)+". A defender's unit exists to STOP the opposing offense — NEVER measure the defense against the opponent's point total, never treat defensive touchdowns as the defense owing offense-level scoring, and never ask the defense to answer for the offense's job."+(d.pull? " THE ROOM CAME FOR THE NOISE, NOT THE GAME: the player is in the news for his own public words and standing (the facts carry it) — at least two questions press him directly on that noise"+(d.didPlay===false?", and he DID NOT play in this game, so never ask about his in-game performance":"")+"; the rest can touch the team's result." : " Questions address ONLY the game just played.")+freshLine()+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
       worldFacts(S.blob, lastPlayed())+"\n\nWrite the four questions now.", 500);
     const arr=parseModelJSON(out);
     if (Array.isArray(arr)&&arr.length) return arr.slice(0,5).filter(x=>x&&x.q);
@@ -7520,6 +7541,7 @@ function posStatFields(pos){ return POSFIELDS[pos] || ["DEFTACKLES","DLINESACKS"
 const STATLBL={PASSYARDS:"pass yds",PASSTDS:"pass TD",PASSINTS:"INT thrown",PASSCOMPLETED:"comp",PASSATTEMPTS:"att",PASSSACKED:"sacked",RUSHYARDS:"rush yds",RUSHTDS:"rush TD",RUSHATTEMPTS:"carries",RUSHLONGEST:"long run",RUSHFUMBLES:"fumbles",RECEIVECATCHES:"rec",RECEIVEYARDS:"rec yds",RECEIVETDS:"rec TD",RECEIVELONGEST:"long catch",RECEIVEDROPS:"drops",DEFTACKLES:"tackles",ASSDEFTACKLES:"asst tackles",DEFTACKLESFORLOSS:"TFL",DLINESACKS:"sacks",DLINEHALFSACK:"half sacks",DSECINTS:"INT",DSECINTTDS:"pick six",DEFPASSDEFLECTIONS:"PD",DLINEFORCEDFUMBLES:"FF",BIGHITS:"big hits",OLINEPANCAKES:"pancakes",OLINESACKSALLOWED:"sacks allowed",KICKFGMADE:"FG made",KICKFGATTEMPTS:"FG att",KICKFGLONGEST:"long FG",KICKEPMADE:"XP",KICKEPATTEMPTS:"XP att",PUNTATTEMPTS:"punts",PUNTYARDS:"punt yds",PUNTNETYARDS:"net punt yds",PUNTIN20:"inside 20",PUNTLONGEST:"long punt",GAMESPLAYED:"GP",GAMESSTARTED:"GS"};
 /* v1.6: the world engine gets the player's REAL position-relevant season numbers instead
    of inventing them. Zero games played says so explicitly. */
+function sideOfBall(pos){ const p=String(pos||"").toUpperCase(); if(["QB","HB","RB","FB","WR","TE","LT","LG","C","RG","RT","OL","OT","OG"].includes(p)) return "OFFENSE"; if(["K","P","LS"].includes(p)) return "SPECIAL TEAMS"; return "DEFENSE"; }   /* v1.18.6: computed, never inferred — the pens kept treating a defender like he owed offense */
 function myStatLine(blob){
   const merged={};
   for (const st of (blob.seasonStats||[])) for (const k in st){ if (k!=="table" && typeof st[k]==="number") merged[k]=Math.max(merged[k]||0, st[k]); }
@@ -7935,7 +7957,7 @@ function worldFacts(blob, last, opts){
 HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network).
 STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches, the GM, assistant GM, front office, the owner — NEVER text the player and have no text thread. Any direct staff outreach arrives only as a one-way club EMAIL the player cannot answer. Text threads belong to teammates, family, the agent, and friends only; never write a staff member into a text thread.
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
-${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos}, ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
+${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
 LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
@@ -8811,7 +8833,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.5";
+const VER="v1.18.6";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
