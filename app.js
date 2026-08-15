@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.7 (Aug 15 2026) — THE COMMENT THAT PLAYED WEATHERMAN (Ty’s screenshot: "/* v1.18.6 THE BAR..." rendering in the next-game bar): the v1.18.6 bar edit appended its annotation INSIDE renderNextBar’s template literal — the comment became literal bar content, and because that same round made the weather span the only shrinkable element, the weather collapsed and the comment took its seat. The insert-trap class, again, from the chat that named it. Stray text pulled; the harness now pins the CLASS: after a home render, NOTHING on screen may contain comment syntax or a version string (the no-in-UI-changelog law, finally enforced by a check instead of a promise). No other template in the v1.18.4-18.6 rounds carried a leak (audited). No exe change. (prior: v1.18.6) */
+/* TyPhone app.js — v1.18.8 (Aug 15 2026) — THE SCHEDULE ROUND: (1) WEATHER WEARS AN ICON — the save’s condition maps to an emblem (wxIcon: snow, rain, storm, fog, wind, clouds, part-sun, sun, dome) and the bar text shrinks to the temperature; the full label rides the title attribute. The length problem stops existing instead of getting scrolled. (2) THE PILL OPENS THE SCHEDULE — the next-game pill opens teamSchedSheet: his whole season, W/L-colored finals for played games, day + kickoff + network for future ones (TBD only when the save carries no day — with v1.8.8 syncs it never should). Pylon keeps its app icon. (3) BOARDS RUN CHRONOLOGICAL — weekWindows sorted by broadcast-slot rank, which shuffled preseason Thu/Fri/Sat; both return paths now sort by assigned DAY (Thu→Wed, the NFL week) then kickoff, slot rank as tiebreak. Nothing in the window path caches — order derives from the live blob every render, so a fresh sync reorders by construction (a pre-v1.18.5 stripped blob still needs its ONE re-sync to carry fields at all). No exe change. (prior: v1.18.7) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -784,9 +784,44 @@ function trophySheet(){
     `<p class="sp">Nothing in here yet. Rings and hardware land as you win them \u2014 the case only holds what the save says you took.</p>`) +
     `<button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
+function wxIcon(w){ if(!w) return ""; if(w.dome) return "\u{1F3DF}\uFE0F"; const c=String(w.cond||w.label||"").toLowerCase();
+  if(c.indexOf("snow")>=0) return "\u2744\uFE0F"; if(c.indexOf("thunder")>=0||c.indexOf("storm")>=0) return "\u26C8\uFE0F";
+  if(c.indexOf("rain")>=0||c.indexOf("shower")>=0||c.indexOf("drizzle")>=0) return "\u{1F327}\uFE0F";
+  if(c.indexOf("fog")>=0||c.indexOf("mist")>=0||c.indexOf("haze")>=0) return "\u{1F32B}\uFE0F";
+  if(c.indexOf("wind")>=0) return "\u{1F32C}\uFE0F"; if(c.indexOf("partly")>=0) return "\u26C5";
+  if(c.indexOf("cloud")>=0||c.indexOf("overcast")>=0) return "\u2601\uFE0F";
+  if(c.indexOf("clear")>=0||c.indexOf("sun")>=0) return "\u2600\uFE0F"; return "\u{1F324}\uFE0F"; }   /* v1.18.8: the save’s condition wears an emblem — deterministic, no art files to stage */
+function dayIdx(d){ const m={Thursday:0,Friday:1,Saturday:2,Sunday:3,Monday:4,Tuesday:5,Wednesday:6}; const v=m[String(d||"")]; return v==null? 9 : v; }
+function d3Idx(d3){ const m={THU:0,FRI:1,SAT:2,SUN:3,MON:4,TUE:5,WED:6}; const v=m[String(d3||"").toUpperCase()]; return v==null? 9 : v; }
+function teamSchedSheet(){
+  const TO={PreSeason:0,RegularSeason:1,WildcardPlayoff:2,DivisionalPlayoff:3,ConferencePlayoff:4,ProBowl:5,SuperBowl:6,OffSeason:7};
+  const rows=(S.blob.schedule||[]).slice().sort((a,b)=>((TO[a[1]]==null?8:TO[a[1]])-(TO[b[1]]==null?8:TO[b[1]])) || ((+a[0]||0)-(+b[0]||0)));
+  const cl=S.blob.clock||{}; const nowK=((TO[cl.weekType]==null?8:TO[cl.weekType])*100)+(+cl.week||0);
+  const body=rows.filter(s=>s && s[1]!=="OffSeason").map(s=>{
+    const t=s[1], w=+s[0]||0, opp=s[3]||"", home=!!s[4], sc=s[7];
+    const k=((TO[t]==null?8:TO[t])*100)+w;
+    const hasScore=Array.isArray(sc)&&(((+sc[0]||0)>0)||((+sc[1]||0)>0));
+    const played=hasScore || k<nowK;
+    const lbl = t==="PreSeason"? "PRE "+(w+1) : t==="RegularSeason"? "WK "+(w+1) : (WKNAMES[t]||String(t));
+    let right;
+    if (played && hasScore){ const my=+sc[0]||0, op=+sc[1]||0; const res=my>op?"W":my<op?"L":"T";
+      right="<b style=\"color:"+(my>op?"#3fdc84":my<op?"#ff6b6b":"#e8eef4")+"\">"+res+" "+my+"-"+op+"</b>"; }
+    else if (played){ right="<span style=\"opacity:.6\">Final</span>"; }
+    else { const day=s[5]? String(s[5]).slice(0,3).toUpperCase() : ""; const tim=s[5]? fmClock(s[6]) : "";
+      let nm=null; try{ nm=s[5]? NETMAP(s) : null; }catch(e){}
+      right="<span style=\"opacity:.85\">"+(day||"")+(tim?" "+tim:"")+(nm?" \u00b7 "+esc(String(nm)):" \u00b7 TBD")+"</span>"; }
+    return "<div class=\"sched-row\" style=\"display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)\">"+
+      "<span style=\"width:52px;flex-shrink:0;opacity:.6;font-size:12px\">"+lbl+"</span>"+
+      "<span style=\"flex-shrink:0;font-size:12px;opacity:.8\">"+(home?"vs":"at")+"</span>"+
+      tlogoImg(opp,"tlogo")+"<span style=\"min-width:0;overflow:hidden;text-overflow:ellipsis\">"+esc(opp)+"</span>"+
+      "<span style=\"margin-left:auto;flex-shrink:0\">"+right+"</span></div>";
+  }).join("");
+  sheet("<h3>"+esc(S.blob.player.team)+" schedule</h3><div style=\"max-height:60vh;overflow-y:auto;margin-top:6px\">"+(body||"<p class=\"sp\">No schedule in the save yet.</p>")+"</div>"+
+  "<button class=\"btn\" style=\"background:rgba(255,255,255,.1)\" onclick=\"closeSheet()\">Close</button>");
+}   /* v1.18.8 THE PILL OPENS THE SCHEDULE: scores for the past, windows for the future */
 function renderNextBar(){
   const bar=$("#nextbar"); if(!bar) return;
-  bar.onclick=()=>openApp("pylon"); bar.style.cursor="pointer";   /* v1.17.2 (Ty): the pill opens Pylon — the scores/schedule app; "nflsn" was never an app id and fell to Coming Soon */
+  bar.onclick=()=>teamSchedSheet(); bar.style.cursor="pointer";   /* v1.18.8 (Ty): the pill opens HIS schedule now — Pylon keeps its app icon (v1.17.2 sent it there) */   /* v1.17.2 (Ty): the pill opens Pylon — the scores/schedule app; "nflsn" was never an app id and fell to Coming Soon */
   const g=nextGame();
   if(!g){ bar.classList.add("hidden"); return; }
   bar.classList.remove("hidden");
@@ -804,7 +839,7 @@ function renderNextBar(){
   bar.innerHTML = `<span class="nb-when"><b>${day}</b>${time?" "+time:""}</span>
     <span class="nb-opp" style="display:inline-flex;align-items:center;gap:7px;flex-shrink:0;overflow:visible">${matchup}</span>
     <span class="nb-net">${netStd(netChip(NETMAP(g)))}</span>
-    ${wx? `<span class="nb-wx" style="min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1">${esc(wx.label)}</span>`:""}`;
+    ${wx? `<span class="nb-wx" title="${esc(wx.label)}" style="min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1">${wxIcon(wx)} ${wx.dome? "Dome" : (isFinite(wx.temp)? wx.temp+"\u00B0F" : esc(wx.cond||wx.label))}</span>`:""}`;
 }
 /* v1.6.1: real saves carry WildcardPlayoff / DivisionalPlayoff / ConferencePlayoff /
    SuperBowl / ProBowl / OffSeason — label them like a human, and never append the raw
@@ -4264,7 +4299,7 @@ function weekWindows(games, seedKey){
     const sl=slotFor(g.dy, g.tm, g.a, g.t==="PreSeason");
     x.net=sl.net; x.day=sl.day; x.ord=sl.ord; x.time=fmClock(g.tm)||"";
   });
-  if (out.every(x=>x.net)) return out.sort((a,b)=>a.ord-b.ord || (+a.g.tm||0)-(+b.g.tm||0) || (a.g.played?0:1)-(b.g.played?0:1));
+  if (out.every(x=>x.net)) return out.sort((a,b)=> d3Idx(a.day)-d3Idx(b.day) || (+a.g.tm||0)-(+b.g.tm||0) || a.ord-b.ord || (a.g.played?0:1)-(b.g.played?0:1));   /* v1.18.8 (Ty: preseason Thu/Fri/Sat shuffled): slot rank ordered the board; the CALENDAR does now — day then kickoff, Thu→Wed */
   if (games.length && games[0].t==="PreSeason"){
     out.forEach(x=>{ if(!x.net){ x.net="NFLN"; x.day="FRI"; x.ord=1; x.time="7:00 PM"; } });
     return out;
@@ -4304,7 +4339,7 @@ function weekWindows(games, seedKey){
     else if (i===mnf){ x.net="MNF"; x.day="MON"; x.ord=3; x.time="8:15 PM"; }
     else { x.net=confNetFor(x.g.a); x.day="SUN"; x.ord=1; x.time = rng()<0.62? "1:00 PM" : (rng()<0.5? "4:05 PM":"4:25 PM"); }
   });
-  return out.sort((a,b)=>a.ord-b.ord || (a.g.played?0:1)-(b.g.played?0:1));
+  return out.sort((a,b)=> d3Idx(a.day)-d3Idx(b.day) || a.ord-b.ord || (a.g.played?0:1)-(b.g.played?0:1));   /* v1.18.8: every assigned window carries a day — the calendar orders the invented board too */
 }
 function wagerNet(g, i){ /* DEAD v1.5.7: replaced by weekWindows; kept per helper-deletion law */
   if (g.t==="PreSeason") return "NFLN";
@@ -8833,7 +8868,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.7";
+const VER="v1.18.8";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
