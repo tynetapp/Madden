@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.4 (Aug 14 2026) — THE CODE WALLS (audit round; Ty’s ruling: "AI is fallible and code is not — if anything can be transferred over to code so it’s always right, do that"): (1) NO-PEN-AS-HIM REACHES THE FEED — the v1.17.1 law covered texts and replies but scrubChirps/scrubHuddle trusted the pens; a world chirp or Huddle post/comment authored under his handle or name now dies at the door (penAsMe, one guard both doors). (2) THE EM-DASH DOOR — "no em dashes" lived only in prompts; deDash() now heals every inbound pen surface (chirps, Huddle, texts, replies, emails, the game story) AND the deterministic marker/gift templates at deliverReply — belt AND suspenders. (3) THE WINDOW-POOL SPLICE — weekWindows spliced idx.indexOf(myI) unguarded; when MY game was already save-slotted, indexOf returned -1 and splice(-1,1) silently ate the LAST unslotted candidate from the primetime pick pool. (4) SNF REQUIRES SUNDAY — slotFor granted SNF to any 8pm+ row whatever the day; it now agrees with NETMAP’s Sunday guard (a stray weekday-evening row falls to the afternoon net). No exe change. (prior: v1.18.3) */
+/* TyPhone app.js — v1.18.5 (Aug 14 2026) — THE DOOR STRIP (Ty’s field report: fresh v1.8.8 re-sync and the board still invented windows; the interleaved Sunday times in his screenshots are the seeded filler’s exact signature): normalizeLeague() runs on EVERY applied sync code, and its array→object map copied league rows [0..5] and DROPPED [6]=day [7]=kickoff — the exe’s fields died at the phone’s front door before the blob was ever stored, so v1.18.3’s save-truth windows never fired on a real phone. The lab never caught it because build-lab BAKES the blob, which skips applyCode entirely; new checks pin the APPLY DOOR itself. Also fixed: Pylon’s array map never carried dy/tm (only WagerLines got the v1.18.3 wiring) — both boards read the fields now. AFTER UPLOADING: one fresh sync code is REQUIRED — the blob already on the phone was stripped at intake and only a new code can carry the fields in (until then the board stays on the invented filler by design). No exe change — v1.8.8 was right all along. (prior: v1.18.4) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1806,7 +1806,7 @@ function pyBody(){
     if (S.blob.league && S.blob.league.games && S.blob.league.games.length){
       const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
       const tn=S.blob.league.teams;
-      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
+      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
       const card = (x, wkTag)=>{ const g=x.g;
         /* v1.6.2 (Ty): finals were dropping the broadcast chip and kickoff time — a played
            game still aired somewhere at some time. Keep both on every card. */
@@ -6617,7 +6617,7 @@ function normalizeLeague(blob){
     L.teams = names.map(n=>({n, d: NFL_DIVS[n]||"Other"}));
     if (Array.isArray(L.games) && Array.isArray(L.games[0])){
       L.games = L.games.map(g=>({ t: g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:names[g[2]], a:names[g[3]],
-        hs: g[4]<0?0:g[4], as: g[5]<0?0:g[5], played: g[4]>=0 }));
+        hs: g[4]<0?0:g[4], as: g[5]<0?0:g[5], played: g[4]>=0, dy:String(g[6]||""), tm:String(g[7]||"") }));   /* v1.18.5 THE DOOR STRIP: [6]=day [7]=kickoff (exe v1.8.8) rode every code and THIS map dropped them on every real sync — the save’s windows survive the apply now */
     }
   }
 }
@@ -8811,7 +8811,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.4";
+const VER="v1.18.5";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
