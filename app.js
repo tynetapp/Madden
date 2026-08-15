@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.6 (Aug 15 2026) — THE BATCH (seven field reports): (1) THE JOIN THAT NEVER FIRED — chSendReply’s isWorld still read the legacy "w" ids; v1.18.2’s stable cids renamed world chirps to "cwc..." and the before/after thread-join went dead for every world reply since (chLike’s guard was churned that round, this one was missed). (2) PRESSER SENSE — THE COUNT LAW (question wording matches his real counts: four interceptions is FOUR, never "that interception") and THE SIDE-OF-BALL LAW (a defender’s unit stops the OPPOSING offense — never measured against the opponent’s point total, never asked to apologize for a WIN) now ride the presser and midweek prompts, with side-of-ball computed deterministically into worldFacts. (3) THE BAR SQUEEZE — pinned CSS made .nb-opp the only shrinkable span in #nextbar, so flexbox clipped the rightmost team logo; inline sizing door: logos never shrink, the weather ellipsizes. (4) MENTIONS ARE REAL — @-mentions of HIM (any handle he’s ever held) are tappable links to a profile sheet. (5) GIFTS READ THE ROOM — gift thanks ride the AI with the note, relationship, and thread voice behind THE AMOUNT WALL (any $-figure must equal the true amount or the v1.18.2 template speaks; MARKERS SPEAK upheld). (6) THE TABLE COPY — negWalk threatened a consequence that does not exist; honest copy. No exe change. (prior: v1.18.5) */
+/* TyPhone app.js — v1.18.7 (Aug 15 2026) — THE COMMENT THAT PLAYED WEATHERMAN (Ty’s screenshot: "/* v1.18.6 THE BAR..." rendering in the next-game bar): the v1.18.6 bar edit appended its annotation INSIDE renderNextBar’s template literal — the comment became literal bar content, and because that same round made the weather span the only shrinkable element, the weather collapsed and the comment took its seat. The insert-trap class, again, from the chat that named it. Stray text pulled; the harness now pins the CLASS: after a home render, NOTHING on screen may contain comment syntax or a version string (the no-in-UI-changelog law, finally enforced by a check instead of a promise). No other template in the v1.18.4-18.6 rounds carried a leak (audited). No exe change. (prior: v1.18.6) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -804,7 +804,7 @@ function renderNextBar(){
   bar.innerHTML = `<span class="nb-when"><b>${day}</b>${time?" "+time:""}</span>
     <span class="nb-opp" style="display:inline-flex;align-items:center;gap:7px;flex-shrink:0;overflow:visible">${matchup}</span>
     <span class="nb-net">${netStd(netChip(NETMAP(g)))}</span>
-    ${wx? `<span class="nb-wx" style="min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1">${esc(wx.label)}</span>`:""}   /* v1.18.6 THE BAR SQUEEZE: pinned CSS let only .nb-opp shrink — the logos got clipped; now the weather text is what gives */`;
+    ${wx? `<span class="nb-wx" style="min-width:0;overflow:hidden;text-overflow:ellipsis;flex-shrink:1">${esc(wx.label)}</span>`:""}`;
 }
 /* v1.6.1: real saves carry WildcardPlayoff / DivisionalPlayoff / ConferencePlayoff /
    SuperBowl / ProBowl / OffSeason — label them like a human, and never append the raw
@@ -8833,7 +8833,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.6";
+const VER="v1.18.7";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
