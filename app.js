@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.3 (Aug 14 2026) — THE SAVE KNOWS THE WINDOW + MARKERS SPLIT BY DIRECTION + GIFTS + THE SCROLL FIX (Ty’s six, one exe change): (1) SLOT TRUTH, FOR REAL — Ty’s screenshots proved the Madden save carries a day + kickoff for EVERY league game; exe v1.8.8 ships them (league rows [6]=day, [7]=timeOfDayMin) and weekWindows now READS the save instead of inventing windows — the seeded scheduler survives only as the fallback for legacy blobs without the fields. slotFor() is the one door: Thu→TNF/Prime, Mon→MNF/ESPN, Sat→NFLN, Sun 8pm+→SNF/NBC, Sunday afternoons→CBS/FOX by the away team’s conference. (2) MARKERS SPLIT BY DIRECTION (Ty) — what THEY owe (and unpriced promises) lives in markers; what YOU owe becomes a 0%%-APR, no-minimum entry in DEBTS the moment it has a number (TBD promises migrate when the number lands); paying it off fires the confirmation text and the settled-money memory, same as any settle. (3) GIFTS — a third direction: money moves NOW, no obligation, and the thank-you text SCALES with the amount ($100 gets a thanks, $1,000,000 gets a paragraph of disbelief), always quoting the exact figure. (4) Monthly support home moved from Settings to Meridian’s pay tab, under Recent activity. (5) THE SCROLL FIX — tapping a charity election re-rendered Apex and threw you to the top; the rerender keeps your scroll now. (6) New Dodge mark (Ty’s upload). (prior: v1.18.2) */
+/* TyPhone app.js — v1.18.4 (Aug 14 2026) — THE CODE WALLS (audit round; Ty’s ruling: "AI is fallible and code is not — if anything can be transferred over to code so it’s always right, do that"): (1) NO-PEN-AS-HIM REACHES THE FEED — the v1.17.1 law covered texts and replies but scrubChirps/scrubHuddle trusted the pens; a world chirp or Huddle post/comment authored under his handle or name now dies at the door (penAsMe, one guard both doors). (2) THE EM-DASH DOOR — "no em dashes" lived only in prompts; deDash() now heals every inbound pen surface (chirps, Huddle, texts, replies, emails, the game story) AND the deterministic marker/gift templates at deliverReply — belt AND suspenders. (3) THE WINDOW-POOL SPLICE — weekWindows spliced idx.indexOf(myI) unguarded; when MY game was already save-slotted, indexOf returned -1 and splice(-1,1) silently ate the LAST unslotted candidate from the primetime pick pool. (4) SNF REQUIRES SUNDAY — slotFor granted SNF to any 8pm+ row whatever the day; it now agrees with NETMAP’s Sunday guard (a stray weekday-evening row falls to the afternoon net). No exe change. (prior: v1.18.3) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1033,6 +1033,7 @@ async function sendText(tid){
    — the read stamp clears (badge + notification center) and a notification lands; the screen
    he is actually on is re-rendered in place, never replaced by the conversation. */
 function deliverReply(t, reply){
+  reply=deDash(reply);   /* v1.18.4: every inbound line rides the no-em-dash door — AI replies AND the deterministic templates */
   t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); delete t.hidden;
   ledgerTouchIn(t, reply);
   const looking = (curApp==="messages" && curMsgThread===t.id);
@@ -1200,8 +1201,8 @@ function sanitizeInMsgs(th, msgs){
     if (!m || !String(m[1]||"").trim()) continue;
     if (isGigAsk(m[1])) continue;   /* v1.17.5: the gig wall rides the text door too */
     const who=String(m[0]||"").toLowerCase();
-    if (th && th.group){ if (who==="me" || who===me) continue; out.push([m[0], m[1], Date.now()]); }
-    else out.push(["them", m[1], Date.now()]);
+    if (th && th.group){ if (who==="me" || who===me) continue; out.push([m[0], deDash(m[1]), Date.now()]); }
+    else out.push(["them", deDash(m[1]), Date.now()]);
   }
   return th && th.group? out : out.slice(0,1);   /* v1.17.8 (Ty: "one single text at a time"): a 1:1 batch lands as ONE message, ONE bubble; groups keep their many voices. Supersedes the v1.17.6 two-line allowance. */
 }
@@ -1243,13 +1244,20 @@ function okReply(x){ try{ const t=String(x||""); if(!t.trim()) return false; if(
    surface ever invites him to appear or do things, and no email implies a mechanic that does
    not exist. The prompt laws are the belt; this wall is the suspenders, media-wall pattern. */
 function isGigAsk(x){ try{ return /\b(appearance fee|autograph session|meet.?and.?greet|book (you|him) for|booking (request|inquiry)|benefit election|open enrollment|enrollment (window|period)|sign and return|rsvp)\b|small money|paid (gig|event|appearance)/i.test(String(x||"")); }catch(e){ return false; } }
-function scrubChirps(list){ try{ return (list||[]).filter(c=>c && String(c.t||"").trim() && String(c.n||c.a||"").trim() && !isMediaAsk(c.t) && !isGigAsk(c.t)); }catch(e){ return list||[]; } }
-function scrubHuddle(list){ try{ return (list||[]).filter(h=>{ if(!h || !String(h.h||"").trim() || !String(h.b||"").trim() || isMediaAsk(String(h.h)+" "+String(h.b)) || isGigAsk(String(h.h)+" "+String(h.b))) return false; h.cmts=(h.cmts||[]).filter(cm=>cm && String(cm.t||"").trim() && !isMediaAsk(cm.t) && !isGigAsk(cm.t)); return true; }); }catch(e){ return list||[]; } }
+/* v1.18.4 (audit round, Ty’s "AI is fallible, code is not" ruling): two prompt-only laws get
+   code walls. (a) NO PEN EVER SPEAKS AS HIM (v1.17.1) covered texts and replies but the FEED
+   doors trusted the pens — a world chirp or Huddle post authored under his handle or name would
+   have rendered as HIS. penAsMe() guards scrubChirps + scrubHuddle now. (b) The no-em-dash law
+   lived only in prompts; deDash() heals every inbound surface at the doors. */
+function penAsMe(n,h){ try{ const me=(S.blob&&S.blob.player? (S.blob.player.first+" "+S.blob.player.last):"").toLowerCase(); const strip=x=>String(x==null?"":x).replace(/^@/,"").toLowerCase(); const mh=strip(S.handle); return (!!mh && (strip(h)===mh || strip(n)===mh)) || (!!me && String(n==null?"":n).toLowerCase()===me); }catch(e){ return false; } }
+function deDash(t){ try{ return typeof t==="string"? t.replace(/\u2014/g,"-") : t; }catch(e){ return t; } }
+function scrubChirps(list){ try{ return (list||[]).filter(c=>c && String(c.t||"").trim() && String(c.n||c.a||"").trim() && !isMediaAsk(c.t) && !isGigAsk(c.t) && !penAsMe(c.n||c.a, c.h)).map(c=>{ c.t=deDash(c.t); return c; }); }catch(e){ return list||[]; } }   /* v1.18.4: the feed door drops anything the pen wrote AS HIM and heals em dashes */
+function scrubHuddle(list){ try{ return (list||[]).filter(h=>{ if(!h || !String(h.h||"").trim() || !String(h.b||"").trim() || isMediaAsk(String(h.h)+" "+String(h.b)) || isGigAsk(String(h.h)+" "+String(h.b)) || penAsMe(h.u,h.u)) return false; h.h=deDash(h.h); h.b=deDash(h.b); h.cmts=(h.cmts||[]).filter(cm=>cm && String(cm.t||"").trim() && !isMediaAsk(cm.t) && !isGigAsk(cm.t) && !penAsMe(cm.u,cm.u)); for(const cm of h.cmts){ cm.t=deDash(cm.t); for(const rr of (cm.r||[])){ if(rr.t!=null) rr.t=deDash(rr.t); if(rr.x!=null) rr.x=deDash(rr.x); } } return true; }); }catch(e){ return list||[]; } }   /* v1.18.4: same walls at the Huddle door */
 function dedupeReplies(fresh, existing){
   /* v1.17.6 (Ty: "my player replied to myself"): no generated reply is ever HIM — his words
      only enter a thread when he types them. One door: every reply merge rides this. */
   const _meH=String(S.handle||"").toLowerCase(), _meN=(S.blob&&S.blob.player? (S.blob.player.first+" "+S.blob.player.last):"").toLowerCase();
-  fresh=(fresh||[]).filter(r=>r&&okReply(r.x)&&String(r.h||"").toLowerCase()!==_meH&&String(r.a||"").toLowerCase()!==_meN);
+  fresh=(fresh||[]).filter(r=>r&&okReply(r.x)&&String(r.h||"").toLowerCase()!==_meH&&String(r.a||"").toLowerCase()!==_meN).map(r=>{ r.x=deDash(r.x); return r; });
   const seen=(existing||[]).map(r=>({h:String(r.h||"").toLowerCase(), t:normChText(r.x)}));
   const out=[];
   for (const r of (fresh||[])){
@@ -1499,7 +1507,7 @@ async function postWorldReact(post){
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
-      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; stampInbound(th.id); } }
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", deDash(String(m[1]))]); th.unread=true; moved=true; stampInbound(th.id); } }
     }
     for (const h of (j.huddle||[])){
       if (h && h.h && Array.isArray(h.cmts) && h.cmts.length){ S.world.huddle.unshift(h); moved=true;
@@ -1525,7 +1533,7 @@ async function lifeEventReact(){
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
-      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; stampInbound(th.id); } }
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", deDash(String(m[1]))]); th.unread=true; moved=true; stampInbound(th.id); } }
     }
     if (moved){ S.world.notifs.push({app:"messages", t:"Messages", p:"People saw the news"});
       persist(); if(curApp==="messages") rerenderMessages(); }
@@ -1544,7 +1552,7 @@ async function lifePurchaseReact(what, amt){
     const j=parseModelJSON(out); let moved=false;
     for (const t of (j.texts||[])){
       const th=S.world.texts.find(x=>x.id===t.thread); if(!th) continue;
-      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", String(m[1])]); th.unread=true; moved=true; stampInbound(th.id); } }
+      for (const m of (t.msgs||[])){ if(m&&m[1]&&String(m[1]).trim()){ th.msgs.push(["them", deDash(String(m[1]))]); th.unread=true; moved=true; stampInbound(th.id); } }
     }
     if (moved){ S.world.notifs.push({app:"messages", t:"Messages", p:"Someone has thoughts about that purchase"});
       persist(); if(curApp==="messages") rerenderMessages(); }
@@ -1723,7 +1731,7 @@ function slotFor(day, tmin, awayTeam, isPre){
   if (day==="Thursday") return {net:"TNF", day:"THU", ord:0};
   if (day==="Monday")   return {net:"MNF", day:"MON", ord:3};
   if (day==="Saturday") return {net:"NFLN", day:"SAT", ord:1};
-  if (+tmin>=1200)      return {net:"SNF", day:d3, ord:2};
+  if (day==="Sunday" && +tmin>=1200) return {net:"SNF", day:"SUN", ord:2};   /* v1.18.4: SNF is SUNDAY night — a stray weekday-evening row falls to the afternoon net (NETMAP already guarded; the doors agree now) */
   return {net:confNetFor(awayTeam), day:d3, ord:1};
 }
 const NETMAP = g => { const day=g[5], t=+g[6];
@@ -2020,7 +2028,7 @@ function merBody(){
     <div class="acct-group"><div class="acct">${S.ledger.slice(-14).reverse().map(l=>{const a=l.kind==="move"?l.mv:l.amt;return `<div class="payline ${l.amt<0?"neg":""}"><span>${esc(l.t)}</span><span>${a?fm(l.kind==="move"?a:l.amt):""}</span></div>`}).join("")}</div></div>
     <div class="mer-sechead">Monthly support home</div>
     <div class="acct-group"><div class="acct">
-      <div style="font-size:12.5px;opacity:.6;margin-bottom:6px">Money you send the family every month. It rides the monthly burn, and the world knows he sends it home. (Moved here from Settings — v1.18.3, Ty.)</div>
+      <div style="font-size:12.5px;opacity:.6;margin-bottom:6px">Money you send the family every month. It rides the monthly burn, and the world knows he sends it home.</div>
       <div style="display:flex;gap:8px"><input class="field" style="margin:0" id="supAmt" type="number" min="0" step="50" value="${S.perception.familyAsk||0}"><button class="btn sm" style="background:#0b5cad;color:#fff;white-space:nowrap" onclick="setSupport()">Set</button></div>
     </div></div>
   `;
@@ -4260,7 +4268,7 @@ function weekWindows(games, seedKey){
       else if (t>=1200){ x.net="SNF"; x.day="SUN"; x.ord=2; }
       else { x.net=confNetFor(x.g.a); x.day="SUN"; x.ord=1; }
       x.time=fmClock(sg[6])||x.time; myNet=x.net;
-      idx.splice(idx.indexOf(myI),1);
+      const mii=idx.indexOf(myI); if(mii>=0) idx.splice(mii,1);   /* v1.18.4: a save-slotted MY game was never in the pool — splice(indexOf=-1) was eating the LAST unslotted candidate */
     }
   }catch(e){}
   const pick=()=>idx.splice(Math.floor(rng()*idx.length),1)[0];
@@ -5271,7 +5279,7 @@ RENDER.settings = b=>{
   <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px" id="colHint">Prestige reads automatically: ${esc(collegePrestige(pc.collegeName))}.${pc.collegeName?"":" The save's college slot is empty for created players (verified against the save itself) — pick yours here once and it sticks."}</div>
   <label class="flabel">College career</label>${dd("pcCol", ["Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"], pc.college||"Career backup")}
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
-  <p style="font-size:12px;opacity:.55;margin:2px 0 10px">Monthly support home moved to Meridian → pay & transfer (v1.18.3, Ty).</p>
+
   ${(S.blob.player.draftRound>=1&&S.blob.player.draftRound<=7)? `<label class="flabel">Draft story (read from the save)</label>
   <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>`
   : `<label class="flabel">Draft story — your pick (the save lists every created player as a UDFA; the phone accounts for the round where it can)</label>
@@ -7977,6 +7985,7 @@ function intakeGameStory(art, byline, wkLbl, gk, _cid){
   /* v1.8.1: the story's intake is ONE door — the phone's own call and the computer's
      returned text both land here, so the byline/credit laws can never fork. */
   if (!(art && art.paras && art.paras.length)) throw new Error("the model returned no story");
+  art.paras=(art.paras||[]).map(deDash); ["head","stand","kick","pq"].forEach(k=>{ if(art[k]!=null) art[k]=deDash(art[k]); });   /* v1.18.4: the story rides the em-dash door too */
   art.by=byline+" \u00b7 United Chronicle Sports"; art.wk=wkLbl; try{ art.wkFull=articleWkLabel(); }catch(e){} art.ts=Date.now(); if(gk) art.gk=gk;   /* v1.16.6: the story knows its game — existence checks stop trusting a flag */
   S.world.articles.unshift(art);
   S.articleFor=S.articleFor||{}; if (gk) S.articleFor[gk]=1;
@@ -8065,7 +8074,7 @@ function intakeWorld(j, wkLbl, gk, opts){
   if (j.chirps){ const fresh=dedupeChirps(scrubChirps(j.chirps), S.world.chirps); dedupeBatchPfps(fresh); S.world.chirps=[...fresh, ...S.world.chirps].slice(0,40); }   // v1.7.7 no repeat voices; v1.17.3 blanks + media asks die, no twin faces in one batch
   if (j.huddle) S.world.huddle=[...scrubHuddle(j.huddle), ...S.world.huddle].slice(0,20);   /* v1.17.3 scrubbed */
   if (j.texts) for (const t of inboundClamp(j.texts)){ const th=S.world.texts.find(x=>x.id===t.thread); if(th){ th.msgs.push(...sanitizeInMsgs(th, t.msgs)); th.last=Date.now(); delete S.reads["t:"+th.id]; delete th.hidden; stampInbound(th.id); } }   /* v1.9.5 enforced; v1.17.0 cooldown; v1.17.1: never as him */
-  if (j.emails) S.world.emails=[...j.emails.filter(okEmail), ...S.world.emails].slice(0,60);   /* v1.9.5 rolling window; v1.17.1: no press emails ever */
+  if (j.emails) S.world.emails=[...j.emails.filter(okEmail).map(m=>{ m.subj=deDash(m.subj); m.body=deDash(m.body); return m; }), ...S.world.emails].slice(0,60);   /* v1.9.5 rolling window; v1.17.1: no press emails ever */
   if (j.myReplies && j.myReplies.length){ const f=S.chirp.followers||0; const posts=(S.chirp.posts||[]).slice(-3);
     for (const r of j.myReplies){ if(!r||!String(r.x||"").trim()) continue; const p=posts[Math.floor(Math.random()*posts.length)]; if(p){ p.replies=p.replies||[]; if(dedupeReplies([r], p.replies).length){ p.replies.push(r); p.li=(p.li||0)+Math.round(f*0.008); } } } }   /* v1.13.0 fullWeek: replies to HIS posts ride the week package (husks + dupes filtered) */
   stampWorld();
@@ -8802,7 +8811,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.3";
+const VER="v1.18.4";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
