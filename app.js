@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.8 (Aug 15 2026) — THE SCHEDULE ROUND: (1) WEATHER WEARS AN ICON — the save’s condition maps to an emblem (wxIcon: snow, rain, storm, fog, wind, clouds, part-sun, sun, dome) and the bar text shrinks to the temperature; the full label rides the title attribute. The length problem stops existing instead of getting scrolled. (2) THE PILL OPENS THE SCHEDULE — the next-game pill opens teamSchedSheet: his whole season, W/L-colored finals for played games, day + kickoff + network for future ones (TBD only when the save carries no day — with v1.8.8 syncs it never should). Pylon keeps its app icon. (3) BOARDS RUN CHRONOLOGICAL — weekWindows sorted by broadcast-slot rank, which shuffled preseason Thu/Fri/Sat; both return paths now sort by assigned DAY (Thu→Wed, the NFL week) then kickoff, slot rank as tiebreak. Nothing in the window path caches — order derives from the live blob every render, so a fresh sync reorders by construction (a pre-v1.18.5 stripped blob still needs its ONE re-sync to carry fields at all). No exe change. (prior: v1.18.7) */
+/* TyPhone app.js — v1.18.9 (Aug 15 2026) — THE LONG LIST (Ty’s fifteen-item batch): domes drop the emoji; SPOKEN-RECORD LAW at the podium (three and ZERO, never “ohh”); content-hash cids (wch) so a liked heart survives any object rebuild — same words, same cid, forever; lifeFacts tiers WHERE HE LIVES (starter home → landmark estate) so an invite over reads the address; the record book names EVERY holder of a tied record and paints HIS name gold; Longest pass/run/reception get real labels (the 21 was save truth — the franchise’s longest catch so far, not an error); Active deals shows n/6 slots (display first, enforcement awaits Ty’s number); weekly awards wear ×N beside the name, not under it; mailCrests learns two more letterheads — Hall of Fame mail carries the HOF mark beside the shield, NFLPA mail carries ONLY the union mark (Ty’s ruling: no shield on union letters); THE LINES LAW — WagerLines’ exact spreads and totals ride worldFacts so every pen quotes the board, never an invented number; sponsor-amazon.png refreshed to the 2024 mark (Ty’s art). Deferred to an exe round: the FA league market (all-32 cap space + best offers) — the extractor ships only his team’s cap today. No exe change. (prior: v1.18.8) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -223,7 +223,7 @@ function lifeFacts(opts){
     const lease=S.rental&&S.rental.city? "renting in "+S.rental.city+" ("+fm(S.rental.amt||S.rental.rent||0)+"/mo)" : "";
     const bigBuys=(S.ledger||[]).slice(-25).filter(l=>l.kind==="spend" && Math.abs(l.amt||0)>=Math.max(40000, liquid*0.3)).slice(-3).map(l=>l.t+" ("+fm(Math.abs(l.amt))+")");
     return "\nHIS MATERIAL LIFE (real, from the phone): pay grade "+tier+" ("+fm(sal)+"/yr cap, "+fm(liquid)+" liquid). Drives: "+carLine+"."+arrLine
-      +(props.length? " Owns "+props.length+" propert"+(props.length===1?"y":"ies")+" ("+fm(props.reduce((a,x)=>a+x.value,0))+").":"")
+      +(function(){ if(!props.length) return ""; const top=props.slice().sort((a,b)=>(b.value||0)-(a.value||0))[0]; const v=top.value||0; const w=v>=40e6?"a landmark estate":v>=10e6?"a mansion":v>=3e6?"a luxury home":v>=750e3?"a nice house":"a modest starter home"; return " LIVES IN "+w+" he owns ("+fm(v)+")"+(props.length>1?", plus "+(props.length-1)+" more propert"+(props.length===2?"y":"ies")+" ("+fm(props.reduce((a,x)=>a+x.value,0))+" total)":"")+" — an invite over, a party, or a hangout reads THIS address (a landmark estate awes people; a starter home gets starter-home energy)."; })()   /* v1.18.9 (Ty): a rented condo, a $1M house, and a $100M compound get DIFFERENT reactions */
       +(boats.length? " "+boats.length+" boat"+(boats.length===1?"":"s")+".":"")+(planes.length? " "+planes.length+" aircraft.":"")
       +(lease? " "+lease+".":"")
       +(bigBuys.length? " Recent big spends: "+bigBuys.join("; ")+".":"")
@@ -715,7 +715,7 @@ function trophyPieces(){
     if (/_of_(Week|Month)$/i.test(a.type)) weekly[a.type]=(weekly[a.type]||0)+1;   /* v1.17.10 (Ty confirming the rule): MONTHLY awards tally like weeklies (×N) — yearly hardware keeps its own year, one row each */
     else out.push({ic:"\u{1F3C5}", t:a.type.replace(/_/g," "), sub:(a.season!=null? String(a.season<100? base+a.season : a.season) : "")});
   }
-  for (const [t,n] of Object.entries(weekly)) out.push({ic:"\u2B50", t:t.replace(/_/g," "), sub:n>1? "\u00d7"+n : ""});
+  for (const [t,n] of Object.entries(weekly)) out.push({ic:"\u2B50", t:t.replace(/_/g," ")+(n>1? "\u00a0\u00a0\u00d7"+n : ""), sub:""});   /* v1.18.9 (Ty): the ×N rides BESIDE the award, not under it */
   return out;
 }
 /* v1.18.0 THE HALL OF FAME METER (Ty's parked design): save truth only. Hardware weighs
@@ -784,7 +784,7 @@ function trophySheet(){
     `<p class="sp">Nothing in here yet. Rings and hardware land as you win them \u2014 the case only holds what the save says you took.</p>`) +
     `<button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`);
 }
-function wxIcon(w){ if(!w) return ""; if(w.dome) return "\u{1F3DF}\uFE0F"; const c=String(w.cond||w.label||"").toLowerCase();
+function wxIcon(w){ if(!w) return ""; if(w.dome) return ""; const c=String(w.cond||w.label||"").toLowerCase();
   if(c.indexOf("snow")>=0) return "\u2744\uFE0F"; if(c.indexOf("thunder")>=0||c.indexOf("storm")>=0) return "\u26C8\uFE0F";
   if(c.indexOf("rain")>=0||c.indexOf("shower")>=0||c.indexOf("drizzle")>=0) return "\u{1F327}\uFE0F";
   if(c.indexOf("fog")>=0||c.indexOf("mist")>=0||c.indexOf("haze")>=0) return "\u{1F32B}\uFE0F";
@@ -1384,7 +1384,7 @@ function chEnsureCids(){
      keyed "w"+ARRAY INDEX while the feed unshifts — every new chirp slid his hearts onto
      strangers' posts. Stable cids now; the legacy index-keys are purged ONCE (those marks
      were already on the wrong posts — that is the bug, not data worth keeping). */
-  S.world.chirps.forEach(c=>{ if(!c.cid) c.cid="wc"+(S.chirpCid=(S.chirpCid||0)+1); });
+  S.world.chirps.forEach(c=>{ if(!c.cid){ let h5=5381; const s5=String(c.h||"").toLowerCase()+"|"+normChText(c.t); for(let i=0;i<s5.length;i++) h5=((h5*33)^s5.charCodeAt(i))>>>0; c.cid="wch"+h5.toString(36); } });   /* v1.18.9: the cid is the CONTENT now — any rebuild of the same chirp lands the same cid, so a liked heart can never orphan (legacy counter cids on persisted objects stand untouched; "cwch..." still startsWith "cwc" for the join door) */
   if(!S.likeMigr){ S.likeMigr=1; for(const k of Object.keys(S.chirpLiked||{})) if(/^w\d+$/.test(k)) delete S.chirpLiked[k]; }
 }
 function chGet(id){
@@ -1916,14 +1916,16 @@ function pyBody(){
          carry the save's RAW keys (PassTds, ReceiveTDs, ReceiveCatches, DefensiveTackles...), which
          missed the label map and printed as camelCase mush in a random order. Normalize every key
          to canon, label it, and render BOTH books in the same fixed category order. */
-      const RL={PassYards:"Pass yards",PassTDS:"Pass TD",RushYards:"Rush yards",RushTDS:"Rush TD",ReceivingYards:"Receiving yards",ReceivingTDS:"Receiving TD",ReceivingCatches:"Receptions",DefensiveSacks:"Sacks",DefensiveInts:"Interceptions",DefensiveTackles:"Tackles"};
-      const CANONMAP={passyards:"PassYards",passtds:"PassTDS",rushyards:"RushYards",rushtds:"RushTDS",receiveyards:"ReceivingYards",receivingyards:"ReceivingYards",receivetds:"ReceivingTDS",receivingtds:"ReceivingTDS",receivecatches:"ReceivingCatches",receivingcatches:"ReceivingCatches",defensivesacks:"DefensiveSacks",defensiveints:"DefensiveInts",defensivetackles:"DefensiveTackles"};
+      const RL={PassYards:"Pass yards",PassTDS:"Pass TD",RushYards:"Rush yards",RushTDS:"Rush TD",ReceivingYards:"Receiving yards",ReceivingTDS:"Receiving TD",ReceivingCatches:"Receptions",DefensiveSacks:"Sacks",DefensiveInts:"Interceptions",DefensiveTackles:"Tackles",PassLongest:"Longest pass (yds)",RushLongest:"Longest run (yds)",ReceiveLongest:"Longest reception (yds)",ReceivingLongest:"Longest reception (yds)"};
+      const CANONMAP={passyards:"PassYards",passtds:"PassTDS",rushyards:"RushYards",rushtds:"RushTDS",receiveyards:"ReceivingYards",receivingyards:"ReceivingYards",receivetds:"ReceivingTDS",receivingtds:"ReceivingTDS",receivecatches:"ReceivingCatches",receivingcatches:"ReceivingCatches",defensivesacks:"DefensiveSacks",defensiveints:"DefensiveInts",defensivetackles:"DefensiveTackles",passlongest:"PassLongest",rushlongest:"RushLongest",receivelongest:"ReceiveLongest",receivinglongest:"ReceiveLongest"};
       const CANON=k=>CANONMAP[String(k||"").toLowerCase()]||String(k||"");
-      const RORD=["PassYards","PassTDS","RushYards","RushTDS","ReceivingYards","ReceivingTDS","ReceivingCatches","DefensiveSacks","DefensiveInts","DefensiveTackles"];
+      const RORD=["PassYards","PassTDS","RushYards","RushTDS","ReceivingYards","ReceivingTDS","ReceivingCatches","DefensiveSacks","DefensiveInts","DefensiveTackles","PassLongest","RushLongest","ReceiveLongest"];
       const rlabel=k=>{ const c=CANON(k); return RL[c]||c.replace(/([a-z])([A-Z])/g,"$1 $2"); };
-      const dedupe=rows=>{ const by={}; for (const r of (rows||[])){ const k=CANON(r[0]); if(!by[k]||r[1]>by[k][1]) by[k]=r; }
-        return Object.keys(by).sort((a,b)=>((i=>i<0?99:i)(RORD.indexOf(a)))-((i=>i<0?99:i)(RORD.indexOf(b)))).map(k=>by[k]); };
-      const row=(r,showTeam)=>`<div class="tm"><span>${esc(rlabel(r[0]))}</span><b style="font-size:12.5px;text-align:right">${(+r[1]).toLocaleString()} · ${esc(r[2])}${showTeam&&r[4]?", "+esc(r[4]):""}${r[5]?" ("+r[5]+")":""}</b></div>`;
+      const dedupe=rows=>{ const by={}; for (const r of (rows||[])){ const k=CANON(r[0]); if(!by[k]){ by[k]=[r]; continue; } const mx=+by[k][0][1]; if(+r[1]>mx) by[k]=[r]; else if(+r[1]===mx && !by[k].some(x=>x[2]===r[2])) by[k].push(r); }
+        return Object.keys(by).sort((a,b)=>((i=>i<0?99:i)(RORD.indexOf(a)))-((i=>i<0?99:i)(RORD.indexOf(b)))).map(k=>by[k]); };   /* v1.18.9 (Ty: "i tied a record but my name is not there"): a tie is EVERY holder’s record — the book names them all (the save’s ledger must carry the tie; the phone never invents a holder) */
+      const row=(rs,showTeam)=>{ const list=Array.isArray(rs[0])? rs : [rs]; const r=list[0]; const me=S.blob.player.first+" "+S.blob.player.last;
+        const names=list.map(x=>{ const gold=x[2]===me; return (gold? '<span style="color:#ffd76a;font-weight:800">':"")+esc(x[2])+(showTeam&&x[4]?", "+esc(x[4]):"")+(x[5]?" ("+x[5]+")":"")+(gold? "</span>":""); }).join(" & ");
+        return `<div class="tm"><span>${esc(rlabel(r[0]))}</span><b style="font-size:12.5px;text-align:right">${(+r[1]).toLocaleString()} · ${names}</b></div>`; };   /* v1.18.9: his name reads GOLD in the book */
       const T2=S.blob.player.team;
       m.innerHTML = `<div class="seg segc" style="background:rgba(255,255,255,.08);margin:0 0 10px">${SC.map(s=>`<button class="${pyScope===s[0]?"on":""}" style="font-size:11px" onclick="pyScopeGo('${s[0]}')">${s[1]}</button>`).join("")}</div>
       <div class="hoodhead" style="color:#fff"><h3>${esc(T2)} records</h3><span style="color:#8b939c">franchise book</span></div>
@@ -3125,7 +3127,7 @@ RENDER.apex = (b,sub)=>{
     ${(!S.agent||window._apexRoster)? D.AGENTS.filter(A=>!(S.agent&&S.agent.id===A.id&&window._apexRoster)).map(A=>`<button class="veh-row light" onclick="renderApp('apex',{a:'${A.id}'})">
       <span class="vr-l"><b>${esc(A.n)} ${S.agent&&S.agent.id===A.id?"· ✓ yours":""}</b><small>Negotiation ${A.neg}/10 · Endorsements ${A.end}/10 · Aggressiveness ${A.agg}/10 · Fee ${A.fee.toFixed(2)}%</small></span>
       <span class="vr-r" style="font-size:12px;opacity:.6">${A.yrs} years experience</span></button>`).join(""):""}
-    ${(S.deals||[]).filter(d=>d.perYear).length? `<div class="hoodhead" style="margin-top:16px"><h3>Active deals</h3><span>${dealAnnual()? fm(dealAnnual())+"/yr gross":""}</span></div>
+    ${(S.deals||[]).filter(d=>d.perYear).length? `<div class="hoodhead" style="margin-top:16px"><h3>Active deals</h3><span>${S.deals.filter(d=>d.perYear).length}/6 slots${dealAnnual()? " · "+fm(dealAnnual())+"/yr gross":""}</span></div><!--DEAL_SLOTS:6 display-first; enforcement awaits Ty’s number-->
     ${S.deals.filter(d=>d.perYear).map(d=>`<div class="veh-detail light" style="margin-bottom:10px"><div class="vd-title" style="font-size:16px">${sponsorImg(d.n)}${esc(d.n)}</div>
       <div style="font-size:13px;opacity:.65;margin:4px 0 6px">${fm(d.perYear)}/yr · ${d.left} season${d.left===1?"":"s"} left${d.inc? " · incentive: "+esc(d.inc.desc)+" pays "+fm(d.inc.amt):""}</div>
       <div style="font-size:12px;opacity:.5">Pays weekly during the season · ${selfRepped()? "no commission \u2014 you represent yourself":"10% Apex endorsement commission"}</div></div>`).join("")}`:""}
@@ -4271,6 +4273,19 @@ function teamPower(name){
   const margTerm = n? Math.max(-3, Math.min(3, (marg/n)*0.22)) : 0;
   return base*noiseFade + (n>0 ? (w-l)*1.1 : 0) + margTerm;
 }
+function linesLine(){
+  try{
+    const L=S.blob.league; if(!L||!L.games||!L.teams) return "";
+    const wk=S.blob.clock.week, tp=S.blob.clock.weekType;
+    if(tp!=="RegularSeason"&&tp!=="PreSeason") return "";
+    const tn=L.teams;
+    const gs=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason",w:g[1],h:teamNm(tn[g[2]]),a:teamNm(tn[g[3]]),hs:g[4],as:g[5],played:g[4]>=0}:g).filter(g=>g.t===tp&&g.w===wk&&!g.played);
+    if(!gs.length) return "";
+    const ln=gameLines(gs);
+    const parts=gs.map((g,i)=>{ const l2=ln[i]||{}; const sp=+l2.spread||0; const tot=l2.total!=null? l2.total:""; return g.a+" at "+g.h+": "+(sp>0? g.h+" -"+sp : sp<0? g.a+" -"+(-sp) : "PK")+(tot!==""? ", O/U "+tot:""); });
+    return "\nTHE BOARD (WagerLines, save-seeded — THE LINES LAW: any point spread, moneyline, or over/under mentioned ANYWHERE, chirps, Huddle, articles, or texts, must be EXACTLY these numbers; never invent or drift a line): "+parts.join("; ")+".";
+  }catch(e){ return ""; }
+}   /* v1.18.9 (Ty: "people on chirper and huddle dont reflect the same point spreads... as wager lines"): one board, one truth */
 function gameLines(list){
   return list.map(g=>{
     const rng=seedRng(S.careerId+"|line|"+g.h+g.a+g.w);
@@ -4822,7 +4837,7 @@ function pressersLine(){
   const g=lastPlayed(); if(!g) return "";
   const gk="pr"+g[2]+"|"+g[1]+"|"+g[0];
   const pr=(S.pressers||{})[gk]; if(!pr) return "";
-  let out="\nTHE PRESSER (postgame podium, THIS sync's game — "+ (g[4]?"vs ":"at ")+g[3]+" "+g[7][0]+"-"+g[7][1]+", team record after: EXACTLY "+pr.record_after+"): ";
+  let out="\nTHE PRESSER (postgame podium, THIS sync's game — "+ (g[4]?"vs ":"at ")+g[3]+" "+g[7][0]+"-"+g[7][1]+", team record after: EXACTLY "+pr.record_after+"): SPOKEN-RECORD LAW: a record is spoken with real numbers — 3-0 is 'three and zero' (the 'and' stays), a 0 is ZERO, and 'oh'/'ohh' are OUTLAWED words for it. ";
   if (pr.skipped_all){
     out+="he SKIPPED availability entirely. Coverage may note that ONCE, neutrally, and may not invent a single podium word.";
   } else {
@@ -7672,9 +7687,13 @@ function mailCrests(m){
     const team=(S.blob&&S.blob.player&&S.blob.player.team)||"";
     const isLeague = /NFL|League Office|NFLPA|Players Association|Commissioner/i.test(String(m.from||""));
     const isTeam = !isLeague && ((team && String(m.from||"").includes(team)) || /Football Operations|Equipment Room|Coaching Staff|Front Office/i.test(from));
-    if (!isTeam && !isLeague) return "";
+    const isPA = /NFLPA|Players Association/i.test(String(m.from||""));
+    const isHOF = /Hall of Fame|Canton/i.test(from);
+    if (!isTeam && !isLeague && !isHOF) return "";
     const px="height:78px;width:78px;object-fit:contain";
     const nfl=`<img src="nfl-logo.png" alt="" style="${px}" onerror="if(!artE(this))this.remove()">`;
+    if (isPA) return `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin:28px 0 6px"><img src="img/nflpa-logo.png" alt="" style="${px}" onerror="if(!artE(this))this.remove()"></div>`;   /* v1.18.9 (Ty’s ruling): union letters wear ONLY the union mark — no shield */
+    if (isHOF) return `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin:28px 0 6px"><img src="hof-logo.png" alt="" style="${px}" onerror="if(!artE(this))this.remove()">${nfl}</div>`;   /* v1.18.9 (Ty): Canton mail carries the Hall beside the shield */
     const crest=isTeam? tlogoImg(team,"tlogo",px+";margin:0") : "";
     return `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin:28px 0 6px">${crest}${nfl}</div>`;
   }catch(e){ return ""; }
@@ -7994,7 +8013,7 @@ STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
@@ -8868,7 +8887,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.8";
+const VER="v1.18.9";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
