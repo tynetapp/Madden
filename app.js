@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.18.9 (Aug 15 2026) — THE LONG LIST (Ty’s fifteen-item batch): domes drop the emoji; SPOKEN-RECORD LAW at the podium (three and ZERO, never “ohh”); content-hash cids (wch) so a liked heart survives any object rebuild — same words, same cid, forever; lifeFacts tiers WHERE HE LIVES (starter home → landmark estate) so an invite over reads the address; the record book names EVERY holder of a tied record and paints HIS name gold; Longest pass/run/reception get real labels (the 21 was save truth — the franchise’s longest catch so far, not an error); Active deals shows n/6 slots (display first, enforcement awaits Ty’s number); weekly awards wear ×N beside the name, not under it; mailCrests learns two more letterheads — Hall of Fame mail carries the HOF mark beside the shield, NFLPA mail carries ONLY the union mark (Ty’s ruling: no shield on union letters); THE LINES LAW — WagerLines’ exact spreads and totals ride worldFacts so every pen quotes the board, never an invented number; sponsor-amazon.png refreshed to the 2024 mark (Ty’s art). Deferred to an exe round: the FA league market (all-32 cap space + best offers) — the extractor ships only his team’s cap today. No exe change. (prior: v1.18.8) */
+/* TyPhone app.js — v1.19.0 (Aug 16 2026) — THE LEDGER LANDS (phone half of exe v1.9.0 THE LEAGUE LEDGER; Ty: "put all of that into the exe", dev traits excluded by his word): the sync now carries all-32 cap space, the 120-deep FA street, HIS coaching staff by name, the league-wide INJURY LEDGER, the TRANSACTION WIRE with real contract money, draft capital (guarded; empty on preseason fixtures), and his career stat lines. Phone consumption: (1) the LEAGUE MARKET sheet on the negotiation table — cap room ranked, free agents listed, straight from the save; (2) three new truth lines ride worldFacts as LAW — the only injuries, the only moves, the only coach names any pen may use; (3) RECORD TIES OVERLAY — Madden’s book stores ONE holder per record, so his equal-or-better number from the save’s own stats now joins the book beside the named holder (career scope from careerMine, season scope from seasonStats, rookie season while yearsPro is 0 — never an invented value); (4) THE GOLD WRAP — his highlighted name ran font-weight:800, wider than the row planned for, and wrapped; gold keeps the row’s own weight now. Requires exe v1.9.0 + ONE re-sync to fill the ledger; everything degrades gracefully without it. (prior: v1.18.9) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1921,17 +1921,26 @@ function pyBody(){
       const CANON=k=>CANONMAP[String(k||"").toLowerCase()]||String(k||"");
       const RORD=["PassYards","PassTDS","RushYards","RushTDS","ReceivingYards","ReceivingTDS","ReceivingCatches","DefensiveSacks","DefensiveInts","DefensiveTackles","PassLongest","RushLongest","ReceiveLongest"];
       const rlabel=k=>{ const c=CANON(k); return RL[c]||c.replace(/([a-z])([A-Z])/g,"$1 $2"); };
+      const SAVE2CANON={PASSYARDS:"PassYards",PASSTDS:"PassTDS",RUSHYARDS:"RushYards",RUSHTDS:"RushTDS",RECEIVEYARDS:"ReceivingYards",RECEIVETDS:"ReceivingTDS",RECEIVECATCHES:"ReceivingCatches",DLINESACKS:"DefensiveSacks",DSECINTS:"DefensiveInts",DEFTACKLES:"DefensiveTackles"};
+      const myVals=scope=>{ try{ const me={}; const eat=lines=>{ for(const st of (lines||[])) for(const k in st){ const c=SAVE2CANON[k]; if(c) me[c]=Math.max(me[c]||0, +st[k]||0); } };
+        if(scope==="career"&&S.blob.careerMine) eat(S.blob.careerMine);
+        else if(scope==="season"||(scope==="rookieSeason"&&(+S.blob.player.yearsPro||0)===0)) eat(S.blob.seasonStats);
+        else return null; return me; }catch(e){ return null; } };
+      const withMe=(rows,scope)=>{ try{ const mv=myVals(scope); if(!mv) return rows||[]; const me=S.blob.player.first+" "+S.blob.player.last; const yr=(S.blob.clock||{}).seasonYear||""; const out=(rows||[]).slice();
+        for(const c in mv){ const v=mv[c]; if(!v) continue; const same=out.filter(r=>CANON(r[0])===c); if(!same.length) continue; const mx=Math.max.apply(null,same.map(r=>+r[1]||0));
+        if(v>=mx && !same.some(r=>+r[1]>=v && r[2]===me)) out.push([c,v,me,null,S.blob.player.team,yr]); }
+        return out; }catch(e){ return rows||[]; } };   /* v1.19.0 (Ty: "i tied a record but my name is not there... shared records still not showing"): Madden’s book keeps ONE holder — the overlay adds HIS equal-or-better number from the save’s own stats, never an invented value */
       const dedupe=rows=>{ const by={}; for (const r of (rows||[])){ const k=CANON(r[0]); if(!by[k]){ by[k]=[r]; continue; } const mx=+by[k][0][1]; if(+r[1]>mx) by[k]=[r]; else if(+r[1]===mx && !by[k].some(x=>x[2]===r[2])) by[k].push(r); }
         return Object.keys(by).sort((a,b)=>((i=>i<0?99:i)(RORD.indexOf(a)))-((i=>i<0?99:i)(RORD.indexOf(b)))).map(k=>by[k]); };   /* v1.18.9 (Ty: "i tied a record but my name is not there"): a tie is EVERY holder’s record — the book names them all (the save’s ledger must carry the tie; the phone never invents a holder) */
       const row=(rs,showTeam)=>{ const list=Array.isArray(rs[0])? rs : [rs]; const r=list[0]; const me=S.blob.player.first+" "+S.blob.player.last;
-        const names=list.map(x=>{ const gold=x[2]===me; return (gold? '<span style="color:#ffd76a;font-weight:800">':"")+esc(x[2])+(showTeam&&x[4]?", "+esc(x[4]):"")+(x[5]?" ("+x[5]+")":"")+(gold? "</span>":""); }).join(" & ");
+        const names=list.map(x=>{ const gold=x[2]===me; return (gold? '<span style="color:#ffd76a">':"")+esc(x[2])+(showTeam&&x[4]?", "+esc(x[4]):"")+(x[5]?" ("+x[5]+")":"")+(gold? "</span>":""); }).join(" & ");
         return `<div class="tm"><span>${esc(rlabel(r[0]))}</span><b style="font-size:12.5px;text-align:right">${(+r[1]).toLocaleString()} · ${names}</b></div>`; };   /* v1.18.9: his name reads GOLD in the book */
       const T2=S.blob.player.team;
       m.innerHTML = `<div class="seg segc" style="background:rgba(255,255,255,.08);margin:0 0 10px">${SC.map(s=>`<button class="${pyScope===s[0]?"on":""}" style="font-size:11px" onclick="pyScopeGo('${s[0]}')">${s[1]}</button>`).join("")}</div>
       <div class="hoodhead" style="color:#fff"><h3>${esc(T2)} records</h3><span style="color:#8b939c">franchise book</span></div>
-      <div class="scorecard">${dedupe(R[pyScope].team).map(r=>row(r,false)).join("")||'<div class="tm"><span>Nothing tracked</span><b></b></div>'}</div>
+      <div class="scorecard">${dedupe(withMe(R[pyScope].team, pyScope)).map(r=>row(r,false)).join("")||'<div class="tm"><span>Nothing tracked</span><b></b></div>'}</div>
       <div class="hoodhead" style="color:#fff"><h3>NFL records</h3><span style="color:#8b939c">league book</span></div>
-      <div class="scorecard">${dedupe(R[pyScope].league).map(r=>row(r,true)).join("")}</div>`;
+      <div class="scorecard">${dedupe(withMe(R[pyScope].league, pyScope)).map(r=>row(r,true)).join("")}</div>`;
     }
   }
   if (pyTab==="leaders"){
@@ -3879,6 +3888,7 @@ function negSheet(){
   <label class="flabel">Counter \u2014 signing bonus ($M)</label><input class="field" id="negB" type="number" step="0.5" min="0" value="${o.bonusM}">
   <button class="btn" style="background:var(--ok);color:#04170d" onclick="negAccept()">Take their offer \u2014 ${o.years}yr / $${o.totalM}M</button>
   <button class="btn" style="background:var(--apx-acc);color:#fff" onclick="negCounter()">Send the counter</button>
+  <button class="btn" style="background:rgba(255,255,255,.1)" onclick="marketSheet()">League market \u203a</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="negWalk()">Leave the table</button>`);
 }
 function negCounter(){
@@ -3925,6 +3935,20 @@ function negAgree(t){
   persist(); closeSheet(); toast("Terms agreed. The paper rides the order code \u2014 the save makes it real.");
   if (curApp==="apex") renderApp("apex");
 }
+function marketSheet(){
+  const M=S.blob.market;
+  if(!M||!M.caps){ sheet(`<h3>League market</h3><p class="sp">The all-32 market rides your next desktop sync (TyPhone Sync v1.9.0 or newer): every club\u2019s cap room and the whole free-agent street.</p><button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Close</button>`); return; }
+  const caps=(M.caps||[]).slice().sort((a,b)=>b[2]-a[2]);
+  const myPos=S.blob.player.pos;
+  const faMine=(M.fa||[]).filter(x=>x[1]===myPos).slice(0,10);
+  const faTop=(M.fa||[]).slice(0,12);
+  sheet(`<h3>League market</h3><p class="sp">Cap room around the league and who\u2019s on the street \u2014 straight from the save.</p>
+  <div class="hoodhead"><h3>Cap space (this year)</h3><span>${caps.length} clubs</span></div>
+  <div style="max-height:30vh;overflow-y:auto">${caps.map(c=>`<div style="display:flex;gap:8px;align-items:center;padding:4px 0">${tlogoImg(c[1],"tlogo")}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(c[1])}</span><b style="margin-left:auto;flex-shrink:0;color:${c[2]<0?"#ff6b6b":"#3fdc84"}">${fm(c[2])}</b></div>`).join("")}</div>
+  ${faMine.length? `<div class="hoodhead"><h3>Free agents \u2014 ${esc(myPos)}</h3></div>`+faMine.map(x=>`<div style="display:flex;gap:8px;padding:3px 0"><span>${esc(x[0])}</span><b style="margin-left:auto;opacity:.8">${x[3]} OVR \u00b7 ${x[2]}y</b></div>`).join("") : ""}
+  <div class="hoodhead"><h3>Best available (all)</h3></div>${faTop.map(x=>`<div style="display:flex;gap:8px;padding:3px 0"><span>${esc(x[0])} \u00b7 ${esc(x[1])}</span><b style="margin-left:auto;opacity:.8">${x[3]} OVR</b></div>`).join("")}
+  <button class="btn" style="background:rgba(255,255,255,.1);margin-top:10px" onclick="closeSheet()">Close</button>`);
+}   /* v1.19.0 (Ty: "need to see the best offers around the league to see what you can get") */
 function negWalk(){
   const st=negState(); st.round=Math.max(0,(st.round||0)); persist(); closeSheet();
   toast("You left the table \u2014 nothing changes and nothing is held against you. Their offer stands this week; come back to it in Apex any time.");   /* v1.18.6 (Ty: "hope it doesn’t affect the contract stuff"): it never did — negWalk changes no state; the old line threatened a memory that does not exist */
@@ -4273,6 +4297,9 @@ function teamPower(name){
   const margTerm = n? Math.max(-3, Math.min(3, (marg/n)*0.22)) : 0;
   return base*noiseFade + (n>0 ? (w-l)*1.1 : 0) + margTerm;
 }
+function injuriesLine(){ try{ const N=S.blob.newsTruth; if(!N||!N.injuries||!N.injuries.length) return ""; return "\nTHE INJURY LEDGER (save truth \u2014 THE ONLY injuries in the league; anyone not listed is healthy; NEVER invent an injury, the Nick Bosa law): "+N.injuries.slice(0,20).map(x=>x[0]+" ("+x[1]+", "+String(x[2]).replace(/([a-z])([A-Z])/g,"$1 $2")+", "+x[3]+(x[4]&&x[4]!==x[3]?"-"+x[4]:"")+" wks)").join("; ")+"."; }catch(e){ return ""; } }
+function txLine(){ try{ const N=S.blob.newsTruth; if(!N||!N.transactions||!N.transactions.length) return ""; const t=N.transactions.slice(-12); return "\nTHE TRANSACTION WIRE (save truth \u2014 the ONLY recent moves; never invent a signing, cut, or trade): "+t.map(x=>x[0]+(x[2]?" to the "+x[2]:"")+(x[5]?" ("+x[5]+(x[6]?", "+x[6]+"yr":"")+(x[7]?" "+fm(x[7]):"")+")":"")).join("; ")+"."; }catch(e){ return ""; } }
+function staffTruthLine(){ try{ const st=S.blob.staff; if(!st||!st.mine||!st.mine.length) return ""; return "\nHIS COACHING STAFF (save truth \u2014 quote THESE names; never invent a coach): "+st.mine.map(x=>x[0]+" ("+String(x[1]).replace(/([a-z])([A-Z])/g,"$1 $2")+")").join(", ")+"."; }catch(e){ return ""; } }   /* v1.19.0 THE LEDGER LANDS */
 function linesLine(){
   try{
     const L=S.blob.league; if(!L||!L.games||!L.teams) return "";
@@ -8013,7 +8040,7 @@ STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, jersey #${p.jersey}, age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}${SL(()=>injuriesLine(),"injuriesLine")}${SL(()=>txLine(),"txLine")}${SL(()=>staffTruthLine(),"staffTruthLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
@@ -8887,7 +8914,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.18.9";
+const VER="v1.19.0";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
