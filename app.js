@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.19.1 (Aug 16 2026) — SPOKEN AND HEARD (Ty’s six): (1) THE AND RETURNS — v1.18.9’s "OUTLAWED" record wording taught pens to dodge the whole and-construction ("three five" was born there); the presser law now mirrors the podcast’s proven phrasing: the word AND between the numbers, ALWAYS, zero spoken "zero", never oh/ohh, never bare digits. (2) PODCAST AGE LAW — his age, if ever spoken, is EXACTLY the facts’ number (now riding the PLAYER line); a birthday passing in-season earns one minor aside at most, and only if he’s genuinely a story. (3) RECORD-BOOK SILENCE — the podcast mentions records ONLY broken or a whisker from breaking. (4) THE NUMBER WALL — a jersey-number email dies at okEmail unless the SAVE changed his number (flag set at the apply door); the facts say outright the number is not a story. (5) FAMILY AT THE GAMES — each created family member carries a "Comes to games" checkbox; the facts split AT HIS GAMES (the seats his pull earns, texts from the building) from WATCHES FROM HOME (TV only, never "great seats") — and famSet no longer .trim()s a checkbox boolean. (6) THE HEART AND THE JOIN, HARDENED — likes key CANONICAL cid ids everywhere (a thread opened under a legacy id no longer strands its heart on the way back to the feed), and the world-reply join SELF-HEALS: if a thread holds no replies but his, the join runs again regardless of the _joined scar. (prior: v1.19.0) */
+/* TyPhone app.js — v1.19.2 (Aug 18 2026) — THE WAR AND THE DOOR (Ty's sixteen): (1) THE AGENT'S DESK — the agent answers money, cap, market, and trade-stock questions with SAVE NUMBERS (top roster cap hits, all-32 cap room, the FA street, an honest interest read); the "top of the sheet is quinnen" class of invented answer dies (the desk law: never deflect, never invent). (2) VOICE VARIETY + THE HOMETOWN LAW — KEY TEAMMATES rotates weekly (top four stars + six week-seeded from the next twenty-six) and no player runs his home state as a recurring bit (the Minkah-NJ fix). (3) POSTSEASON STRUCTURE LAW — the facts name the round, a first-round bye means the team does NOT play wild-card weekend, Pro Bowl week is the gap before the Super Bowl, and rounds never share a weekend. (4) THE EXIT WAR — "I'm leaving" is an absolute refusal to ever play for the team again: benched and barred at declaration, every game check WITHHELD, the CBA-maximum club fine (one week's salary) per missed game, the ask stays pending and only the save (trade/release/FA) ends it. (5) NFLPA playoff shares — the postseason checks say who pays them (the union pool, never the club), and a player at war draws none. (6) THE RECORD WRAP — the pinned ".scorecard .tm span{display:flex}" rule was turning his gold record-book name into a block and wrapping every row he holds; display:inline rides the gold span (styles.css stays pinned). (7) THE HUDDLE NaN — a reply arriving without an "up" count rendered NaN; score() number-guards. (8) THE 555 WALL — every inbound phone number heals to a fictional 555 exchange at the deDash door (area code kept), and the reply pens carry the belt. (9) THE IN-WORLD DATE — text dates mapped the PHONE'S calendar (August in November, then June after a sync shifted the ts again); dateLabel now maps onto the world's calendar: world-today minus how long ago. (10) SPOKEN RECORDS ARE PODIUM-ONLY — spelled-out records govern only words spoken aloud; every written surface uses digits with a hyphen (3-5). (11) THE LOAD DOOR — liking and replying on Chirper stir NOTHING until "Load top replies" is pressed: a like earns reactions to it, a reply earns before/after + reactions, nothing earns the plain fold (supersedes the v1.17.5/v1.17.9/v1.18.6 auto-pens; the v1.19.1 self-heal lives on inside the door). (12) GAME REACTION FLAVOR — texts react to games like the rest of the world does. (13) CAR PRIVACY — fans online never comment on his cars unless the gameday arrival says he drove one to the game (the shuttle now states the no-look law). (14) HEISMAN WINNER — a new college-career tier above multi-year starter; it locks the draft picker to Round 1. (prior: v1.19.1) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -234,9 +234,10 @@ function lifeFacts(opts){
         const kin=(S.blob.roster||[]).filter(r=>r.length>15&&r[14]===my&&(r[0]+" "+r[1])!==me).slice(0,3);
         if(!kin.length) return "";
         const town=S.blob.player.homeTown;
-        return " FROM HIS HOME STATE ("+deCamel(my)+") on the roster: "+kin.map(r=>r[0]+" "+r[1]+(town&&r[15]===town?" (same hometown!)":"")).join(", ")+" — natural kinship, fair game in texts and stories.";
+        return " FROM HIS HOME STATE ("+deCamel(my)+") on the roster: "+kin.map(r=>r[0]+" "+r[1]+(town&&r[15]===town?" (same hometown!)":"")).join(", ")+" — natural kinship: an OCCASIONAL warm note at most (the hometown law: never a weekly bit).";
       }catch(e){ return ""; } })()
-      +"\nTHE SURPRISE LAW: react to his material life ONLY where it clashes with his station. Modest means at modest pay is INVISIBLE (never mention it). Extravagance far above his pay is a real event (fans notice the car, the agent worries about the money, teammates rib him). Extreme modesty far below famous-player pay is a mild curiosity at most. Matching life to money is nothing at all.";
+      +" CAR PRIVACY LAW: the garage is PRIVATE — family, friends, teammates, and the agent may know his cars, but fans and strangers ONLINE have NEVER seen them and never post, chirp, or comment about his cars unless the GAMEDAY ARRIVAL fact says he drove one to a game."
+      +"\nTHE SURPRISE LAW: react to his material life ONLY where it clashes with his station. Modest means at modest pay is INVISIBLE (never mention it). Extravagance far above his pay is a real event (the agent worries about the money, teammates rib him; FANS only ever see a car per the car privacy law). Extreme modesty far below famous-player pay is a mild curiosity at most. Matching life to money is nothing at all.";
   }catch(e){ return ""; }
 }
 function deCamel(s){ return String(s||"").replace(/([a-z])([A-Z])/g, "$1 $2"); }
@@ -468,10 +469,17 @@ function gameDateObj(clock){
 /* v1.4: relative age labels for world content ("3w", "8mo", "2y") */
 function dateLabel(ts){
   /* v1.18.2 (Ty: "text threads should just give a date"): a real date, never "X days ago".
-     Texts only — chirps, mail, and huddle keep relative time. */
+     Texts only — chirps, mail, and huddle keep relative time.
+     v1.19.2 (Ty: "text had a date in august when it was november. and now those same texts are
+     showing in june when it's january 2nd"): the label was the PHONE'S calendar — a text arriving
+     in game-November stamped the real-world August date, and every sync's shiftWorldTime pushed
+     the ts (and so the printed month) further back. The label now maps onto the IN-WORLD
+     calendar: world-today minus how long ago the message is. The shift math and this mapping
+     agree by construction, so a November text reads November forever. */
   if(!ts) return "";
-  const d=new Date(ts), now=new Date();
   const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let now=new Date(), d=new Date(ts);
+  try{ if (typeof S!=="undefined" && S && S.blob && S.blob.clock){ now=worldToday(S.blob.clock); d=new Date(now.getTime()-(Date.now()-ts)); } }catch(e){}
   return MO[d.getMonth()]+" "+d.getDate()+(d.getFullYear()!==now.getFullYear()? ", "+d.getFullYear() : "");
 }
 function agoFull(ts){ const l=agoLabel(ts); return l==="now"? "now" : l+" ago"; }   /* v1.7.7 (Ty: an email said "now ago") */
@@ -1286,7 +1294,23 @@ function isGigAsk(x){ try{ return /\b(appearance fee|autograph session|meet.?and
    have rendered as HIS. penAsMe() guards scrubChirps + scrubHuddle now. (b) The no-em-dash law
    lived only in prompts; deDash() heals every inbound surface at the doors. */
 function penAsMe(n,h){ try{ const me=(S.blob&&S.blob.player? (S.blob.player.first+" "+S.blob.player.last):"").toLowerCase(); const strip=x=>String(x==null?"":x).replace(/^@/,"").toLowerCase(); const mh=strip(S.handle); return (!!mh && (strip(h)===mh || strip(n)===mh)) || (!!me && String(n==null?"":n).toLowerCase()===me); }catch(e){ return false; } }
-function deDash(t){ try{ return typeof t==="string"? t.replace(/\u2014/g,"-") : t; }catch(e){ return t; } }
+/* v1.19.2 THE 555 WALL (Ty: a "finance guy's number" from a text looked real): any phone number
+   in INBOUND content heals to a fictional 555 exchange — the area code stays plausible, the
+   number can never dial anyone. 10-digit forms always; bare 7-digit forms only when a phone
+   context word sits just before (so "250-1000 yards" ranges are never eaten; exchanges never
+   start 0/1 so "100-1000" can't match anyway). Rides deDash, the ONE inbound heal door, so
+   every surface that heals em dashes heals numbers too. His own outbound typing is untouched. */
+function phone555(t){
+  try{
+    if (typeof t!=="string" || !/\d{3}/.test(t)) return t;
+    t=t.replace(/(^|[^\d$,.])\(?([2-9]\d{2})\)?([\s.\-])?([2-9]\d{2})([\s.\-]?)(\d{4})(?!\d)/g,
+      (m,pre,ac,s1,ex,s2,ln)=> ex==="555"? m : pre+"("+ac+") 555-"+ln);
+    t=t.replace(/((?:call|text|cell|phone|number|reach|dial|line|digits)[^.\n]{0,26}?)([2-9]\d{2})[\s.\-](\d{4})(?!\d)/gi,
+      (m,pre,ex,ln)=> ex==="555"? m : pre+"555-"+ln);
+    return t;
+  }catch(e){ return t; }
+}
+function deDash(t){ try{ return typeof t==="string"? phone555(t.replace(/\u2014/g,"-")) : t; }catch(e){ return t; } }
 function scrubChirps(list){ try{ return (list||[]).filter(c=>c && String(c.t||"").trim() && String(c.n||c.a||"").trim() && !isMediaAsk(c.t) && !isGigAsk(c.t) && !penAsMe(c.n||c.a, c.h)).map(c=>{ c.t=deDash(c.t); return c; }); }catch(e){ return list||[]; } }   /* v1.18.4: the feed door drops anything the pen wrote AS HIM and heals em dashes */
 function scrubHuddle(list){ try{ return (list||[]).filter(h=>{ if(!h || !String(h.h||"").trim() || !String(h.b||"").trim() || isMediaAsk(String(h.h)+" "+String(h.b)) || isGigAsk(String(h.h)+" "+String(h.b)) || penAsMe(h.u,h.u)) return false; h.h=deDash(h.h); h.b=deDash(h.b); h.cmts=(h.cmts||[]).filter(cm=>cm && String(cm.t||"").trim() && !isMediaAsk(cm.t) && !isGigAsk(cm.t) && !penAsMe(cm.u,cm.u)); for(const cm of h.cmts){ cm.t=deDash(cm.t); for(const rr of (cm.r||[])){ if(rr.t!=null) rr.t=deDash(rr.t); if(rr.x!=null) rr.x=deDash(rr.x); } } return true; }); }catch(e){ return list||[]; } }   /* v1.18.4: same walls at the Huddle door */
 function dedupeReplies(fresh, existing){
@@ -1341,8 +1365,17 @@ RENDER.chirper = (b,sub)=>{
          are dropped at render (which also heals husks already saved), and every reply-array
          intake filters them at the door. */
       const reps=(c.replies||[]).filter(r=>r&&String(r.x||"").trim());
-      return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? fmFoll(c.rc) : "0")}</span></div>
-      ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0 && c.id? `<div class="empty">The reply section hasn't loaded. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${c.id}')">Fetch the top replies</button>` : "Add an API key in Sync to pull them."}</div>` : (c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold. ${aiKey()? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin-top:8px" onclick="fetchReplies('${chThread}')">Pull the top replies</button>` : "Reply or like and the thread pulls in."}</div>` : '<div class="empty">No replies yet.</div>')}`;
+      /* v1.19.2 THE LOAD DOOR: the one button that makes anything happen — shown while the
+         thread still owes something (the base fold, reactions to a like, or the join around
+         his reply). Liking and replying by themselves stir nothing (Ty's ruling). */
+      const _ownT=!(String(chThread).startsWith("c")||String(chThread).startsWith("w"));
+      const _canonT=chCanonId(chThread);
+      const _others=(c.replies||[]).some(r=>r&&!r.mine&&String(r.x||"").trim());
+      const _mineT=(c.replies||[]).some(r=>r&&r.mine);
+      const _pend=aiKey()&&((!_others&&!c._loadDone) || (!!(S.chirpLiked&&S.chirpLiked[_canonT])&&!c._likeGen) || (_mineT&&!(_ownT?c._myRepGen:c._joined)));
+      const loadBtn=_pend? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin:2px 0 10px" onclick="chLoadTop('${chThread}')">Load top replies</button>` : "";
+      return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? fmFoll(c.rc) : "0")}</span></div>${loadBtn}
+      ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold.${aiKey()? "" : " Add an API key in Sync to pull them."}</div>` : '<div class="empty">No replies yet.</div>')}`;
       })()}
       </div>`;
       return;
@@ -1403,11 +1436,16 @@ async function chLike(id){ id=chCanonId(id);
   persist();
   if (chThread!==null) renderApp('chirper',{t:chThread});
   else { renderApp('chirper'); requestAnimationFrame(()=>{const nl=$("#chList"); if(nl&&sc!==null) nl.scrollTop=sc;}); }
-  /* v1.17.5 (Ty: "same for liking something"): his like is VISIBLE. Liking a world chirp can
-     stir that specific thread — from nothing at all to an aggregator noticing — scaled by his
-     buzz AND what the post is. Once per chirp, likes only (an unlike stirs nothing). */
-  if (S.chirpLiked[id] && (String(id).startsWith("c")||String(id).startsWith("w")) && aiKey()) await pullFold(c, id);   /* v1.17.9: the fold's promise ("like and the thread pulls in") is kept — the existing replies land first */
-  if (S.chirpLiked[id] && (String(id).startsWith("c")||String(id).startsWith("w")) && !c._likeGen && aiKey()){
+  /* v1.19.2 THE LOAD DOOR (Ty: "just make liking and commenting do nothing until the load top
+     replies is pressed"): a like stirs NOTHING here — supersedes v1.17.5's live stir and
+     v1.17.9's fold-on-like. The reaction to his like generates only when "Load top replies" is
+     pressed (chLoadTop); chLikeStir below carries the old like-reaction pen, fired only from
+     that door. */
+}
+async function chLikeStir(c, id){
+  if (!(S.chirpLiked&&S.chirpLiked[chCanonId(id)]) || c._likeGen || !aiKey()){
+    return;
+  } else {
     c._likeGen=1; persist();
     try{
       const f=S.chirp.followers||0;
@@ -1417,6 +1455,54 @@ async function chLike(id){ id=chCanonId(id);
       if (good.length){ c.replies=(c.replies||[]).concat(good); c.rc=Math.max(c.rc||0, c.replies.length); persist(); if(chThread===id) renderApp('chirper',{t:id}); }
     }catch(e){}
   }
+}
+/* v1.19.2 THE LOAD DOOR (Ty's ruling, supersedes the like/reply auto-pens): NOTHING generates
+   until "Load top replies" is pressed. Pressed after a LIKE it writes the reactions to the like;
+   pressed after HIS REPLY it writes the section around it (a few from before his, a few after,
+   plus reactions to his — aiThreadJoin unchanged); pressed with nothing it writes just the top
+   replies that would have been there anyway (pullFold; possibly none — rc 0 is rc 0). One press
+   can settle several debts at once. The v1.19.1 self-heal survives inside the door: an empty
+   join (!hasOthers) means try again, never never-again. Own posts ride the same door: the base
+   section is aiPostReplies, his un-answered reply earns aiChirpReply. */
+async function chLoadTop(id){
+  const c=chGet(id); if(!c) return;
+  if (!aiKey()) return toast("Add an API key in Sync first.");
+  if (c._fetching) return; c._fetching=1;
+  toast("Loading the thread\u2026");
+  const canon=chCanonId(id);
+  const own=!(String(id).startsWith("c")||String(id).startsWith("w"));
+  try{
+    const myReps=(c.replies||[]).filter(r=>r&&r.mine);
+    if (own){
+      if (!(c.replies||[]).some(r=>r&&!r.mine&&String(r.x||"").trim())) await aiPostReplies(c);
+      const lastMine=myReps[myReps.length-1];
+      if (lastMine && !c._myRepGen){ c._myRepGen=1; persist();
+        const rep=await aiChirpReply(c, lastMine.x);
+        if (rep){ for (const r of dedupeReplies(rep.filter(x=>x&&String(x.x||"").trim()), c.replies)) c.replies.push(r); } }
+    } else {
+      const hasOthers=(c.replies||[]).some(r=>r&&!r.mine&&String(r.x||"").trim());
+      const firstJoin=myReps.length>0 && (!c._joined || !hasOthers);
+      if (firstJoin){
+        c._joined=1; persist();
+        const txt=myReps[myReps.length-1].x;
+        const j=await aiThreadJoin(c, txt);
+        if (j){
+          const clean=a=>dedupeReplies((a||[]).filter(r=>r&&String(r.x||"").trim()), c.replies);
+          const bef=clean(j.before);
+          const myAt=c.replies.findIndex(r=>r.mine && r.x===txt);
+          c.replies.splice(myAt<0? c.replies.length-1 : myAt, 0, ...bef);
+          c.replies.push(...clean(j.after));
+          c.replies.push(...clean(j.toMine).map(r=>Object.assign({},r,{toMine:1})));
+          c.rc=Math.max(c.rc||0, c.replies.length);
+        }
+      } else if (!hasOthers){
+        delete c._foldPull;
+        await pullFold(c, id);   /* just what would've been there — possibly nothing */
+      }
+      await chLikeStir(c, id);   /* a pending like earns its reactions at the door, once */
+    }
+    c._loadDone=1;
+  } finally { delete c._fetching; persist(); if(chThread!==null) renderApp('chirper',{t:chThread}); }
 }
 function editHandle(){
   sheet(`<h3>Your handle</h3><p class="sp">This is your @. The world will use it going forward.</p>
@@ -1440,34 +1526,12 @@ async function chSendReply(){
   const tid=chThread;
   const c=chGet(tid);
   c.replies=c.replies||[];
-  const isWorld=String(tid).startsWith("cwc")||String(tid).startsWith("w");   /* v1.18.6 THE JOIN THAT NEVER FIRED: v1.18.2’s stable cids renamed world ids to "cwc..." and this check still read legacy "w" — the before/after thread-join was dead for every world reply since */
-  const hasOthers=(c.replies||[]).some(r=>String(r.h||"").replace(/^@/,"").toLowerCase()!==String(S.handle||"").replace(/^@/,"").toLowerCase());
-  const firstJoin=isWorld && (!c._joined || !hasOthers);   /* v1.19.1 self-heal (Ty: "replied to chirper. still got nothing"): a join that produced nothing does not scar the thread — empty means try again */
   c.replies.push({a:S.blob.player.first+" "+S.blob.player.last, h:S.handle, x:txt, mine:1});
   ledgerPublicPost(txt);   /* v1.9.0: public replies count as public words */
   persist(); renderApp('chirper',{t:tid});
-  if (!aiKey()) return;
-  if (firstJoin){
-    /* v1.17.5 (Ty: "if I reply to something... replies should be 'seen'"): joining a world
-       thread PULLS IT IN — the seeded count was always real, and now the section loads: a few
-       replies from BEFORE his (they were already there), a few AFTER, and reactions TO HIS
-       scaled by buzz from nothing at all to national news. Once per thread. */
-    c._joined=1; persist();
-    const j = await aiThreadJoin(c, txt);
-    if (j){
-      const clean=a=>dedupeReplies((a||[]).filter(r=>r&&String(r.x||"").trim()), c.replies);
-      const bef=clean(j.before);
-      const myAt=c.replies.findIndex(r=>r.mine && r.x===txt);
-      c.replies.splice(myAt<0? c.replies.length-1 : myAt, 0, ...bef);
-      c.replies.push(...clean(j.after));
-      c.replies.push(...clean(j.toMine).map(r=>Object.assign({},r,{toMine:1})));
-      c.rc=Math.max(c.rc||0, c.replies.length);
-      persist(); if(chThread===tid) renderApp('chirper',{t:tid});
-    }
-    return;
-  }
-  const rep = await aiChirpReply(c, txt);
-  if (rep){ for (const r of dedupeReplies(rep.filter(r=>r&&String(r.x||"").trim()), c.replies)) c.replies.push(r); persist(); if(chThread===tid) renderApp('chirper',{t:tid}); }   // v1.7.6 husks + v1.7.7 dupes filtered
+  /* v1.19.2 THE LOAD DOOR: his reply stirs NOTHING here — supersedes the v1.18.6 join fix and
+     the v1.17.5 pull-in (their machinery lives on inside chLoadTop, where a reply earns its
+     before/after + reactions the moment "Load top replies" is pressed). */
 }
 async function aiThreadJoin(c, mine){
   try{
@@ -1606,17 +1670,11 @@ async function lifePurchaseReact(what, amt){
 }
 /* v1.6.5: a post whose reply fetch failed (pre-armor API hiccup) can heal itself */
 function fetchReplies(id){
-  if (String(id).startsWith("w")){   /* v1.17.9: world threads pull their fold through the same button */
-    const c=chGet(id); if(!c||c._fetching) return; c._fetching=1;
-    toast("Pulling the reply section\u2026");
-    delete c._foldPull;
-    pullFold(c,id).finally(()=>{ delete c._fetching; });
-    return;
-  }
-  const p=(S.chirp.posts||[]).find(x=>x.id===id); if(!p) return;
-  if (p._fetching) return; p._fetching=1;
-  toast("Pulling the reply section\u2026");
-  aiPostReplies(p).finally(()=>{ delete p._fetching; });
+  /* v1.19.2: everything loads through the ONE door now — world ids ("w"/"cwc") AND own posts
+     dispatch to chLoadTop (which still rides pullFold for the plain world fold and
+     aiPostReplies for an own post's base section). Kept as the legacy entry point. */
+  if (String(id).startsWith("w")||String(id).startsWith("c")) return chLoadTop(id);
+  return chLoadTop(id);
 }
 /* v1.17.9 (Ty: "the replies never came, it just says they're coming"): the fold-pull pen —
    the replies that were ALREADY under a counted world post. One door for the like path and
@@ -1936,8 +1994,8 @@ function pyBody(){
       const dedupe=rows=>{ const by={}; for (const r of (rows||[])){ const k=CANON(r[0]); if(!by[k]){ by[k]=[r]; continue; } const mx=+by[k][0][1]; if(+r[1]>mx) by[k]=[r]; else if(+r[1]===mx && !by[k].some(x=>x[2]===r[2])) by[k].push(r); }
         return Object.keys(by).sort((a,b)=>((i=>i<0?99:i)(RORD.indexOf(a)))-((i=>i<0?99:i)(RORD.indexOf(b)))).map(k=>by[k]); };   /* v1.18.9 (Ty: "i tied a record but my name is not there"): a tie is EVERY holder’s record — the book names them all (the save’s ledger must carry the tie; the phone never invents a holder) */
       const row=(rs,showTeam)=>{ const list=Array.isArray(rs[0])? rs : [rs]; const r=list[0]; const me=S.blob.player.first+" "+S.blob.player.last;
-        const names=list.map(x=>{ const gold=x[2]===me; return (gold? '<span style="color:#ffd76a">':"")+esc(x[2])+(showTeam&&x[4]?", "+esc(x[4]):"")+(x[5]?" ("+x[5]+")":"")+(gold? "</span>":""); }).join(" & ");
-        return `<div class="tm"><span>${esc(rlabel(r[0]))}</span><b style="font-size:12.5px;text-align:right">${(+r[1]).toLocaleString()} · ${names}</b></div>`; };   /* v1.18.9: his name reads GOLD in the book */
+        const names=list.map(x=>{ const gold=x[2]===me; return (gold? '<span style="color:#ffd76a;display:inline">':"")+esc(x[2])+(showTeam&&x[4]?", "+esc(x[4]):"")+(x[5]?" ("+x[5]+")":"")+(gold? "</span>":""); }).join(" & ");
+        return `<div class="tm"><span>${esc(rlabel(r[0]))}</span><b style="font-size:12.5px;text-align:right">${(+r[1]).toLocaleString()} · ${names}</b></div>`; };   /* v1.18.9: his name reads GOLD in the book. v1.19.2 (Ty: "player records still wrapping"): the pinned ".scorecard .tm span{display:flex}" rule (a left-label alignment fix) was turning the gold NAME span into a flex block — every row HE holds broke onto a second line; display:inline rides the span itself because styles.css is pinned. */
       const T2=S.blob.player.team;
       m.innerHTML = `<div class="seg segc" style="background:rgba(255,255,255,.08);margin:0 0 10px">${SC.map(s=>`<button class="${pyScope===s[0]?"on":""}" style="font-size:11px" onclick="pyScopeGo('${s[0]}')">${s[1]}</button>`).join("")}</div>
       <div class="hoodhead" style="color:#fff"><h3>${esc(T2)} records</h3><span style="color:#8b939c">franchise book</span></div>
@@ -1971,14 +2029,14 @@ RENDER.huddle = (b, sub)=>{
     S.votes[id]=S.votes[id]===v?0:v; persist(); renderApp("huddle", sub);
     const sc2=b.querySelector(".apbody"); if(sc2) sc2.scrollTop=y; };
   window._hv = vote;
-  const score = (base,id)=> base + (S.votes[id]||0);
+  const score = (base,id)=> (Number(base)||0) + (S.votes[id]||0);   /* v1.19.2 (Ty's NaN screenshot): a reply that arrived without an "up" count rendered NaN — the vote math number-guards now */
   const cmtHtml = (c, path, top)=>{
     const id=path; const sc=score(c.up, id); const mine=S.votes[id]||0;
     return `<div class="cmt ${top?"top":""}"><div class="vote">
       <button class="uv ${mine===1?"on":""}" onclick="_hv('${id}',1)">▲</button>
       <b class="${sc<0?"neg":""}">${sc>999?(sc/1000).toFixed(1)+"k":sc}</b>
       <button class="dv ${mine===-1?"on":""}" onclick="_hv('${id}',-1)">▼</button></div>
-      <div class="cx"><div class="u"><b>${esc(c.u)}</b>${c.op?'<span class="op">OP</span>':''}${c.awd?`<span class="awd">${c.awd}</span>`:''}<span>· ${(_hOld?"":esc(c.tm))}</span></div>
+      <div class="cx"><div class="u"><b>${esc(c.u)}</b>${c.op?'<span class="op">OP</span>':''}${c.awd?`<span class="awd">${c.awd}</span>`:''}<span>${(_hOld||!c.tm)?"":"· "+esc(c.tm)}</span></div>
       <p>${esc(c.t)}</p>
       ${(c.r||[]).map((r,i)=>`<div class="sub">${cmtHtml(r, id+"."+i, false)}</div>`).join("")}</div></div>`;
   };
@@ -2256,11 +2314,13 @@ function charityHtml(){
    wild cards; a first-round BYE also draws the $53,500 wild-card week share without playing
    (CBA truth). Divisional $58,500. Conference Championship $81,000. Super Bowl $178,000
    winners / $103,000 losers. One payment per revealed playoff game, EVER (S.poPaid);
-   deposits ride sweepNet so the tax year tracks them. PRACTICE SQUAD players draw no
+   deposits ride sweepNet so the tax year tracks them. THE CHECKS COME FROM THE NFLPA'S
+   postseason pool, never the club (v1.19.2, Ty's ruling) — the labels say so. PRACTICE SQUAD players draw no
    share — they keep their PS weekly rate through the run (also CBA truth). */
 const PO_SHARES={wcHost:58500, wc:53500, div:58500, conf:81000, sbWin:178000, sbLose:103000};
 function playoffShares(blob){
   try{
+    if (S.exitWar && !S.exitWar.ended) return;   /* v1.19.2: a player at war with the club is not on the postseason pay sheet */
     S.poPaid=S.poPaid||{};
     const ps=(blob.player.status==="PracticeSquad");
     const po=(blob.schedule||[]).filter(g=>isPlayoffType(g[1])&&g[1]!=="ProBowl"&&g[7]).sort((a,b)=>a[0]-b[0]);
@@ -2271,8 +2331,8 @@ function playoffShares(blob){
       if (t==="DivisionalPlayoff" && !hasWC && !S.poPaid["po|bye|"+(blob.clock.seasonYear||0)]){
         S.poPaid["po|bye|"+(blob.clock.seasonYear||0)]=1;
         if (ps) deposit("Practice squad week — Wild Card (bye)", sweepNet(psWeekly()));
-        else { deposit("Playoff share — Wild Card week (first-round bye)", sweepNet(PO_SHARES.wc));
-               S.world.notifs.push({app:"meridian", t:"Meridian", p:"CBA playoff share: "+fm(PO_SHARES.wc)+" — the bye week still pays the Wild Card share"}); }
+        else { deposit("NFLPA playoff share — Wild Card week (first-round bye)", sweepNet(PO_SHARES.wc));
+               S.world.notifs.push({app:"meridian", t:"Meridian", p:"NFLPA playoff share (CBA): "+fm(PO_SHARES.wc)+" — the bye week still pays the Wild Card share"}); }
       }
       let amt=0, lbl="";
       if (t==="WildcardPlayoff"){ amt=g[4]? PO_SHARES.wcHost : PO_SHARES.wc; lbl="Wild Card"+(g[4]?" (division winner)":""); }
@@ -2281,7 +2341,7 @@ function playoffShares(blob){
       else if (t==="SuperBowl"){ const won=g[7][0]>g[7][1]; amt=won? PO_SHARES.sbWin:PO_SHARES.sbLose; lbl="Super Bowl "+(won?"win":"loss"); }
       if (!amt) continue;
       if (ps){ deposit("Practice squad week — "+lbl, sweepNet(psWeekly())); S.world.notifs.push({app:"meridian", t:"Meridian", p:"Playoff week: practice squad rate paid — "+lbl}); }
-      else { deposit("Playoff share — "+lbl, sweepNet(amt)); S.world.notifs.push({app:"meridian", t:"Meridian", p:"CBA playoff share: "+fm(amt)+" — "+lbl}); }
+      else { deposit("NFLPA playoff share — "+lbl, sweepNet(amt)); S.world.notifs.push({app:"meridian", t:"Meridian", p:"NFLPA playoff share (CBA): "+fm(amt)+" — "+lbl}); }
     }
   }catch(e){}
 }
@@ -2964,7 +3024,7 @@ function famSeatsLine(){
   return "\nFAMILY SEATS (flavor truth, scaled to his standing "+L+"/14): "+t+". Texts, chirps, and stories may reflect exactly this and never better.";
 }
 function arrivalLine(){
-  const a=S.arrival; if(!a || a.mode==="shuttle") return "";
+  const a=S.arrival; if(!a || a.mode==="shuttle") return "\nGAMEDAY ARRIVAL: he rides the team shuttle — nobody outside the building sees him arrive or sees any car of his; NEVER write fan or online content about his car or his arrival.";   /* v1.19.2 (Ty: "random people online should not be commenting on my car unless its driven to the game"): the shuttle states the no-look law instead of saying nothing */
   const n=nextGame(), l=lastPlayed();
   const homeNext = n && n[4], homeLast = l && l[4];
   if (!homeNext && !homeLast) return "";
@@ -3448,7 +3508,7 @@ function reqSheet(type, pre){
   <p class="sp">This goes on the record through ${esc(S.agent.n.split(" ")[0])}. The building answers at its own pace — usually by the next sync — and the save, not the ask, decides what actually moves.</p>
   ${type==="bringin"? `<p class="sp" style="font-size:12px;opacity:.75">How this works: a yes from the building is a decision, not a transaction. The phone never signs anyone. The move only becomes real inside Madden's world — when a sync shows him on the roster, the phone announces it like the news it is.</p>`:""}
   ${type==="holdout"? `<p class="sp" style="font-size:12px;color:#e8a13c">Know the cost before you sit: every game week held out is a missed check (about ${fm(wkGross)} gross at your current status), a public holdout is an instant conduct fine, and the building remembers who blinked. Guaranteed money can get voided over it.</p>`:""}
-  ${type==="leave"? `<p class="sp" style="font-size:12px;opacity:.75">The exit consult. ${esc(S.agent.n.split(" ")[0])} reads the league for you: who needs your position, where the tape travels. Talk is talk — a release or free agency only exists when the SAVE shows it; if that door ever opens in Madden's world, this is the map you walk out with.</p>${teamNeedsHtml()}`:""}
+  ${type==="leave"? `<p class="sp" style="font-size:12px;color:#ff9d94"><b>This is final.</b> "I'm leaving" is an absolute refusal to ever play for this team again — a holdout with teeth, way past a trade ask, and there is NO walking it back. The club will bench you on the spot, bar you from team activities, withhold every game check, and fine you the CBA maximum (one week's salary) for every game you sit. It ends ONLY when the save trades or releases you.</p>${teamNeedsHtml()}`:""}
   ${type==="depth"? `<label class="flabel">Which list?</label><select class="field" id="reqPos" onchange="_reqSlotRefresh()">${dPositions.map(x=>`<option ${x===dDefault?"selected":""}>${x}</option>`).join("")}</select>
     <label class="flabel">Which slot do you want?</label><select class="field" id="reqSlot">${dSlotOpts(dDefault).map(x=>`<option ${pre&&pre.slot===x?"selected":""}>${x}</option>`).join("")}</select>
     <p class="sp" id="reqDCur" style="font-size:12px;opacity:.75"></p>`:""}
@@ -3534,6 +3594,18 @@ function reqSubmit(type){
       const gv=+($("#reqGive")&&$("#reqGive").value); if (Number.isInteger(gv)&&gv>=0&&gv<=99) r.giveNum=gv;   /* v1.17.0: HIS new number is YOUR pick, not a scan */ }
   }
   S.requests.push(r);
+  if (type==="leave" && !(S.exitWar && !S.exitWar.ended)){
+    /* v1.19.2 THE EXIT WAR (Ty: "'im leaving' is an absolute refusal to play. its a holdout with
+       teeth... no coming back"): the declaration itself starts it — benched and barred at once;
+       the withheld checks and the CBA-max fines land at every sync (advanceTo); ONLY the save
+       moving him (trade, release, free agency) ends it. The wall stands: the phone writes none
+       of the exit itself. */
+    S.exitWar={wk:wkKey(S.blob.clock), ts:Date.now(), team:S.blob.player.team, fines:0, missed:0};
+    clubMail("Notice of Suspension — Refusal to Perform",
+      'This is formal notice from the club. Your stated refusal to play for the '+(S.blob.player.team||'club')+' has been ruled conduct detrimental by '+coachName()+'. Effective immediately you are benched and barred from all team activities. Game checks will be withheld for every game missed, and the club will assess the maximum fine permitted under the CBA — one week\u2019s salary — for each game you refuse to play. This notice is one-way; direct any response through your representation.');
+    S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Suspended — benched, checks withheld, fines coming"});
+    try{ ledgerRoomEvent("he told the club he will never play for them again", -15); }catch(e){}
+  }
   if (pub && (type==="gone"||type==="trade") && target){
     /* v1.9.4: a PUBLIC ask to move a teammate reaches that teammate. Of course it does. */
     const pk=ledgerPersonKey(target);
@@ -3660,9 +3732,20 @@ function resolveRequests(){
         say("The equipment room kicked the #"+r.num+" ask back \u2014 'league office paperwork window,' which is building-speak for not this week. Refile after a game.");
       } else { r.status="ignored"; say("The number ask sits in somebody's tray. Paperwork moves at paperwork speed. I'll keep on it."); }
     } else if (r.type==="leave"){
-      /* v1.7.5: the exit consult resolves as an honest reading. The wall stands — releases and
-         free agency only exist when the save shows them; the phone never writes an exit. */
-      if (t.score<25 && roll<0.5){ r.status="ignored"; say("On finding your next team \u2014 I made the calls. At "+t.word+" standing the phones don't ring back. File stays open; the tape does the talking."); }
+      /* v1.19.2 THE EXIT WAR (Ty: "a holdout with teeth... no coming back"): a live war never
+         resolves to a refusal — the ask stays PENDING, the agent reports the mounting pressure,
+         and ONLY the save ending it (trade, release, free agency) closes the file as granted.
+         The wall stands: the phone never writes the exit itself. Legacy asks with no war on
+         file keep the old v1.7.5 honest reading, verbatim. */
+      if (S.exitWar && S.exitWar.ended){
+        r.status="granted"; say("It's over. The save moved you \u2014 the war worked. New building, clean slate; don't look back.");
+      } else if (S.exitWar){
+        const wks=S.exitWar.missed||0;
+        say(wks<1? "It's done. I told the building you will never play for them again \u2014 they benched you on the spot, barred you from the facility, and the fines start the first game you sit: the CBA maximum, a week's salary, every week. I'm on every phone in the league. A trade or a release is the only way out now."
+          : "Week "+wks+" of the war. "+fm(S.exitWar.fines||0)+" in fines, every check withheld \u2014 and it's working: "+(r.target? r.target+" has asked about a price" : "buildings are calling about a price")+". They cannot carry a benched contract forever. Hold.");
+        continue;   /* the war outlives the week — the ask stays pending until the save moves him */
+      }
+      else if (t.score<25 && roll<0.5){ r.status="ignored"; say("On finding your next team \u2014 I made the calls. At "+t.word+" standing the phones don't ring back. File stays open; the tape does the talking."); }
       else { r.status="refused"; say("Walked the exit ask up to "+t.who+". Under contract means under contract \u2014 they're not cutting anybody as a favor. If the save ever shows you free or moved, "+(r.target? r.target+" is where I aim first" : "we aim wherever the need is real that day")+". Until then it's leverage talk, and we both know what your leverage is right now."); }
     } else {
       // the wall: the phone never writes trades, releases, or signings. Honest refusals only.
@@ -3691,7 +3774,8 @@ function requestsLine(){
   const rs=(S.requests||[]); if(!rs.length) return "";
   const t=pullTier();
   const recent=rs.slice(-5).map(r=>REQ_TYPES[r.type].label+(r.target?" ("+r.target+")":"")+(r.pub?", made PUBLIC":"")+" \u2014 "+(r.status==="pending"?"pending, no answer yet":(r.status==="granted"?"the staff moved on it":r.status)+" (SETTLED, old news)")).join("; ");
-  return "\nFORMAL REQUESTS "+(selfRepped()?"HE FILED HIMSELF, self-represented":"THROUGH HIS AGENT")+" (facts): "+recent+". His standing in the building: "+t.word+"; asks route as far as "+t.whoLong+". LAW: talk is talk \u2014 NEVER state that a trade, release, signing, benching, or promotion happened because of a request; only the save's own news decides. The world may discuss, mock, or speculate about PUBLIC requests only. SETTLED ASKS ARE THE PAST (v1.17.5, Ty: the agent re-answered an old ask): anything not pending was answered long ago — never re-answer it, re-raise it, or treat it as new; only a pending ask is live business.";
+  const warTxt=(S.exitWar&&!S.exitWar.ended)? " THE EXIT WAR IS ON: his \"I'm leaving\" is an ABSOLUTE refusal to ever play for this team again, with no walking it back — the club benched him, bars him from team activities, withholds every game check, and fines him a week's salary (the CBA maximum) per missed game; coverage treats a trade or release as inevitable." : "";
+  return "\nFORMAL REQUESTS "+(selfRepped()?"HE FILED HIMSELF, self-represented":"THROUGH HIS AGENT")+" (facts): "+recent+"."+warTxt+" His standing in the building: "+t.word+"; asks route as far as "+t.whoLong+". LAW: talk is talk \u2014 NEVER state that a trade, release, signing, benching, or promotion happened because of a request; only the save's own news decides. The world may discuss, mock, or speculate about PUBLIC requests only. SETTLED ASKS ARE THE PAST (v1.17.5, Ty: the agent re-answered an old ask): anything not pending was answered long ago — never re-answer it, re-raise it, or treat it as new; only a pending ask is live business.";
 }
 /* ============ v1.12.0 THE DEPTH CHART — full team view from save truth ============
    IDENTITY LAW: this is the BUILDING's document, rendered read-only. Your rows are marked;
@@ -4867,7 +4951,7 @@ function pressersLine(){
   const g=lastPlayed(); if(!g) return "";
   const gk="pr"+g[2]+"|"+g[1]+"|"+g[0];
   const pr=(S.pressers||{})[gk]; if(!pr) return "";
-  let out="\nTHE PRESSER (postgame podium, THIS sync's game — "+ (g[4]?"vs ":"at ")+g[3]+" "+g[7][0]+"-"+g[7][1]+", team record after: EXACTLY "+pr.record_after+"): SPOKEN-RECORD LAW: every record is spoken with the word AND between the numbers, ALWAYS — 'three and five', 'three and zero', 'ten and six'; a 0 is spoken 'zero'; never 'oh', never 'ohh', never bare digits like 'three five'. ";
+  let out="\nTHE PRESSER (postgame podium, THIS sync's game — "+ (g[4]?"vs ":"at ")+g[3]+" "+g[7][0]+"-"+g[7][1]+", team record after: EXACTLY "+pr.record_after+"): SPOKEN-RECORD LAW (governs ONLY words spoken aloud — his podium quotes and on-air speech; every WRITTEN surface anywhere else prints the record as digits with a hyphen, 3-5, never spelled out): every record is spoken with the word AND between the numbers, ALWAYS — 'three and five', 'three and zero', 'ten and six'; a 0 is spoken 'zero'; never 'oh', never 'ohh', never bare digits like 'three five'. ";
   if (pr.skipped_all){
     out+="he SKIPPED availability entirely. Coverage may note that ONCE, neutrally, and may not invent a single podium word.";
   } else {
@@ -5378,13 +5462,14 @@ RENDER.settings = b=>{
     ${other? `<input class="field" id="pcColName" value="${esc(cn)}" placeholder="Type the school" oninput="colHintLive(this.value)" onchange="savePerception()">`:""}`;
   })()}
   <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px" id="colHint">Prestige reads automatically: ${esc(collegePrestige(pc.collegeName))}.${pc.collegeName?"":" The save's college slot is empty for created players (verified against the save itself) — pick yours here once and it sticks."}</div>
-  <label class="flabel">College career</label>${dd("pcCol", ["Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"], pc.college||"Career backup")}
+  <label class="flabel">College career</label>${dd("pcCol", (function(){const o=["Heisman winner","Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"];const c=pc.college; if(c && !o.includes(c)) o.splice(1,0,c); return o;})(), pc.college||"Career backup")}
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
 
   ${(S.blob.player.draftRound>=1&&S.blob.player.draftRound<=7)? `<label class="flabel">Draft story (read from the save)</label>
   <div class="field" style="opacity:.75">${esc(pc.draft||"Undrafted free agent")}</div>`
   : `<label class="flabel">Draft story — your pick (the save lists every created player as a UDFA; the phone accounts for the round where it can)</label>
-  ${dd("pcDraftRound", ["UDFA — undrafted","Round 1","Round 2","Round 3","Round 4","Round 5","Round 6","Round 7"], (function(){const r=+(pc.draftRoundPick);return (r>=1&&r<=7)?"Round "+r:"UDFA — undrafted";})())}
+  ${dd("pcDraftRound", (pc.college==="Heisman winner")? ["Round 1"] : ["UDFA — undrafted","Round 1","Round 2","Round 3","Round 4","Round 5","Round 6","Round 7"], (function(){const r=+(pc.draftRoundPick);return (pc.college==="Heisman winner")? "Round 1" : (r>=1&&r<=7)?"Round "+r:"UDFA — undrafted";})())}
+  ${pc.college==="Heisman winner"? `<p style="font-size:11px;color:var(--faint);margin:-4px 0 8px">A Heisman winner goes in the first round — every other round is off the board.</p>`:""}
   <p style="font-size:11px;color:var(--faint);margin:-4px 0 8px">Feeds your standing at the table, the seed money math, and what the world says about you. No in-game effect — Madden never knew.</p>`}
   <label class="flabel">Public reputation (set by the league, not by you)</label>
   <div class="field" style="opacity:.75">${esc(autoReputation())}</div>
@@ -5610,6 +5695,7 @@ function familyLine(){
 }
 function savePerception(){
   const pc=S.perception;
+  const _prevCol=pc.college;   /* v1.19.2: a college change re-renders (the Heisman lock swaps the draft options live) */
   const gv=id=>{const el=$("#"+id);return el?el.value:null;};
   const st=gv("pcState");
   if (st==="Other (type a country)"){ pc.stateOther = pc.stateOther||""; const co=gv("pcStateOther"); if(co!==null) pc.stateOther=co; if(!$("#pcStateOther")) rerenderSettings(); }
@@ -5619,6 +5705,11 @@ function savePerception(){
   pc.college=gv("pcCol")||pc.college; pc.family=gv("pcFam")||pc.family;
   const drp=gv("pcDraftRound");   /* v1.16.5: the chosen draft round */
   if (drp!==null){ const m=/Round (\d)/.exec(drp); pc.draftRoundPick = m? +m[1] : 0; pc.draft=draftStoryText(draftRoundEff()); }
+  /* v1.19.2 HEISMAN WINNER (Ty): the trophy blocks every round but the first — the picker
+     locks to Round 1 in the UI, and this belt coerces any stored pick (save-truth rounds,
+     read-only 1-7 from a real draft, always win and are never touched). */
+  if (pc.college==="Heisman winner" && !(+(S.blob.player.draftRound)>=1 && +(S.blob.player.draftRound)<=7) && pc.draftRoundPick!==1){ pc.draftRoundPick=1; pc.draft=draftStoryText(1); }
+  if (pc.college!==_prevCol) setTimeout(rerenderSettings,0);
   const ask=gv("pcAsk"); if(ask!==null) pc.familyAsk=Math.max(0,+ask||0);
   const dt=gv("pcDebtTotal"); if(dt!==null) pc.debtTotal=Math.max(0,+dt||0);
   const ac=gv("pcAutoCar"); if(ac!==null) pc.autoLoanCar=ac.trim();
@@ -7016,6 +7107,12 @@ async function advanceTo(blob){
   const oldSS=mergedSS(S.blob);                                       // v1.7.5: last sync's stat truth, for the per-game diff
   const rng=seedRng(S.careerId+"|wk|"+wkKey(newC));
   const events=[];
+  /* v1.19.2 THE EXIT WAR ends ONLY when the save moves him — a new team or free agency. Checked
+     BEFORE the pay loop so a man the save already moved is never fined for the elapsed weeks. */
+  if (S.exitWar && !S.exitWar.ended && (blob.player.team!==S.exitWar.team || blob.player.status==="FreeAgent")){
+    S.exitWar.ended=wkKey(newC);
+    events.push("The exit war is over — the save moved him ("+(blob.player.status==="FreeAgent"?"released to free agency":"to the "+blob.player.team)+")");
+  }
   // elapsed regular-season weeks → paychecks, ACROSS SEASONS if the code jumps years.
   // Each entry: {y: seasonYear, w: week index}. Skipped full seasons pay all 18 checks.
   const wksElapsed=[];
@@ -7044,8 +7141,20 @@ async function advanceTo(blob){
     let net=ck.net;
     net=sweepNet(net);   // v1.8.7: the sweep moved into its ONE door (sweepNet) — same math, now every income stream uses it
     const yTag = (y!==newC.seasonYear)? y+" " : "";
-    deposit("Game check — "+yTag+"Week "+(w+1)+(road?" (@ "+g[3]+")":""), net);
-    events.push(yTag+"Week "+(w+1)+" check "+fm(net));
+    if (S.exitWar && !S.exitWar.ended){
+      /* v1.19.2 THE EXIT WAR: refusal to play under contract — the game check is WITHHELD (never
+         deposited) and the club assesses the CBA MAXIMUM team fine, one week's salary, for every
+         game he sits. Two checks' worth of pain per week, by design. */
+      const warFine=Math.max(5000, Math.round(ck.lines[0][1]));
+      S.cash.checking-=warFine;
+      S.ledger.push({t:"Club fine — refusal to play (CBA maximum: one week's salary) — "+yTag+"Week "+(w+1), amt:-warFine, kind:"spend"});
+      S.ledger.push({t:"Game check WITHHELD — refusal to play — "+yTag+"Week "+(w+1), amt:0, kind:"note"});
+      S.exitWar.fines=(S.exitWar.fines||0)+warFine; S.exitWar.missed=(S.exitWar.missed||0)+1;
+      events.push(yTag+"Week "+(w+1)+" check WITHHELD; club fine "+fm(warFine));
+    } else {
+      deposit("Game check — "+yTag+"Week "+(w+1)+(road?" (@ "+g[3]+")":""), net);
+      events.push(yTag+"Week "+(w+1)+" check "+fm(net));
+    }
     dealWeekPay(y, w);                                             // v1.6: endorsement money rides the season weeks
     burnWeek(); charityWeekly(y); tickInvest(rng); cardCycle(w);   /* v1.18.0: the giving commitment rides every game week */
   }
@@ -8027,6 +8136,65 @@ function hisFormLine(blob){
   const won=played[played.length-1][7][0]>played[played.length-1][7][1];
   return "FORM (his team, real, most recent first): "+rows.join("; ")+". CURRENT STREAK: "+(won?"won":"lost")+" "+n+" straight. STREAK LAW: any claim about a streak, stretch, run, drought, or \"ending\" one must match FORM and CURRENT STREAK exactly — a team that won its previous game has NOT broken a losing stretch; never invent an arc the results do not show.";
 }
+/* v1.19.2 (Ty: "mix up the players that comment a bit. its always the same ones"): the facts
+   used to hand every pen the SAME ten names forever (the roster ships OVR-sorted). The top four
+   stars always ride; six more rotate on a week-seeded shuffle of the next twenty-six, so the
+   world's voices genuinely change week to week. */
+function keyTeammatesLine(blob){
+  try{
+    const rs=blob.roster||[]; if(!rs.length) return "n/a";
+    const stars=rs.slice(0,4), pool=rs.slice(4,30);
+    const rng=seedRng(((typeof S!=="undefined"&&S&&S.careerId)||"x")+"|ktm|"+wkKey(blob.clock));
+    const arr=pool.slice();
+    for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const t2=arr[i]; arr[i]=arr[j]; arr[j]=t2; }
+    return stars.concat(arr.slice(0,6)).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ");
+  }catch(e){ return (blob.roster||[]).slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", "); }
+}
+/* v1.19.2 POSTSEASON STRUCTURE LAW (Ty: "ai talks about division and wildcard sometimes like
+   the teams are all playing the same week"): the facts name the round, the bye, and the gap.
+   His schedule is the truth: a wild-card week with no wild-card row but a divisional row is a
+   FIRST-ROUND BYE; Pro Bowl week is the off week before the Super Bowl. */
+function postseasonLine(){
+  const c=S.blob.clock; const t=c.weekType;
+  if (!isPlayoffType(t)) return "";
+  const sched=S.blob.schedule||[];
+  const rowOf=wt=>sched.find(g=>g&&g[1]===wt);
+  let mine="";
+  if (t==="ProBowl") mine=" This is the OFF WEEK between the Conference Championships and the Super Bowl (Pro Bowl week): NEITHER Super Bowl team plays this week — the two finalists are preparing, and every other team's season is already over.";
+  else {
+    const g=rowOf(t);
+    if (g) mine=" "+S.blob.player.team+" PLAY this round: "+(g[4]?"home vs ":"at ")+g[3]+(g[7]?" (final "+g[7][0]+"-"+g[7][1]+")":"")+".";
+    else if (t==="WildcardPlayoff" && rowOf("DivisionalPlayoff")) mine=" "+S.blob.player.team+" have a FIRST-ROUND BYE: they DO NOT play wild-card weekend — never write them into a wild-card game, never write them as playing this week; their postseason opens in the Divisional round.";
+    else mine=" "+S.blob.player.team+" have NO game this round on the schedule — never invent one; if no later playoff game of theirs exists, their season is over and they are watching like everyone else.";
+  }
+  return "\nPOSTSEASON STRUCTURE LAW: it is "+phaseName(t)+". Only qualified teams still play, and every round owns its OWN weekend — teams on a bye and eliminated teams play NOBODY that week; never write wild-card, divisional, and championship games as the same weekend, and never write a bye team into that week's slate."+mine;
+}
+/* v1.19.2 THE EXIT WAR line — public, absolute, rides every pen (press included: it IS news). */
+function exitWarLine(){
+  const w=(typeof S!=="undefined"&&S)? S.exitWar : null; if(!w||w.ended) return "";
+  return "\nTHE EXIT WAR (public, absolute): he has told the "+S.blob.player.team+" he is DONE — an absolute refusal to EVER play for this team again, far beyond a trade request, and there is no walking it back. The club has benched him and barred him from all team activities, withholds every game check, and fines him the CBA maximum (one week's salary) for every game he sits ("+(w.missed||0)+" missed so far, "+fm(w.fines||0)+" in fines). He does not practice, play, appear in team content, or warm to the club. The whole league knows; coverage treats a trade or release as inevitable, and the pressure on the front office grows every week he sits. NEVER write him playing, practicing, or reconciling — only the save's own news (a trade, a release, free agency) can end this.";
+}
+/* v1.19.2 THE AGENT'S DESK (Ty: agent said "top of the sheet is quinnen" — a player not on the
+   roster — and defers on cap/interest/stock questions): the agent thread's pen now carries the
+   SAVE'S money sheet and the desk law. Roster idx 8 has shipped every teammate's cap hit since
+   exe v1.6.7 — nobody ever handed it to the pen. */
+function agentDeskLine(){
+  try{
+    const p=S.blob.player;
+    const rows=(S.blob.roster||[]).filter(r=>Array.isArray(r)&&r.length>8&&(+r[8]>0));
+    const paid=rows.slice().sort((a,b)=>(+b[8])-(+a[8])).slice(0,8);
+    const myHit=(p.contract&&p.contract.capSalary)||p.capSalary||0;
+    const yrsLeft=(function(){ const c=p.contract; if(!c||!Array.isArray(c.salary)) return null; return Math.max(0, c.salary.length-(+c.currentYear||0)); })();
+    const M=S.blob.market||{};
+    const caps=(M.caps||[]).slice().sort((a,b)=>b[2]-a[2]);
+    const capLine=caps.length? " LEAGUE CAP ROOM (all 32, save truth — the most room first): "+caps.slice(0,6).map(c=>c[1]+" "+fm(c[2])).join(", ")+"; the tightest: "+caps.slice(-3).map(c=>c[1]+" "+fm(c[2])).join(", ")+"." : "";
+    const fa=(M.fa||[]).filter(x=>x&&x[1]===p.pos);
+    const faLine=fa.length? " THE FREE-AGENT STREET at his position: "+fa.length+" "+p.pos+"s available; best out there: "+fa.slice(0,3).map(x=>x[0]+" ("+x[3]+" OVR)").join(", ")+"." : "";
+    const needs=(function(){ try{ const ns=teamNeeds(p.pos); return (ns&&ns.length)? " HONEST INTEREST READ (records + thin position rooms, save truth): buildings where a "+p.pos+" could eat: "+ns.slice(0,4).map(x=>x.n+" ("+x.rec.w+"-"+x.rec.l+(x.thin?", thin at the spot":"")+")").join(", ")+"." : ""; }catch(e){ return ""; } })();
+    const payLine=paid.length? " TEAM PAYROLL TRUTH (this roster's top cap hits, save truth — THE sheet; never name anyone not on it): "+paid.map((r,i)=>(i+1)+". "+r[0]+" "+r[1]+" ("+r[2]+") "+fm(+r[8])).join("; ")+". HIS OWN cap hit: "+fm(myHit)+(yrsLeft!=null? " with "+yrsLeft+" year"+(yrsLeft===1?"":"s")+" left on the deal":"")+"." : " (Payroll figures ride the next desktop sync — if asked who makes the most, say the sheet arrives with the sync; NEVER invent a name or a number.)";
+    return "\nTHE AGENT'S DESK (facts only the agent carries):"+payLine+capLine+faLine+needs+" THE DESK LAW: the agent is the ONE person in his life with real answers about money, contracts, cap space, the market, other teams' interest, and his trade stock — asked any of it, ANSWER, using these exact numbers and honest readings; never deflect, never defer to the front office, never a 'we'll see'. Interest reads are honest projections, never promises — an actual move only exists when the save shows it (and he can make any trade happen in the game himself).";
+  }catch(e){ return ""; }
+}
 function worldFacts(blob, last, opts){
   /* v1.17.0 THE PRESS SCOPE (Ty: the paper printed his private number-ask, his follower count,
      his parents buying seats — "none of this has anything to do with a news article"): the
@@ -8040,16 +8208,17 @@ function worldFacts(blob, last, opts){
      Every line is fenced now; a failure logs its name (console + S.wfErrs) and yields "". */
   const SL=(fn,name)=>{ try{ return fn()||""; }catch(e){ try{ console.log("worldFacts line failed: "+name, e); (S.wfErrs=S.wfErrs||[]).push(name+": "+String(e&&e.message||e).slice(0,70)); S.wfErrs=S.wfErrs.slice(-8); }catch(_){} return ""; } };
   return `TODAY (in-world): ${gameDateLong(blob.clock)}, ${wkLabel(blob.clock)}. All content you write happens NOW; anything from earlier weeks or seasons is the past.
-HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network).
+HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network). WRITTEN-RECORD LAW: in WRITTEN content — texts, chirps, Huddle, emails, articles — a team record is digits with a hyphen (3-5, 10-6), NEVER spelled out in words; spelled-out records belong only to words spoken aloud at the podium or on a show.
 STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches, the GM, assistant GM, front office, the owner — NEVER text the player and have no text thread. Any direct staff outreach arrives only as a one-way club EMAIL the player cannot answer. Text threads belong to teammates, family, the agent, and friends only; never write a staff member into a text thread.
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
 ${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, age EXACTLY ${p.age}, jersey #${p.jersey} (the number has NOT changed — it is never a story and never an email topic unless these facts say otherwise), age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>famAttendLine(),"famAttendLine")}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}${SL(()=>injuriesLine(),"injuriesLine")}${SL(()=>txLine(),"txLine")}${SL(()=>staffTruthLine(),"staffTruthLine")}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>famAttendLine(),"famAttendLine")}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}${SL(()=>injuriesLine(),"injuriesLine")}${SL(()=>txLine(),"txLine")}${SL(()=>staffTruthLine(),"staffTruthLine")}${SL(()=>postseasonLine(),"postseasonLine")}${SL(exitWarLine,"exitWarLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
-KEY TEAMMATES: ${blob.roster.slice(0,10).map(r=>r[0]+" "+r[1]+" ("+r[2]+" #"+r[4]+")").join(", ")}.
+KEY TEAMMATES (a weekly rotation — vary the voices): ${keyTeammatesLine(blob)}.
+VOICE VARIETY LAW: rotate who shows up — different teammates, different fan accounts, different Huddle usernames week to week; never the same handful every week. HOMETOWN LAW: a player's home state or hometown is background trivia, not a personality — no player brings up where he is from as a recurring bit (New Jersey or anywhere else); at most a rare aside, never week after week.
 POSITION ROOM (${p.pos}): ${blob.roster.filter(r=>r[2]===p.pos).map(r=>r[0]+" "+r[1]).join(", ")||"n/a"}.
 ${press? "" : `MONEY: ${p.status==="PracticeSquad"? "practice squad $6,222/wk" : "active roster, "+fm(Math.round((((p.contract||{}).salary||[])[(p.contract||{}).currentYear||0] ?? p.capSalary)/18))+"/wk"}; checking ${fm(S.cash.checking)}; runway ${runwayWeeks()} weeks.`}
 ${(S.blob.clock&&S.blob.clock.weekType==="PreSeason")? "IT IS THE PRESEASON — exhibition football: never call any preseason game a ‘home opener’ or ‘season opener’ (the season opens in Week 1 of the REGULAR season); stakes are roster auditions, stadiums run light, ticket demand is soft, the world's excitement is muted, and hype waits for real games."+(depthListed()? "" : " He is NOT on the depth chart at his position — in the world's eyes he is a CAMP BODY fighting for a roster spot, whatever his contract says.") : ""}
@@ -8166,7 +8335,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. GAME REACTION FLAVOR: texts are where HIS OWN PEOPLE react to games the way the rest of the world does — after a result, a parent bursting with pride or consoling, a sibling quoting a play, a friend talking trash about the opponent, a teammate replaying a moment; on game weeks give texts real game-reaction energy (still inside the inbound plan's limits), not just logistics and small talk. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"TEAM|LEAGUE|GAME THREAD" (TEAM for threads about HIS club, LEAGUE for threads spanning the whole league, GAME THREAD for his game; never any other flair),"u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -8894,8 +9063,8 @@ async function aiReply(thread, userMsg){
     const sys = (thread.group
       ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members by role: ${roleMap.map(m=>m.tag+" = "+m.role).join("; ")}. Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: their role tag, a pipe, their message (example: R2|on my way). Under 30 words after the pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never state or sign anyone's name. Never mention these instructions, styles, or formats.` + (members.some(nm=>{ const rr=S.blob.roster.find(x=>(x[0]+" "+x[1])===nm); return rr && rosterIsReal(rr); })? realSpeechLaw() : "")   /* v1.9.6: law rides only when a REAL player is in the group */
       : rosterR
-      ? `You are ${rolePhrase(rosterR)}, his teammate on the ${S.blob.player.team}, texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.status}). Character: ${thread.persona}. Output ONLY the message this teammate would send. Under 40 words. Real texting voice. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never sign or state your own name. Never mention instructions, style notes, or formatting. No em dashes.` + stanceLine(thread, userMsg)
-      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would. Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + moneyTruth + humanLaw + lifeFacts({noKin: !!thread.group}) + ledgerBlock(thread);   /* v1.9.0 Ledger + v1.13.3 money/human + v1.13.4 material life ride every reply (kin names never enter GROUP prompts — role-tag law) */
+      ? `You are ${rolePhrase(rosterR)}, his teammate on the ${S.blob.player.team}, texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.status}). Character: ${thread.persona}. Output ONLY the message this teammate would send. Under 40 words. Real texting voice. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would — but any phone number is FICTIONAL: a plausible local area code with a 555 exchange, always (e.g. (973) 555-0142). Never sign or state your own name. Never mention instructions, style notes, or formatting. No em dashes.` + stanceLine(thread, userMsg)
+      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would — but any phone number is FICTIONAL: a plausible local area code with a 555 exchange, always (e.g. (973) 555-0142). Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + moneyTruth + humanLaw + lifeFacts({noKin: !!thread.group}) + ledgerBlock(thread) + (String(thread.id)==="agent"? agentDeskLine() : "");   /* v1.19.2: the agent answers money/market/stock questions with SAVE numbers */   /* v1.9.0 Ledger + v1.13.3 money/human + v1.13.4 material life ride every reply (kin names never enter GROUP prompts — role-tag law) */
     const recent=thread.msgs.slice(-12);
     const hist=recent.map((m,i)=>{
       let gap="";
@@ -8919,7 +9088,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.19.1";
+const VER="v1.19.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
