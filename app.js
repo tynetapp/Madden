@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.20.1 (Aug 18 2026) — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
+/* TyPhone app.js — v1.20.2 (Aug 18 2026) — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -2795,6 +2795,7 @@ let keyMode="browse";
    not-for-sale and take COLD OFFERS: moving an owner who is not selling takes stupid money —
    at least double the estimate (Ty's ruling), the exact ask seeded and hidden. */
 const MARKET_SITES={car:"Autotrader", home:"Zillow", boat:"Boat Trader", plane:"Controller"};
+let _lstBusy=null;   /* v1.20.2: one read at a time */
 const MARKET_APP={car:"octane", home:"keystone", boat:"yachts", plane:"planes"};
 function LISTING_SYS(kind){
   const want={
@@ -2803,7 +2804,7 @@ function LISTING_SYS(kind){
     boat:'"Length","Engines","Engine hours","Fuel","Seller","Hull/colors" (gel coat, bottom paint if listed)',
     plane:'"Total time","Engine time" (SMOH/SNEW + TBO if listed),"Prop time","Year painted","Year interior","Registration","Seller"'
   }[kind];
-  return 'You read one real '+kind+' listing for a life-sim phone. If given a URL, use web search to read that exact listing page (or its indexed data); if given pasted text, read the text. Report ONLY what the listing actually shows — never invent numbers. Return STRICT JSON as your ENTIRE final message, no prose before or after, no fences: {"title":"(year make model, or the street address)","price":asking price number (0 if none),"forSale":true|false (false if off market, sold, or not listed for sale),"estValue":number (market/Zestimate estimate if shown, else the price),"location":"city, ST","year":number or null,"sub":"one short line of what it is","facts":{up to 9 of these keys when the listing shows them: '+want+'},"notes":"one sentence of deal-relevant color: price drops, days listed, condition"}. If the listing cannot be read at all, return {"title":""}.';
+  return 'You read one real '+kind+' listing for a life-sim phone. If given a URL: FETCH that exact page first (web_fetch); only if the page will not fetch, SEARCH for the listing using the site name and the identifiers in the URL (the vehicle/listing ID, the address) and read the indexed data. If given pasted text, read the text. Report ONLY what the listing actually shows — never invent numbers. Return STRICT JSON as your ENTIRE final message, no prose before or after, no fences: {"title":"(year make model, or the street address)","price":asking price number (0 if none),"forSale":true|false (false if off market, sold, or not listed for sale),"estValue":number (market/Zestimate estimate if shown, else the price),"location":"city, ST","year":number or null,"sub":"one short line of what it is","facts":{up to 9 of these keys when the listing shows them: '+want+'},"notes":"one sentence of deal-relevant color: price drops, days listed, condition"}. If the listing cannot be read at all, return {"title":""}.';
 }
 async function callAIWeb(system, user, maxTokens){
   /* the web-read pen. Anthropic: server-side web_search tool, streaming so mobile networks
@@ -2827,16 +2828,26 @@ async function callAIWeb(system, user, maxTokens){
     return gtxt;
   }
   const model = META.settings.model || D.AI.anthropic.models[0];
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json", "x-api-key":aiKey(),
-      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-    body: JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-5",
+  /* v1.20.2 (Ty: "every autotrader car link gets a couldnt-read toast"): web_search HUNTS the
+     index and a fresh dealer detail page was never indexed — the call needs to OPEN the URL.
+     The web_fetch tool does exactly that (beta header rides along); if an account or model
+     rejects the tool with a 400, the call retries search-only rather than dying. */
+  const _mkHdr=wf=>{ const h={ "Content-Type":"application/json", "x-api-key":aiKey(),
+      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" };
+    if (wf) h["anthropic-beta"]="web-fetch-2025-09-10"; return h; };
+  const _mkBody=wf=>JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-5",
       max_tokens:maxTokens||3000, stream:true, system,
       messages:[{role:"user", content:user}],
-      tools:[{type:"web_search_20250305", name:"web_search", max_uses:4}] })
-  });
-  if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+      tools: wf? [{type:"web_fetch_20250910", name:"web_fetch", max_uses:3},{type:"web_search_20250305", name:"web_search", max_uses:3}]
+               : [{type:"web_search_20250305", name:"web_search", max_uses:4}] });
+  let r = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", headers:_mkHdr(true), body:_mkBody(true) });
+  if (!r.ok){
+    const e=await r.text();
+    if (r.status===400 && /web_fetch|beta|tool/i.test(e)){
+      r = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", headers:_mkHdr(false), body:_mkBody(false) });
+      if (!r.ok){ const e2=await r.text(); throw new Error("API "+r.status+": "+e2.slice(0,120)); }
+    } else throw new Error("API "+r.status+": "+e.slice(0,120));
+  }
   const txt = await readSSE(r, ev=>{
     if (ev.type==="error") throw new Error("API stream error");
     if (ev.type==="content_block_delta" && ev.delta && ev.delta.type==="text_delta") return ev.delta.text;
@@ -2846,13 +2857,16 @@ async function callAIWeb(system, user, maxTokens){
   return txt;
 }
 async function listingRead(kind){
+  if (_lstBusy) return toast("Still reading \u2014 one at a time.");   /* v1.20.2 (Ty: "let me click multiple times and gave 3 generations"): the door is one-shot */
   const el=$("#lst-"+kind); const raw=(el&&el.value||"").trim();
   if(!raw) return toast("Paste a "+MARKET_SITES[kind]+" link (or the listing text) first.");
   if(!aiKey()) return toast("Add an API key in Sync first.");
   const isUrl=/^https?:\/\//i.test(raw);
   const prov=META.settings.provider||"anthropic";
   if (isUrl && prov==="openai") return toast("Link reading works on an Anthropic or Google key — on OpenAI, paste the listing TEXT instead. That door works everywhere.");   /* v1.20.1: Gemini reads links itself now */
-  toast("Reading the listing\u2026");
+  _lstBusy=kind;
+  const _rb=$("#lstbtn-"+kind); if(_rb){ _rb.disabled=true; _rb.textContent="Reading\u2026"; }
+  toast("Reading the listing\u2026 this takes a few seconds.");
   try{
     const sys=LISTING_SYS(kind);
     const out = isUrl
@@ -2875,14 +2889,16 @@ async function listingRead(kind){
     persist();
     toast(L.forSale? "Listing read \u2014 it's on the shelf." : "Read it \u2014 that one is NOT for sale.");
     renderApp(MARKET_APP[kind]);
-  }catch(e){ toast("Couldn't read that one. Try pasting the listing text itself \u2014 the fallback door always works."); }
+  }catch(e){ try{ console.log("listing read failed: "+(e&&e.message||e)); }catch(_e){}
+    toast("Couldn't read that one. Try again, or paste the listing text itself \u2014 the fallback door always works."); }
+  finally{ _lstBusy=null; const _rb2=$("#lstbtn-"+kind); if(_rb2){ _rb2.disabled=false; _rb2.textContent="Read the listing"; } }   /* v1.20.2: the door reopens whatever happened */
 }
 function marketBlock(kind, light){
   const rows=(S.listings||[]).filter(x=>x.kind===kind);
   const rowCls=light? "veh-row light":"veh-row";
   return '<div class="hoodhead"'+(light?'':' style="color:var(--ink)"')+'><h3>The open market</h3><span'+(light?'':' style="color:var(--faint)"')+'>paste a real listing</span></div>'+
     '<textarea id="lst-'+kind+'" class="field" rows="2" placeholder="Paste a '+MARKET_SITES[kind]+' link, or the listing text itself"></textarea>'+
-    '<button class="btn sm" style="background:rgba(127,127,127,.18)" onclick="listingRead(\''+kind+'\')">Read the listing</button>'+
+    '<button class="btn sm" id="lstbtn-'+kind+'" style="background:rgba(127,127,127,.18)" onclick="listingRead(\''+kind+'\')">Read the listing</button>'+
     rows.map(L=>'<button class="'+rowCls+'" onclick="listingSheet(\''+L.id+'\')">'+
       '<span class="vr-l"><b>'+esc(L.title)+(L.forSale?"":" \u00b7 NOT FOR SALE")+'</b><small>'+esc(L.sub||L.loc||MARKET_SITES[kind])+'</small></span>'+
       '<span class="vr-r">'+(L.forSale? fm(L.price) : "est "+fm(L.estValue))+'</span></button>').join("");
@@ -3164,7 +3180,7 @@ RENDER.octane = (b,sub)=>{
     <select onchange="octF.max=this.value;octList()"><option value="">Any price</option><option value="30000">Under $30k</option><option value="60000">Under $60k</option><option value="120000">Under $120k</option><option value="300000">Under $300k</option><option value="1000000">Under $1M</option><option value="99999999">No limit</option></select>
     <select onchange="octF.sort=this.value;octList()"><option value="az">Make A-Z</option><option value="plo" ${octF.sort==="plo"?"selected":""}>Price: low</option><option value="phi" ${octF.sort==="phi"?"selected":""}>Price: high</option><option value="new" ${octF.sort==="new"?"selected":""}>Year: newest</option></select>
   </div>
-  <div class="apbody" style="padding-bottom:0">${marketBlock("car")}</div>
+  <div style="padding:12px 16px 0">${marketBlock("car")}</div>
   <div class="oct-count" id="octCount"></div>
   <div class="apbody flush" id="octList" style="padding:0 16px 28px"></div>`;
   octList();
@@ -9418,7 +9434,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.20.1";
+const VER="v1.20.2";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
