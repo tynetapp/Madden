@@ -1,5 +1,5 @@
-/* TyPhone sw.js — v1.19.2 (Aug 18 2026) — THE WAR AND THE DOOR (cache-buster) */
-const VER = "typhone-v1.19.2";
+/* TyPhone sw.js — v1.20.1 (Aug 18 2026) — THE GEMINI DOOR (cache-buster) */
+const VER = "typhone-v1.20.1";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
 const EXTRAS = []; // scanner retired v1.4 (copy-paste is THE sync path); jsqr.min.js no longer cached
 const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use

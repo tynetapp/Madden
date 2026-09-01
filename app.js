@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.19.2 (Aug 18 2026) — THE WAR AND THE DOOR (Ty's sixteen): (1) THE AGENT'S DESK — the agent answers money, cap, market, and trade-stock questions with SAVE NUMBERS (top roster cap hits, all-32 cap room, the FA street, an honest interest read); the "top of the sheet is quinnen" class of invented answer dies (the desk law: never deflect, never invent). (2) VOICE VARIETY + THE HOMETOWN LAW — KEY TEAMMATES rotates weekly (top four stars + six week-seeded from the next twenty-six) and no player runs his home state as a recurring bit (the Minkah-NJ fix). (3) POSTSEASON STRUCTURE LAW — the facts name the round, a first-round bye means the team does NOT play wild-card weekend, Pro Bowl week is the gap before the Super Bowl, and rounds never share a weekend. (4) THE EXIT WAR — "I'm leaving" is an absolute refusal to ever play for the team again: benched and barred at declaration, every game check WITHHELD, the CBA-maximum club fine (one week's salary) per missed game, the ask stays pending and only the save (trade/release/FA) ends it. (5) NFLPA playoff shares — the postseason checks say who pays them (the union pool, never the club), and a player at war draws none. (6) THE RECORD WRAP — the pinned ".scorecard .tm span{display:flex}" rule was turning his gold record-book name into a block and wrapping every row he holds; display:inline rides the gold span (styles.css stays pinned). (7) THE HUDDLE NaN — a reply arriving without an "up" count rendered NaN; score() number-guards. (8) THE 555 WALL — every inbound phone number heals to a fictional 555 exchange at the deDash door (area code kept), and the reply pens carry the belt. (9) THE IN-WORLD DATE — text dates mapped the PHONE'S calendar (August in November, then June after a sync shifted the ts again); dateLabel now maps onto the world's calendar: world-today minus how long ago. (10) SPOKEN RECORDS ARE PODIUM-ONLY — spelled-out records govern only words spoken aloud; every written surface uses digits with a hyphen (3-5). (11) THE LOAD DOOR — liking and replying on Chirper stir NOTHING until "Load top replies" is pressed: a like earns reactions to it, a reply earns before/after + reactions, nothing earns the plain fold (supersedes the v1.17.5/v1.17.9/v1.18.6 auto-pens; the v1.19.1 self-heal lives on inside the door). (12) GAME REACTION FLAVOR — texts react to games like the rest of the world does. (13) CAR PRIVACY — fans online never comment on his cars unless the gameday arrival says he drove one to the game (the shuttle now states the no-look law). (14) HEISMAN WINNER — a new college-career tier above multi-year starter; it locks the draft picker to Round 1. (prior: v1.19.1) */
+/* TyPhone app.js — v1.20.1 (Aug 18 2026) — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -223,7 +223,7 @@ function lifeFacts(opts){
     const lease=S.rental&&S.rental.city? "renting in "+S.rental.city+" ("+fm(S.rental.amt||S.rental.rent||0)+"/mo)" : "";
     const bigBuys=(S.ledger||[]).slice(-25).filter(l=>l.kind==="spend" && Math.abs(l.amt||0)>=Math.max(40000, liquid*0.3)).slice(-3).map(l=>l.t+" ("+fm(Math.abs(l.amt))+")");
     return "\nHIS MATERIAL LIFE (real, from the phone): pay grade "+tier+" ("+fm(sal)+"/yr cap, "+fm(liquid)+" liquid). Drives: "+carLine+"."+arrLine
-      +(function(){ if(!props.length) return ""; const top=props.slice().sort((a,b)=>(b.value||0)-(a.value||0))[0]; const v=top.value||0; const w=v>=40e6?"a landmark estate":v>=10e6?"a mansion":v>=3e6?"a luxury home":v>=750e3?"a nice house":"a modest starter home"; return " LIVES IN "+w+" he owns ("+fm(v)+")"+(props.length>1?", plus "+(props.length-1)+" more propert"+(props.length===2?"y":"ies")+" ("+fm(props.reduce((a,x)=>a+x.value,0))+" total)":"")+" — an invite over, a party, or a hangout reads THIS address (a landmark estate awes people; a starter home gets starter-home energy)."; })()   /* v1.18.9 (Ty): a rented condo, a $1M house, and a $100M compound get DIFFERENT reactions */
+      +(function(){ if(!props.length) return ""; const top=(S.residence!=null&&props[S.residence])? props[S.residence] : props.slice().sort((a,b)=>(b.value||0)-(a.value||0))[0];   /* v1.20.0 THE RESIDENCE CHECK: he picks where he actually lives; an hour from the stadium is his business */ const v=top.value||0; const w=v>=40e6?"a landmark estate":v>=10e6?"a mansion":v>=3e6?"a luxury home":v>=750e3?"a nice house":"a modest starter home"; return " LIVES IN "+w+" he owns ("+fm(v)+")"+(props.length>1?", plus "+(props.length-1)+" more propert"+(props.length===2?"y":"ies")+" ("+fm(props.reduce((a,x)=>a+x.value,0))+" total)":"")+" — an invite over, a party, or a hangout reads THIS address (a landmark estate awes people; a starter home gets starter-home energy)."+((S.residence!=null&&props[S.residence])?" This is HIS OWN PICK of residence — wherever it sits, however far the drive, that was his call and the world treats it as settled fact, commute and all.":""); })()   /* v1.18.9 (Ty): a rented condo, a $1M house, and a $100M compound get DIFFERENT reactions */
       +(boats.length? " "+boats.length+" boat"+(boats.length===1?"":"s")+".":"")+(planes.length? " "+planes.length+" aircraft.":"")
       +(lease? " "+lease+".":"")
       +(bigBuys.length? " Recent big spends: "+bigBuys.join("; ")+".":"")
@@ -236,7 +236,7 @@ function lifeFacts(opts){
         const town=S.blob.player.homeTown;
         return " FROM HIS HOME STATE ("+deCamel(my)+") on the roster: "+kin.map(r=>r[0]+" "+r[1]+(town&&r[15]===town?" (same hometown!)":"")).join(", ")+" — natural kinship: an OCCASIONAL warm note at most (the hometown law: never a weekly bit).";
       }catch(e){ return ""; } })()
-      +" CAR PRIVACY LAW: the garage is PRIVATE — family, friends, teammates, and the agent may know his cars, but fans and strangers ONLINE have NEVER seen them and never post, chirp, or comment about his cars unless the GAMEDAY ARRIVAL fact says he drove one to a game."
+      +" CAR PRIVACY LAW: the garage is PRIVATE — family, friends, teammates, and the agent may know his cars, but fans and strangers ONLINE have NEVER seen them and never post, chirp, or comment about his cars — not in the players' lot, not arriving, not 'rolling out of the lot' — unless the GAMEDAY ARRIVAL fact says he drove one to a game."
       +"\nTHE SURPRISE LAW: react to his material life ONLY where it clashes with his station. Modest means at modest pay is INVISIBLE (never mention it). Extravagance far above his pay is a real event (the agent worries about the money, teammates rib him; FANS only ever see a car per the car privacy law). Extreme modesty far below famous-player pay is a mild curiosity at most. Matching life to money is nothing at all.";
   }catch(e){ return ""; }
 }
@@ -803,11 +803,30 @@ function dayIdx(d){ const m={Thursday:0,Friday:1,Saturday:2,Sunday:3,Monday:4,Tu
 function d3Idx(d3){ const m={THU:0,FRI:1,SAT:2,SUN:3,MON:4,TUE:5,WED:6}; const v=m[String(d3||"").toUpperCase()]; return v==null? 9 : v; }
 function teamSchedSheet(){
   const TO={PreSeason:0,RegularSeason:1,WildcardPlayoff:2,DivisionalPlayoff:3,ConferencePlayoff:4,ProBowl:5,SuperBowl:6,OffSeason:7};
-  const rows=(S.blob.schedule||[]).slice().sort((a,b)=>((TO[a[1]]==null?8:TO[a[1]])-(TO[b[1]]==null?8:TO[b[1]])) || ((+a[0]||0)-(+b[0]||0)));
+  let rows=(S.blob.schedule||[]).slice();
+  /* v1.20.0 (Ty: "wildcard playoffs dont show on the season schedule... the schedule continues
+     regardless of if my team plays or not"): the save only carries HIS games — a first-round bye
+     simply had no wild-card row and the round VANISHED. The ladder now always shows every
+     postseason rung; rounds without his game read honestly (bye, eliminated, league plays on). */
+  for (const wt of ["WildcardPlayoff","DivisionalPlayoff","ConferencePlayoff","ProBowl","SuperBowl"])
+    if (!rows.some(s=>s&&s[1]===wt)) rows.push([0, wt, "", "", false, null, null, null, 1]);
+  rows=rows.sort((a,b)=>((TO[a[1]]==null?8:TO[a[1]])-(TO[b[1]]==null?8:TO[b[1]])) || ((+a[0]||0)-(+b[0]||0)));
   const cl=S.blob.clock||{}; const nowK=((TO[cl.weekType]==null?8:TO[cl.weekType])*100)+(+cl.week||0);
   const body=rows.filter(s=>s && s[1]!=="OffSeason").map(s=>{
     const t=s[1], w=+s[0]||0, opp=s[3]||"", home=!!s[4], sc=s[7];
     const k=((TO[t]==null?8:TO[t])*100)+w;
+    if (s[8]===1){   /* a league round with no game of his */
+      const lbl2=WKNAMES[t]||String(t);
+      const later=(S.blob.schedule||[]).some(g=>g&&(TO[g[1]]||0)>(TO[t]||0)&&TO[g[1]]<7);
+      let st;
+      if (t==="ProBowl") st="league off week";
+      else if (k<nowK || (k===nowK)) st = later? (t==="WildcardPlayoff"? "first-round bye" : "bye") : "season over \u2014 league plays on";
+      else st = later? "bye \u2014 they wait" : "TBD \u2014 league plays on";
+      return "<div class=\"sched-row\" style=\"display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);opacity:.62\">"+
+        "<span style=\"width:52px;flex-shrink:0;opacity:.7;font-size:12px\">"+esc(lbl2.toUpperCase())+"</span>"+
+        "<span style=\"min-width:0;font-size:12.5px\">League slate \u00b7 no "+esc(S.blob.player.team)+" game</span>"+
+        "<span style=\"margin-left:auto;flex-shrink:0;font-size:12px;opacity:.85\">"+st+"</span></div>";
+    }
     const hasScore=Array.isArray(sc)&&(((+sc[0]||0)>0)||((+sc[1]||0)>0));
     const played=hasScore || k<nowK;
     const lbl = t==="PreSeason"? "PRE "+(w+1) : t==="RegularSeason"? "WK "+(w+1) : (WKNAMES[t]||String(t));
@@ -1372,7 +1391,7 @@ RENDER.chirper = (b,sub)=>{
       const _canonT=chCanonId(chThread);
       const _others=(c.replies||[]).some(r=>r&&!r.mine&&String(r.x||"").trim());
       const _mineT=(c.replies||[]).some(r=>r&&r.mine);
-      const _pend=aiKey()&&((!_others&&!c._loadDone) || (!!(S.chirpLiked&&S.chirpLiked[_canonT])&&!c._likeGen) || (_mineT&&!(_ownT?c._myRepGen:c._joined)));
+      const _pend=aiKey()&&((!_others && ((c.rc||0)>0 || _mineT || !c._loadDone)) || (!!(S.chirpLiked&&S.chirpLiked[_canonT])&&!c._likeGen) || (_mineT&&_ownT&&!c._myRepGen));   /* v1.20.0: a load that came back EMPTY used to eat the button (loadDone set, join burned, nothing on screen) — while a counted or replied thread still shows nothing, the door stays open */
       const loadBtn=_pend? `<button class="btn sm" style="background:rgba(255,255,255,.12);margin:2px 0 10px" onclick="chLoadTop('${chThread}')">Load top replies</button>` : "";
       return `<div class="hoodhead" style="color:var(--ink)"><h3>Replies</h3><span style="color:var(--faint)">${reps.length? ((c.rc||0)>reps.length? "showing the "+reps.length+" most popular of "+fmFoll(c.rc) : reps.length) : ((c.rc||0)>0? fmFoll(c.rc) : "0")}</span></div>${loadBtn}
       ${reps.map(r=>{const bd=replyBadge(r); return `<div class="chirp reply"><div class="ch-row">${replyAvatar(r,bd)}<div class="ch-main"><div class="ch-h"><b>${esc(r.a)}</b>${bd.vf?VF:""}<span>${esc(r.h)}</span></div><p>${chText(r.x)}</p></div></div></div>`;}).join("") || ((c.rc||0)>0? `<div class="empty">${fmFoll(c.rc)} replies below the fold.${aiKey()? "" : " Add an API key in Sync to pull them."}</div>` : '<div class="empty">No replies yet.</div>')}`;
@@ -1446,12 +1465,12 @@ async function chLikeStir(c, id){
   if (!(S.chirpLiked&&S.chirpLiked[chCanonId(id)]) || c._likeGen || !aiKey()){
     return;
   } else {
-    c._likeGen=1; persist();
     try{
       const f=S.chirp.followers||0;
       const out = await callAI("You write a reply section on a fake social platform in an NFL life sim. NEVER use real-world journalists, media personalities, or celebrities; only players and coaches from this save may be real, everyone else is invented. "+S.handle+" (a "+povDesc()+", buzz level: "+buzzTier(f)+", "+f.toLocaleString()+" followers) just LIKED this post by "+(c.n||"someone")+" ("+(c.h||"")+"): \""+c.t+"\". Likes are public. "+careerFactsLine()+" "+accountVoiceLaw()+" Decide the reaction IN THAT THREAD, scaled HARD by his buzz and by WHAT he liked: Unknown or Local curiosity: almost always NOBODY notices, output []. Mid buzz: 0-2 replies, maybe the original poster losing it or a fan going \"he liked this??\". League-wide buzz and up: 1-3 including the poster reacting; a spicy or controversial post he liked draws takes about the LIKE itself; National story and up: an aggregator account may screenshot it. Mixed tones, no em dashes. Output ONLY a JSON array (possibly empty), no fences: [{\"a\":\"name\",\"h\":\"@handle\",\"g\":\"m|f|x\",\"vf\":0,\"x\":\"text\"}] (vf 1 ONLY for teammates, media outlets, and official accounts).", "Write the reaction now (or []).", 600);
       const arr = JSON.parse(out.replace(/```json|```/g,"").trim());
       const good = dedupeReplies((Array.isArray(arr)?arr:[]).filter(r=>r&&String(r.x||"").trim()), c.replies||[]).slice(0,3);
+      c._likeGen=1;   /* v1.20.0: the burn moved AFTER the call — a thrown or killed fetch no longer eats the one shot */
       if (good.length){ c.replies=(c.replies||[]).concat(good); c.rc=Math.max(c.rc||0, c.replies.length); persist(); if(chThread===id) renderApp('chirper',{t:id}); }
     }catch(e){}
   }
@@ -1467,7 +1486,8 @@ async function chLikeStir(c, id){
 async function chLoadTop(id){
   const c=chGet(id); if(!c) return;
   if (!aiKey()) return toast("Add an API key in Sync first.");
-  if (c._fetching) return; c._fetching=1;
+  if (c._fetching && Date.now()-c._fetching < 90000) return;   /* v1.20.0 (Ty: "exiting and entering chirper stops the top replies from loading"): a fetch killed by the OS left the flag on FOREVER — persisted, even. A stale flag (90s) is taken over instead of obeyed. */
+  c._fetching=Date.now();
   toast("Loading the thread\u2026");
   const canon=chCanonId(id);
   const own=!(String(id).startsWith("c")||String(id).startsWith("w"));
@@ -2763,6 +2783,226 @@ function endLease(quiet){
   if (!quiet){ closeSheet(); toast("Lease ended. Deposit back, hotel bill returns."); if(curApp==="keystone") renderApp("keystone"); renderWidget(); }
 }
 let keyMode="browse";
+/* ============================ v1.20.0 THE OPEN MARKET ============================
+   (Ty: "let people paste links from these sites so that they can buy these houses and cars...
+   implement the websites as an option for now. only as an additional option... a paste box for
+   each url in each app and a way for you to read it")
+   One paste box per asset app. A URL rides an AI call WITH WEB SEARCH (Anthropic tool; the
+   model reads the page or its search index) and returns strict JSON; pasted listing TEXT works
+   on any provider through the plain pen. The bakeoff picked one site per kind — Autotrader,
+   Zillow, Boat Trader, Controller — but any listing the reader can read, it reads. The house
+   inventory stays untouched: the market is ADDITIVE. Off-market homes read in honestly as
+   not-for-sale and take COLD OFFERS: moving an owner who is not selling takes stupid money —
+   at least double the estimate (Ty's ruling), the exact ask seeded and hidden. */
+const MARKET_SITES={car:"Autotrader", home:"Zillow", boat:"Boat Trader", plane:"Controller"};
+const MARKET_APP={car:"octane", home:"keystone", boat:"yachts", plane:"planes"};
+function LISTING_SYS(kind){
+  const want={
+    car:'"Mileage","Exterior","Interior","Engine","MPG","Seller","Market read" (e.g. "$100 below market, price dropped $1,533")',
+    home:'"Beds","Baths","Interior sqft","Lot","Year built","Property tax" (latest year, $/yr),"Price history" (one line),"Estimate" (Zestimate or market estimate)',
+    boat:'"Length","Engines","Engine hours","Fuel","Seller","Hull/colors" (gel coat, bottom paint if listed)',
+    plane:'"Total time","Engine time" (SMOH/SNEW + TBO if listed),"Prop time","Year painted","Year interior","Registration","Seller"'
+  }[kind];
+  return 'You read one real '+kind+' listing for a life-sim phone. If given a URL, use web search to read that exact listing page (or its indexed data); if given pasted text, read the text. Report ONLY what the listing actually shows — never invent numbers. Return STRICT JSON as your ENTIRE final message, no prose before or after, no fences: {"title":"(year make model, or the street address)","price":asking price number (0 if none),"forSale":true|false (false if off market, sold, or not listed for sale),"estValue":number (market/Zestimate estimate if shown, else the price),"location":"city, ST","year":number or null,"sub":"one short line of what it is","facts":{up to 9 of these keys when the listing shows them: '+want+'},"notes":"one sentence of deal-relevant color: price drops, days listed, condition"}. If the listing cannot be read at all, return {"title":""}.';
+}
+async function callAIWeb(system, user, maxTokens){
+  /* the web-read pen. Anthropic: server-side web_search tool, streaming so mobile networks
+     never kill an idle fetch (the v1.7.7 lesson) — readSSE keeps text deltas only, search
+     blocks pass through silently and the JSON is the text that remains. Google (v1.20.1):
+     Gemini's own url_context + google_search grounding tools on generateContent — the model
+     fetches the page itself; small call, same non-streaming shape as every other Gemini call
+     on this phone. OpenAI has no web tool the phone can reach — its road is pasted text. */
+  const provW = META.settings.provider||"anthropic";
+  if (provW==="google"){
+    const gm = D.AI.google.models.includes(META.settings.model)?META.settings.model:"gemini-3.6-flash";
+    const gmax=Math.max(Number(maxTokens)||0, 1024);
+    const gbody={ system_instruction:{parts:[{text:system}]}, contents:[{role:"user",parts:[{text:user}]}],
+      tools:[{url_context:{}},{google_search:{}}], generationConfig:{ maxOutputTokens:gmax } };
+    const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+gm+":generateContent?key="+encodeURIComponent(aiKey()), {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(gbody) });
+    if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+    const data=await r.json();
+    const gtxt=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("\n");
+    if (!gtxt.trim()) throw new Error("no text back: "+aiEmptyWhy("google", data));
+    return gtxt;
+  }
+  const model = META.settings.model || D.AI.anthropic.models[0];
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", "x-api-key":aiKey(),
+      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+    body: JSON.stringify({ model: D.AI.anthropic.models.includes(model)?model:"claude-sonnet-5",
+      max_tokens:maxTokens||3000, stream:true, system,
+      messages:[{role:"user", content:user}],
+      tools:[{type:"web_search_20250305", name:"web_search", max_uses:4}] })
+  });
+  if (!r.ok){ const e=await r.text(); throw new Error("API "+r.status+": "+e.slice(0,120)); }
+  const txt = await readSSE(r, ev=>{
+    if (ev.type==="error") throw new Error("API stream error");
+    if (ev.type==="content_block_delta" && ev.delta && ev.delta.type==="text_delta") return ev.delta.text;
+    return "";
+  });
+  if (!txt.trim()) throw new Error("no text");
+  return txt;
+}
+async function listingRead(kind){
+  const el=$("#lst-"+kind); const raw=(el&&el.value||"").trim();
+  if(!raw) return toast("Paste a "+MARKET_SITES[kind]+" link (or the listing text) first.");
+  if(!aiKey()) return toast("Add an API key in Sync first.");
+  const isUrl=/^https?:\/\//i.test(raw);
+  const prov=META.settings.provider||"anthropic";
+  if (isUrl && prov==="openai") return toast("Link reading works on an Anthropic or Google key — on OpenAI, paste the listing TEXT instead. That door works everywhere.");   /* v1.20.1: Gemini reads links itself now */
+  toast("Reading the listing\u2026");
+  try{
+    const sys=LISTING_SYS(kind);
+    const out = isUrl
+      ? await callAIWeb(sys, "Read this listing and return the JSON: "+raw, 3000)
+      : await callAI(sys, "Here is the listing text:\n\n"+raw.slice(0,7000)+"\n\nReturn the JSON.", 2000);
+    const m=String(out).match(/\{[\s\S]*\}/);
+    const j=JSON.parse((m?m[0]:out).replace(/```json|```/g,"").trim());
+    if (!j || !String(j.title||"").trim()) throw new Error("unreadable");
+    const facts={}; if (j.facts&&typeof j.facts==="object") for (const k of Object.keys(j.facts).slice(0,10)){ const v=j.facts[k]; if(v!=null&&String(v).trim()) facts[deDash(String(k)).slice(0,40)]=deDash(String(v)).slice(0,120); }
+    const price=Math.max(0, Math.round(+j.price||0));
+    const L={ id:"L"+Date.now(), kind, url:isUrl?raw:"",
+      title:deDash(String(j.title)).slice(0,90), price,
+      forSale:(j.forSale!==false)&&price>0,
+      estValue:Math.max(1000, Math.round(+j.estValue||price||0)),
+      loc:deDash(String(j.location||"")).slice(0,60), year:(+j.year||null),
+      sub:deDash(String(j.sub||"")).slice(0,110), facts,
+      notes:deDash(String(j.notes||"")).slice(0,300) };
+    S.listings=S.listings||[]; S.listings.unshift(L);
+    if(el) el.value="";
+    persist();
+    toast(L.forSale? "Listing read \u2014 it's on the shelf." : "Read it \u2014 that one is NOT for sale.");
+    renderApp(MARKET_APP[kind]);
+  }catch(e){ toast("Couldn't read that one. Try pasting the listing text itself \u2014 the fallback door always works."); }
+}
+function marketBlock(kind, light){
+  const rows=(S.listings||[]).filter(x=>x.kind===kind);
+  const rowCls=light? "veh-row light":"veh-row";
+  return '<div class="hoodhead"'+(light?'':' style="color:var(--ink)"')+'><h3>The open market</h3><span'+(light?'':' style="color:var(--faint)"')+'>paste a real listing</span></div>'+
+    '<textarea id="lst-'+kind+'" class="field" rows="2" placeholder="Paste a '+MARKET_SITES[kind]+' link, or the listing text itself"></textarea>'+
+    '<button class="btn sm" style="background:rgba(127,127,127,.18)" onclick="listingRead(\''+kind+'\')">Read the listing</button>'+
+    rows.map(L=>'<button class="'+rowCls+'" onclick="listingSheet(\''+L.id+'\')">'+
+      '<span class="vr-l"><b>'+esc(L.title)+(L.forSale?"":" \u00b7 NOT FOR SALE")+'</b><small>'+esc(L.sub||L.loc||MARKET_SITES[kind])+'</small></span>'+
+      '<span class="vr-r">'+(L.forSale? fm(L.price) : "est "+fm(L.estValue))+'</span></button>').join("");
+}
+function listingSheet(id){
+  const L=(S.listings||[]).find(x=>x.id===id); if(!L) return;
+  const pay=Object.keys(L.facts||{}).map(k=>'<div class="payline"><span>'+esc(k)+'</span><span>'+esc(L.facts[k])+'</span></div>').join("");
+  let buys="";
+  if (!L.forSale){
+    buys='<p class="sp" style="font-size:12px;color:#ffb35c">Not on the market. Moving an owner who is not selling takes STUPID money \u2014 figure at least double the '+fm(L.estValue)+' it\u2019s worth.</p>'+
+      '<button class="btn" style="background:rgba(255,179,92,.2);color:#ffb35c" onclick="coldOfferSheet(\''+L.id+'\')">Reach out with an offer</button>';
+  } else if (L.kind==="car"){
+    const dn=Math.round(L.price*0.1), r=0.079/12, n=60, mo=Math.round((L.price-dn)*r/(1-Math.pow(1+r,-n)));
+    buys='<button class="btn" style="background:var(--ok);color:#04170d" onclick="listingBuy(\''+L.id+'\',0)">Buy in cash \u2014 '+fm(L.price)+'</button>'+
+      '<button class="btn" style="background:rgba(240,127,36,.16);color:#ffb35c" onclick="listingBuy(\''+L.id+'\',1)">'+fm(dn)+' down \u00b7 60mo @ 7.9% \u2014 '+fm(mo)+'/mo</button>'+
+      '<button class="btn" style="background:rgba(207,214,223,.14)" onclick="listingBuy(\''+L.id+'\',2)">Meridian card \u2014 '+fm(L.price)+'</button>';
+  } else if (L.kind==="home"){
+    buys=mortgageOptions(L.price, L.id);
+  } else {
+    buys='<button class="btn" style="background:var(--ok);color:#04170d" onclick="listingBuy(\''+L.id+'\',0)">Buy \u2014 '+fm(L.price)+'</button>'+
+      '<button class="btn" style="background:rgba(207,214,223,.14)" onclick="listingBuy(\''+L.id+'\',2)">Meridian card \u2014 '+fm(L.price)+'</button>';
+  }
+  sheet('<h3>'+esc(L.title)+'</h3>'+
+    '<p class="sp" style="margin:2px 0 8px">'+esc(L.sub||"")+(L.loc?" \u00b7 "+esc(L.loc):"")+(L.url?' \u00b7 read from '+esc(MARKET_SITES[L.kind]):' \u00b7 read from pasted text')+'</p>'+
+    (L.forSale? '<div class="payline tot"><span>Asking</span><span>'+fm(L.price)+'</span></div>' : '<div class="payline tot"><span>Estimated value</span><span>'+fm(L.estValue)+'</span></div>')+
+    pay+(L.notes? '<p class="sp" style="font-size:12px;opacity:.75;margin-top:6px">'+esc(L.notes)+'</p>':"")+
+    buys+
+    '<button class="btn" style="background:rgba(244,100,92,.12);color:#ff9d94" onclick="listingDrop(\''+L.id+'\')">Take it off the shelf</button>'+
+    '<button class="btn" style="background:rgba(127,127,127,.15)" onclick="closeSheet()">Close</button>');
+}
+function listingDrop(id){ S.listings=(S.listings||[]).filter(x=>x.id!==id); persist(); closeSheet(); toast("Off the shelf."); renderApp(curApp); }
+function listingBuy(id, fin){
+  const L=(S.listings||[]).find(x=>x.id===id); if(!L||!L.forSale) return;
+  const src=MARKET_SITES[L.kind];
+  if (fin===2){ if(!payWithCard(L.price, src+" \u2014 "+L.title)) return; }
+  else { const dn = (fin===1 && L.kind==="car")? Math.round(L.price*0.1) : L.price;
+    if (S.cash.checking<dn) return toast("You need "+fm(dn)+" in checking. You have "+fm(S.cash.checking)+".");
+    S.cash.checking-=dn; S.ledger.push({t:src+" \u2014 "+L.title, amt:-dn, kind:"spend"}); }
+  if (L.kind==="car"){
+    S.garage.push({n:L.title, value:L.price, body:"listing", id:L.id, img:L.img||null});
+    if (fin===1){ const dn=Math.round(L.price*0.1); const r=0.079/12,n=60,pay=Math.round((L.price-dn)*r/(1-Math.pow(1+r,-n)));
+      S.debts.push({n:"Auto \u2014 "+L.title, bal:L.price-dn, orig:L.price-dn, apr:7.9, pay, kind:"auto"}); creditTouch(-8); }
+    S.bills.find(x=>x.id==="carins") || S.bills.push({id:"carins", n:"Auto insurance", amt:0, cat:"life"});
+    S.bills.find(x=>x.id==="carins").amt = Math.round(S.garage.reduce((a,c)=>a+c.value,0)*0.00045)+120;
+  } else if (L.kind==="boat"){
+    const len=parseInt(String((L.facts&&(L.facts["Length"]||L.facts.length))||""))||30;
+    S.boats.push({n:L.title, value:L.price, img:L.img||null});
+    S.bills.push({id:"dock"+Date.now(), n:"Dockage & yacht upkeep", amt:Math.round((len*450+L.price*0.08)/12), cat:"toys"});
+  } else if (L.kind==="plane"){
+    S.planes.push({n:L.title, value:L.price, cls:"listing", img:L.img||null});
+    S.bills.push({id:"hangar"+Date.now(), n:"Aircraft fixed costs", amt:Math.round(L.price*0.06/12), cat:"toys"});
+  }
+  lifePurchaseReact(L.title+(L.kind==="boat"?" (a boat)":L.kind==="plane"?" (an aircraft)":""), L.price);
+  S.listings=(S.listings||[]).filter(x=>x.id!==id);
+  persist(); closeSheet(); toast("It's yours \u2014 the real one, at the real price."); renderApp(curApp); renderWidget();
+}
+function coldOfferSheet(id){
+  const L=(S.listings||[]).find(x=>x.id===id); if(!L) return;
+  sheet('<h3>An offer nobody asked for</h3><p class="sp">'+esc(L.title)+' is not for sale. The letter goes out anyway. It\u2019s worth about '+fm(L.estValue)+' \u2014 an owner who wasn\u2019t selling starts listening somewhere past DOUBLE that.</p>'+
+    '<label class="flabel">Your offer</label><input id="coldAmt" class="field" type="number" placeholder="'+(L.estValue*2)+'">'+
+    '<button class="btn" style="background:var(--ok);color:#04170d" onclick="coldOffer(\''+L.id+'\')">Send the offer</button>'+
+    '<button class="btn" style="background:rgba(127,127,127,.15)" onclick="closeSheet()">Never mind</button>');
+}
+function coldOffer(id){
+  const L=(S.listings||[]).find(x=>x.id===id); if(!L) return;
+  const off=Math.round(+($("#coldAmt")&&$("#coldAmt").value)||0);
+  if (off<=0) return toast("Put a number on it.");
+  /* Ty's ruling: they will want AT LEAST double. The exact line is seeded per listing and hidden. */
+  const need=Math.round(L.estValue*(2+seedRng(S.careerId+"|cold|"+id)()*0.5));
+  if (off < need){
+    const lines=["They said no. Politely. Add zeroes or lose the address.","A week of silence, then a two-word reply: not selling.","Their lawyer answered. The answer was no."];
+    return toast(lines[Math.floor(seedRng(S.careerId+"|coldno|"+id+"|"+off)()*lines.length)]);
+  }
+  L.forSale=true; L.price=off; L.coldWon=1; persist(); closeSheet();
+  toast("Stupid money works. They'll sell \u2014 at YOUR number.");
+  listingSheet(id);
+}
+/* ---- owned-thing photos (Ty: "a place people can upload a screenshot so they can see what
+   they own... jpg png whatever a phone uses"). Compressed on-device; IndexedDB carries it. */
+async function shrinkImg(file){
+  const load=f=>new Promise((res,rej)=>{ const u=URL.createObjectURL(f); const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=u; });
+  const im=await load(file);
+  const draw=(px,q)=>{ const sc=Math.min(1, px/Math.max(im.width,im.height)); const c=document.createElement("canvas");
+    c.width=Math.max(1,Math.round(im.width*sc)); c.height=Math.max(1,Math.round(im.height*sc));
+    c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",q); };
+  let out=draw(900,0.72);
+  if (out.length>360000) out=draw(680,0.55);
+  return out;
+}
+function attachPhoto(kindKey, idx){
+  let inp=$("#photoInp");
+  if (!inp){ document.body.insertAdjacentHTML("beforeend",'<input type="file" id="photoInp" accept="image/*" style="display:none">'); inp=$("#photoInp"); }
+  inp.onchange=async e=>{
+    const f=e.target.files&&e.target.files[0]; inp.value=""; if(!f) return;
+    try{ const url=await shrinkImg(f); const it=(S[kindKey]||[])[idx]; if(it){ it.img=url; persist(); toast("Photo saved \u2014 that's yours now."); } }
+    catch(err){ toast("Couldn't read that image."); }
+    if (kindKey==="garage" && typeof garSheet==="function" && document.getElementById("sheet") && document.getElementById("sheet").innerHTML.includes("Garage")) garSheet();
+    else if (curApp) renderApp(curApp);
+  };
+  inp.click();
+}
+function ownedThumb(it, kindKey, idx, light){
+  const t=it.img? '<img src="'+it.img+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">' : "";
+  return t+'<button class="btn sm" style="background:rgba(127,127,127,.18);margin:0;flex-shrink:0" onclick="attachPhoto(\''+kindKey+'\','+idx+')">'+(it.img?"Re-shoot":"Photo")+'</button>';
+}
+function ownedBlock(kindKey, title, light){
+  const arr=S[kindKey]||[]; if(!arr.length) return "";
+  const isHome=kindKey==="properties";
+  return '<div class="hoodhead"'+(light?'':' style="color:var(--ink)"')+'><h3>'+title+'</h3><span'+(light?'':' style="color:var(--faint)"')+'>'+arr.length+' owned</span></div>'+
+    arr.map((it,i)=>'<div class="lorerow" style="display:flex;gap:8px;align-items:center;margin:6px 0">'+
+      (it.img?'<img src="'+it.img+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">':"")+
+      '<span style="flex:1;min-width:0;font-size:13px"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(it.n)+'</b><small style="opacity:.6">'+fm(it.value||0)+(isHome&&S.residence===i?" \u00b7 HE LIVES HERE":"")+'</small></span>'+
+      (isHome? '<button class="btn sm" style="background:'+(S.residence===i?"rgba(63,220,132,.2);color:#3fdc84":"rgba(127,127,127,.18)")+';margin:0;flex-shrink:0" onclick="setResidence('+i+')">'+(S.residence===i?"\u2713 Home":"Live here")+'</button>' : "")+
+      '<button class="btn sm" style="background:rgba(127,127,127,.18);margin:0;flex-shrink:0" onclick="attachPhoto(\''+kindKey+'\','+i+')">'+(it.img?"Re-shoot":"Photo")+'</button></div>').join("");
+}
+function setResidence(i){
+  S.residence = (S.residence===i)? null : i;
+  persist(); toast(S.residence===i? "That's home now \u2014 however far the drive." : "Residence cleared.");
+  renderApp(curApp);
+}
 RENDER.keystone = (b,sub)=>{
   b.className="keystone lightapp";
   const homes=genHomes(); const T=teamMetro();   /* v1.15.0 */
@@ -2801,6 +3041,8 @@ RENDER.keystone = (b,sub)=>{
     return;
   }
   let html="";
+  html += ownedBlock("properties","Your homes",true);
+  html += marketBlock("home", true);
   {
     const R=rentInfo();
     html += S.rental
@@ -2869,7 +3111,8 @@ function buyHouseOpt(i){
 function buyHouse(price, down, pay, apr, hid, custom){
   if (S.cash.checking < down) return toast("You need "+fm(down)+" in checking. You have "+fm(S.cash.checking)+".");
   const homes=genHomes(); const H=homes.find(x=>x.id===hid);
-  const label = H? H.addr+", "+H.hood : "Custom build — "+(custom?custom.hood:"");
+  const LST=(S.listings||[]).find(x=>x.id===hid);   /* v1.20.0: a pasted real listing closes through the same door */
+  const label = LST? LST.title+(LST.loc? ", "+LST.loc : "") : H? H.addr+", "+H.hood : "Custom build — "+(custom?custom.hood:"");
   _closing={price, down, pay, apr, label};
   sheet(`<h3>Close on it?</h3><p class="sp">${esc(label)} for ${fm(price)}${pay?` — ${fm(down)} down, ${fm(pay)}/mo`:" in cash"}. Your extended-stay bill (${fm(3400)}/mo) ends at closing.</p>
   <button class="btn" style="background:var(--key-acc);color:#fff" onclick="confirmHousePending()">Sign & close</button>
@@ -2879,6 +3122,7 @@ function confirmHousePending(){ const c=_closing; _closing=null; if(c) confirmHo
 function confirmHouse(price, down, pay, apr, label){
   S.cash.checking-=down;
   S.properties.push({n:label, value:price, bought:price});
+  if (_mort && _mort.hid && String(_mort.hid).charAt(0)==="L"){ S.listings=(S.listings||[]).filter(x=>x.id!==_mort.hid); }   /* v1.20.0: a closed listing leaves the shelf */
   lifePurchaseReact(label, price);   /* v1.13.4 */
   if (pay) S.debts.push({n:"Mortgage — "+label, bal:price-down, orig:price-down, apr, pay, kind:"mortgage"});
   if (S.rental){ S.cash.checking+=S.rental.dep; S.ledger.push({t:"Security deposit returned — lease ended at closing", amt:S.rental.dep, kind:"income"}); S.rental=null; }
@@ -2920,6 +3164,7 @@ RENDER.octane = (b,sub)=>{
     <select onchange="octF.max=this.value;octList()"><option value="">Any price</option><option value="30000">Under $30k</option><option value="60000">Under $60k</option><option value="120000">Under $120k</option><option value="300000">Under $300k</option><option value="1000000">Under $1M</option><option value="99999999">No limit</option></select>
     <select onchange="octF.sort=this.value;octList()"><option value="az">Make A-Z</option><option value="plo" ${octF.sort==="plo"?"selected":""}>Price: low</option><option value="phi" ${octF.sort==="phi"?"selected":""}>Price: high</option><option value="new" ${octF.sort==="new"?"selected":""}>Year: newest</option></select>
   </div>
+  <div class="apbody" style="padding-bottom:0">${marketBlock("car")}</div>
   <div class="oct-count" id="octCount"></div>
   <div class="apbody flush" id="octList" style="padding:0 16px 28px"></div>`;
   octList();
@@ -2972,7 +3217,7 @@ function buyVeh(id, fin){
 }
 const PAINTS=[["Gloss Black","#111",650],["Pearl White","#f2f0ea",800],["Nardo Gray","#7a8087",750],["Racing Red","#c8102e",700],["Miami Blue","#00b1c8",900],["British Green","#0b3d2e",750],["Midnight Purple","#2e1a47",1200],["Chalk","#d9d5cc",850],["Solar Yellow","#f5c400",700],["Copper","#b45f2a",950],["Frozen Matte Black","#1a1a1a",1500],["Chrome Wrap","#c9ced4",2200],["Lime Green","#7ed321",850],["Acid Lime","#c6ff00",950],["Hot Pink","#ff2d78",900],["Rose Pink","#f4a6c6",850],["Magenta Pearl","#c2185b",1100],["Liquid Silver Metallic","#aeb6bf",1050],["Gunmetal Metallic","#4a545e",1000],["Champagne Gold Metallic","#c9a86a",1150],["Deep Ocean Metallic","#123a5e",1050],["Sunset Orange Metallic","#e2571b",1000]];
 function garSheet(){
-  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l"><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops monthly)</p></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
+  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l" style="display:flex;gap:8px;align-items:center">${c.img?`<img src="${c.img}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">`:""}<div><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops monthly)</p></div></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="attachPhoto('garage',${i})">${c.img?"Re-shoot":"Photo"}</button><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
   `<h4 style="margin:14px 0 4px">Gameday arrival</h4>
   <p class="sp" style="margin:0 0 8px">How you pull up to HOME games. Drive your own car and the players' lot might notice; roll in chauffeured and nobody gets a look. Pure theater — the save never sees it. The chauffeur bills you, though: the fee hits checking for each home game you actually play.</p>` +
   S.garage.map(c=>arrRow("drive","Drive the "+c.n+(c.colorName?" ("+c.colorName+")":""),c.id)).join("") +
@@ -3086,7 +3331,7 @@ RENDER.yachts = (b,sub)=>{
     return;
   }
   const groups=["fishing","dayboat","wake","cruiser","sport","flybridge","sportfish","catamaran","classic","superyacht"];
-  b.innerHTML = `<div class="brandhead yct"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">⚓</div><div><h1>Harborline</h1><small>Yacht brokerage since 1958</small></div></div><div class="apbody">` + groups.map(g=>{
+  b.innerHTML = `<div class="brandhead yct"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">⚓</div><div><h1>Harborline</h1><small>Yacht brokerage since 1958</small></div></div><div class="apbody">` + ownedBlock("boats","Your fleet",true) + marketBlock("boat", true) + groups.map(g=>{
     const rows=boats.filter(x=>x.type===g); if(!rows.length) return "";
     return `<div class="hoodhead"><h3 style="text-transform:capitalize">${g==="sportfish"?"Sportfishing":g}</h3><span>${rows.length} vessels</span></div>` +
     rows.map(Y=>`<button class="veh-row light" onclick="renderApp('yachts',{y:'${Y.id}'})">
@@ -3129,6 +3374,7 @@ RENDER.planes = (b,sub)=>{
     return;
   }
   b.innerHTML = `<div class="brandhead pln"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark">✈</div><div><h1>Stratos Air</h1><small>Private aviation, whole ownership</small></div></div><div class="apbody">` +
+  ownedBlock("planes","Your hangar") + marketBlock("plane") +
   ["piston","vlj","turboprop","light","midsize","super-mid","large","ultra","bizliner"].map(g=>{
     const rows=planes.filter(x=>x.cls===g); if(!rows.length) return "";
     const label={piston:"Piston",vlj:"Very Light Jets",turboprop:"Turboprops",light:"Light Jets",midsize:"Midsize",["super-mid"]:"Super-Midsize",large:"Large Cabin",ultra:"Ultra Long Range",bizliner:"Bizliners"}[g];
@@ -5463,6 +5709,8 @@ RENDER.settings = b=>{
   })()}
   <div style="font-size:11.5px;color:var(--faint);margin:-6px 0 8px" id="colHint">Prestige reads automatically: ${esc(collegePrestige(pc.collegeName))}.${pc.collegeName?"":" The save's college slot is empty for created players (verified against the save itself) — pick yours here once and it sticks."}</div>
   <label class="flabel">College career</label>${dd("pcCol", (function(){const o=["Heisman winner","Multi-year starter","Late-career starter","Career backup","Good career, bad ending","Poor career","Walk-on, never played"];const c=pc.college; if(c && !o.includes(c)) o.splice(1,0,c); return o;})(), pc.college||"Career backup")}
+  <label class="flabel">Birthday (the world computes his real age from this)</label>
+  <input id="pcBday" type="date" class="field" value="${pc.birthdate||""}" onchange="savePerception()">
   <label class="flabel">Family situation</label>${dd("pcFam", ["Single parent household","Both parents, tight money","Middle class, stable","Family is comfortable","It's complicated"], pc.family||"Single parent household")}
 
   ${(S.blob.player.draftRound>=1&&S.blob.player.draftRound<=7)? `<label class="flabel">Draft story (read from the save)</label>
@@ -5504,6 +5752,17 @@ RENDER.settings = b=>{
     <button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94;margin:0" onclick="famDelAsk(${i})">Remove</button></div>
   </div>`).join("")}
   <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="famAdd()">+ Add family member</button>
+
+  <div class="hoodhead" style="margin-top:16px"><h3>World facts & story beats</h3><span>you write the lore</span></div>
+  <p class="sp" style="font-size:12px;opacity:.75">FACTS are permanent background the world can reference when relevant — college stories, upbringing, habits. BEATS are temporary storylines that run 1-6 weeks: when a beat ends it either becomes a permanent fact or the world moves on.</p>
+  ${(pc.customFacts||[]).map((f,i)=>`<div class="lorerow" style="display:flex;gap:8px;align-items:center;margin:6px 0"><span style="flex:1;font-size:13px">${esc(f)}</span><button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94;margin:0;flex-shrink:0" onclick="cfDel(${i})">Remove</button></div>`).join("")}
+  <textarea id="cfNew" class="field" rows="2" placeholder="A fact the world can know"></textarea>
+  <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="cfAdd()">+ Add fact</button>
+  ${(S.beats||[]).map((b,i)=>`<div class="lorerow" style="display:flex;gap:8px;align-items:center;margin:6px 0"><span style="flex:1;font-size:13px">${esc(b.txt)}<small style="display:block;opacity:.6">${Math.max(1,Math.ceil((b.endMs-worldToday(S.blob.clock).getTime())/(7*86400000)))} wk left · ${b.keep?"becomes a fact":"fades away"}</small></span><button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94;margin:0;flex-shrink:0" onclick="beatDel(${i})">End it</button></div>`).join("")}
+  <textarea id="btNew" class="field" rows="2" placeholder="A story beat (new cleats, contract chatter, a storyline)"></textarea>
+  <label class="flabel">Runs for</label>${dd("btWks",["1 week","2 weeks","3 weeks","4 weeks","5 weeks","6 weeks"],"2 weeks")}
+  <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0"><input type="checkbox" id="btKeep"> Becomes a permanent fact when it ends</label>
+  <button class="btn sm" style="background:rgba(255,255,255,.1)" onclick="beatAdd()">+ Start the beat</button>
 
   
   <div class="hoodhead" style="color:var(--ink);margin-top:20px"><h3>Phone</h3></div>
@@ -5685,6 +5944,18 @@ function famDelAsk(i){
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="closeSheet()">Keep them</button>`);
 }
 function famDel(i){ const pc=S.perception; (pc.familyPeople||[]).splice(i,1); persist(); closeSheet(); rerenderSettings(); }
+/* v1.20.0 WORLD FACTS & STORY BEATS (Ty): owner-written lore. */
+function cfAdd(){ const el=$("#cfNew"); const t=(el&&el.value||"").trim(); if(!t) return toast("Write the fact first."); const pc=S.perception; pc.customFacts=pc.customFacts||[]; pc.customFacts.push(t.slice(0,240)); persist(); rerenderSettings(); }
+function cfDel(i){ const pc=S.perception; (pc.customFacts||[]).splice(i,1); persist(); rerenderSettings(); }
+function beatAdd(){
+  const el=$("#btNew"); const t=(el&&el.value||"").trim(); if(!t) return toast("Write the beat first.");
+  const wks=parseInt((gv("btWks")||"2"),10)||2;
+  const keep=!!($("#btKeep")&&$("#btKeep").checked);
+  S.beats=S.beats||[];
+  S.beats.push({id:"b"+Date.now(), txt:t.slice(0,240), weeks:wks, keep, endMs:worldToday(S.blob.clock).getTime()+wks*7*86400000});
+  persist(); toast("The beat is live — the world knows for "+wks+" week"+(wks===1?"":"s")+"."); rerenderSettings();
+}
+function beatDel(i){ (S.beats||[]).splice(i,1); persist(); rerenderSettings(); }
 function famCount(el,i){ const n=(el.value||"").length; const c=$("#famCt"+i); if(c){ c.textContent=n+"/140"; c.style.color=n>=140?"#ff9d94":"var(--faint)"; } }   /* v1.16.5: the fact line is a prompt fact, not an essay */
 function famSet(i,k,v){ const pc=S.perception; if(pc.familyPeople&&pc.familyPeople[i]){ pc.familyPeople[i][k]=(k==="fact"? String(v).slice(0,140).trim() : (typeof v==="string"? v.trim() : v));   /* v1.19.1: .trim() on a checkbox boolean was a crash waiting */ persist(); } }
 function famAttendLine(){ try{ const fp=(S.perception.familyPeople||[]).filter(f=>f.name); if(!fp.length) return ""; const go=fp.filter(f=>f.games), stay=fp.filter(f=>!f.games); let out=""; if(go.length) out+="\nAT HIS GAMES (these people COME to the stadium — the family seats his pull earns; their postgame texts can be from the building, the seats, the tunnel): "+go.map(f=>f.name+" ("+f.rel+")").join(", ")+"."; if(stay.length) out+="\nWATCHES FROM HOME (TV only — these people are never at the stadium, never 'great seats', never 'saw you after the game'): "+stay.map(f=>f.name+" ("+f.rel+")").join(", ")+"."; return out; }catch(e){ return ""; } }   /* v1.19.1 (Ty: "family constantly says theyre watching from the tv when they could be at the game") */
@@ -5703,6 +5974,7 @@ function savePerception(){
   pc.grew=gv("pcGrew")??pc.grew; pc.hs=gv("pcHS")||pc.hs;
   pc.collegeName=gv("pcColName")??pc.collegeName;
   pc.college=gv("pcCol")||pc.college; pc.family=gv("pcFam")||pc.family;
+  const _bd=gv("pcBday"); if(_bd!==null) pc.birthdate=_bd;
   const drp=gv("pcDraftRound");   /* v1.16.5: the chosen draft round */
   if (drp!==null){ const m=/Round (\d)/.exec(drp); pc.draftRoundPick = m? +m[1] : 0; pc.draft=draftStoryText(draftRoundEff()); }
   /* v1.19.2 HEISMAN WINNER (Ty): the trophy blocks every round but the first — the picker
@@ -7163,6 +7435,7 @@ async function advanceTo(blob){
      SYNCS instead of game weeks. One burn per game week now, ever. */
   if (!wksElapsed.length && S.lastBurnWk!==wkKey(newC)){ burnWeek(); if (newC.weekType==="RegularSeason") charityWeekly(taxYearNow()); tickInvest(rng); }   /* v1.18.1 (Ty): donations charge on REGULAR-SEASON game weeks only */
   S.lastBurnWk=wkKey(newC);
+  try{ setTimeout(beatsSweep, 800); }catch(e){}   /* v1.20.0: expired beats graduate or fade once the new truth is adopted (the timer fires after this function finishes and S.blob carries the new clock) */
   // adopt the new truth
   const gameDelta = gameDateObj(newC) - gameDateObj(oldC);           // v1.4: how far the WORLD moved
   if (gameDelta > 0) shiftWorldTime(gameDelta);                       // everything already here ages by game time
@@ -8136,6 +8409,63 @@ function hisFormLine(blob){
   const won=played[played.length-1][7][0]>played[played.length-1][7][1];
   return "FORM (his team, real, most recent first): "+rows.join("; ")+". CURRENT STREAK: "+(won?"won":"lost")+" "+n+" straight. STREAK LAW: any claim about a streak, stretch, run, drought, or \"ending\" one must match FORM and CURRENT STREAK exactly — a team that won its previous game has NOT broken a losing stretch; never invent an arc the results do not show.";
 }
+/* v1.20.0 THE AGE TRUTH (Ty: "they refer to him as 20 in january when he turned 21 in september"):
+   the save's age field only moves when Madden feels like it — the phone computes the REAL age
+   from the birthday in Settings against the world calendar, and that number outranks the save. */
+function ageTruth(p){
+  try{
+    const bd=(S.perception&&S.perception.birthdate)||"";
+    const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(bd);
+    if(!m) return String(p.age);
+    const wt=worldToday(S.blob.clock);
+    const by=+m[1], bm=+m[2]-1, bday=+m[3];
+    let n=wt.getFullYear()-by;
+    if (wt.getMonth()<bm || (wt.getMonth()===bm && wt.getDate()<bday)) n--;
+    const MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return n+" (born "+MO[bm]+" "+bday+", "+by+" — computed against the world calendar; the save's own age field may lag a birthday and THIS number is the truth)";
+  }catch(e){ return String(p.age); }
+}
+/* v1.20.0 THE QUOTE ECONOMY (Ty: "every single quote from every single game... should not be in
+   an article. thats not realistic"): a seeded weekly budget, stated as fact, binding on the pen. */
+function quoteBudgetLine(){
+  try{
+    const r=seedRng(((S&&S.careerId)||"x")+"|qb|"+wkKey(S.blob.clock))();
+    const n=r<0.4?0 : r<0.9?1 : 2;
+    return "\nQUOTE BUDGET (BINDING on the Chronicle): of his podium answers this week the paper may print at most "+n+(n===0?" — this week it prints NONE of his quotes; the story stands on reporting alone":"")+". His other words either surface naturally elsewhere (Huddle chatter, the podcast, a chirp) or go unused entirely — most quotes are never printed anywhere, and that is normal.";
+  }catch(e){ return ""; }
+}
+/* v1.20.0 WORLD FACTS & STORY BEATS (Ty): the owner writes his own lore. Facts are permanent
+   background; beats run 1-6 weeks and either graduate into facts or fade (beatsSweep). */
+function backstoryLine(){
+  try{
+    const cf=(S.perception&&S.perception.customFacts)||[];
+    if(!cf.length) return "";
+    return "\nHIS BACKSTORY (owner-written, true, background color — weave a piece in only when genuinely relevant, never recite the list, never all at once): "+cf.map(deDash).join(" | ");
+  }catch(e){ return ""; }
+}
+function beatsLine(){
+  try{
+    const bs=(S.beats||[]).filter(b=>b&&b.txt);
+    if(!bs.length) return "";
+    const now=worldToday(S.blob.clock).getTime();
+    return "\nACTIVE STORY BEATS (owner-written, temporary, LIVE right now — these are real current storylines; give them honest life across surfaces while they run, scaled to what they are): "+bs.map(b=>deDash(b.txt)+" ("+Math.max(1,Math.ceil((b.endMs-now)/(7*86400000)))+" wk left)").join(" | ");
+  }catch(e){ return ""; }
+}
+function beatsSweep(){
+  try{
+    if(!S || !(S.beats&&S.beats.length)) return;
+    const now=worldToday(S.blob.clock).getTime();
+    const done=S.beats.filter(b=>b.endMs<=now);
+    if(!done.length) return;
+    S.beats=S.beats.filter(b=>b.endMs>now);
+    for (const b of done){
+      if (b.keep){ S.perception.customFacts=S.perception.customFacts||[]; S.perception.customFacts.push(b.txt);
+        S.world.notifs.push({app:"assist", t:"Story beat", p:"Now part of his story: "+b.txt.slice(0,80)}); }
+      else S.world.notifs.push({app:"assist", t:"Story beat", p:"The world moved on: "+b.txt.slice(0,80)});
+    }
+    persist();
+  }catch(e){}
+}
 /* v1.19.2 (Ty: "mix up the players that comment a bit. its always the same ones"): the facts
    used to hand every pen the SAME ten names forever (the roster ships OVR-sorted). The top four
    stars always ride; six more rotate on a week-seeded shuffle of the next twenty-six, so the
@@ -8208,12 +8538,12 @@ function worldFacts(blob, last, opts){
      Every line is fenced now; a failure logs its name (console + S.wfErrs) and yields "". */
   const SL=(fn,name)=>{ try{ return fn()||""; }catch(e){ try{ console.log("worldFacts line failed: "+name, e); (S.wfErrs=S.wfErrs||[]).push(name+": "+String(e&&e.message||e).slice(0,70)); S.wfErrs=S.wfErrs.slice(-8); }catch(_){} return ""; } };
   return `TODAY (in-world): ${gameDateLong(blob.clock)}, ${wkLabel(blob.clock)}. All content you write happens NOW; anything from earlier weeks or seasons is the past.
-HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network). WRITTEN-RECORD LAW: in WRITTEN content — texts, chirps, Huddle, emails, articles — a team record is digits with a hyphen (3-5, 10-6), NEVER spelled out in words; spelled-out records belong only to words spoken aloud at the podium or on a show.
+HARD RULES: The ONLY real people who may appear are players and coaches named in these facts. NEVER use real-world journalists, media personalities, insiders, or celebrities (no real beat writers, nobody like Rich Cimini or Adam Schefter). Real TV networks (ESPN, FOX, CBS, NBC, Prime) may be mentioned ONLY as the broadcast a game airs on ("caught it on the FOX broadcast"); they never produce written content, stats, quotes, or personalities here. Every reporter, outlet, fan, and brand voice must be invented (the United Chronicle is a NATIONAL NFL paper — no local paper exists, no team is its home team — and it has MULTIPLE staff writers — vary which invented byline covers what, no single house writer; NFLSN is the stats network). WRITTEN-RECORD LAW: in WRITTEN content — texts, chirps, Huddle, emails, articles — a team record is digits with a hyphen (3-5, 10-6), NEVER spelled out in words; spelled-out records belong only to words spoken aloud at the podium or on a show. Nobody calls the postseason "the tournament" — it is the playoffs, the round names, the postseason.
 STAFF CHANNEL LAW: team staff — the head coach, coordinators, position coaches, the GM, assistant GM, front office, the owner — NEVER text the player and have no text thread. Any direct staff outreach arrives only as a one-way club EMAIL the player cannot answer. Text threads belong to teammates, family, the agent, and friends only; never write a staff member into a text thread.
 REAL-PLAYER SPEECH LAW: real players (anyone on a save roster) never initiate controversy, never comment on politics, religion, or anyone's personal life, and never say anything about a third party that is not about football performance. Invented people are not bound by this.
-${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, age EXACTLY ${p.age}, jersey #${p.jersey} (the number has NOT changed — it is never a story and never an email topic unless these facts say otherwise), age ${p.age}, overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
+${press? "" : SL(practiceLine,"practiceLine")}\nPLAYER (save truth): ${p.first} ${p.last} — his FULL legal name; he has NO middle name on record and none may ever be invented for him — ${p.pos} (side of ball: ${sideOfBall(p.pos)}), ${p.team}, age EXACTLY ${ageTruth(p)}, jersey #${p.jersey} (the number has NOT changed — it is never a story and never an email topic unless these facts say otherwise), overall ability ${p.ovr}/99 (${p.ovr>=90?"elite talent":p.ovr>=80?"quality starter talent":p.ovr>=70?"fringe/backup talent":p.ovr>=55?"longshot talent":"camp-body talent"}), status ${p.status}${p.isIR?" (IR)":""}, confidence ${p.confidence}/99.
 CLOCK: ${wkLabel(blob.clock)}.
-LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>famAttendLine(),"famAttendLine")}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}${SL(()=>injuriesLine(),"injuriesLine")}${SL(()=>txLine(),"txLine")}${SL(()=>staffTruthLine(),"staffTruthLine")}${SL(()=>postseasonLine(),"postseasonLine")}${SL(exitWarLine,"exitWarLine")}
+LAST RESULT: ${last? (last[4]?"home vs ":"away at ")+last[3]+", "+last[7][0]+"-"+last[7][1]+(last[7][0]>last[7][1]?" WIN":" LOSS") : "none"}.${isCutWeek(S.blob.clock)? " CUT-DOWN WEEK LAW: the preseason is OVER \u2014 three preseason games exist, all played. This week is the league-wide bye between preseason and the season: NO games anywhere, rosters cut to 53, the only stories are the trim and the opener ahead. The NEXT GAME below is the REGULAR SEASON opener \u2014 never call it a preseason game." : ""}${press? "" : lifeFacts()}${press? "" : bookLine()}${SL(()=>famAttendLine(),"famAttendLine")}${SL(()=>charityLine(press),"charityLine")}${SL(()=>linesLine(),"linesLine")}${SL(()=>injuriesLine(),"injuriesLine")}${SL(()=>txLine(),"txLine")}${SL(()=>staffTruthLine(),"staffTruthLine")}${SL(()=>postseasonLine(),"postseasonLine")}${SL(exitWarLine,"exitWarLine")}${SL(quoteBudgetLine,"quoteBudgetLine")}${SL(backstoryLine,"backstoryLine")}${SL(beatsLine,"beatsLine")}
 ${SL(()=>hisInjuryLine(blob),"hisInjuryLine")}
 ${SL(()=>hisFormLine(blob),"hisFormLine")}
 NEXT: ${(()=>{const n=nextGame(); return n? (n[4]?"home vs ":"at ")+n[3]+" ("+n[5]+")":"unknown"})()}.
@@ -8255,7 +8585,7 @@ function storyOwed(){ const ps=paperState(); return (ps.k==="missing" && (S.appl
 function storySys(wByline){
   /* v1.8.1 Lane C: the story register lives in ONE place so the phone call and the
      computer job carry the identical instruction. */
-  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. NAME LAW: when the subject player is covered at all, he is covered BY NAME — full name on first mention, last name after; a bare role tag like "the Jets quarterback" may only ever ACCOMPANY his name, never replace it; he has NO middle name on record — never invent a middle name or initial for him. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
+  return `You are ${wByline}, a staff writer for the United Chronicle, a serious NATIONAL NFL newspaper — there is no local paper and no home team in this newsroom. Write a FEATURE-LENGTH game story in professional newspaper register: third person, reported past tense, attributed quotes, scene-setting, tactical detail invented plausibly around the real final score. THE PAPER IS NATIONAL: the week's feature leads with whatever around the NFL genuinely deserves the lead — the subject player's game is one line on a 16-game scoreboard and earns coverage strictly proportional to its league-wide interest (an unremarkable preseason result may get a sentence, or nothing). When his game IS covered, cover it as a game: both teams, the stakes, the stars who actually decided it — never as the subject player's story. NOTHING ABOUT PARTICIPATION IS EVER INVENTED: who played, started, sat, or was rested comes ONLY from the facts and the league desk notes — the box-score star lines are the only individual performances that exist, a player absent from them is never written as having done anything, and no one is described as \"rested\" or \"held out\" unless the facts say so (a quarterback with a real stat line in the notes PLAYED and was not rested). THE SAVE DOES NOT RECORD WHO STARTS GAMES: never state that anyone started, was named the starter, was benched for the start, or came in relief — for the subject player or anyone else. The subject player earns column inches ONLY if his real stat line in the facts did — a camp body who barely played may go entirely unmentioned, and that is correct. THE PIECE COVERS BOTH SIDES OF THE WEEK, roughly half and half: the front half reports the game and the league's results; the back half turns to the week ahead — the coming matchup, what it asks of both teams, and the storylines brewing around the NFL. One continuous piece, no section headers. 10 to 14 substantial paragraphs, 900 to 1300 words total. NEVER address the reader, never use "you" or "we" or "folks", no slang, no hedging chatter, no talking to a buddy. AP-style sports journalism. No em dashes anywhere. If THE PRESSER facts carry the player's actual podium answers, every quote from HIM about this game must come from those answers (verbatim or tight paraphrase, attributed namelessly per the presser law); if he gave none, do not put him at a podium at all — and NEVER write that he declined, skipped, dodged, went silent, was unavailable, or "did not speak": absence of answers means the piece simply does not mention his media availability in any way. HIS RECENT PUBLIC POSTS in the facts are real public statements and may be quoted as social-media comment, never as podium answers. The subject player is only as famous as the facts imply. THE RECORD RELEVANCE LAW: never invoke an all-time NFL or franchise record, and never name a record holder (Manning, Tomlinson, Rice, anyone), unless a number in the facts genuinely threatens the mark — within a hair of it or clearly on pace to pass it; 40 passing touchdowns is a terrific season and NO occasion to mention the single-season record, 18 rushing scores summons nobody's ghost, and leading the league is not proximity. THE QUOTE ECONOMY LAW: the QUOTE BUDGET line in the facts is BINDING — most weeks the paper prints at most one of his quotes and many weeks none at all; his other words either live on other surfaces or go unused entirely, because no real paper prints every podium answer from every game, undrafted starter or not. HIS AGE, anywhere it appears, is EXACTLY the AGE stated in the facts — never computed from a draft year, never carried over from last season. WRITTEN NUMBERS ARE DIGITS: stats, counts, and records print as 14 touchdowns, 300 yards, 3-5 — never spelled out; spelled-out numbers exist only inside quoted speech. NAME LAW: when the subject player is covered at all, he is covered BY NAME — full name on first mention, last name after; a bare role tag like "the Jets quarterback" may only ever ACCOMPANY his name, never replace it — and the full appositive ("Zadey, the Jets quarterback,") appears AT MOST ONCE in the entire piece: after the first natural introduction he is simply his surname, and when his position matters again it is woven into the action ("his third touchdown pass"), never restated as a name tag; he has NO middle name on record — never invent a middle name or initial for him. Only players and coaches from the facts may be named as real people; every other person quoted must be invented (scouts, assistants, fans by name and neighborhood). Output STRICT JSON only, no fences: {"kick":"section kicker","head":"headline","stand":"one-sentence standfirst","by":"","paras":["..."],"pq":"one strong pull quote from the piece"}`;
 }
 function intakeGameStory(art, byline, wkLbl, gk, _cid){
   if (_cid!==undefined && _cid!==S.careerId){ console.log('career lock: a story written for another save was dropped at the door'); return null; }
@@ -8335,7 +8665,7 @@ function worldSys(opts){
   const fwLine = fw? " THE WHOLE WEEK IN ONE PASS: roughly half the content reacts to the last result and the league's weekend; the other half lives in the practice week ahead \u2014 practice reports, roster chatter, the coming matchup \u2014 and never re-reports the last game as news." : "";
   const f=S.chirp?S.chirp.followers||0:0;
   const fwReplies = fw? `,\n"myReplies":[{"a":"name","h":"@handle","x":"short reply"} x0-3, ONLY if the player has recent posts worth replying to, scaled to ${f.toLocaleString()} followers]` : "";
-  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. GAME REACTION FLAVOR: texts are where HIS OWN PEOPLE react to games the way the rest of the world does — after a result, a parent bursting with pride or consoling, a sibling quoting a play, a friend talking trash about the opponent, a teammate replaying a moment; on game weeks give texts real game-reaction energy (still inside the inbound plan's limits), not just logistics and small talk. Output STRICT JSON only, no markdown fences, matching:
+  return `You write the living world of a fictional NFL life-sim phone. Everything is fiction anchored to the SAVE FACTS given. Never contradict a fact. No em dashes anywhere. Invent plausible box-score details consistent with the final score, and realistic fan voices with distinct personalities.${fwLine} The player is NOT famous unless the facts imply it. EMAIL LAW: emails are transactional — the league office, the union, the bank, endorsements, tickets; every email reads COMPLETE on its own, NEVER administrative fiction implying an action this phone cannot do (no benefit elections, open-enrollment windows, portals or logins, forms to sign or return, RSVPs, deadlines to click), and NEVER money movement — no payroll notices, deposit confirmations, transfer alerts, balances, or account numbers from ANY bank real or invented; his only bank is Meridian and money truth lives in that app alone;  and MEDIA NEVER EMAILS — and MEDIA NEVER ASKS HIM FOR TIME ANYWHERE: no interview requests in chirper replies, @-mentions, or Huddle posts either; no outlet, podcast, or \"weekly\" account ever requests minutes, sit-downs, or locker time on any surface (his media access is the midweek availability and the postgame Podium show, period). NOBODY BOOKS HIM: no one — his agent included — ever texts, emails, or posts an invitation to an appearance, signing, autograph session, meet and greet, camp, charity event, podcast, or paid gig of any size; his endorsement business lives ONLY in the Apex sports group page. The mention easter egg below recounts a PAST real moment and is the one exception — it invites nothing. REPLY LAW: replies under his posts are REACTIONS ONLY — crowd noise, jokes, praise, groans — never questions asked TO him; he cannot answer replies and everyone knows it. MENTION EASTER EGGS: rarely (most weeks none), a top-line @-mention post from a fan can recount a REAL small interaction — he signed a jersey, waved to their section, played catch with a kid pregame, or was short with opposing fans — a little treasure, tied to what actually happened that week, never a question needing an answer. FAN LAW: Huddle posters and chirper fans are ordinary people on the internet — never teammates, never traveling with the team (no fan ever says \"before we fly to\" a road city; the team flies, fans stay home), never inside the building; they know only public information. PLAIN-HUMAN LAW: never copy phrases from these notes into dialogue; every text, post, and comment must read like something a real person would actually say and make plain sense on its own — if a note cannot be said naturally, say something simpler instead. TEXT THREAD FORMAT LAW: ONLY the threads listed as GROUP threads use the format "FirstName LastName|message text" (pipe), and the sender name MUST be one of that group's actual members. Every other thread is ONE person texting: plain message text, NO name, NO pipe, and the sender is exactly the thread's named contact. ONE-SIDED LAW: he has NOT replied between your messages — each 1:1 thread gets EXACTLY ONE message, one bubble, self-contained; never a second consecutive message from the same person, never a message that answers something he did not say, never a simulated back-and-forth he was not part of. GAME REACTION FLAVOR: texts are where HIS OWN PEOPLE react to games the way the rest of the world does — after a result, a parent bursting with pride or consoling, a sibling quoting a play, a friend talking trash about the opponent, a teammate replaying a moment; on game weeks give texts real game-reaction energy (still inside the inbound plan's limits), not just logistics and small talk. WRITTEN NUMBERS LAW: every number in a written post, text, or comment is DIGITS — 14 touchdowns, 300 yards, a 3-5 record — never spelled out (no "fourteen"), because these are typed surfaces; spelled-out numbers exist ONLY inside words someone actually spoke aloud on camera or on air. THE PLAYOFFS ARE THE PLAYOFFS: nobody, anywhere, calls the NFL postseason "the tournament" — it is the playoffs, the postseason, the Wild Card round, the Divisional round. THE LOT IS INVISIBLE: unless the GAMEDAY ARRIVAL fact says he DROVE, no one posts about his car existing, sitting in the players' lot, arriving, or "rolling out of the lot" — a chauffeured or shuttled player's cars were never seen by anyone. Output STRICT JSON only, no markdown fences, matching:
 {"chirps":[{"n":"","h":"@handle","vf":0,"g":"m|f|x","t":"","li":0,"rp":0,"tm":"2h"} x6-9] (g is the author: m male person, f female person, x for team/fan/brand/meme accounts),
 "huddle":[{"id":"unique","flair":"TEAM|LEAGUE|GAME THREAD" (TEAM for threads about HIS club, LEAGUE for threads spanning the whole league, GAME THREAD for his game; never any other flair),"u":"","tm":"3h","up":0,"h":"","b":"","cmts":[{"u":"","tm":"","up":0,"t":"","r":[{"u":"","tm":"","up":0,"t":""}]} x10-14, at least two nested reply chains 2-3 deep, include some negative-score comments]} x2],
 "texts":[{"thread":"${S.world.texts.map(t=>t.id).join("|")}","msgs":[["them","..."]]} x2-4 additions] (GROUP threads with their ONLY allowed senders: ${S.world.texts.filter(t=>t.group).map(t=>t.id+" ["+((t.members||[]).join(", ")||"derive from the thread's past senders")+"]").join("; ")||"none"} — all others are one-on-one),
@@ -9088,7 +9418,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.19.2";
+const VER="v1.20.1";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
@@ -9173,7 +9503,8 @@ function recomputeTitles(blob){
      so the REAL first game and first start get their texts when they actually happen. */
     if (S.milestones && S.blob && S.blob.player && (S.blob.player.yearsPro||0)===0 && prodOf(mergedSS(S.blob))<=0){ delete S.milestones.firstGame; delete S.milestones.firstStart; }   /* rookies only: a vet's empty NEW-season stats must never hand back career firsts */
   }catch(e){}
-  if (S) try{ if(homeFillPerception(S.perception, S.blob.player)) persist(); }catch(e){}   // v1.12.3: geography backfills at boot the moment a v1.7.1 blob is on file (blank-only, typed wins)
+  if (S) try{ if(homeFillPerception(S.perception, S.blob.player)) persist(); }catch(e){}
+  if (S) try{ beatsSweep(); }catch(e){}   /* v1.20.0: beats that expired while the phone slept resolve at boot */   // v1.12.3: geography backfills at boot the moment a v1.7.1 blob is on file (blank-only, typed wins)
   if (S && S.weekJobs) setTimeout(()=>{ try{ runWeek(); }catch(e){} }, 900);   // v1.13.0: an interrupted week finishes itself at boot
   if (S && !S.weekJobs && aiKey() && META.settings.autogen && (S.appliedWeeks||[]).length
       && (!S.lastRefresh || S.lastRefresh.wk!==wkLabel(S.blob.clock)))
