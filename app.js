@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.20.2 (Aug 18 2026) — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
+/* TyPhone app.js — v1.20.3 (Sep 1 2026) — THE POSTSEASON FEED: (1) the playoffs finally ride the league feed — Ty's CAREER-ZADEY1 probe showed the save holds every playoff game (Wild Card wk18, Divisional 19, Conference 20, Super Bowl 22, continuous numbering) and exe v1.9.1 ships them with type codes 2-5; one decoder (lgType) replaces six copies of the old pre/reg-only guess, so NFLSN shows the round in progress (Wild Card board with the round before beneath it; Pro Bowl week reads as the league at rest), WagerLines opens a playoff board with lines, the pens learn real playoff results, and standings stay regular-season-only. Needs exe v1.9.1 and a fresh sync. (2) OWNED-THING PHOTOS: the picture sits on its own full-width line under the item, with Photo / Re-shoot / Remove buttons (removePhoto). (3) CALL FOR PRICE: a listing that hides its number reads in FOR SALE at the price the call would have returned — the pen prices it from the real market for that exact year/model/hours and flags it as an estimate on the card. (prior: v1.20.2 — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1892,7 +1892,7 @@ function pyRecs(){
     const tn=L.teams; const out={};
     for (const g of L.games){
       const a=Array.isArray(g);
-      const t=a? (g[0]===0?"PreSeason":"RegularSeason") : g.t, w=a? g[1] : g.w;
+      const t=a? (lgType(g[0])) : g.t, w=a? g[1] : g.w;
       if (t!=="RegularSeason" || !gameRevealed(t,w)) continue;
       const h=a? teamNm(tn[g[2]]) : g.h, aw=a? teamNm(tn[g[3]]) : g.a;
       const hs=a? g[4] : g.hs, as=a? g[5] : g.as;
@@ -1930,7 +1930,7 @@ function pyBody(){
     if (S.blob.league && S.blob.league.games && S.blob.league.games.length){
       const wkNow = S.blob.clock.week; const tp = S.blob.clock.weekType;
       const tn=S.blob.league.teams;
-      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
+      const all=S.blob.league.games.map(g=>Array.isArray(g)? {t:lgType(g[0]), w:g[1], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""} : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
       const card = (x, wkTag)=>{ const g=x.g;
         /* v1.6.2 (Ty): finals were dropping the broadcast chip and kickoff time — a played
            game still aired somewhere at some time. Keep both on every card. */
@@ -1941,19 +1941,33 @@ function pyBody(){
       /* v1.6.1 (live-save bug): league games only carry Pre/RS weeks, so a postseason or
          offseason sync (P10 Pro Bowl, P11 OffSeason) rendered a totally empty slate. Once
          the calendar leaves the regular season, show the season's FINAL week instead. */
-      let viewTp=tp, viewWk=wkNow, seasonOver=false;
-      if (tp!=="PreSeason" && tp!=="RegularSeason"){
+      /* v1.20.3 THE POSTSEASON FEED (Ty: "wildcard playoffs still dont show... it is now showing
+         week 17 and 18 scores"): the feed carries the rounds now. A playoff clock shows THAT round
+         (the save numbers playoff weeks continuously, so the round before is simply week-1 among
+         regular-season-or-playoff games). Pro Bowl week shows the conference finals with the league
+         at rest; the offseason keeps the old finale view, Super Bowl first if the feed has it. */
+      let viewTp=tp, viewWk=wkNow, seasonOver=false, po=isPOType(tp);
+      const anyPO=all.some(g=>isPOType(g.t));
+      if (tp==="ProBowl" && anyPO){ po=true; viewTp="ConferencePlayoff"; const cw=all.filter(g=>g.t==="ConferencePlayoff").map(g=>g.w); viewWk=cw.length? Math.max(...cw) : wkNow-1; }
+      else if (tp==="OffSeason" && anyPO){ po=true; const sb=all.find(g=>g.t==="SuperBowl"&&g.played); if (sb){ viewTp="SuperBowl"; viewWk=sb.w; } else { viewTp="ConferencePlayoff"; const cw=all.filter(g=>g.t==="ConferencePlayoff").map(g=>g.w); viewWk=cw.length? Math.max(...cw) : wkNow; } seasonOver=true; }
+      else if (tp!=="PreSeason" && tp!=="RegularSeason" && !po){
         seasonOver=true; viewTp="RegularSeason";
         const rsWks=all.filter(g=>g.t==="RegularSeason"&&(g.played||g.hs+g.as>0)).map(g=>g.w);
         viewWk=rsWks.length? Math.max(...rsWks) : 0;
       }
-      const wkTag = w => (viewTp==="PreSeason"?"PRE ":"")+"WK "+(w+1);
+      const tagOf = (t,w) => isPOType(t)? roundName(t) : (t==="PreSeason"?"PRE ":"")+"WK "+(w+1);
+      const wkTag = w => tagOf(viewTp, w);
+      const prevOf = g => g.w===viewWk-1 && (g.t===viewTp || (po && (g.t==="RegularSeason"||isPOType(g.t))));
       const thisWk = weekWindows(all.filter(g=>g.t===viewTp && g.w===viewWk), S.careerId+"|"+viewTp+viewWk);
-      const lastWk = viewWk>0? weekWindows(all.filter(g=>g.t===viewTp && g.w===viewWk-1 && (g.played||g.hs+g.as>0)), S.careerId+"|"+viewTp+(viewWk-1)) : [];
-      m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${seasonOver? "Season finale":"This week"}</h3><span style="color:#8b939c">${seasonOver? wkLabel(S.blob.clock).split(" · ")[1]+" · "+wkTag(viewWk) : wkTag(viewWk)}</span></div>` +
+      const lastArr = viewWk>0? all.filter(g=>prevOf(g) && (g.played||g.hs+g.as>0)) : [];
+      const lastTp = lastArr.length? lastArr[0].t : viewTp;
+      const lastWk = lastArr.length? weekWindows(lastArr, S.careerId+"|"+lastTp+(viewWk-1)) : [];
+      const headH3 = tp==="ProBowl"? "Pro Bowl week" : seasonOver? "Season finale" : po? "The postseason" : "This week";
+      const headTag = tp==="ProBowl"? "the league rests · "+roundName(viewTp)+" finals" : seasonOver&&!po? wkLabel(S.blob.clock).split(" · ")[1]+" · "+wkTag(viewWk) : wkTag(viewWk);
+      m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${headH3}</h3><span style="color:#8b939c">${headTag}</span></div>` +
         thisWk.map(x=>card(x, wkTag(viewWk))).join("") +
-        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${seasonOver? "The week before":"Last week"}</h3><span style="color:#8b939c">${wkTag(viewWk-1)}</span></div>` +
-        lastWk.filter(x=>x.g.played).map(x=>card(x, wkTag(viewWk-1))).join("") : "");
+        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${(seasonOver||po)? "The round before":"Last week"}</h3><span style="color:#8b939c">${tagOf(lastTp, viewWk-1)}</span></div>` +
+        lastWk.filter(x=>x.g.played).map(x=>card(x, tagOf(lastTp, viewWk-1))).join("") : "");
     } else {
       const played = S.blob.schedule.filter(g=>g[7]).slice(-2);
       const upcoming = S.blob.schedule.filter(g=>!g[7]).slice(0,2);
@@ -1967,7 +1981,7 @@ function pyBody(){
       const recs={}; for (const t of S.blob.league.teams) recs[t.n]={w:0,l:0,ti:0,div:t.d};
       /* v1.7.8: compact-array games never matched .t here (same class of bug the board fixed in
          v1.4) — map first; and the reveal law keeps this week's simmed results out of the table. */
-      const stG=(S.blob.league.games||[]).map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:S.blob.league.teams[g[2]].n||S.blob.league.teams[g[2]], a:S.blob.league.teams[g[3]].n||S.blob.league.teams[g[3]], hs:g[4], as:g[5], played:g[4]>=0} : g);
+      const stG=(S.blob.league.games||[]).map(g=>Array.isArray(g)? {t:lgType(g[0]), w:g[1], h:S.blob.league.teams[g[2]].n||S.blob.league.teams[g[2]], a:S.blob.league.teams[g[3]].n||S.blob.league.teams[g[3]], hs:g[4], as:g[5], played:g[4]>=0} : g);
       for (const g of stG){ if(g.t!=="RegularSeason"||!(g.played||g.hs+g.as>0)||!gameRevealed(g.t,g.w)) continue;
         if(g.hs>g.as){recs[g.h].w++;recs[g.a].l++;} else if(g.as>g.hs){recs[g.a].w++;recs[g.h].l++;} else {recs[g.h].ti++;recs[g.a].ti++;} }
       const divs={}; for(const n in recs){ (divs[recs[n].div]=divs[recs[n].div]||[]).push([n,recs[n]]); }
@@ -2804,7 +2818,7 @@ function LISTING_SYS(kind){
     boat:'"Length","Engines","Engine hours","Fuel","Seller","Hull/colors" (gel coat, bottom paint if listed)',
     plane:'"Total time","Engine time" (SMOH/SNEW + TBO if listed),"Prop time","Year painted","Year interior","Registration","Seller"'
   }[kind];
-  return 'You read one real '+kind+' listing for a life-sim phone. If given a URL: FETCH that exact page first (web_fetch); only if the page will not fetch, SEARCH for the listing using the site name and the identifiers in the URL (the vehicle/listing ID, the address) and read the indexed data. If given pasted text, read the text. Report ONLY what the listing actually shows — never invent numbers. Return STRICT JSON as your ENTIRE final message, no prose before or after, no fences: {"title":"(year make model, or the street address)","price":asking price number (0 if none),"forSale":true|false (false if off market, sold, or not listed for sale),"estValue":number (market/Zestimate estimate if shown, else the price),"location":"city, ST","year":number or null,"sub":"one short line of what it is","facts":{up to 9 of these keys when the listing shows them: '+want+'},"notes":"one sentence of deal-relevant color: price drops, days listed, condition"}. If the listing cannot be read at all, return {"title":""}.';
+  return 'You read one real '+kind+' listing for a life-sim phone. If given a URL: FETCH that exact page first (web_fetch); only if the page will not fetch, SEARCH for the listing using the site name and the identifiers in the URL (the vehicle/listing ID, the address) and read the indexed data. If given pasted text, read the text. Report ONLY what the listing actually shows — never invent numbers. Return STRICT JSON as your ENTIRE final message, no prose before or after, no fences: {"title":"(year make model, or the street address)","price":asking price number,"priceCall":true|false (true when the listing says Call for price / Contact seller / Inquire and shows no number — then price MUST be your best realistic market figure for that exact year, model, hours or mileage, and condition, the number the call would have returned; never 0 for an item that is for sale),"forSale":true|false (false ONLY if the listing is off market, sold, or not for sale; a hidden price is still for sale),"estValue":number (market/Zestimate estimate if shown, else the price),"location":"city, ST","year":number or null,"sub":"one short line of what it is","facts":{up to 9 of these keys when the listing shows them: '+want+'},"notes":"one sentence of deal-relevant color: price drops, days listed, condition"}. If the listing cannot be read at all, return {"title":""}.';
 }
 async function callAIWeb(system, user, maxTokens){
   /* the web-read pen. Anthropic: server-side web_search tool, streaming so mobile networks
@@ -2876,9 +2890,11 @@ async function listingRead(kind){
     const j=JSON.parse((m?m[0]:out).replace(/```json|```/g,"").trim());
     if (!j || !String(j.title||"").trim()) throw new Error("unreadable");
     const facts={}; if (j.facts&&typeof j.facts==="object") for (const k of Object.keys(j.facts).slice(0,10)){ const v=j.facts[k]; if(v!=null&&String(v).trim()) facts[deDash(String(k)).slice(0,40)]=deDash(String(v)).slice(0,120); }
-    const price=Math.max(0, Math.round(+j.price||0));
+    let price=Math.max(0, Math.round(+j.price||0));
+    const callP = !!j.priceCall || (j.forSale!==false && price===0);
+    if (callP && price===0) price=Math.max(0, Math.round(+j.estValue||0));   /* v1.20.3 CALL FOR PRICE: a hidden number reads in at the figure the call would return */
     const L={ id:"L"+Date.now(), kind, url:isUrl?raw:"",
-      title:deDash(String(j.title)).slice(0,90), price,
+      title:deDash(String(j.title)).slice(0,90), price, callPrice: callP&&price>0,
       forSale:(j.forSale!==false)&&price>0,
       estValue:Math.max(1000, Math.round(+j.estValue||price||0)),
       loc:deDash(String(j.location||"")).slice(0,60), year:(+j.year||null),
@@ -2923,7 +2939,7 @@ function listingSheet(id){
   }
   sheet('<h3>'+esc(L.title)+'</h3>'+
     '<p class="sp" style="margin:2px 0 8px">'+esc(L.sub||"")+(L.loc?" \u00b7 "+esc(L.loc):"")+(L.url?' \u00b7 read from '+esc(MARKET_SITES[L.kind]):' \u00b7 read from pasted text')+'</p>'+
-    (L.forSale? '<div class="payline tot"><span>Asking</span><span>'+fm(L.price)+'</span></div>' : '<div class="payline tot"><span>Estimated value</span><span>'+fm(L.estValue)+'</span></div>')+
+    (L.forSale? '<div class="payline tot"><span>'+(L.callPrice? "Call for price \u2014 the call was made":"Asking")+'</span><span>'+fm(L.price)+'</span></div>'+(L.callPrice? '<p class="sp" style="font-size:11.5px;opacity:.7;margin:2px 0 6px">The listing hid its number; this is the realistic market figure for this exact one, and it\u2019s what the seller quoted when asked.</p>':"") : '<div class="payline tot"><span>Estimated value</span><span>'+fm(L.estValue)+'</span></div>')+
     pay+(L.notes? '<p class="sp" style="font-size:12px;opacity:.75;margin-top:6px">'+esc(L.notes)+'</p>':"")+
     buys+
     '<button class="btn" style="background:rgba(244,100,92,.12);color:#ff9d94" onclick="listingDrop(\''+L.id+'\')">Take it off the shelf</button>'+
@@ -3000,6 +3016,13 @@ function attachPhoto(kindKey, idx){
   };
   inp.click();
 }
+function removePhoto(kindKey, idx){ const it=(S[kindKey]||[])[idx]; if(!it) return; it.img=null; persist(); toast("Photo removed."); if (kindKey==="garage" && document.getElementById("sheet") && document.getElementById("sheet").innerHTML.includes("Garage")) garSheet(); else if (curApp) renderApp(curApp); }   /* v1.20.3 (Ty: "need a removal option not just a reshoot") */
+function photoStrip(it, kindKey, idx){
+  /* v1.20.3: the picture rides its own full-width line under the item; the buttons sit beneath it */
+  return (it.img? '<img src="'+it.img+'" style="display:block;width:100%;max-height:230px;object-fit:cover;border-radius:10px;margin-top:8px" alt="">' : "")+
+    '<div style="display:flex;gap:6px;margin-top:8px"><button class="btn sm" style="background:rgba(127,127,127,.18);margin:0" onclick="attachPhoto(\''+kindKey+'\','+idx+')">'+(it.img?"Re-shoot":"Add a photo")+'</button>'+
+    (it.img? '<button class="btn sm" style="background:rgba(244,100,92,.12);color:#ff9d94;margin:0" onclick="removePhoto(\''+kindKey+'\','+idx+')">Remove photo</button>' : "")+'</div>';
+}
 function ownedThumb(it, kindKey, idx, light){
   const t=it.img? '<img src="'+it.img+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">' : "";
   return t+'<button class="btn sm" style="background:rgba(127,127,127,.18);margin:0;flex-shrink:0" onclick="attachPhoto(\''+kindKey+'\','+idx+')">'+(it.img?"Re-shoot":"Photo")+'</button>';
@@ -3008,11 +3031,10 @@ function ownedBlock(kindKey, title, light){
   const arr=S[kindKey]||[]; if(!arr.length) return "";
   const isHome=kindKey==="properties";
   return '<div class="hoodhead"'+(light?'':' style="color:var(--ink)"')+'><h3>'+title+'</h3><span'+(light?'':' style="color:var(--faint)"')+'>'+arr.length+' owned</span></div>'+
-    arr.map((it,i)=>'<div class="lorerow" style="display:flex;gap:8px;align-items:center;margin:6px 0">'+
-      (it.img?'<img src="'+it.img+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">':"")+
+    arr.map((it,i)=>'<div class="lorerow" style="margin:8px 0;padding:10px;border-radius:12px;background:rgba(127,127,127,.09)"><div style="display:flex;gap:8px;align-items:center">'+
       '<span style="flex:1;min-width:0;font-size:13px"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(it.n)+'</b><small style="opacity:.6">'+fm(it.value||0)+(isHome&&S.residence===i?" \u00b7 HE LIVES HERE":"")+'</small></span>'+
       (isHome? '<button class="btn sm" style="background:'+(S.residence===i?"rgba(63,220,132,.2);color:#3fdc84":"rgba(127,127,127,.18)")+';margin:0;flex-shrink:0" onclick="setResidence('+i+')">'+(S.residence===i?"\u2713 Home":"Live here")+'</button>' : "")+
-      '<button class="btn sm" style="background:rgba(127,127,127,.18);margin:0;flex-shrink:0" onclick="attachPhoto(\''+kindKey+'\','+i+')">'+(it.img?"Re-shoot":"Photo")+'</button></div>').join("");
+      '</div>'+photoStrip(it, kindKey, i)+'</div>').join("");
 }
 function setResidence(i){
   S.residence = (S.residence===i)? null : i;
@@ -3233,7 +3255,7 @@ function buyVeh(id, fin){
 }
 const PAINTS=[["Gloss Black","#111",650],["Pearl White","#f2f0ea",800],["Nardo Gray","#7a8087",750],["Racing Red","#c8102e",700],["Miami Blue","#00b1c8",900],["British Green","#0b3d2e",750],["Midnight Purple","#2e1a47",1200],["Chalk","#d9d5cc",850],["Solar Yellow","#f5c400",700],["Copper","#b45f2a",950],["Frozen Matte Black","#1a1a1a",1500],["Chrome Wrap","#c9ced4",2200],["Lime Green","#7ed321",850],["Acid Lime","#c6ff00",950],["Hot Pink","#ff2d78",900],["Rose Pink","#f4a6c6",850],["Magenta Pearl","#c2185b",1100],["Liquid Silver Metallic","#aeb6bf",1050],["Gunmetal Metallic","#4a545e",1000],["Champagne Gold Metallic","#c9a86a",1150],["Deep Ocean Metallic","#123a5e",1050],["Sunset Orange Metallic","#e2571b",1000]];
 function garSheet(){
-  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline"><div class="l" style="display:flex;gap:8px;align-items:center">${c.img?`<img src="${c.img}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" alt="">`:""}<div><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops monthly)</p></div></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="attachPhoto('garage',${i})">${c.img?"Re-shoot":"Photo"}</button><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
+  sheet(`<h3>Garage</h3>` + (S.garage.length? S.garage.map((c,i)=>`<div class="rowline" style="flex-wrap:wrap"><div class="l"><h4>${c.color?`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c.color};margin-right:6px;border:1px solid rgba(255,255,255,.3)"></span>`:""}${esc(c.n)}</h4><p>${c.colorName?esc(c.colorName)+" · ":""}Value ${fm(c.value)} (drops monthly)</p></div><span style="display:flex;gap:6px"><button class="btn sm" style="background:rgba(255,255,255,.12)" onclick="paintSheet(${i})">Paint</button><button class="btn sm" style="background:rgba(244,100,92,.2);color:#ff9d94" onclick="sellVeh(${i})">Sell</button></span><div style="flex-basis:100%">${photoStrip(c,'garage',i)}</div></div>`).join("") : `<p class="sp">Empty. The team facility has a shuttle, but let's be honest.</p>`) +
   `<h4 style="margin:14px 0 4px">Gameday arrival</h4>
   <p class="sp" style="margin:0 0 8px">How you pull up to HOME games. Drive your own car and the players' lot might notice; roll in chauffeured and nobody gets a look. Pure theater — the save never sees it. The chauffeur bills you, though: the fee hits checking for each home game you actually play.</p>` +
   S.garage.map(c=>arrRow("drive","Drive the "+c.n+(c.colorName?" ("+c.colorName+")":""),c.id)).join("") +
@@ -4653,9 +4675,9 @@ function linesLine(){
   try{
     const L=S.blob.league; if(!L||!L.games||!L.teams) return "";
     const wk=S.blob.clock.week, tp=S.blob.clock.weekType;
-    if(tp!=="RegularSeason"&&tp!=="PreSeason") return "";
+    if(tp!=="RegularSeason"&&tp!=="PreSeason"&&!isPOType(tp)) return "";   /* v1.20.3: playoff boards ride the pens too */
     const tn=L.teams;
-    const gs=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason",w:g[1],h:teamNm(tn[g[2]]),a:teamNm(tn[g[3]]),hs:g[4],as:g[5],played:g[4]>=0}:g).filter(g=>g.t===tp&&g.w===wk&&!g.played);
+    const gs=L.games.map(g=>Array.isArray(g)? {t:lgType(g[0]),w:g[1],h:teamNm(tn[g[2]]),a:teamNm(tn[g[3]]),hs:g[4],as:g[5],played:g[4]>=0}:g).filter(g=>g.t===tp&&g.w===wk&&!(g.played&&gameRevealed(g.t,g.w)));   /* v1.20.3: the reveal law rides the lines line — a game the save pre-simmed is still OPEN on the board until the week passes, so the pens quote the same open lines the board shows */
     if(!gs.length) return "";
     const ln=gameLines(gs);
     const parts=gs.map((g,i)=>{ const l2=ln[i]||{}; const sp=+l2.spread||0; const tot=l2.total!=null? l2.total:""; return g.a+" at "+g.h+": "+(sp>0? g.h+" -"+sp : sp<0? g.a+" -"+(-sp) : "PK")+(tot!==""? ", O/U "+tot:""); });
@@ -4745,7 +4767,7 @@ RENDER.wager = b=>{
     // league games are COMPACT ARRAYS [type(0 pre/1 reg), week, homeIdx, awayIdx, hs, as] — map first (v1.4 fix: filtering on .t/.w matched nothing, board collapsed to your game only)
     const tnames=S.blob.league.teams;
     const all=S.blob.league.games.map(g=>Array.isArray(g)
-      ? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:tnames[g[2]], a:tnames[g[3]], hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""}
+      ? {t:lgType(g[0]), w:g[1], h:tnames[g[2]], a:tnames[g[3]], hs:g[4], as:g[5], played:g[4]>=0, dy:g[6]||"", tm:g[7]||""}
       : g).map(g=>Object.assign({}, g, {played: !!g.played && gameRevealed(g.t, g.w)}));   // v1.7.8 reveal law, array AND object games
     /* v1.7.8 (Ty: no spoilers): the CURRENT week's board is all open lines — the save may carry
        simmed finals, but nothing settles until the clock moves past the week. Last week's slate
@@ -4753,7 +4775,7 @@ RENDER.wager = b=>{
     const wins=weekWindows(all.filter(g=>g.t===tp && g.w===wkNow), S.careerId+"|"+tp+wkNow);
     games = wins.map(x=>{ x.g._net=x.net; x.g._day=x.day; return x.g; });
     if (wkNow>0){
-      const pw=weekWindows(all.filter(g=>g.t===tp && g.w===wkNow-1 && g.played), S.careerId+"|"+tp+(wkNow-1));
+      const pw=weekWindows(all.filter(g=>g.w===wkNow-1 && g.played && (g.t===tp || (isPOType(tp)&&(g.t==="RegularSeason"||isPOType(g.t))))), S.careerId+"|"+tp+(wkNow-1));   /* v1.20.3: the settled slate crosses the round boundary (Wild Card's week before is Week 18) */
       priorGames = pw.map(x=>{ x.g._net=x.net; x.g._day=x.day; return x.g; });
     }
   } else {
@@ -4770,7 +4792,7 @@ RENDER.wager = b=>{
   const mlTxt = g => `${esc(g.h)} ${g.mlH>0?"+":""}${g.mlH} · ${esc(g.a)} ${g.mlA>0?"+":""}${g.mlA}`;
   b.innerHTML = `<div class="brandhead wgr"><button class="back" onclick="closeApp()">‹ Home</button><div class="bh-mark"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 8.5v-2A1.5 1.5 0 0 1 5 5h14a1.5 1.5 0 0 1 1.5 1.5v2a2.3 2.3 0 0 0 0 7v2A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5v-2a2.3 2.3 0 0 0 0-7z"/><path d="M9 5v14" stroke-dasharray="1.6 2.2"/></svg></div><div><h1>WagerLines</h1><small>Lines move. Discipline doesn't.</small></div></div>
   <div class="apbody">
-  <div class="hoodhead" style="color:var(--ink)"><h3>${tp==="PreSeason"?"Preseason":"Week"} ${wkNow+1} board</h3><span style="color:var(--faint)">${openL.length} open · finals arrive when the week does</span></div>
+  <div class="hoodhead" style="color:var(--ink)"><h3>${isPOType(tp)? roundName(tp).charAt(0)+roundName(tp).slice(1).toLowerCase()+" board" : (tp==="PreSeason"?"Preseason":"Week")+" "+(wkNow+1)+" board"}</h3><span style="color:var(--faint)">${openL.length} open · finals arrive when the week does</span></div>
   ${openL.map(g=>`<div class="veh-detail" style="margin-bottom:10px;${(g.h===mine||g.a===mine)?"border-color:rgba(127,212,160,.4)":""}">
     <div class="payline" style="border:none;padding:2px 0"><span class="wl-match" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap">${tlogoImg(g.a,"tlogo wl","height:27px;width:27px;vertical-align:-8px;margin:0 5px 0 0")}<b>${esc(g.a)}</b> <span style="opacity:.55">at</span> ${tlogoImg(g.h,"tlogo wl","height:27px;width:27px;vertical-align:-8px;margin:0 5px 0 0")}<b>${esc(g.h)}</b>${(g.h===mine||g.a===mine)?' <span style="color:#7fd4a0;font-size:11px">YOUR GAME</span>':""}</span><span>${netChip(g._net||"CBS")}</span></div>
     <div class="payline"><span>Spread</span><span>${g.spread===0? "PK (pick em)" : spreadTxt(g)}</span></div>
@@ -4932,7 +4954,7 @@ function leagueDigest(){
   const tn=L.teams||[]; const c=S.blob.clock;
   const ord=(t,w)=>(t==="PreSeason"?0:1)*100+w;
   const cOrd=(c.weekType==="PreSeason"?0:c.weekType==="RegularSeason"?1:2)*100+c.week;
-  const all=L.games.map(g=>Array.isArray(g)? {t:g[0]===0?"PreSeason":"RegularSeason", w:g[1], hi:g[2], ai:g[3], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g);
+  const all=L.games.map(g=>Array.isArray(g)? {t:lgType(g[0]), w:g[1], hi:g[2], ai:g[3], h:teamNm(tn[g[2]]), a:teamNm(tn[g[3]]), hs:g[4], as:g[5], played:g[4]>=0} : g);
   /* v1.17.4 (Ty: "united chronicle said bengals were 0-2... we only played one game" — the
      paper AND the podcast both spoke week-2 futures): Madden sims the current week's other
      games before he lives them, so league.games carries unlived finals. The box was already
@@ -7097,7 +7119,7 @@ function normalizeLeague(blob){
     const names=L.teams;
     L.teams = names.map(n=>({n, d: NFL_DIVS[n]||"Other"}));
     if (Array.isArray(L.games) && Array.isArray(L.games[0])){
-      L.games = L.games.map(g=>({ t: g[0]===0?"PreSeason":"RegularSeason", w:g[1], h:names[g[2]], a:names[g[3]],
+      L.games = L.games.map(g=>({ t: lgType(g[0]), w:g[1], h:names[g[2]], a:names[g[3]],
         hs: g[4]<0?0:g[4], as: g[5]<0?0:g[5], played: g[4]>=0, dy:String(g[6]||""), tm:String(g[7]||"") }));   /* v1.18.5 THE DOOR STRIP: [6]=day [7]=kickoff (exe v1.8.8) rode every code and THIS map dropped them on every real sync — the save’s windows survive the apply now */
     }
   }
@@ -7114,6 +7136,10 @@ async function backupCode(){
    the rest of the current week's slate before he plays his own game, so the save carries finals
    the player hasn't lived yet. REVEAL LAW: a game's score exists on screen only once the clock
    has moved PAST its week. The current week is always "upcoming", everywhere. */
+const LG_TYPES=["PreSeason","RegularSeason","WildcardPlayoff","DivisionalPlayoff","ConferencePlayoff","SuperBowl"];   /* v1.20.3: exe v1.9.1 type codes */
+function lgType(c){ return LG_TYPES[+c]||"RegularSeason"; }
+function isPOType(t){ return t==="WildcardPlayoff"||t==="DivisionalPlayoff"||t==="ConferencePlayoff"||t==="SuperBowl"; }
+function roundName(t){ return t==="WildcardPlayoff"?"WILD CARD" : t==="DivisionalPlayoff"?"DIVISIONAL" : t==="ConferencePlayoff"?"CONFERENCE" : t==="SuperBowl"?"SUPER BOWL" : t==="ProBowl"?"PRO BOWL" : ""; }
 function wkRevealOrd(t,w){ return (t==="PreSeason"?0 : t==="RegularSeason"?1 : 2)*1000 + (+w||0); }
 function gameRevealed(t,w){ const c=S.blob.clock||{}; return wkRevealOrd(t,w) < wkRevealOrd(c.weekType, c.week); }
 function clockOrd(c){
@@ -8380,7 +8406,7 @@ function bookLine(){
     const g=nextGame(); if(!g) return "";
     const L=S.blob.league; if(!L||!L.games||!L.games.length) return "";
     const tn=L.teams;
-    const all=L.games.map(x=>Array.isArray(x)? {t:x[0]===0?"PreSeason":"RegularSeason", w:x[1], h:tn[x[2]], a:tn[x[3]], hs:x[4], as:x[5], played:x[4]>=0} : x);
+    const all=L.games.map(x=>Array.isArray(x)? {t:lgType(x[0]), w:x[1], h:tn[x[2]], a:tn[x[3]], hs:x[4], as:x[5], played:x[4]>=0} : x);
     const recs={};
     for (const gm of all.filter(x=>x.t==="RegularSeason"&&x.played&&gameRevealed(x.t,x.w))){   /* v1.17.4 reveal law: the book's records never count Madden's pre-simmed futures */
       recs[gm.h]=recs[gm.h]||{w:0,l:0}; recs[gm.a]=recs[gm.a]||{w:0,l:0};
@@ -9434,7 +9460,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.20.2";
+const VER="v1.20.3";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
