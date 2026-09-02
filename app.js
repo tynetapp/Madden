@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.20.3 (Sep 1 2026) — THE POSTSEASON FEED: (1) the playoffs finally ride the league feed — Ty's CAREER-ZADEY1 probe showed the save holds every playoff game (Wild Card wk18, Divisional 19, Conference 20, Super Bowl 22, continuous numbering) and exe v1.9.1 ships them with type codes 2-5; one decoder (lgType) replaces six copies of the old pre/reg-only guess, so NFLSN shows the round in progress (Wild Card board with the round before beneath it; Pro Bowl week reads as the league at rest), WagerLines opens a playoff board with lines, the pens learn real playoff results, and standings stay regular-season-only. Needs exe v1.9.1 and a fresh sync. (2) OWNED-THING PHOTOS: the picture sits on its own full-width line under the item, with Photo / Re-shoot / Remove buttons (removePhoto). (3) CALL FOR PRICE: a listing that hides its number reads in FOR SALE at the price the call would have returned — the pen prices it from the real market for that exact year/model/hours and flags it as an estimate on the card. (prior: v1.20.2 — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
+/* TyPhone app.js — v1.20.4 (Sep 1 2026) — THE PLAYOFF RECORD: (1) recordAfter no longer restarts the tally in January — the regular-season record FREEZES at Week 18 and a playoff game is a ROUND won or lost, stated as such (the 1-0 presser dies); (2) THE ANGLES ENGINE — every postgame and midweek question is assigned a fact-backed angle (margin, streak, the box-score stars, the opponent's record, the round and its stakes, the injury ledger, the weather, a live story beat, the week ahead), seeded per game so the corps never repeats itself, with generic stems banned outright; (3) NFLSN speaks the calendar — Week N, Wild Card, Divisional, Conference, Pro Bowl week, Super Bowl (no 'the week before', no 'season finale'); (4) NFL Network carries NO playoff games — the postseason windows go to CBS/FOX/NBC/ESPN/ABC, and the NFLN chip drops the white art box for the red text chip; (5) standings and record tags are regular-season-only by construction (pinned); (6) THE STALLED WEEK — a job that hangs past 4 minutes fails instead of jamming the runner forever, the wake lock is re-taken every time the phone comes back while a week is writing, and a runner stuck longer than 5 minutes is reset on return. (prior: v1.20.3 — THE POSTSEASON FEED: (1) the playoffs finally ride the league feed — Ty's CAREER-ZADEY1 probe showed the save holds every playoff game (Wild Card wk18, Divisional 19, Conference 20, Super Bowl 22, continuous numbering) and exe v1.9.1 ships them with type codes 2-5; one decoder (lgType) replaces six copies of the old pre/reg-only guess, so NFLSN shows the round in progress (Wild Card board with the round before beneath it; Pro Bowl week reads as the league at rest), WagerLines opens a playoff board with lines, the pens learn real playoff results, and standings stay regular-season-only. Needs exe v1.9.1 and a fresh sync. (2) OWNED-THING PHOTOS: the picture sits on its own full-width line under the item, with Photo / Re-shoot / Remove buttons (removePhoto). (3) CALL FOR PRICE: a listing that hides its number reads in FOR SALE at the price the call would have returned — the pen prices it from the real market for that exact year/model/hours and flags it as an estimate on the card. (prior: v1.20.2 — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -1851,7 +1851,13 @@ function confNetFor(awayTeam){ return String(DIVISIONS[awayTeam]||"").indexOf("A
 const DAY3={Thursday:"THU",Friday:"FRI",Saturday:"SAT",Sunday:"SUN",Monday:"MON",Tuesday:"TUE",Wednesday:"WED"};
 function slotFor(day, tmin, awayTeam, isPre){
   const d3=DAY3[day]||String(day||"").slice(0,3).toUpperCase()||"SUN";
-  if (isPre) return {net:"NFLN", day:d3, ord:1};
+  if (isPre===true || isPre===1) return {net:"NFLN", day:d3, ord:1};
+  if (isPre===2){   /* v1.20.4 (Ty: "i didnt know nfl network had playoff games. confirm that" — it does not; NFLN has never carried a playoff game): playoff windows ride the majors */
+    if (day==="Saturday") return {net:+tmin>=1200?"NBC":"CBS", day:"SAT", ord:1};
+    if (day==="Monday") return {net:"ESPN", day:"MON", ord:3};
+    if (day==="Sunday" && +tmin>=1200) return {net:"NBC", day:"SUN", ord:2};
+    return {net:confNetFor(awayTeam), day:d3, ord:1};
+  }
   if (day==="Thursday") return {net:"TNF", day:"THU", ord:0};
   if (day==="Monday")   return {net:"MNF", day:"MON", ord:3};
   if (day==="Saturday") return {net:"NFLN", day:"SAT", ord:1};
@@ -1860,12 +1866,14 @@ function slotFor(day, tmin, awayTeam, isPre){
 }
 const NETMAP = g => { const day=g[5], t=+g[6];
   if (g[1]==="PreSeason") return "NFLN";
+  if (isPOType(g[1])){ if (day==="Saturday") return t>=1200?"NBC":"CBS"; if (day==="Monday") return "ESPN"; if (day==="Sunday"&&t>=1200) return "NBC"; }   /* v1.20.4: no NFLN in the playoffs */
   if (day==="Thursday") return "PRIME"; if (day==="Monday") return "ESPN"; if (day==="Saturday") return "NFLN";
   if (day==="Sunday"){ if (t>=1200) return "NBC";
     const away = g[4]? g[3] : ((S.blob&&S.blob.player&&S.blob.player.team)||g[3]);   // his schedule row: home game → the away side is the opponent; road game → it's him
     return confNetFor(away); } return "CBS"; };
 const NETIMG = {ESPN:"net-espn", NBC:"net-nbc", CBS:"net-cbs-dark", FOX:"net-fox", PRIME:"net-prime", ABC:"net-abc", SNF:"broadcast-sunday-night-football", TNF:"broadcast-thursday-night-football", MNF:"broadcast-monday-night-football", NFLN:"broadcast-nfl-network"};
 function netChip(net){
+  if (net==="NFLN") return NETFALL(net);   /* v1.20.4 (Ty: "the white background on nfl network needs to be fixed on dark mode"): the art rode a white box; the red text chip reads on both themes */
   const f=NETIMG[net];
   if (f) return `<span class="netimg"><img src="${f}.png" alt="${net}" onerror="if(!artE(this))this.parentNode.outerHTML=NETFALL('${net}')"></span>`;
   return NETFALL(net);
@@ -1962,11 +1970,15 @@ function pyBody(){
       const lastArr = viewWk>0? all.filter(g=>prevOf(g) && (g.played||g.hs+g.as>0)) : [];
       const lastTp = lastArr.length? lastArr[0].t : viewTp;
       const lastWk = lastArr.length? weekWindows(lastArr, S.careerId+"|"+lastTp+(viewWk-1)) : [];
-      const headH3 = tp==="ProBowl"? "Pro Bowl week" : seasonOver? "Season finale" : po? "The postseason" : "This week";
-      const headTag = tp==="ProBowl"? "the league rests · "+roundName(viewTp)+" finals" : seasonOver&&!po? wkLabel(S.blob.clock).split(" · ")[1]+" · "+wkTag(viewWk) : wkTag(viewWk);
+      /* v1.20.4 (Ty: "'the week before' and 'season finale' arent things in the playoffs. Weeks have numbers"):
+         the calendar speaks for itself — Week N, Wild Card, Divisional, Conference, Pro Bowl week, Super Bowl. */
+      const nice = t => t==="SuperBowl"?"Super Bowl" : t==="ConferencePlayoff"?"Conference" : t==="DivisionalPlayoff"?"Divisional" : t==="WildcardPlayoff"?"Wild Card" : "";
+      const secName = (t,w) => isPOType(t)? nice(t) : (t==="PreSeason"?"Preseason week ":"Week ")+(w+1);
+      const headH3 = tp==="ProBowl"? "Pro Bowl week" : seasonOver? (po? nice(viewTp)+" final":"Week "+(viewWk+1)+" final") : secName(viewTp, viewWk);
+      const headTag = tp==="ProBowl"? "the league rests" : seasonOver? "season over" : po? "the postseason" : "this week";
       m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${headH3}</h3><span style="color:#8b939c">${headTag}</span></div>` +
         thisWk.map(x=>card(x, wkTag(viewWk))).join("") +
-        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${(seasonOver||po)? "The round before":"Last week"}</h3><span style="color:#8b939c">${tagOf(lastTp, viewWk-1)}</span></div>` +
+        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${secName(lastTp, viewWk-1)}</h3><span style="color:#8b939c">${tp==="ProBowl"? "the round before the Super Bowl" : (po? "finals" : "last week")}</span></div>` +
         lastWk.filter(x=>x.g.played).map(x=>card(x, tagOf(lastTp, viewWk-1))).join("") : "");
     } else {
       const played = S.blob.schedule.filter(g=>g[7]).slice(-2);
@@ -4709,7 +4721,7 @@ function weekWindows(games, seedKey){
      true window; only legacy blobs without the fields fall through to the seeded filler. */
   out.forEach(x=>{
     const g=x.g; if(!g.dy) return;
-    const sl=slotFor(g.dy, g.tm, g.a, g.t==="PreSeason");
+    const sl=slotFor(g.dy, g.tm, g.a, g.t==="PreSeason"? true : isPOType(g.t)? 2 : false);   /* v1.20.4: playoff rows ride the no-NFLN branch */
     x.net=sl.net; x.day=sl.day; x.ord=sl.ord; x.time=fmClock(g.tm)||"";
   });
   if (out.every(x=>x.net)) return out.sort((a,b)=> d3Idx(a.day)-d3Idx(b.day) || (+a.g.tm||0)-(+b.g.tm||0) || a.ord-b.ord || (a.g.played?0:1)-(b.g.played?0:1));   /* v1.18.8 (Ty: preseason Thu/Fri/Sat shuffled): slot rank ordered the board; the CALENDAR does now — day then kickoff, Thu→Wed */
@@ -4733,7 +4745,7 @@ function weekWindows(games, seedKey){
       const t=+sg[6]||0; const x=out[myI];
       if (sg[5]==="Thursday"){ x.net="TNF"; x.day="THU"; x.ord=0; }
       else if (sg[5]==="Monday"){ x.net="MNF"; x.day="MON"; x.ord=3; }
-      else if (sg[5]==="Saturday"){ x.net="NFLN"; x.day="SAT"; x.ord=1; }
+      else if (sg[5]==="Saturday"){ x.net=isPOType(sg[1])? (t>=1200?"NBC":"CBS") : "NFLN"; x.day="SAT"; x.ord=1; }   /* v1.20.4: no NFLN in the playoffs */
       else if (t>=1200){ x.net="SNF"; x.day="SUN"; x.ord=2; }
       else { x.net=confNetFor(x.g.a); x.day="SUN"; x.ord=1; }
       x.time=fmClock(sg[6])||x.time; myNet=x.net;
@@ -5100,8 +5112,19 @@ function recordAfter(sched, g){
     if (x[0]>g[0]) continue;
     if (x[7][0]>x[7][1]) w++; else if (x[7][0]<x[7][1]) l++; else t++;
   }
+  /* v1.20.4 THE PLAYOFF RECORD (Ty: "press conference called me 1-0 because the playoffs reset
+     the record"): a playoff game is a ROUND, not a new tally. The regular-season record is the
+     record, frozen at Week 18; the postseason is spoken as rounds won or lost. */
+  if (isPOType(g[1])){
+    let rw=0,rl=0,rt=0;
+    for (const x of (sched||[])){ if (x[1]!=="RegularSeason" || x[2]!==g[2] || !x[7]) continue; if (x[7][0]>x[7][1]) rw++; else if (x[7][0]<x[7][1]) rl++; else rt++; }
+    const rounds=(sched||[]).filter(x=>isPOType(x[1]) && x[2]===g[2] && x[7] && (TO_PO[x[1]]||0)<=(TO_PO[g[1]]||0)).sort((a,b)=>(TO_PO[a[1]]||0)-(TO_PO[b[1]]||0))
+      .map(x=>(x[7][0]>x[7][1]?"won":"lost")+" the "+roundName(x[1]).charAt(0)+roundName(x[1]).slice(1).toLowerCase()+" round "+x[7][0]+"-"+x[7][1]+(x[3]?" vs the "+x[3]:""));
+    return rw+"-"+rl+(rt?"-"+rt:"")+" (the FINAL regular-season record, frozen at Week 18 — it never changes in the playoffs; a playoff tally is never spoken or written — the postseason is spoken as rounds: "+(rounds.join("; ")||"no round played yet")+")";
+  }
   return w+"-"+l+(t?"-"+t:"");
 }
+const TO_PO={WildcardPlayoff:1, DivisionalPlayoff:2, ConferencePlayoff:3, SuperBowl:4};
 /* v1.7.5 (Ty): the podium is EARNED. Played + mattered = questions. One tackle is not a
    press conference; an int probably is; QBs who play talk every week. When the save gives us
    no per-game visibility (preseason boxes don't land in the season stat tables, and a season
@@ -5173,7 +5196,7 @@ async function midAvailQuestions(){
   const n=nextGame(); const fb=()=>midTemplates(n);
   if (!aiKey()) return fb();
   try{
-    const out=await callAI("You write 2 midweek locker-room questions for the player described. They are about THIS practice week and the game AHEAD"+(n? " ("+(n[4]?"home vs ":"road at ")+n[3]+")":"")+" — never the last game; the podium owned that. THE COUNT LAW: any stat mentioned must match the facts' counts EXACTLY — never singular for a multiple. He plays "+sideOfBall(S.blob.player.pos)+"; frame his job by his side of the ball."+freshLine()+" No reporter names or personas. Output ONLY a JSON array: [{\"q\":\"...\"}] x2, no fences.",
+    const out=await callAI("You write 2 midweek locker-room questions for the player described. They are about THIS practice week and the game AHEAD"+(n? " ("+(n[4]?"home vs ":"road at ")+n[3]+")":"")+" — never the last game; the podium owned that. THE COUNT LAW: any stat mentioned must match the facts' counts EXACTLY — never singular for a multiple. He plays "+sideOfBall(S.blob.player.pos)+"; frame his job by his side of the ball."+freshLine()+presserAngles("mid", null)+" No reporter names or personas. Output ONLY a JSON array: [{\"q\":\"...\"}] x2, no fences.",
       worldFacts(S.blob, lastPlayed())+String.fromCharCode(10)+"Write the two questions now.", 300);
     const arr=parseModelJSON(out);
     if (Array.isArray(arr)&&arr.length) return arr.slice(0,3).filter(x=>x&&x.q);
@@ -5226,6 +5249,49 @@ function pressTemplates(g, rec){
     "What's the one thing from tonight that has to travel to next week?"];
   const used=new Set(Object.values(S.askedQs||{}).flat());
   return all.filter(q=>!used.has(q.slice(0,40))).slice(0,4).map(q=>({q}));
+}
+/* v1.20.4 THE ANGLES ENGINE (Ty: "postgame questions/practice questions becoming a little
+   redundant... theyre too generic and open and made up about certain things. if youre going
+   to have questions they need to earn their relevance"): every question is ASSIGNED a concrete,
+   fact-backed angle from the save — margin, streak, box-score stars, the opponent's record,
+   the round and its stakes, the injury ledger, the weather, a live story beat, the week ahead
+   — seeded per game so the pool rotates, with generic stems banned. The pen words the question;
+   the angle decides what it is about. */
+function presserAngles(mode, g){
+  try{
+    const A=[]; const p=S.blob.player; const me=p.first+" "+p.last;
+    const sched=S.blob.schedule||[];
+    const recs=(function(){ try{ return pyRecs(); }catch(e){ return {}; } })();
+    const rec=t=>recs[t]? recs[t].w+"-"+recs[t].l+(recs[t].t?"-"+recs[t].t:"") : "";
+    const n=nextGame();
+    if (mode==="post" && g && g[7]){
+      const m=Math.abs(g[7][0]-g[7][1]); const won=g[7][0]>g[7][1];
+      A.push("the "+g[7][0]+"-"+g[7][1]+" final "+(g[4]?"vs the ":"at the ")+g[3]+" was "+(m<=3?"a one-score game decided at the very end — the specific sequence that settled it":m<=8?"a one-possession game — the drive or stop that decided it":"a "+m+"-point "+(won?"blowout — the moment it broke open":"loss that got away early — where it went wrong")));
+      let streak=0, kind=null; const played=sched.filter(x=>x[7]&&x[2]===g[2]&&(x[1]==="RegularSeason"||isPOType(x[1]))).sort((a,b)=>(((TO_PO[a[1]]||0)*100+a[0])-((TO_PO[b[1]]||0)*100+b[0])));
+      for (let i=played.length-1;i>=0;i--){ const w=played[i][7][0]>played[i][7][1]; if(kind===null) kind=w; if(w!==kind) break; streak++; }
+      if (streak>=3) A.push("the team has now "+(kind?"won ":"lost ")+streak+" straight — the specific thing that is "+(kind?"sustaining":"repeating")+" over that run, not 'momentum'");
+      if (isPOType(g[1])) A.push("this was the "+roundName(g[1]).toLowerCase()+" round"+(won? (g[1]==="SuperBowl"?" — a championship":g[1]==="ConferencePlayoff"?" — a Super Bowl berth":" — one more win and the round after")+"; the stakes by name":" — the season is over; what ends and what carries"));
+      if (rec(g[3])) A.push("the "+g[3]+" came in "+rec(g[3])+" — what that specific opponent does that the record shows");
+      if (g[8]&&g[8][0]) A.push("the weather was "+String(g[8][0]).toLowerCase()+", "+g[8][1]+" degrees — how it actually changed the plan");
+      try{ const B=S.blob.league&&S.blob.league.box; const tn=S.blob.league.teams; const myIdx=tn.findIndex(x=>(x.n||x)===p.team);
+        if (B&&B.games){ const bg=B.games.find(x=>x[0]===myIdx||x[1]===myIdx); if(bg) for (const st of (bg[6]||[])) if(st[2]===myIdx && st[0]!==me) A.push("teammate "+st[0]+" ("+st[1]+") had "+st[3]+" — that line, specifically, and what he saw of it"); } }catch(e){}
+    }
+    if (mode==="mid" && n){
+      A.push("the "+n[3]+" are next ("+(n[4]?"home":"on the road")+(rec(n[3])?", "+rec(n[3]):"")+") — one specific thing they do that this week's plan has to answer");
+      if (n[5]==="Thursday") A.push("a short week — Thursday kickoff; what the body and the install actually lose");
+      if (isPOType(n[1])) A.push("the "+roundName(n[1]).toLowerCase()+" round is next — the stakes by name, not 'a big game'");
+      if (n[8]&&n[8][0]&&/snow|rain|storm|wind|fog/i.test(String(n[8][0]))) A.push("the forecast reads "+String(n[8][0]).toLowerCase()+" — what changes in the plan");
+    }
+    try{ const N=S.blob.newsTruth; if(N&&N.injuries) for (const x of N.injuries.slice(0,20)) if(x[1]===p.team && x[0]!==me) A.push(x[0]+" is out with a "+String(x[2]).replace(/([a-z])([A-Z])/g,"$1 $2").toLowerCase()+" ("+x[3]+" wks) — who fills that exact role"); }catch(e){}
+    for (const b of (S.beats||[])) if(b&&b.txt) A.push("the live storyline: "+deDash(b.txt)+" — asked about directly");
+    if ((+p.yearsPro||0)===0 && (S.perception&&S.perception.draft&&/undrafted|UDFA/i.test(String(S.perception.draft)))) A.push("an undrafted rookie in this spot — one pointed question about that, no more");
+    if (!A.length) return "";
+    const want = mode==="post"? 4 : 2;
+    const rng=seedRng(S.careerId+"|ang|"+mode+"|"+(g? g[2]+"|"+g[1]+"|"+g[0] : wkKey(S.blob.clock)));
+    const pool=A.slice(); const pick=[pool.shift()];   /* the first angle (the margin postgame, the opponent midweek) is mandatory; the rest rotate */
+    while (pool.length && pick.length<want){ pick.push(pool.splice(Math.floor(rng()*pool.length),1)[0]); }
+    return "\nASSIGNED ANGLES (THE RELEVANCE LAW — one question per angle, in this order; each question must name the specific detail in its angle; a question that could be asked after ANY game is a failure and gets rewritten): "+pick.map((x,i)=>(i+1)+") "+x).join(" ")+" BANNED as too generic: 'how does it feel', 'what's the mindset', 'take us through', 'what did you see out there', 'how important was', 'what does this say about this team', 'talk about'.";
+  }catch(e){ return ""; }
 }
 function freshLine(){
   const asked=Object.values(S.askedQs||{}).flat();
@@ -5304,7 +5370,7 @@ async function presserQuestions(){
   const fallback=()=>pressTemplates({opp:d.opp, score:d.score}, d.record_after);
   if (!aiKey()) return fallback();
   try{
-    const out=await callAI("You write 4 postgame press-conference questions for the player described. The game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+". HIS TEAM "+(d.score[0]>d.score[1]?"WON":d.score[0]<d.score[1]?"LOST":"TIED")+" this game — questions carry that reality (a win is never framed as something to apologize for). THE COUNT LAW: his real stat line rides the facts — question wording must match those counts EXACTLY (four interceptions is FOUR interceptions, never \"that interception\"; one is one). THE SIDE-OF-BALL LAW: he plays "+sideOfBall(S.blob.player.pos)+". A defender's unit exists to STOP the opposing offense — NEVER measure the defense against the opponent's point total, never treat defensive touchdowns as the defense owing offense-level scoring, and never ask the defense to answer for the offense's job."+(d.pull? " THE ROOM CAME FOR THE NOISE, NOT THE GAME: the player is in the news for his own public words and standing (the facts carry it) — at least two questions press him directly on that noise"+(d.didPlay===false?", and he DID NOT play in this game, so never ask about his in-game performance":"")+"; the rest can touch the team's result." : " Questions address ONLY the game just played.")+freshLine()+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
+    const out=await callAI("You write 4 postgame press-conference questions for the player described. The game just played: "+(d.home?"home vs ":"road at ")+d.opp+", final "+d.score[0]+"-"+d.score[1]+", team record now EXACTLY "+d.record_after+". HIS TEAM "+(d.score[0]>d.score[1]?"WON":d.score[0]<d.score[1]?"LOST":"TIED")+" this game — questions carry that reality (a win is never framed as something to apologize for). THE COUNT LAW: his real stat line rides the facts — question wording must match those counts EXACTLY (four interceptions is FOUR interceptions, never \"that interception\"; one is one). THE SIDE-OF-BALL LAW: he plays "+sideOfBall(S.blob.player.pos)+". A defender's unit exists to STOP the opposing offense — NEVER measure the defense against the opponent's point total, never treat defensive touchdowns as the defense owing offense-level scoring, and never ask the defense to answer for the offense's job."+(d.pull? " THE ROOM CAME FOR THE NOISE, NOT THE GAME: the player is in the news for his own public words and standing (the facts carry it) — at least two questions press him directly on that noise"+(d.didPlay===false?", and he DID NOT play in this game, so never ask about his in-game performance":"")+"; the rest can touch the team's result." : " Questions address ONLY the game just played.")+freshLine()+presserAngles("post", lastPlayed())+" No reporter names or personas — just the questions. Output ONLY a JSON array: [{\"q\":\"...\"}] x4, no fences.",
       worldFacts(S.blob, lastPlayed())+"\n\nWrite the four questions now.", 500);
     const arr=parseModelJSON(out);
     if (Array.isArray(arr)&&arr.length) return arr.slice(0,5).filter(x=>x&&x.q);
@@ -5448,7 +5514,7 @@ function aheadDone(){
    Midweek as a SYNC STEP is dead for keyed phones: media availability is just a card you tap
    during the week, or don't. Lane C survives ONLY as the keyless fallback, untouched.
    THE EXE IS A DUMB RELIABLE PIPE: save read/write + the mailbox ferry, nothing else. */
-let weekRunBusy=false, _wakeLock=null;
+let weekRunBusy=false, _wakeLock=null, _weekRunAt=0;   /* v1.20.4: the runner stamps when it started so a stall can be recognized */
 async function wakeAcquire(){ try{ if(navigator.wakeLock && !_wakeLock){ _wakeLock=await navigator.wakeLock.request("screen"); _wakeLock.addEventListener("release",()=>{_wakeLock=null;}); } }catch(e){ console.log("wake lock unavailable:", String(e.message||e)); } }
 function wakeRelease(){ try{ if(_wakeLock){ _wakeLock.release(); _wakeLock=null; } }catch(e){} }
 function mediaHandled(){ const wk=wkKey(S.blob.clock); return !!((S.midweek&&S.midweek[wk])||(S.midSkip&&S.midSkip[wk])); }
@@ -5512,18 +5578,22 @@ async function runWeek(){
   if (weekRunBusy || !S || !S.weekJobs) return;
   if (!aiKey()) return;                                                    // keyless never runs the phone pen
   if (S.weekJobs.wk!==wkKey(S.blob.clock)){ S.weekJobs=null; persist(); if(curApp==="sync") renderApp("sync"); return; }   // a week the save left dies quietly — and the card dies WITH it (v1.15.0: the stale card used to linger with a dead Resume button)
-  weekRunBusy=true; await wakeAcquire(); if(curApp==="sync") renderApp("sync");
+  weekRunBusy=true; _weekRunAt=Date.now(); await wakeAcquire(); if(curApp==="sync") renderApp("sync");
   const _cid=S.careerId;                                                   /* v1.16.0 career lock */
+  /* v1.20.4 THE STALLED WEEK (Ty: "screen stopped staying awake... seems not to finish"): a
+     fetch the OS killed on lock never rejects — the await hung forever, weekRunBusy stayed true,
+     and every return to the phone bounced off it. Each job now races a 4-minute clock. */
+  const withClock=(pr)=>Promise.race([pr, new Promise((_,rej)=>setTimeout(()=>rej(new Error("timed out — tap Resume")), 240000))]);
   for (const j of S.weekJobs.jobs){
     if (!S || !S.weekJobs || S.careerId!==_cid) break;   /* v1.16.3: a deleted career mid-await can null S — the loop must survive it */
     if (j.st==="done") continue;
     if (j.st==="gated"){ if (weekJobReady(j)) j.st="todo"; else continue; }   /* v1.15.0: world ungates on the practice log; podium on media + practice */
     if (j.st!=="todo" && j.st!=="failed") continue;
     try{
-      if (j.id==="questions"){ const qs=await midAvailQuestions(); S.midAvailQs=S.midAvailQs||{}; S.midAvailQs[S.weekJobs.wk]=qs; }
-      else if (j.id==="article"){ const l=lastPlayed(); if (l && !(S.articleFor||{})[gkey(l)]) await writeGameStory(S.blob, l); }
-      else if (j.id==="world"){ await generateWeek(S.blob, lastPlayed(), {local:true, noArticle:true, fullWeek:true}); }
-      else if (j.id==="podium"){ await podiumJobRun(); }
+      if (j.id==="questions"){ const qs=await withClock(midAvailQuestions()); S.midAvailQs=S.midAvailQs||{}; S.midAvailQs[S.weekJobs.wk]=qs; }
+      else if (j.id==="article"){ const l=lastPlayed(); if (l && !(S.articleFor||{})[gkey(l)]) await withClock(writeGameStory(S.blob, l)); }
+      else if (j.id==="world"){ await withClock(generateWeek(S.blob, lastPlayed(), {local:true, noArticle:true, fullWeek:true})); }
+      else if (j.id==="podium"){ await withClock(podiumJobRun()); }
       if (!S || S.careerId!==_cid) break;                                  /* v1.16.0 career lock; v1.16.3: null-S (deleted career) counts as left */
       j.st="done"; delete j.err; persist(); if(curApp==="sync") renderApp("sync");
     }catch(e){ j.st="failed"; j.err=String(e.message||e).slice(0,90); persist(); if(curApp==="sync") renderApp("sync"); break; }
@@ -5531,7 +5601,12 @@ async function runWeek(){
   if (S && S.weekJobs && S.weekJobs.jobs.every(x=>x.st==="done")){ S.weekJobs=null; S.world.notifs.push({app:"sync", t:"Sync", p:"The week is written \u2014 everything's on the phone"}); persist(); }
   weekRunBusy=false; wakeRelease(); if(curApp==="sync") renderApp("sync");
 }
-document.addEventListener("visibilitychange", ()=>{ try{ if(!document.hidden && S && S.weekJobs) runWeek(); }catch(e){} });   /* v1.13.0: coming back resumes the week */
+document.addEventListener("visibilitychange", ()=>{ try{
+  if (document.hidden) return;
+  if (weekRunBusy && Date.now()-_weekRunAt > 300000){ weekRunBusy=false; }   /* v1.20.4: a runner stuck past five minutes is a corpse — reset it so the week can resume */
+  if (weekRunBusy){ wakeAcquire(); if(curApp==="sync") renderApp("sync"); return; }   /* v1.20.4: the OS drops the wake lock on lock — take it back the moment the phone is looked at */
+  if (S && S.weekJobs) runWeek();
+}catch(e){} });   /* v1.13.0: coming back resumes the week */
 /* v1.16.0 (Ty's field report): the fallback door — when a week hangs or its words look wrong
    (a leak, a bad generation), one tap re-enqueues the WHOLE week and writes it fresh. This
    week's article stamp clears so the paper rewrites too. */
@@ -9460,7 +9535,7 @@ async function aiReply(thread, userMsg){
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.20.3";
+const VER="v1.20.4";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
