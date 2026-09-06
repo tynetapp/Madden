@@ -1,5 +1,5 @@
-/* TyPhone sw.js — v1.22.23 (Sep 6 2026) — THE ROOM CAN BE WAVED OFF (cache-buster) */
-const VER = "typhone-v1.22.23";
+/* TyPhone sw.js — v1.22.24 (Sep 6 2026) — THE COIN ROOM DISSOLVES TOO (cache-buster) */
+const VER = "typhone-v1.22.24";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
 const EXTRAS = []; // scanner retired v1.4 (copy-paste is THE sync path); jsqr.min.js no longer cached
 const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use
