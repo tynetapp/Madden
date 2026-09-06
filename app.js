@@ -1,4 +1,4 @@
-/* TyPhone app.js — v1.22.12 (Sep 5 2026) — THE COMMENTS PAGE + THE SCOUT-TEAM FORM (Ty: "add the realism gaps" — a Huddle thread's comments page like everything else: More comments (N more) asks the Huddle pen for the next six ranked below what is shown, never repeating, until the thread's size (12 / 24 / 40 by upvotes) is reached; and a practice-squad man's practice form is headed scout team, the on-field dial reads Scout-team reps, the copy says the numbers are how hard he made the starters work and how well he knew the looks — nobody outside the building sees it). Prior era: v1.22.11 (Sep 5 2026) — THE PAGES KEEP GOING + THE SCOUT TEAM (Ty: "i want 'more replies' more 'threads' etc to keep going. generate more if i click more. if i dont, it doesnt get generated" — the v1.22.3 weekly feed caps go (a click is a page; pages still fall off when the world turns; storage 240 chirps / 80 threads), and a thread offers Show more replies once its fold has landed: each click asks the thread pen for the NEXT page of the most popular replies below what is shown, never repeating, until the shown count reaches the post's reply count (80 stored per thread). Ty: "my players on the practice squad and they talked about him in practice. seemed a little odd since i wouldnt get reps" — practiceLine carries THE SCOUT-TEAM LAW for a practice-squad man: scout-team work, no first-team or game-week reps unless elevated, practice closed to the public, no first-team-reps chatter, no reporter at practice). Prior era: v1.22.10 (Sep 5 2026) — THE BEAT BUTTON + THE UDFA-ONLY PAPER (Ty: "the button to add a beat doesnt seem to work" — beatAdd() read the Runs-for dropdown through gv(), a helper scoped inside savePerception(); ReferenceError before persist(), no toast, no beat, since v1.20.0 — it reads the select itself now. Ty: "the signed off the street/3 year deal option in settings should only be selectable for a UDFA" — the dropdown was render-time only; a draft-round change now re-renders the sheet (the college-change law) and a drafted man's stored entryPath is dropped. THE MARK THAT STAYED BROKEN: artE's retry re-pointed an img/-first mark at img/ again — same URL, no reload, no second error, the broken box stayed under NFLPA letters; the retry swaps root<->img now and the PA mark starts at the root. THE FEED PAGE CEILING: 1,400 -> 4,000 / 6,000, a ceiling caps, it does not spend. THE FOLD SCALES WITH THE POST: top replies size to the post's reply count, 4/6/8/10, ceiling 3,200). Prior era: v1.22.9 (Sep 4 2026) — THE HEADACHE (Ty: "if you're doing the bare minimum, it means you're doing SOMETHING. enough to not get fined... following the letter but not the spirit of the rules... both options need to be on the table"): filing "Trade me" now asks how he will play it — STRAIGHT (a pro who wants out), THE LETTER OF THE LAW (present, on time, every obligation met, ZERO fines, a liability by design), or UGLY (public comments, a skipped meeting, a suspension, fines and all); headacheTick moves the club's posture week by week off the coach's own machinery (the logged practice dials read at bare minimum, the coach demotes then benches through the staff orders the exe applies, the room cools through the ledger, the agent reports the market, brands go quiet, the paper reports the quiet modes only through sources) until the club is READY TO MOVE HIM — then the phone says so and waits for the save (the trade or release is Madden's), reads the new team or the release when it lands, and writes the cold first week; a season that ends first carries the tender question into March. headacheLine rides every pen as a season-long story developed, never repeated. (prior: v1.22.8 — THE PAPER MATCHES THE PATH (Ty: "i dont get why a dude off the street who makes a roster is tied to a team for 3 years"): Madden writes every created player a one-year row; when the owner picks the post-draft college-free-agent path the phone reads the paper as the standard three-year deal (year = accrued seasons + 1) for every pen and the table, so the contract line and the origin story never contradict; the Settings note now explains both paths in plain words. (prior: v1.22.7 — THE LEAGUE PICKS (Ty: "mvp was picked by madden, the other awards... aren't in game so that stuff is why i wanted you to make it up. payton man of year should be loosely tied to my philanthropy"): the honors desk never computes an award Madden gives — MVP, the Players of the Year, the Rookies of the Year, Super Bowl MVP, Coach of the Year, the Pro Bowl come from the save's award table and honorsFromSave makes each a MOMENT once (league email, family text, the facts line, the ladder rung) the first sync it appears; the desk decides only the awards the game does not have (Deacon Jones off the sack lead, Butkus, the Payton and Rooney nominations, Bart Starr, All-Pro and PFWA All-Rookie) off save truth with a seeded roll so nobody wins everything every year; the Payton nomination is loosely tied to his real giving through the Meridian charity commitment and conduct beats close it. (prior: v1.22.6 — THE ROOM AND THE STRIP (audit A2/B18/C10/D2/D6): the phone reads the playoff box scores exe v1.9.2 now ships (the digest names the round; the ranker reads a playoff box); his own hot post draws the club's communications email once a week (never a fine — fines are a beat's job); HIS STANDING IN THE ROOM rides the facts (rookie / young / vet / elder, the captain's patch, his seat in the position room, and who may say what to whom in public); HIS OWN VOICE rides the world pens from the save's makeup (ego, personality, motivations) so his posts and answers sound like him; Chirper carries a trending strip from the ranked week, the wire, and the injury report, no AI. (prior: v1.22.5 — THE LIFE AROUND HIM (audit B3/B4/B6/B13/B16/B17/B19/C2/C6/C7/D7): the world call is not bigger, it is told more truth — a minor week still brings ONE text from someone about THEIR life (never football); game morning may bring a good-luck text that knows nothing of the result; Thanksgiving, Christmas, New Year's, Mother's Day, and his birthday are real weeks with a family text and a calendar line; a rookie pays the vets' dinner in Week 3 (the money leaves, the vet texts, a milestone is logged); a first career touchdown, pick, sack, or pick-six, a 100-yard or 300-yard game, and the season thresholds are MILESTONES read off the stat delta at the sync (notification, family text, a line the pens see once); his injury reads as the official practice report (DNP/limited/full, questionable/doubtful/out, the IR window); trade-deadline week is the week it is with an honest rumor rule; the agent texts once a week only when there is something to say and the facts carry THE CAP (his club's room, next year's, the dead money, the league's deepest pockets); last season is remembered; endorsements obey the league (no sportsbooks for players) and the law (no alcohol under 21) and a small name gets the LOCAL version of a brand Ty already added. (prior: v1.22.4 — THE OFFSEASON & THE HONORS (audit B2/B11/B12): from the Super Bowl to camp the phone had nothing to say; now the clock knows the league's calendar (the re-sign window and NFL Honors, the combine and the tag, the free-agency frenzy, the second wave, the draft, rookie minicamp, OTAs, minicamp, the dead of summer) and offseasonLine tells every pen what the league is doing, what HE is doing, what is NOT happening, and what his paper means; an honors desk runs off save truth at the sync (honorsTick): Man of the Year and Sportsmanship nominees in early December, Pro Bowl selections in late December (verified: 88 players, NO game from the 2026 season on, honored in person at the Super Bowl site, no alternates), All-Pro and the PFWA All-Rookie team in January, NFL Honors the Thursday before the Super Bowl (MVP, OPOY, DPOY, the Rookies of the Year, Man of the Year), and the awards Madden does not have (Deacon Jones, Butkus, Bart Starr, Art Rooney); every honor lands as a league email, a notification, a family text, a line in his facts for a year, and a trophy-case row; the ladder's Pro Bowl rung reads "no game since 2026". (prior: v1.22.3 — THE FEED ON DEMAND (audit B9, Ty: "generate more and more as needed... like video games only generate visuals for what the player is looking at"): the weekly world call is unchanged; the bottom of Chirper offers "Show more posts" and the bottom of the Huddle offers "More threads", each ONE small call (eight chirps or two threads) written as the league's week under THE FEED LAW (at most two of eight about him, zero unless the verdict makes him a league story; the rest are the ranked games, the wire, the injury report, a broadcaster's window, fantasy football, other teams' fans, a beat note), capped at three Chirper pages and two Huddle pages per week, timestamped older so they sit below the week's feed, and dropped when the world turns so the cap never bloats. Keyless phones see the key prompt like the thread door. (prior: v1.22.2 — THE LEAGUE'S BUSINESS (audit round 3): (B5) THE TRANSACTION WIRE rides every pen — the save's signings, cuts, elevations, and free-agent deals with the money, the last two weeks only, his club's moves first (a move in his position room is HIS news), then his position around the league, then the money; (B10) a road week brings the club's travel itinerary to his inbox at the sync — charter, hotel, meetings, curfew, buses, will-call — deterministic from the schedule; (C3) the Chronicle stays ONE paper and ONE build: the game feature now carries an AROUND THE LEAGUE notebook of three or four short items from the digest and the wire, never about him unless the verdict names him a league story, rendered under the feature. (prior: v1.22.1 — THE RIPPLE (audit round 2, Ty: "what is the ripple effect of a life beat... will that prompt a text from my offensive lineman... will that cause a reaction from the media... will I get a fine"): a beat is read for what it is (beatClassify: a league-rule matter, public or on camera, said inside the building, off-field conduct, money, personal; severity 1-3; the teammates and position groups it names off the depth chart) and the phone DOES what would happen on a schedule of weeks (ripplePlan/rippleRun): the league's fine letter with the real fine schedule and the money gone from checking (doubled on a repeat; a club fine for a missed meeting), the club's one-way email (public comments, a conduct review, a closing statement), the agent texting within the hour, family texting, the named teammates opening threads and answering in their own bordered voices (the inbound plan forces their texts that week), a colder podium follow-up the week after (presserAngles), a fan storm sized to his buzz, and a running log of what already happened so every pen escalates instead of repeating (rippleLine rides worldFacts). Also: the save's confidence number leaves every pen with the rating (found by the v1.22.0 check) — the world pens get a private worded read of his own head instead, the press nothing. Fines never read the save's penalty stats — only beats the owner writes. Beats written before this round get their read at boot but never a retroactive fine. (prior: v1.22.0 — THE PAPER TRUTH (audit round 1 of the realism overhaul, Ty: "want it done right"): (A1) the Madden rating leaves EVERY pen — the world reads his talent only from his body of work (talentRead: unproven until he has production; nobody quotes a rating, grade, or overall, they do not exist in this world), per Ty's v1.16.7 law that buzz already obeyed; (A5, Ty's ruling) both undrafted paths exist and are shown — a college free agent on the standard three-year deal or a STREET free agent on a one-year minimum (Settings picks, the save's contract length is the default), and the pens are told his FREE-AGENCY STATUS from accrued seasons (faStatusLine: under contract / exclusive-rights / restricted / unrestricted) so "contract year" and "could walk" are written only when he can actually leave; (A4) the negotiation table obeys the CBA — a drafted rookie cannot renegotiate until after his third regular season, and an exclusive-rights free agent gets a tender not a market unless the building wants him badly; (B7) his coordinators exist by name (staffNamesLine, from the save's staff table, each speaking on his own day about his own side); (C9) HIS STRUCTURE rides the facts — the men his job depends on read off the depth chart by position, and they are the teammates who would text him about his play. (prior: v1.21.5 — THE BOOK, THE MIRROR, THE LADDER (Ty's three fixes): (1) THE BOOK — moneylines are priced off the spread the way a real board prices them (ML_BOARD: key numbers at the 3 and the 7, juice that grows faster than the points, the dog paying less than the favorite costs, a seeded shade of a few cents), and totals are priced off what the two teams have actually scored and allowed this season (teamForm, blended toward the league average until there are five games of tape) instead of a random 41-51; (2) THE MIRROR — he is not in his own Contacts, the locker-room count excludes him, and any thread with himself is swept at boot ("i texted myself and I responded"); (3) THE LADDER — the postseason rungs do not exist on the team schedule until the regular season is over (in season the ladder ends at Week 18), and when they do exist the wider label column from v1.21.4 keeps DIVISIONAL and CONF. CHAMPIONSHIP from colliding. (prior: v1.21.4 — THE LADDER BEFORE IT EXISTS (Ty's screenshot, Thu Oct 1, Week 4: every playoff rung on the team schedule read "League slate · no Vikings game — TBD — league plays on" in October, as if a 4-1 team had already been eliminated, and DIVISIONAL / CONF. CHAMPIONSHIP overran their label column into the row text): until the regular season is over the postseason does not exist yet, so each rung reads "Postseason · TBD — if they qualify" and the Pro Bowl rung reads "Pro Bowl Games · league off week"; the honest reads (first-round bye, bye, season over, league plays on) begin when the playoffs actually start; the label column is wider and wraps cleanly and the middle text ellipsizes instead of colliding. (prior: v1.21.3 — HIS OWN STANDING (found running v1.21.2 through Ty's three saves: Tyran Saint Jr., an undrafted corner with 8 interceptions and 5 pick-sixes in 5 games, the league's interception leader by five and an NFC Defensive Player of the Week, read as NOBODY to the national desk because the box-score stars are production rows and a corner never appears in them): the ranker now reads HIS OWN STANDING — a Player of the Week award for the week just played, and any league-leading category from the leaders table — as prominence: it lifts his game in the ranking, makes him a league story from anywhere in the top half of the slate, is stated on THE LEAGUE'S WEEK line so the pens know WHY the desk knows his name, and a league leader's pedigree tag is sized bigger. (prior: v1.21.2 — EARNED WITHIN THE LEAGUE (Ty: "if there's a big game in the NFL and my story is not the biggest I shouldn't be seen on a story... whether my character earns front page and his name is mentioned everywhere or he's not mentioned at all should be based on what would realistically happen, regardless of whether me as the user would enjoy it or not"): the national rule was wording; now it is a number. leagueWeekRank ranks the last completed week's games the way a national desk does (the round and its stakes, both records, an upset, an unbeaten or winless team, a division game, a one-score finish or a blowout, his own line among the box-score stars) and his game's rank decides whether he is one of the league's stories at all; THE LEAGUE'S WEEK line rides the facts with the ranked list and a VERDICT, binding on the paper and the podcast (lead with rank 1; below the top four is a scoreboard line or nothing; not a story = his name need not appear). The pedigree budget reads the same verdict: when he is not a league story the Chronicle and the podcast are closed to him that week and only fan chatter and his own people may still bring his background up. The podium stays local (his beat asks their questions whatever happened elsewhere); texts and team threads stay personal. (prior: v1.21.1 — THE PEDIGREE ECONOMY (Ty, verbatim: "I don't mind if a storyline or a tagline exists for an entire season. An undrafted free agent IS a story. A first-round bust is a story. A multiple-time Super Bowl winner is a story, and it can be harped on if it deserves to be harped on — that's OK even if it annoys me, it's realistic. I'm not going for what is fun or what I enjoy. I'm going for what would realistically happen."): NOT a suppression law. The facts hand every pen a loud identity tag (undrafted, rookie, 21) and a model reaches for the loudest fact every time, so the same tag decorated every article, thread, and episode every week whether or not anything made it relevant. Now ONE seeded weekly PEDIGREE BUDGET rides the facts, sized from save truth (draft slot, age, years pro, production, record, stakes, fame — a 15-3 undrafted rookie in a conference title game is huge; a drafted 27-year-old backup in an average season is nothing; a first-round bust, an aging journeyman, and a champion all size themselves), allocated per surface (Chronicle, podium, podcast, Huddle, Chirper, texts; emails always 0), stated as fact and BINDING the way the quote budget and the appositive-once law already are: a surface at 0 says nothing about the tag at all; a surface at 1 raises it once and only to ADVANCE it (a new fact, a new angle, or a different voice, assigned per week), never as decoration; some weeks even a huge story rests because the football is the story. The podium angle spends only its allocation and works for any tag (the unconditional undrafted-rookie question retires). THE PHONE LAW joins the hard rules: this phone is not about him and is not here to be interesting to him — it shows what that player would actually see, and most of a real phone is not about its owner. (prior: v1.21.0 — THE ONE DOOR: (1) CHIRPER REVAMPED to Ty's spec, verbatim: liking does nothing but show the heart (unliking hides it, same switch); replying does nothing; likes and replies together do nothing; the ONLY thing that generates is the Load top replies button, and it works whether he left Chirper, waited, or did anything else in between — one pen (chThreadPen), one door (chLoadTop), one owed-check (chOwed) shared by the button and the runner; the old join/fold/stir machinery is dead-flagged. Every pull is 10 unless he is buzz level 1: 5 top replies as the thread stood before he touched it, plus 5 reactions to what he did (his like is public, his reply is quoted), scaled by buzz level 1-14 — a nobody's like goes unnoticed and the reactions are just more thread; level 10+ cascades (likes and reply counts jump, other accounts post about the moment). (2) HIS WORDS LAW: the only words of his that exist are his podium answers, his midweek answers, and his own posts and replies; a skipped podium means he said NOTHING and no surface may quote, paraphrase, or attribute — a Huddle quote out of a skipped week dies. (3) THE PRESSER SPEAKS THE LIVE RECORD: pressersLine recomputes the record through recordAfter at read time instead of trusting the number stored at podium time, so a divisional presser stored as 1-0 before v1.20.4 reads 14-3 plus the round now. (prior: v1.20.7 — OFF-MARKET IS EARNED: Ty's Colts Neck estate (165 days on Zillow, tour button live) read in as NOT FOR SALE because Zillow blocked the page and the index fallback trusted a 2021 sale record as today's truth. The pen now (a) may call a home off-market ONLY on current, explicit evidence — a years-old sale is never evidence of anything; (b) when the page will not fetch it must search the address for an ACTIVE listing on any brokerage site (list price, days on market) before concluding; (c) never uses a sale older than a year as the estimate; (d) reports readMode, and the card says plainly when a read came from the index because the page blocked, with the paste-the-text door pointed at. (prior: v1.20.6 — THE RUNNER RESTORED: (1) v1.20.4's 4-minute job clock and 5-minute corpse reset are REVERTED — the clock was killing healthy long generations (the world job outruns four minutes on a slow model), releasing the wake lock and leaving the week 'unfinished', and the reset could start a second runner beside a live one; the runner is back to how it worked: take the lock once, hold it to the end. The one keeper from v1.20.4 stays: the lock is re-taken when the phone comes back while a week is writing. (2) THE STATUS SPEAKS (Ty: '1 out of 4 is meaningless'): the sync card names WHAT is happening — each job by name with its state — and says outright that he can use the phone while it writes; the week keeps writing in the background inside TyPhone, and only pauses if he leaves the app entirely. (prior: v1.20.5 — THE STAMPED ROUNDS: Ty's screenshots showed the divisional games tagged WK 20 on NFLN — a blob that crossed the sync door on a pre-v1.20.3 phone was stamped RegularSeason on every row and STORED that way, so the new decoder never saw a type code. A regular-season week 18/19/20/22 is impossible (the season runs 0-17), so healLeagueTypes re-derives the round from the week number — at the apply door, at boot, and on every read — for object rows and compact rows alike. Conference is Conference, Divisional is Divisional, on every phone, without a re-sync. (prior: v1.20.4 — THE PLAYOFF RECORD: (1) recordAfter no longer restarts the tally in January — the regular-season record FREEZES at Week 18 and a playoff game is a ROUND won or lost, stated as such (the 1-0 presser dies); (2) THE ANGLES ENGINE — every postgame and midweek question is assigned a fact-backed angle (margin, streak, the box-score stars, the opponent's record, the round and its stakes, the injury ledger, the weather, a live story beat, the week ahead), seeded per game so the corps never repeats itself, with generic stems banned outright; (3) NFLSN speaks the calendar — Week N, Wild Card, Divisional, Conference, Pro Bowl week, Super Bowl (no 'the week before', no 'season finale'); (4) NFL Network carries NO playoff games — the postseason windows go to CBS/FOX/NBC/ESPN/ABC, and the NFLN chip keeps its mark but drops the white art box; (5) standings and record tags are regular-season-only by construction (pinned); (6) THE STALLED WEEK — a job that hangs past 4 minutes fails instead of jamming the runner forever, the wake lock is re-taken every time the phone comes back while a week is writing, and a runner stuck longer than 5 minutes is reset on return. (prior: v1.20.3 — THE POSTSEASON FEED: (1) the playoffs finally ride the league feed — Ty's CAREER-ZADEY1 probe showed the save holds every playoff game (Wild Card wk18, Divisional 19, Conference 20, Super Bowl 22, continuous numbering) and exe v1.9.1 ships them with type codes 2-5; one decoder (lgType) replaces six copies of the old pre/reg-only guess, so NFLSN shows the round in progress (Wild Card board with the round before beneath it; Pro Bowl week reads as the league at rest), WagerLines opens a playoff board with lines, the pens learn real playoff results, and standings stay regular-season-only. Needs exe v1.9.1 and a fresh sync. (2) OWNED-THING PHOTOS: the picture sits on its own full-width line under the item, with Photo / Re-shoot / Remove buttons (removePhoto). (3) CALL FOR PRICE: a listing that hides its number reads in FOR SALE at the price the call would have returned — the pen prices it from the real market for that exact year/model/hours and flags it as an estimate on the card. (prior: v1.20.2 — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
+/* TyPhone app.js — v1.22.15 (Sep 5 2026) — THE LIFELINE (Ty's six: the NFLSN cut-down week shows the Week 1 slate; every fetch-completion render lands in place, in its own app, scroll kept (the Huddle snap's second root); a practice-squad man draws a written warning, then a final one, never a demotion; a depth-chart change in his room or a new starter anywhere is announced at both sync doors; the agent carries a full brief (his paper, his room, his standing, the table's real numbers, his money, his clauses, the app's own doors, the honest limits) and answers fully, and a number texted to the agent goes to the table for real; incentives at the table priced risk-for-reward, earned clauses paid on the sync that shows the stat). Prior era: v1.22.14 (Sep 5 2026) — LEFT ON READ (Ty: "fill in the realism gap with the lol thing" — a group text can now draw NOBODY: a "k" / "lol" / an emoji is left on read about half the time, a plain line now and then, a question to the room or a plan never; zero is no pen call and no reply). Prior era: v1.22.13 (Sep 5 2026) — THE QUIET REFRESH + THE GROUP ANSWERS (Ty: "if something is refreshing in the background let it go. don't pull me back there out of any apps until i want to go" — a background landing (the week, a same-week refresh, a post's fallout, a photo save) re-renders the sub-view he is on in place, scroll kept, never the app's root; "if i message in a group chat it shouldnt always be one person responding" — one, two or three members answer a group text by a seeded roll sized by the group and the message, each in its own bubble with a human gap; plus stale-sub guards: a thread, mail, or listing the world dropped falls back to its list instead of throwing). Prior era: v1.22.12 (Sep 5 2026) — THE COMMENTS PAGE + THE SCOUT-TEAM FORM (Ty: "add the realism gaps" — a Huddle thread's comments page like everything else: More comments (N more) asks the Huddle pen for the next six ranked below what is shown, never repeating, until the thread's size (12 / 24 / 40 by upvotes) is reached; and a practice-squad man's practice form is headed scout team, the on-field dial reads Scout-team reps, the copy says the numbers are how hard he made the starters work and how well he knew the looks — nobody outside the building sees it). Prior era: v1.22.11 (Sep 5 2026) — THE PAGES KEEP GOING + THE SCOUT TEAM (Ty: "i want 'more replies' more 'threads' etc to keep going. generate more if i click more. if i dont, it doesnt get generated" — the v1.22.3 weekly feed caps go (a click is a page; pages still fall off when the world turns; storage 240 chirps / 80 threads), and a thread offers Show more replies once its fold has landed: each click asks the thread pen for the NEXT page of the most popular replies below what is shown, never repeating, until the shown count reaches the post's reply count (80 stored per thread). Ty: "my players on the practice squad and they talked about him in practice. seemed a little odd since i wouldnt get reps" — practiceLine carries THE SCOUT-TEAM LAW for a practice-squad man: scout-team work, no first-team or game-week reps unless elevated, practice closed to the public, no first-team-reps chatter, no reporter at practice). Prior era: v1.22.10 (Sep 5 2026) — THE BEAT BUTTON + THE UDFA-ONLY PAPER (Ty: "the button to add a beat doesnt seem to work" — beatAdd() read the Runs-for dropdown through gv(), a helper scoped inside savePerception(); ReferenceError before persist(), no toast, no beat, since v1.20.0 — it reads the select itself now. Ty: "the signed off the street/3 year deal option in settings should only be selectable for a UDFA" — the dropdown was render-time only; a draft-round change now re-renders the sheet (the college-change law) and a drafted man's stored entryPath is dropped. THE MARK THAT STAYED BROKEN: artE's retry re-pointed an img/-first mark at img/ again — same URL, no reload, no second error, the broken box stayed under NFLPA letters; the retry swaps root<->img now and the PA mark starts at the root. THE FEED PAGE CEILING: 1,400 -> 4,000 / 6,000, a ceiling caps, it does not spend. THE FOLD SCALES WITH THE POST: top replies size to the post's reply count, 4/6/8/10, ceiling 3,200). Prior era: v1.22.9 (Sep 4 2026) — THE HEADACHE (Ty: "if you're doing the bare minimum, it means you're doing SOMETHING. enough to not get fined... following the letter but not the spirit of the rules... both options need to be on the table"): filing "Trade me" now asks how he will play it — STRAIGHT (a pro who wants out), THE LETTER OF THE LAW (present, on time, every obligation met, ZERO fines, a liability by design), or UGLY (public comments, a skipped meeting, a suspension, fines and all); headacheTick moves the club's posture week by week off the coach's own machinery (the logged practice dials read at bare minimum, the coach demotes then benches through the staff orders the exe applies, the room cools through the ledger, the agent reports the market, brands go quiet, the paper reports the quiet modes only through sources) until the club is READY TO MOVE HIM — then the phone says so and waits for the save (the trade or release is Madden's), reads the new team or the release when it lands, and writes the cold first week; a season that ends first carries the tender question into March. headacheLine rides every pen as a season-long story developed, never repeated. (prior: v1.22.8 — THE PAPER MATCHES THE PATH (Ty: "i dont get why a dude off the street who makes a roster is tied to a team for 3 years"): Madden writes every created player a one-year row; when the owner picks the post-draft college-free-agent path the phone reads the paper as the standard three-year deal (year = accrued seasons + 1) for every pen and the table, so the contract line and the origin story never contradict; the Settings note now explains both paths in plain words. (prior: v1.22.7 — THE LEAGUE PICKS (Ty: "mvp was picked by madden, the other awards... aren't in game so that stuff is why i wanted you to make it up. payton man of year should be loosely tied to my philanthropy"): the honors desk never computes an award Madden gives — MVP, the Players of the Year, the Rookies of the Year, Super Bowl MVP, Coach of the Year, the Pro Bowl come from the save's award table and honorsFromSave makes each a MOMENT once (league email, family text, the facts line, the ladder rung) the first sync it appears; the desk decides only the awards the game does not have (Deacon Jones off the sack lead, Butkus, the Payton and Rooney nominations, Bart Starr, All-Pro and PFWA All-Rookie) off save truth with a seeded roll so nobody wins everything every year; the Payton nomination is loosely tied to his real giving through the Meridian charity commitment and conduct beats close it. (prior: v1.22.6 — THE ROOM AND THE STRIP (audit A2/B18/C10/D2/D6): the phone reads the playoff box scores exe v1.9.2 now ships (the digest names the round; the ranker reads a playoff box); his own hot post draws the club's communications email once a week (never a fine — fines are a beat's job); HIS STANDING IN THE ROOM rides the facts (rookie / young / vet / elder, the captain's patch, his seat in the position room, and who may say what to whom in public); HIS OWN VOICE rides the world pens from the save's makeup (ego, personality, motivations) so his posts and answers sound like him; Chirper carries a trending strip from the ranked week, the wire, and the injury report, no AI. (prior: v1.22.5 — THE LIFE AROUND HIM (audit B3/B4/B6/B13/B16/B17/B19/C2/C6/C7/D7): the world call is not bigger, it is told more truth — a minor week still brings ONE text from someone about THEIR life (never football); game morning may bring a good-luck text that knows nothing of the result; Thanksgiving, Christmas, New Year's, Mother's Day, and his birthday are real weeks with a family text and a calendar line; a rookie pays the vets' dinner in Week 3 (the money leaves, the vet texts, a milestone is logged); a first career touchdown, pick, sack, or pick-six, a 100-yard or 300-yard game, and the season thresholds are MILESTONES read off the stat delta at the sync (notification, family text, a line the pens see once); his injury reads as the official practice report (DNP/limited/full, questionable/doubtful/out, the IR window); trade-deadline week is the week it is with an honest rumor rule; the agent texts once a week only when there is something to say and the facts carry THE CAP (his club's room, next year's, the dead money, the league's deepest pockets); last season is remembered; endorsements obey the league (no sportsbooks for players) and the law (no alcohol under 21) and a small name gets the LOCAL version of a brand Ty already added. (prior: v1.22.4 — THE OFFSEASON & THE HONORS (audit B2/B11/B12): from the Super Bowl to camp the phone had nothing to say; now the clock knows the league's calendar (the re-sign window and NFL Honors, the combine and the tag, the free-agency frenzy, the second wave, the draft, rookie minicamp, OTAs, minicamp, the dead of summer) and offseasonLine tells every pen what the league is doing, what HE is doing, what is NOT happening, and what his paper means; an honors desk runs off save truth at the sync (honorsTick): Man of the Year and Sportsmanship nominees in early December, Pro Bowl selections in late December (verified: 88 players, NO game from the 2026 season on, honored in person at the Super Bowl site, no alternates), All-Pro and the PFWA All-Rookie team in January, NFL Honors the Thursday before the Super Bowl (MVP, OPOY, DPOY, the Rookies of the Year, Man of the Year), and the awards Madden does not have (Deacon Jones, Butkus, Bart Starr, Art Rooney); every honor lands as a league email, a notification, a family text, a line in his facts for a year, and a trophy-case row; the ladder's Pro Bowl rung reads "no game since 2026". (prior: v1.22.3 — THE FEED ON DEMAND (audit B9, Ty: "generate more and more as needed... like video games only generate visuals for what the player is looking at"): the weekly world call is unchanged; the bottom of Chirper offers "Show more posts" and the bottom of the Huddle offers "More threads", each ONE small call (eight chirps or two threads) written as the league's week under THE FEED LAW (at most two of eight about him, zero unless the verdict makes him a league story; the rest are the ranked games, the wire, the injury report, a broadcaster's window, fantasy football, other teams' fans, a beat note), capped at three Chirper pages and two Huddle pages per week, timestamped older so they sit below the week's feed, and dropped when the world turns so the cap never bloats. Keyless phones see the key prompt like the thread door. (prior: v1.22.2 — THE LEAGUE'S BUSINESS (audit round 3): (B5) THE TRANSACTION WIRE rides every pen — the save's signings, cuts, elevations, and free-agent deals with the money, the last two weeks only, his club's moves first (a move in his position room is HIS news), then his position around the league, then the money; (B10) a road week brings the club's travel itinerary to his inbox at the sync — charter, hotel, meetings, curfew, buses, will-call — deterministic from the schedule; (C3) the Chronicle stays ONE paper and ONE build: the game feature now carries an AROUND THE LEAGUE notebook of three or four short items from the digest and the wire, never about him unless the verdict names him a league story, rendered under the feature. (prior: v1.22.1 — THE RIPPLE (audit round 2, Ty: "what is the ripple effect of a life beat... will that prompt a text from my offensive lineman... will that cause a reaction from the media... will I get a fine"): a beat is read for what it is (beatClassify: a league-rule matter, public or on camera, said inside the building, off-field conduct, money, personal; severity 1-3; the teammates and position groups it names off the depth chart) and the phone DOES what would happen on a schedule of weeks (ripplePlan/rippleRun): the league's fine letter with the real fine schedule and the money gone from checking (doubled on a repeat; a club fine for a missed meeting), the club's one-way email (public comments, a conduct review, a closing statement), the agent texting within the hour, family texting, the named teammates opening threads and answering in their own bordered voices (the inbound plan forces their texts that week), a colder podium follow-up the week after (presserAngles), a fan storm sized to his buzz, and a running log of what already happened so every pen escalates instead of repeating (rippleLine rides worldFacts). Also: the save's confidence number leaves every pen with the rating (found by the v1.22.0 check) — the world pens get a private worded read of his own head instead, the press nothing. Fines never read the save's penalty stats — only beats the owner writes. Beats written before this round get their read at boot but never a retroactive fine. (prior: v1.22.0 — THE PAPER TRUTH (audit round 1 of the realism overhaul, Ty: "want it done right"): (A1) the Madden rating leaves EVERY pen — the world reads his talent only from his body of work (talentRead: unproven until he has production; nobody quotes a rating, grade, or overall, they do not exist in this world), per Ty's v1.16.7 law that buzz already obeyed; (A5, Ty's ruling) both undrafted paths exist and are shown — a college free agent on the standard three-year deal or a STREET free agent on a one-year minimum (Settings picks, the save's contract length is the default), and the pens are told his FREE-AGENCY STATUS from accrued seasons (faStatusLine: under contract / exclusive-rights / restricted / unrestricted) so "contract year" and "could walk" are written only when he can actually leave; (A4) the negotiation table obeys the CBA — a drafted rookie cannot renegotiate until after his third regular season, and an exclusive-rights free agent gets a tender not a market unless the building wants him badly; (B7) his coordinators exist by name (staffNamesLine, from the save's staff table, each speaking on his own day about his own side); (C9) HIS STRUCTURE rides the facts — the men his job depends on read off the depth chart by position, and they are the teammates who would text him about his play. (prior: v1.21.5 — THE BOOK, THE MIRROR, THE LADDER (Ty's three fixes): (1) THE BOOK — moneylines are priced off the spread the way a real board prices them (ML_BOARD: key numbers at the 3 and the 7, juice that grows faster than the points, the dog paying less than the favorite costs, a seeded shade of a few cents), and totals are priced off what the two teams have actually scored and allowed this season (teamForm, blended toward the league average until there are five games of tape) instead of a random 41-51; (2) THE MIRROR — he is not in his own Contacts, the locker-room count excludes him, and any thread with himself is swept at boot ("i texted myself and I responded"); (3) THE LADDER — the postseason rungs do not exist on the team schedule until the regular season is over (in season the ladder ends at Week 18), and when they do exist the wider label column from v1.21.4 keeps DIVISIONAL and CONF. CHAMPIONSHIP from colliding. (prior: v1.21.4 — THE LADDER BEFORE IT EXISTS (Ty's screenshot, Thu Oct 1, Week 4: every playoff rung on the team schedule read "League slate · no Vikings game — TBD — league plays on" in October, as if a 4-1 team had already been eliminated, and DIVISIONAL / CONF. CHAMPIONSHIP overran their label column into the row text): until the regular season is over the postseason does not exist yet, so each rung reads "Postseason · TBD — if they qualify" and the Pro Bowl rung reads "Pro Bowl Games · league off week"; the honest reads (first-round bye, bye, season over, league plays on) begin when the playoffs actually start; the label column is wider and wraps cleanly and the middle text ellipsizes instead of colliding. (prior: v1.21.3 — HIS OWN STANDING (found running v1.21.2 through Ty's three saves: Tyran Saint Jr., an undrafted corner with 8 interceptions and 5 pick-sixes in 5 games, the league's interception leader by five and an NFC Defensive Player of the Week, read as NOBODY to the national desk because the box-score stars are production rows and a corner never appears in them): the ranker now reads HIS OWN STANDING — a Player of the Week award for the week just played, and any league-leading category from the leaders table — as prominence: it lifts his game in the ranking, makes him a league story from anywhere in the top half of the slate, is stated on THE LEAGUE'S WEEK line so the pens know WHY the desk knows his name, and a league leader's pedigree tag is sized bigger. (prior: v1.21.2 — EARNED WITHIN THE LEAGUE (Ty: "if there's a big game in the NFL and my story is not the biggest I shouldn't be seen on a story... whether my character earns front page and his name is mentioned everywhere or he's not mentioned at all should be based on what would realistically happen, regardless of whether me as the user would enjoy it or not"): the national rule was wording; now it is a number. leagueWeekRank ranks the last completed week's games the way a national desk does (the round and its stakes, both records, an upset, an unbeaten or winless team, a division game, a one-score finish or a blowout, his own line among the box-score stars) and his game's rank decides whether he is one of the league's stories at all; THE LEAGUE'S WEEK line rides the facts with the ranked list and a VERDICT, binding on the paper and the podcast (lead with rank 1; below the top four is a scoreboard line or nothing; not a story = his name need not appear). The pedigree budget reads the same verdict: when he is not a league story the Chronicle and the podcast are closed to him that week and only fan chatter and his own people may still bring his background up. The podium stays local (his beat asks their questions whatever happened elsewhere); texts and team threads stay personal. (prior: v1.21.1 — THE PEDIGREE ECONOMY (Ty, verbatim: "I don't mind if a storyline or a tagline exists for an entire season. An undrafted free agent IS a story. A first-round bust is a story. A multiple-time Super Bowl winner is a story, and it can be harped on if it deserves to be harped on — that's OK even if it annoys me, it's realistic. I'm not going for what is fun or what I enjoy. I'm going for what would realistically happen."): NOT a suppression law. The facts hand every pen a loud identity tag (undrafted, rookie, 21) and a model reaches for the loudest fact every time, so the same tag decorated every article, thread, and episode every week whether or not anything made it relevant. Now ONE seeded weekly PEDIGREE BUDGET rides the facts, sized from save truth (draft slot, age, years pro, production, record, stakes, fame — a 15-3 undrafted rookie in a conference title game is huge; a drafted 27-year-old backup in an average season is nothing; a first-round bust, an aging journeyman, and a champion all size themselves), allocated per surface (Chronicle, podium, podcast, Huddle, Chirper, texts; emails always 0), stated as fact and BINDING the way the quote budget and the appositive-once law already are: a surface at 0 says nothing about the tag at all; a surface at 1 raises it once and only to ADVANCE it (a new fact, a new angle, or a different voice, assigned per week), never as decoration; some weeks even a huge story rests because the football is the story. The podium angle spends only its allocation and works for any tag (the unconditional undrafted-rookie question retires). THE PHONE LAW joins the hard rules: this phone is not about him and is not here to be interesting to him — it shows what that player would actually see, and most of a real phone is not about its owner. (prior: v1.21.0 — THE ONE DOOR: (1) CHIRPER REVAMPED to Ty's spec, verbatim: liking does nothing but show the heart (unliking hides it, same switch); replying does nothing; likes and replies together do nothing; the ONLY thing that generates is the Load top replies button, and it works whether he left Chirper, waited, or did anything else in between — one pen (chThreadPen), one door (chLoadTop), one owed-check (chOwed) shared by the button and the runner; the old join/fold/stir machinery is dead-flagged. Every pull is 10 unless he is buzz level 1: 5 top replies as the thread stood before he touched it, plus 5 reactions to what he did (his like is public, his reply is quoted), scaled by buzz level 1-14 — a nobody's like goes unnoticed and the reactions are just more thread; level 10+ cascades (likes and reply counts jump, other accounts post about the moment). (2) HIS WORDS LAW: the only words of his that exist are his podium answers, his midweek answers, and his own posts and replies; a skipped podium means he said NOTHING and no surface may quote, paraphrase, or attribute — a Huddle quote out of a skipped week dies. (3) THE PRESSER SPEAKS THE LIVE RECORD: pressersLine recomputes the record through recordAfter at read time instead of trusting the number stored at podium time, so a divisional presser stored as 1-0 before v1.20.4 reads 14-3 plus the round now. (prior: v1.20.7 — OFF-MARKET IS EARNED: Ty's Colts Neck estate (165 days on Zillow, tour button live) read in as NOT FOR SALE because Zillow blocked the page and the index fallback trusted a 2021 sale record as today's truth. The pen now (a) may call a home off-market ONLY on current, explicit evidence — a years-old sale is never evidence of anything; (b) when the page will not fetch it must search the address for an ACTIVE listing on any brokerage site (list price, days on market) before concluding; (c) never uses a sale older than a year as the estimate; (d) reports readMode, and the card says plainly when a read came from the index because the page blocked, with the paste-the-text door pointed at. (prior: v1.20.6 — THE RUNNER RESTORED: (1) v1.20.4's 4-minute job clock and 5-minute corpse reset are REVERTED — the clock was killing healthy long generations (the world job outruns four minutes on a slow model), releasing the wake lock and leaving the week 'unfinished', and the reset could start a second runner beside a live one; the runner is back to how it worked: take the lock once, hold it to the end. The one keeper from v1.20.4 stays: the lock is re-taken when the phone comes back while a week is writing. (2) THE STATUS SPEAKS (Ty: '1 out of 4 is meaningless'): the sync card names WHAT is happening — each job by name with its state — and says outright that he can use the phone while it writes; the week keeps writing in the background inside TyPhone, and only pauses if he leaves the app entirely. (prior: v1.20.5 — THE STAMPED ROUNDS: Ty's screenshots showed the divisional games tagged WK 20 on NFLN — a blob that crossed the sync door on a pre-v1.20.3 phone was stamped RegularSeason on every row and STORED that way, so the new decoder never saw a type code. A regular-season week 18/19/20/22 is impossible (the season runs 0-17), so healLeagueTypes re-derives the round from the week number — at the apply door, at boot, and on every read — for object rows and compact rows alike. Conference is Conference, Divisional is Divisional, on every phone, without a re-sync. (prior: v1.20.4 — THE PLAYOFF RECORD: (1) recordAfter no longer restarts the tally in January — the regular-season record FREEZES at Week 18 and a playoff game is a ROUND won or lost, stated as such (the 1-0 presser dies); (2) THE ANGLES ENGINE — every postgame and midweek question is assigned a fact-backed angle (margin, streak, the box-score stars, the opponent's record, the round and its stakes, the injury ledger, the weather, a live story beat, the week ahead), seeded per game so the corps never repeats itself, with generic stems banned outright; (3) NFLSN speaks the calendar — Week N, Wild Card, Divisional, Conference, Pro Bowl week, Super Bowl (no 'the week before', no 'season finale'); (4) NFL Network carries NO playoff games — the postseason windows go to CBS/FOX/NBC/ESPN/ABC, and the NFLN chip keeps its mark but drops the white art box; (5) standings and record tags are regular-season-only by construction (pinned); (6) THE STALLED WEEK — a job that hangs past 4 minutes fails instead of jamming the runner forever, the wake lock is re-taken every time the phone comes back while a week is writing, and a runner stuck longer than 5 minutes is reset on return. (prior: v1.20.3 — THE POSTSEASON FEED: (1) the playoffs finally ride the league feed — Ty's CAREER-ZADEY1 probe showed the save holds every playoff game (Wild Card wk18, Divisional 19, Conference 20, Super Bowl 22, continuous numbering) and exe v1.9.1 ships them with type codes 2-5; one decoder (lgType) replaces six copies of the old pre/reg-only guess, so NFLSN shows the round in progress (Wild Card board with the round before beneath it; Pro Bowl week reads as the league at rest), WagerLines opens a playoff board with lines, the pens learn real playoff results, and standings stay regular-season-only. Needs exe v1.9.1 and a fresh sync. (2) OWNED-THING PHOTOS: the picture sits on its own full-width line under the item, with Photo / Re-shoot / Remove buttons (removePhoto). (3) CALL FOR PRICE: a listing that hides its number reads in FOR SALE at the price the call would have returned — the pen prices it from the real market for that exact year/model/hours and flags it as an estimate on the card. (prior: v1.20.2 — THE STUCK DOOR AND THE FETCH: (1) the Anthropic web reader gains the web_fetch tool (beta header, search-only retry on a 400) so a pasted Autotrader/Controller/Boat Trader DETAIL page gets OPENED instead of hunted through a search index that never indexed it — the every-link-fails toast dies; the pen now says fetch the exact URL first, search only as the fallback. (2) READ THE LISTING is one-shot: the button disables and reads "Reading\u2026" while the call runs — no more triple-pasting the same car because nothing looked busy. (3) the Octane gap closes: the market block rode an apbody div and apbody GROWS — a plain padded div now, no stretch. (prior: v1.20.1 — THE GEMINI DOOR: link reading joins the Google key. Gemini's API carries its own page-reading tools (url_context + google_search grounding), so a pasted listing URL now reads on an Anthropic key OR a Google key; only OpenAI keys take the paste-the-text fallback (their chat endpoint has no web tool the phone can reach). Same strict-JSON pen, same cards, same buy doors. (prior: v1.20.0 — THE OPEN MARKET: (1) real listings ride in — every asset app (Octane, Keystone, Harborline, Stratos) grows a paste box for a REAL listing URL (Autotrader / Zillow / Boat Trader / Controller) or the listing text itself; an AI web-read turns it into a card with the real price, the real details, and honest for-sale truth; buying uses the same cash/finance/card doors as the house inventory (which stays untouched — the market is ADDITIVE). Off-market homes read in as not-for-sale and take cold offers: moving an owner who isn't selling costs stupid money, at least double the estimate. (2) OWNED THINGS GET PHOTOS — every car, home, boat, and plane can carry an uploaded screenshot (compressed on-device) so what he owns looks like something. (3) THE RESIDENCE CHECK — he picks which owned home he actually lives in; an hour from the stadium is his business. (4) THE AGE TRUTH — a birthday in Settings computes his REAL in-world age every week (the save's age field lags; the phone's number wins; the January-still-20 bug dies). (5) WORLD FACTS & STORY BEATS — a Settings section under family where the owner writes permanent facts and 1-6-week temporary beats (a beat either becomes a fact or fades when it ends). (6) THE FULL POSTSEASON LADDER — the schedule sheet shows every playoff round whether his team plays it or not (bye, eliminated, TBD; the league plays on). (7) chron laws: RECORD RELEVANCE (40 TDs summons no Peyton Manning), the appositive dies after one use, QUOTE ECONOMY (a weekly binding budget, most quotes never print), age exactness. (8) written surfaces use DIGITS (14, never fourteen) and nobody calls the playoffs "the tournament". (9) the lot is invisible — no "rolling out of the lot" content while he's chauffeured. (10) the chirper door heals: a stale fetch flag times out instead of bricking the button, an empty load keeps the button alive, and a thrown like-stir no longer burns the one shot. prior: v1.19.2) */
 /* ============ TyPhone OS — app.js ============ */
 "use strict";
 /* ==================== v1.15.0 THE METROS RULING (Ty) ====================
@@ -996,11 +996,28 @@ $("#lk-unlock").addEventListener("click", unlock);
 function aphead(title, opts={}){
   return `<div class="aphead">${opts.noback?"":`<button class="back" onclick="${opts.back||"closeApp()"}">‹ ${opts.backlabel||"Home"}</button>`}<h1>${title}</h1>${opts.act?`<button class="hact${opts.actCls?" "+opts.actCls:""}" onclick="${opts.actFn}">${opts.act}</button>`:""}</div>`;
 }
+/* v1.22.13 THE QUIET REFRESH (Ty: "if something is refreshing in the background let it go. don't pull me back
+   there out of any apps until i want to go"): every renderApp remembers the sub-view it drew (curSub), and the
+   background doors — the weekly world landing, a same-week truth refresh, a post's fallout, a photo save — re-render
+   THAT sub-view in place through rerenderApp(), scroll kept. Before this, those doors called renderApp(curApp) with
+   no sub, which is the app's ROOT: a Chirper thread, a Huddle post, an old Chronicle article, a listing he was
+   reading all snapped back to the list the moment the week landed. Messages already had its own door (v1.13.3). */
+let curSub=null, _chronCur=null;
 function renderApp(id, sub){
   const b=$("#app-body");
   b.className="";
+  if (id===curApp){ curSub=sub; if (id==="chron"){ try{ _chronCur=(S.world.articles||[])[sub?.a ?? 0]||null; }catch(e){ _chronCur=null; } } }
   const R = RENDER[id]; if(!R){ b.innerHTML=aphead(id)+`<div class="empty">Coming soon.</div>`; return; }
   R(b, sub);
+}
+function rerenderApp(){
+  if (!curApp) return;
+  if (curApp==="messages") return rerenderMessages();
+  let sub=curSub;
+  if (curApp==="chron" && sub && sub.a!==undefined && _chronCur){ const i=(S.world.articles||[]).indexOf(_chronCur); if (i>=0) sub={a:i}; }   /* the article he was reading, wherever the new one pushed it */
+  const b=$("#app-body"); const sc=b&&b.querySelector(".apbody"); const y=sc? sc.scrollTop : 0;
+  try{ renderApp(curApp, sub); }catch(e){ console.log("rerenderApp: sub-view gone, root instead:", String(e&&e.message||e).slice(0,80)); renderApp(curApp); }
+  const sc2=b&&b.querySelector(".apbody"); if (sc2 && y) sc2.scrollTop=y;
 }
 /* ---- app renderers ---- */
 const RENDER = {};
@@ -1108,6 +1125,13 @@ async function sendText(tid){
    — the read stamp clears (badge + notification center) and a notification lands; the screen
    he is actually on is re-rendered in place, never replaced by the conversation. */
 function deliverReply(t, reply){
+  /* v1.22.13 THE GROUP ANSWERS: a group reply may carry several voices, one per line — the first lands now, the rest
+     land one at a time with a human gap (1.2-3.4s), each through this same door. */
+  if (t && t.group && typeof reply==="string" && reply.includes("\n")){
+    const parts=reply.split(/\n+/).map(x=>x.trim()).filter(Boolean); const _cid=S.careerId; const _tid=t.id;
+    parts.slice(1).forEach((p,i)=>{ setTimeout(()=>{ try{ if (!S || S.careerId!==_cid) return; const th=S.world.texts.find(x=>x.id===_tid); if (th) deliverReply(th, p); }catch(e){} }, 1200 + 1100*i + Math.floor(Math.random()*1100)); });
+    reply=parts[0]; if (!reply) return;
+  }
   reply=deDash(reply);   /* v1.18.4: every inbound line rides the no-em-dash door — AI replies AND the deterministic templates */
   t.msgs.push(["them", reply, Date.now()]); t.last=Date.now(); delete t.hidden;
   ledgerTouchIn(t, reply);
@@ -1476,7 +1500,7 @@ async function feedMore(kind){
     if (!aiKey()) return toast("Add an API key in Sync first.");
     if (feedPagesUsed(kind)>=(FEED_PAGE_CAP[kind]||0)) return;
     if (S._feedBusy) return;
-    S._feedBusy=kind; renderApp(kind);
+    S._feedBusy=kind; if (curApp===kind) rerenderApp();   /* v1.22.15 THE SNAP (Ty: "huddle still snapping me back sometimes"): More threads re-drew the ROOT at the top, twice — once on tap, once minutes later when the page landed, wherever he had gone by then */
     const facts=worldFacts(S.blob, lastPlayed());
     const already = kind==="chirper"? (S.world.chirps||[]).slice(0,40).map(c=>normChText(c.t)).join(" | ") : (S.world.huddle||[]).slice(0,20).map(h=>h.h).join(" | ");
     const j=await aiJSON(feedSys(kind), facts+"\nALREADY IN THE FEED (never repeat): "+already.slice(0,3000)+"\nWrite the page now.", kind==="chirper"? 4000 : 6000);   /* v1.22.10: 1,400 hit the ceiling on eight chirps of JSON (reasoning models spend half of it thinking) — a ceiling caps, it does not spend */
@@ -1491,7 +1515,7 @@ async function feedMore(kind){
     } else throw new Error("the feed pen returned nothing");
     feedPageMark(kind); persist();
   }catch(e){ toast("The feed didn\u2019t load: "+String(e&&e.message||e).slice(0,80)); }
-  finally{ S._feedBusy=null; try{ renderApp(kind); }catch(e){} }
+  finally{ S._feedBusy=null; try{ if (curApp===kind) rerenderApp(); }catch(e){} }   /* v1.22.15 */
 }
 function chEnsureCids(){
   /* v1.18.2 (Ty: "chirps are showing me as giving likes that i never made"): world likes were
@@ -1631,7 +1655,7 @@ async function chLoadTop(id){
     c.rc=Math.max(c.rc||0, c.replies.length);
     c._loadDone=1;
   }catch(e){ toast("The thread didn't load \u2014 try again."); }
-  finally { delete c._fetching; persist(); if(chThread!==null) renderApp('chirper',{t:chThread}); }
+  finally { delete c._fetching; persist(); if(curApp==="chirper") rerenderApp(); }
 }
 /* v1.22.11 THE PAGES KEEP GOING: how many replies the post still has below what is shown; the next-page loader */
 function chMoreLeft(c){ const shown=(c&&c.replies||[]).filter(r=>r&&!r.mine&&String(r.x||"").trim()).length; const rc=+(c&&c.rc)||0; if (shown>=80) return 0; return Math.max(0, rc-shown); }
@@ -1640,7 +1664,7 @@ async function chLoadMore(id){
   if (!aiKey()) return toast("Add an API key in Sync first.");
   if (c._fetching && Date.now()-c._fetching < 90000) return;
   if (chMoreLeft(c)<=0) return toast("That\u2019s every reply.");
-  c._fetching=Date.now(); if(chThread!==null) renderApp('chirper',{t:chThread});
+  c._fetching=Date.now(); if(curApp==="chirper") rerenderApp();
   const own=!(String(id).startsWith("c")||String(id).startsWith("w"));
   try{
     const j=await chThreadPen(c, {more:true, own});
@@ -1651,7 +1675,7 @@ async function chLoadMore(id){
     if (myAt>=0) c.replies.splice(myAt, 0, ...page); else c.replies.push(...page);
     c.rc=Math.max(c.rc||0, c.replies.filter(r=>r&&!r.mine).length);
   }catch(e){ toast("The page didn\u2019t load \u2014 try again."); }
-  finally { delete c._fetching; persist(); if(chThread!==null) renderApp('chirper',{t:chThread}); }
+  finally { delete c._fetching; persist(); if(curApp==="chirper") rerenderApp(); }
 }
 async function chLoadTop_v1192(id){   /* v1.21.0: DEAD — the old door, kept whole under the helper law; never called */
   const c=chGet(id); if(!c) return;
@@ -1692,7 +1716,7 @@ async function chLoadTop_v1192(id){   /* v1.21.0: DEAD — the old door, kept wh
       await chLikeStir(c, id);   /* a pending like earns its reactions at the door, once */
     }
     c._loadDone=1;
-  } finally { delete c._fetching; persist(); if(chThread!==null) renderApp('chirper',{t:chThread}); }
+  } finally { delete c._fetching; persist(); if(curApp==="chirper") rerenderApp(); }
 }
 function editHandle(){
   sheet(`<h3>Your handle</h3><p class="sp">This is your @. The world will use it going forward.</p>
@@ -1814,7 +1838,7 @@ async function postWorldReact(post){
         S.world.notifs.push({app:"huddle", t:"The Huddle", p:"A thread went up about your post"}); }
     }
     if (moved){ if((j.texts||[]).some(t=>S.world.texts.find(x=>x.id===t.thread))) S.world.notifs.push({app:"messages", t:"Messages", p:"Your post got someone typing"});
-      persist(); if(curApp==="messages") rerenderMessages(); else if(curApp==="huddle"||curApp==="chirper") renderApp(curApp); }   /* v1.13.3: right app ids (the app is "messages", not "texts"); an open convo survives the knock */
+      persist(); if(curApp==="messages") rerenderMessages(); else if(curApp==="huddle"||curApp==="chirper") rerenderApp(); }   /* v1.22.13: in place */   /* v1.13.3: right app ids (the app is "messages", not "texts"); an open convo survives the knock */
   }catch(e){ console.log("post fallout skipped:", String(e&&e.message||e).slice(0,80)); }
 }
 /* v1.13.5 THE LIFE EVENT FALLOUT (Ty: "injury texts to get well... the possibilities can be
@@ -1925,7 +1949,8 @@ function chPost(){
 RENDER.tmail = (b, sub)=>{
   b.className="tmail lightapp";
   if (sub && sub.mail){
-    const m=S.world.emails.find(x=>x.id===sub.mail); m.unread=false; S.reads["e:"+m.id]=1; persist();
+    const m=S.world.emails.find(x=>x.id===sub.mail); if (!m){ RENDER.tmail(b); return; }   /* v1.22.13 stale-sub guard */
+    m.unread=false; S.reads["e:"+m.id]=1; persist();
     b.innerHTML = aphead("T-Mail", {back:"renderApp('tmail')", backlabel:"Inbox"}) +
       `<div class="apbody flush"><div class="mailread"><h2>${esc(m.subj)}</h2><div class="mfrom">${esc(m.from)} · ${m.ts?agoFull(m.ts):esc(m.time)}</div><div style="white-space:pre-line">${esc(m.body)}</div>${mailCrests(m)}</div></div>`;   /* v1.17.6: bodies keep their line breaks; v1.17.8 (Ty): the marks moved to the FOOT of the letter, homescreen-icon size, centered — mailCrests is the one door */
   } else {
@@ -2127,6 +2152,8 @@ function pyBody(){
          regular-season-or-playoff games). Pro Bowl week shows the conference finals with the league
          at rest; the offseason keeps the old finale view, Super Bowl first if the feed has it. */
       let viewTp=tp, viewWk=wkNow, seasonOver=false, po=isPOType(tp);
+      const cut=isCutWeek(S.blob.clock);   /* v1.22.15 CUT-DOWN SLATE (Ty: "cut down week still showing as preseason week 4... literally no games"): the network shows the Week 1 slate, the third preseason week's finals under it */
+      if (cut){ viewTp="RegularSeason"; viewWk=0; }
       const anyPO=all.some(g=>isPOType(g.t));
       if (tp==="ProBowl" && anyPO){ po=true; viewTp="ConferencePlayoff"; const cw=all.filter(g=>g.t==="ConferencePlayoff").map(g=>g.w); viewWk=cw.length? Math.max(...cw) : wkNow-1; }
       else if (tp==="OffSeason" && anyPO){ po=true; const sb=all.find(g=>g.t==="SuperBowl"&&g.played); if (sb){ viewTp="SuperBowl"; viewWk=sb.w; } else { viewTp="ConferencePlayoff"; const cw=all.filter(g=>g.t==="ConferencePlayoff").map(g=>g.w); viewWk=cw.length? Math.max(...cw) : wkNow; } seasonOver=true; }
@@ -2137,21 +2164,22 @@ function pyBody(){
       }
       const tagOf = (t,w) => isPOType(t)? roundName(t) : (t==="PreSeason"?"PRE ":"")+"WK "+(w+1);
       const wkTag = w => tagOf(viewTp, w);
-      const prevOf = g => g.w===viewWk-1 && (g.t===viewTp || (po && (g.t==="RegularSeason"||isPOType(g.t))));
+      const lastWno = cut? 2 : viewWk-1;   /* v1.22.15 */
+      const prevOf = g => cut? (g.t==="PreSeason" && g.w===2) : (g.w===viewWk-1 && (g.t===viewTp || (po && (g.t==="RegularSeason"||isPOType(g.t)))));
       const thisWk = weekWindows(all.filter(g=>g.t===viewTp && g.w===viewWk), S.careerId+"|"+viewTp+viewWk);
-      const lastArr = viewWk>0? all.filter(g=>prevOf(g) && (g.played||g.hs+g.as>0)) : [];
+      const lastArr = (viewWk>0||cut)? all.filter(g=>prevOf(g) && (g.played||g.hs+g.as>0)) : [];
       const lastTp = lastArr.length? lastArr[0].t : viewTp;
-      const lastWk = lastArr.length? weekWindows(lastArr, S.careerId+"|"+lastTp+(viewWk-1)) : [];
+      const lastWk = lastArr.length? weekWindows(lastArr, S.careerId+"|"+lastTp+lastWno) : [];
       /* v1.20.4 (Ty: "'the week before' and 'season finale' arent things in the playoffs. Weeks have numbers"):
          the calendar speaks for itself — Week N, Wild Card, Divisional, Conference, Pro Bowl week, Super Bowl. */
       const nice = t => t==="SuperBowl"?"Super Bowl" : t==="ConferencePlayoff"?"Conference" : t==="DivisionalPlayoff"?"Divisional" : t==="WildcardPlayoff"?"Wild Card" : "";
       const secName = (t,w) => isPOType(t)? nice(t) : (t==="PreSeason"?"Preseason week ":"Week ")+(w+1);
       const headH3 = tp==="ProBowl"? "Pro Bowl week" : seasonOver? (po? nice(viewTp)+" final":"Week "+(viewWk+1)+" final") : secName(viewTp, viewWk);
-      const headTag = tp==="ProBowl"? "the league rests" : seasonOver? "season over" : po? "the postseason" : "this week";
+      const headTag = tp==="ProBowl"? "the league rests" : seasonOver? "season over" : po? "the postseason" : cut? "cut-down week \u00b7 the opener is next" : "this week";   /* v1.22.15 */
       m.innerHTML = `<div class="hoodhead" style="color:#fff"><h3>${headH3}</h3><span style="color:#8b939c">${headTag}</span></div>` +
         thisWk.map(x=>card(x, wkTag(viewWk))).join("") +
-        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${secName(lastTp, viewWk-1)}</h3><span style="color:#8b939c">${tp==="ProBowl"? "the round before the Super Bowl" : (po? "finals" : "last week")}</span></div>` +
-        lastWk.filter(x=>x.g.played).map(x=>card(x, tagOf(lastTp, viewWk-1))).join("") : "");
+        (lastWk.length? `<div class="hoodhead" style="color:#fff;margin-top:18px"><h3>${secName(lastTp, lastWno)}</h3><span style="color:#8b939c">${tp==="ProBowl"? "the round before the Super Bowl" : (po? "finals" : cut? "the preseason finale" : "last week")}</span></div>` +
+        lastWk.filter(x=>x.g.played).map(x=>card(x, tagOf(lastTp, lastWno))).join("") : "");   /* v1.22.15 */
     } else {
       const played = S.blob.schedule.filter(g=>g[7]).slice(-2);
       const upcoming = S.blob.schedule.filter(g=>!g[7]).slice(0,2);
@@ -2260,6 +2288,7 @@ RENDER.huddle = (b, sub)=>{
   };
   if (sub && sub.post){
     const P=S.world.huddle.find(h=>h.id===sub.post);
+    if (!P){ RENDER.huddle(b); return; }   /* v1.22.13 stale-sub guard: a thread the world dropped falls back to the feed */
     window._hOld = !!(P.ts && Date.now()-P.ts > 7*86400000); // old thread: comment "3h" stamps would lie, hide them
     const psc=score(P.up, P.id);
     b.innerHTML = aphead(esc(hudSub()), {back:"renderApp('huddle')", backlabel:"Feed"}) +
@@ -2295,7 +2324,7 @@ async function hudMore(id){
   if (!aiKey()) return toast("Add an API key in Sync first.");
   if (P._fetching && Date.now()-P._fetching<90000) return;
   const want=Math.min(6, hudMoreLeft(P)); if (want<=0) return toast("That\u2019s the whole thread.");
-  P._fetching=Date.now(); renderApp('huddle',{post:id});
+  P._fetching=Date.now(); if (curApp==="huddle") rerenderApp();   /* v1.22.15 THE SNAP: in place, scroll kept */
   try{
     const facts=worldFacts(S.blob, lastPlayed());
     const shown=[]; const walk=cs=>{ for(const c of (cs||[])){ shown.push(String(c.u||"")+": "+String(c.t||"")); if(c.r) walk(c.r); } }; walk(P.cmts);
@@ -2308,7 +2337,7 @@ async function hudMore(id){
     if (!fresh.length) throw new Error("empty page");
     P.cmts.push(...fresh); P._pages=(P._pages||0)+1;
   }catch(e){ toast("The page didn\u2019t load \u2014 try again."); }
-  finally{ delete P._fetching; persist(); try{ renderApp('huddle',{post:id}); }catch(e){} }
+  finally{ delete P._fetching; persist(); try{ if (curApp==="huddle") rerenderApp(); }catch(e){} }   /* v1.22.15: the page lands under him, never on top of him — and never in another app */
 }
 /* Meridian — real-bank layout */
 let merTab = "accounts";
@@ -3226,11 +3255,11 @@ function attachPhoto(kindKey, idx){
     try{ const url=await shrinkImg(f); const it=(S[kindKey]||[])[idx]; if(it){ it.img=url; persist(); toast("Photo saved \u2014 that's yours now."); } }
     catch(err){ toast("Couldn't read that image."); }
     if (kindKey==="garage" && typeof garSheet==="function" && document.getElementById("sheet") && document.getElementById("sheet").innerHTML.includes("Garage")) garSheet();
-    else if (curApp) renderApp(curApp);
+    else rerenderApp();   /* v1.22.13: the photo lands on the page he is on */
   };
   inp.click();
 }
-function removePhoto(kindKey, idx){ const it=(S[kindKey]||[])[idx]; if(!it) return; it.img=null; persist(); toast("Photo removed."); if (kindKey==="garage" && document.getElementById("sheet") && document.getElementById("sheet").innerHTML.includes("Garage")) garSheet(); else if (curApp) renderApp(curApp); }   /* v1.20.3 (Ty: "need a removal option not just a reshoot") */
+function removePhoto(kindKey, idx){ const it=(S[kindKey]||[])[idx]; if(!it) return; it.img=null; persist(); toast("Photo removed."); if (kindKey==="garage" && document.getElementById("sheet") && document.getElementById("sheet").innerHTML.includes("Garage")) garSheet(); else rerenderApp(); }   /* v1.22.13: in place */   /* v1.20.3 (Ty: "need a removal option not just a reshoot") */
 function photoStrip(it, kindKey, idx){
   /* v1.20.3: the picture rides its own full-width line under the item; the buttons sit beneath it */
   return (it.img? '<img src="'+it.img+'" style="display:block;width:100%;max-height:230px;object-fit:cover;border-radius:10px;margin-top:8px" alt="">' : "")+
@@ -3259,7 +3288,7 @@ RENDER.keystone = (b,sub)=>{
   b.className="keystone lightapp";
   const homes=genHomes(); const T=teamMetro();   /* v1.15.0 */
   if (sub && sub.h){
-    const H=homes.find(x=>x.id===sub.h);
+    const H=homes.find(x=>x.id===sub.h); if (!H){ RENDER.keystone(b); return; }   /* v1.22.13 stale-sub guard */
     b.innerHTML = aphead("Keystone",{back:"renderApp('keystone')",backlabel:"Listings"}) + `<div class="apbody">
     <div class="veh-detail light">
       <div class="vd-title">${esc(H.addr)}</div>
@@ -3390,7 +3419,7 @@ RENDER.octane = (b,sub)=>{
   b.className="octane darkapp";
   const cars=genCars();
   if (sub && sub.c){
-    const C=cars.find(x=>x.id===sub.c);
+    const C=cars.find(x=>x.id===sub.c); if (!C){ RENDER.octane(b); return; }   /* v1.22.13 stale-sub guard */
     b.innerHTML=aphead("Octane",{back:"renderApp('octane')",backlabel:"Inventory"})+`<div class="apbody">
     <div class="veh-detail">
       <div class="vd-title">${C.yr} ${esc(C.make)}<br>${esc(C.model)}</div>
@@ -3565,7 +3594,7 @@ RENDER.yachts = (b,sub)=>{
   b.className="yachts lightapp";
   const boats=genBoats();
   if (sub&&sub.y){
-    const Y=boats.find(x=>x.id===sub.y);
+    const Y=boats.find(x=>x.id===sub.y); if (!Y){ RENDER.yachts(b); return; }   /* v1.22.13 stale-sub guard */
     const dock=Y.len*450, mx=Math.round(Y.price*0.08);
     b.innerHTML=aphead("Harborline",{back:"renderApp('yachts')",backlabel:"Brokerage"})+`<div class="apbody">
     <div class="veh-detail light">
@@ -3607,7 +3636,7 @@ RENDER.planes = (b,sub)=>{
   b.className="planes darkapp";
   const planes=genPlanes();
   if (sub&&sub.p){
-    const P=planes.find(x=>x.id===sub.p);
+    const P=planes.find(x=>x.id===sub.p); if (!P){ RENDER.planes(b); return; }   /* v1.22.13 stale-sub guard */
     const fixed=Math.round(P.price*0.06), hourly=Math.round(1200+P.price/25000);
     b.innerHTML=aphead("Stratos Air",{back:"renderApp('planes')",backlabel:"Hangar"})+`<div class="apbody">
     <div class="veh-detail">
@@ -3655,6 +3684,7 @@ RENDER.apex = (b,sub)=>{
       willing:"You. Always available, never on another client's call.",
       style:"No fee, no filter between you and the building. And no professional weight behind your asks: front offices negotiate hardest against the man alone at the table, and brands like a buffer. Every dollar saved is real. So is everything an agent would have carried for you."})
       : D.AGENTS.find(x=>x.id===sub.a);   /* v1.9.0: self-representation */
+    if (!A){ RENDER.apex(b); return; }   /* v1.22.13 stale-sub guard */
     const mine = S.agent && S.agent.id===A.id;
     const bar = v=>`<span class="agbar"><i style="width:${v*10}%"></i></span>`;
     b.innerHTML = aphead("Apex Sports Group",{back:"renderApp('apex')",backlabel:"Agents"}) + `<div class="apbody">
@@ -4407,6 +4437,29 @@ function negDb(){
   return {w, row};
 }
 function negAgentEdge(){ const ag=S.agent||{neg:1}; return (Number(ag.neg||1)-4)*0.02 - (selfRepped()? 0.06:0); }
+/* v1.22.15 INCENTIVES (Ty: "i should also be able to have incentives in there since the stats are tracked. and if me or the
+   team offers up a wild incentive, the money should correlate. risk reward"): a clause is a tracked season stat, a line, and a
+   payout per season it is hit. The building prices a clause by how likely it is (his seat in the room, the position norm, what
+   he has already produced): a wild line is nearly free to them and a long shot for him; a likely line is real money and costs
+   base. Earned clauses pay on the sync that shows the stat (incentiveTick). The save's paper does not carry the clause — the
+   phone does. */
+const INC_NORM={PASSYARDS:4000, PASSTDS:25, RUSHYARDS:1000, RUSHTDS:8, RECEIVEYARDS:1000, RECEIVETDS:7, DLINESACKS:8, DSECINTS:3, DEFTACKLES:100};
+const INC_WORD={PASSYARDS:"passing yards", PASSTDS:"passing TDs", RUSHYARDS:"rushing yards", RUSHTDS:"rushing TDs", RECEIVEYARDS:"receiving yards", RECEIVETDS:"receiving TDs", DLINESACKS:"sacks", DSECINTS:"interceptions", DEFTACKLES:"tackles"};
+function incStatsFor(pos){
+  return pos==="QB"? ["PASSYARDS","PASSTDS","RUSHYARDS"] : (pos==="HB"||pos==="FB")? ["RUSHYARDS","RUSHTDS","RECEIVEYARDS"] : (pos==="WR"||pos==="TE")? ["RECEIVEYARDS","RECEIVETDS"]
+    : /^(LE|RE|DT|LOLB|ROLB)$/.test(pos)? ["DLINESACKS","DEFTACKLES"] : pos==="MLB"? ["DEFTACKLES","DLINESACKS"] : /^(CB|FS|SS)$/.test(pos)? ["DSECINTS","DEFTACKLES"] : [];
+}
+function incSeat(){
+  try{ const p=S.blob.player; if (p.status==="PracticeSquad") return 0.06; const a=(S.blob.depth||{})[p.pos]||[]; const i=a.indexOf(p.first+" "+p.last); return i===0? 1 : i===1? 0.4 : i===2? 0.15 : 0.08; }catch(e){ return 0.1; }
+}
+function incProb(stat, at){
+  const norm=INC_NORM[stat]||1; const r=at/norm;
+  const have=(mergedSS(S.blob)||{})[stat]||0; if (have>=at) return 1;
+  const band = r<=0.5? 0.9 : r<=1? 0.55 : r<=1.5? 0.2 : r<=2? 0.05 : 0.01;
+  return Math.max(0.005, Math.min(1, band*incSeat()));
+}
+function incWord(inc){ return inc? "$"+inc.payoutM+"M per season for "+inc.at.toLocaleString()+" "+(INC_WORD[inc.stat]||inc.stat) : ""; }
+function incPrice(inc){ if (!inc) return {ev:0, prob:0}; const prob=incProb(inc.stat, inc.at); return {ev:Math.round(inc.payoutM*prob*100)/100, prob}; }
 function negOfferAt(round){
   const rng=seedRng((S.careerId||"c")+"|neg|"+wkKey(S.blob.clock)+"|"+round);
   const fair=negFair(), pull=pullScore();
@@ -4417,7 +4470,13 @@ function negOfferAt(round){
   const aav=Math.round(fair*frac/50000)*50000;
   const bShare= pull>=65? 0.35 : pull>=45? 0.22 : pull>=25? 0.1 : 0;
   const round2=x=>Math.round(x*100)/100;
-  return { years:yrs, totalM:round2(aav*yrs/1e6), bonusM:round2(aav*yrs*bShare/1e6), fair, ceil };
+  /* v1.22.15: below starter standing the building's own offer carries a bet-on-yourself clause — a line above the position
+     norm, a payout worth about half a season's fair money. Long odds from where he sits; real money if he gets there. */
+  let inc=null;
+  const stats=incStatsFor(S.blob.player.pos);
+  if (pull<45 && stats.length){ const stat=stats[0]; const at=Math.round((INC_NORM[stat]||1)*1.2/(stat.endsWith("TDS")||stat==="DSECINTS"? 1 : 50))*(stat.endsWith("TDS")||stat==="DSECINTS"? 1 : 50);
+    inc={stat, at, payoutM: Math.max(0.25, Math.round(fair*0.5/250000)*0.25)}; }
+  return { years:yrs, totalM:round2(aav*yrs/1e6), bonusM:round2(aav*yrs*bShare/1e6), fair, ceil, inc };
 }
 function negCeilFor(years){
   const {w}=negDb();
@@ -4471,9 +4530,12 @@ function negSheet(){
   const st=negState(); const o=negOfferAt(st.round);
   const cap=S.blob.teamCap;
   const agFirst=selfRepped()? null : S.agent.n.split(" ")[0];
+  const stats=incStatsFor(S.blob.player.pos);
+  const curInc=st.inc||null;
   sheet(`<h3>The table</h3>
   <p class="sp">${myContractReal()? "New paper on your real deal \u2014 an agreed number ships as a resign order and the save writes the contract." : "Your first real contract row \u2014 an agreed number ships as a sign order and the save writes the paper."} The building rules the table; the phone never forces a pen.</p>
   <div class="payline"><span style="font-size:12.5px">Their offer on the table</span><span style="font-size:13px;font-weight:700">${o.years}yr \u00b7 $${o.totalM}M${o.bonusM?" \u00b7 $"+o.bonusM+"M to sign":""}</span></div>
+  ${o.inc? `<div class="payline"><span style="font-size:12px;opacity:.7">Their clause</span><span style="font-size:12px">+ ${esc(incWord(o.inc))}</span></div>`:""}
   <div class="payline"><span style="font-size:12px;opacity:.7">The room across the table</span><span style="font-size:12px">${esc(negPatWord(st.patience))}</span></div>
   ${cap&&cap.capRoom>0? `<div class="payline"><span style="font-size:12px;opacity:.7">Cap truth (from the save)</span><span style="font-size:12px">${fm(cap.capRoom)} of room</span></div>`:""}
   <p class="sp" style="font-size:12px;opacity:.75">${esc(agFirst? agFirst+": \""+negFlavor()+"\"" : "Your own read, alone at the table: "+negFlavor())}</p>
@@ -4481,54 +4543,192 @@ function negSheet(){
   <label class="flabel">Counter \u2014 years</label><select class="field" id="negY">${[1,2,3,4,5,6,7].map(x=>`<option ${x===o.years?"selected":""}>${x}</option>`).join("")}</select>
   <label class="flabel">Counter \u2014 total ($M)</label><input class="field" id="negT" type="number" step="0.5" min="0.5" value="${Math.round(o.totalM*1.25*2)/2}">
   <label class="flabel">Counter \u2014 signing bonus ($M)</label><input class="field" id="negB" type="number" step="0.5" min="0" value="${o.bonusM}">
-  <button class="btn" style="background:var(--ok);color:#04170d" onclick="negAccept()">Take their offer \u2014 ${o.years}yr / $${o.totalM}M</button>
+  ${stats.length? `<label class="flabel">Incentive \u2014 a tracked stat, a line, a payout per season it is hit</label>
+  <select class="field" id="negIncStat"><option value="">No clause</option>${stats.map(k=>`<option value="${k}" ${curInc&&curInc.stat===k?"selected":""}>${esc(INC_WORD[k])}</option>`).join("")}</select>
+  <div style="display:flex;gap:8px"><input class="field" id="negIncAt" type="number" min="1" placeholder="the line (e.g. ${INC_NORM[stats[0]]})" value="${curInc? curInc.at : ""}"><input class="field" id="negIncPay" type="number" step="0.25" min="0.25" placeholder="$M per season" value="${curInc? curInc.payoutM : ""}"></div>
+  <p class="sp" style="font-size:11px;opacity:.55;margin:2px 0 8px">They price a clause by how likely it is from your seat: a long shot costs them little and pays you only if you get there; a likely one is real money and comes out of the base.</p>` : ""}
+  <button class="btn" style="background:var(--ok);color:#04170d" onclick="negAccept()">Take their offer \u2014 ${o.years}yr / $${o.totalM}M${o.inc?" + clause":""}</button>
   <button class="btn" style="background:var(--apx-acc);color:#fff" onclick="negCounter()">Send the counter</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="marketSheet()">League market \u203a</button>
   <button class="btn" style="background:rgba(255,255,255,.1)" onclick="negWalk()">Leave the table</button>`);
 }
+function negReadInc(){
+  const k=$("#negIncStat")? $("#negIncStat").value : ""; if (!k) return null;
+  const at=Math.round(+($("#negIncAt")&&$("#negIncAt").value)||0), payoutM=Math.round((+($("#negIncPay")&&$("#negIncPay").value)||0)*4)/4;
+  if (!at || !payoutM) return {bad:"A clause needs a line and a payout."};
+  return {stat:k, at, payoutM};
+}
 function negCounter(){
-  const st=negState();
   const years=+$("#negY").value, totalM=+$("#negT").value, bonusM=+($("#negB").value||0);
-  if (!totalM||totalM<=0) return toast("A number first.");
-  if (bonusM<0||bonusM>=totalM) return toast("Bonus can't beat the total.");
-  const c=negCeilFor(years);
+  const inc=negReadInc(); if (inc && inc.bad) return toast(inc.bad);
+  const r=negCounterWith({years, totalM, bonusM, inc}, "table");
+  if (r && r.toast) toast(r.toast);
+}
+/* v1.22.15: ONE counter door — the sheet and a number texted to the agent both come through here. Returns what happened. */
+function negCounterWith(c, via){
+  const st=negState();
+  const years=+c.years, totalM=+c.totalM, bonusM=+(c.bonusM||0), inc=c.inc||null;
+  if (!totalM||totalM<=0) return {toast:"A number first.", line:"no number"};
+  if (bonusM<0||bonusM>=totalM) return {toast:"Bonus can't beat the total.", line:"the bonus beat the total"};
+  const cl=negCeilFor(years);
   const cap=S.blob.teamCap;
   const yrHit=(totalM+bonusM)/years*1e6;
   const rng=seedRng((S.careerId||"c")+"|negj|"+wkKey(S.blob.clock)+"|"+st.round);
+  const price=incPrice(inc); const effTotal=totalM + price.ev*1.15;   /* the building counts the clause at its expected cost, plus a hair for carrying the risk */
+  let line="", outcome="countered";
   if (cap&&cap.capRoom>0 && yrHit>cap.capRoom){
     st.patience=Math.max(0, st.patience-16);
-    st.log.push("They slid the cap sheet across the table: your year-one hit ("+fm(yrHit)+") is bigger than the room they have ("+fm(cap.capRoom)+"). Nobody signs what the math refuses.");
-  } else if (years>c.maxYears){
+    line="They slid the cap sheet across the table: your year-one hit ("+fm(yrHit)+") is bigger than the room they have ("+fm(cap.capRoom)+"). Nobody signs what the math refuses.";
+  } else if (years>cl.maxYears){
     st.patience=Math.max(0, st.patience-10);
-    st.log.push("Term's the problem \u2014 "+years+" years is past what they'll paper"+(c.maxYears<7?" (they'll go to "+c.maxYears+")":"")+ ". The money conversation never even started.");
-  } else if (totalM<=c.maxTotal && bonusM<=totalM*c.bonusEase && rng()<0.85){
-    return negAgree({years,totalM,bonusM});
+    line="Term's the problem \u2014 "+years+" years is past what they'll paper"+(cl.maxYears<7?" (they'll go to "+cl.maxYears+")":"")+ ". The money conversation never even started.";
+  } else if (inc && price.prob>=0.6 && effTotal>cl.maxTotal){
+    st.patience=Math.max(0, st.patience-6);
+    line="They read your clause ("+incWord(inc)+") as likely money \u2014 about "+Math.round(price.prob*10)+" in 10 from where you sit \u2014 so it counts nearly full against the number. With it, your ask reads like $"+(Math.round(effTotal*100)/100)+"M, and that's past them. Lower the line, lower the payout, or take it off the base.";
+  } else if (effTotal<=cl.maxTotal && bonusM<=totalM*cl.bonusEase && rng()<0.85){
+    st.inc=inc||null;
+    const r=negAgree({years,totalM,bonusM,inc});
+    return {agreed:true, line:"Agreed: "+years+"yr / $"+totalM+"M"+(bonusM?" with $"+bonusM+"M to sign":"")+(inc? " plus "+incWord(inc)+" (they price that at about $"+price.ev+"M of real money; "+Math.round(price.prob*100)+"% from your seat)" : ""), toast:null};
   } else {
-    const over=Math.max(0,(totalM/c.maxTotal-1));
+    const over=Math.max(0,(effTotal/cl.maxTotal-1));
     st.patience=Math.max(0, st.patience-(8+Math.round(Math.min(18, over*40))));
     st.round=(st.round||0)+1;
     const o2=negOfferAt(st.round);
-    st.log.push(bonusM>totalM*c.bonusEase? "The structure spooked them \u2014 that much guaranteed up front isn't how they paper "+(pullTier().word)+". They came back "+o2.years+"yr / $"+o2.totalM+"M."
-      : "They passed the counter around, shook heads, came back: "+o2.years+"yr / $"+o2.totalM+"M"+(o2.bonusM?" with $"+o2.bonusM+"M to sign":"")+".");
+    line=(bonusM>totalM*cl.bonusEase? "The structure spooked them \u2014 that much guaranteed up front isn't how they paper "+(pullTier().word)+". They came back "+o2.years+"yr / $"+o2.totalM+"M."
+      : "They passed the counter around, shook heads, came back: "+o2.years+"yr / $"+o2.totalM+"M"+(o2.bonusM?" with $"+o2.bonusM+"M to sign":"")+".")
+      +(inc? " Your clause ("+incWord(inc)+") they'd carry \u2014 they price it at about $"+price.ev+"M ("+Math.round(price.prob*100)+"% from where you sit); it was the base that lost them." : "")
+      +(o2.inc? " Their clause stays on: "+incWord(o2.inc)+"." : "");
   }
-  if (st.patience<=0) return negWalked();
-  persist(); negSheet();
+  st.log.push(line);
+  if (st.patience<=0){ negWalked(); outcome="walked"; line+=" Then they stood up \u2014 talks are paused until the world moves."; }
+  else { persist(); if (via==="table") negSheet(); }
+  /* the agent hears every round, in his thread, so the table is a conversation he can read back */
+  try{ if (!selfRepped() && via==="table"){ const th=S.world.texts.find(x=>x.id==="agent"); if (th){ th.msgs.push(["them", deDash(line).slice(0,400), Date.now()]); th.last=Date.now(); delete S.reads["t:agent"]; if (curApp==="messages") rerenderMessages(); } } }catch(e){}
+  return {outcome, line, toast:null};
 }
-function negAccept(){ const st=negState(); return negAgree(negOfferAt(st.round)); }
+function negAccept(){ const st=negState(); const o=negOfferAt(st.round); return negAgree({years:o.years,totalM:o.totalM,bonusM:o.bonusM,inc:o.inc||null}); }   /* v1.22.15: their clause rides their offer */
 function negAgree(t){
   if (ordTotal()>=10){ toast("Deal's agreed and the order code is full at ten. Apply or clear it, then take the offer again \u2014 it holds this week."); return; }
   const me=S.blob.player.first+" "+S.blob.player.last;
   const type=myContractReal()? "resign":"sign";
   S.orders=S.orders||[];
-  S.orders.push({type, player:{name:me}, years:t.years, totalM:t.totalM, bonusM:t.bonusM||0});
-  const st=negState(); st.agreedWk=wkKey(S.blob.clock); st.round=0; st.log=[];
+  S.orders.push(Object.assign({type, player:{name:me}, years:t.years, totalM:t.totalM, bonusM:t.bonusM||0}, t.inc? {incentives:[t.inc]} : {}));
+  const st=negState(); st.agreedWk=wkKey(S.blob.clock); st.round=0; st.log=[]; st.inc=null;
+  /* v1.22.15 INCENTIVES: the clause lives on the phone for the life of the deal — paid per season it is hit, on the sync that shows it */
+  if (t.inc){ S.incentives=S.incentives||[]; const y0=+S.blob.clock.seasonYear||0; S.incentives.push({stat:t.inc.stat, at:t.inc.at, payoutM:t.inc.payoutM, from:y0, until:y0+Math.max(1,t.years)-1, team:S.blob.player.team, paid:{}, wk:wkKey(S.blob.clock)}); }
   clubMail("Contract Agreement \u2014 Terms Reached",
-    "This is formal notice from the club. Terms have been agreed"+(selfRepped()?"":" with your representation")+": "+t.years+" year"+(t.years===1?"":"s")+", $"+t.totalM+"M total"+(t.bonusM?" with a $"+t.bonusM+"M signing bonus":"")+". The "+(type==="resign"?"rewritten":"new")+" paper rides the order code on your Sync screen; the contract exists when the franchise file shows it, and your pay schedule updates on that sync. This notice is one-way; direct any response through your representation.");
+    "This is formal notice from the club. Terms have been agreed"+(selfRepped()?"":" with your representation")+": "+t.years+" year"+(t.years===1?"":"s")+", $"+t.totalM+"M total"+(t.bonusM?" with a $"+t.bonusM+"M signing bonus":"")+(t.inc? ", plus a performance clause of "+incWord(t.inc) : "")+". The "+(type==="resign"?"rewritten":"new")+" paper rides the order code on your Sync screen; the contract exists when the franchise file shows it, and your pay schedule updates on that sync. This notice is one-way; direct any response through your representation.");
   S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Terms agreed: "+t.years+"yr / $"+t.totalM+"M \u2014 order waiting in Sync"});
   if (!selfRepped()){ const th=S.world.texts.find(x=>x.id==="agent"); if (th){ th.msgs.push(["them","Shook on it. "+t.years+" years, $"+t.totalM+"M"+(t.bonusM?", $"+t.bonusM+"M of it guaranteed up front":"")+". The paper rides your Sync code \u2014 it's real when the save says it's real, and not a minute before. Don't spend it yet.", Date.now()]); th.last=Date.now(); delete S.reads["t:agent"]; } }
   ledgerRoomEvent("agreed terms with the building on a new deal", 1);
   persist(); closeSheet(); toast("Terms agreed. The paper rides the order code \u2014 the save makes it real.");
   if (curApp==="apex") renderApp("apex");
+}
+function incentiveTick(clock){
+  const list=S.incentives||[]; if (!list.length) return 0;
+  const y=+clock.seasonYear||0; const tp=clock.weekType||clock.stage; if (tp==="PreSeason"||tp==="OffSeason") return 0;
+  const M=mergedSS(S.blob)||{}; let paid=0;
+  for (const inc of list){
+    if (y<inc.from || y>inc.until || inc.paid[y]) continue;
+    if (S.blob.player.team!==inc.team) continue;   /* a clause is with the club that wrote it */
+    if ((M[inc.stat]||0) >= inc.at){
+      inc.paid[y]=wkKey(clock); const amt=Math.round(inc.payoutM*1e6);
+      S.cash.checking+=amt; S.ledger.push({t:"Performance clause earned \u2014 "+inc.at.toLocaleString()+" "+(INC_WORD[inc.stat]||inc.stat)+" ("+inc.team+")", amt, kind:"income"});
+      S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"meridian", t:"Meridian", p:"Clause earned: "+fm(amt)+" \u2014 "+inc.at.toLocaleString()+" "+(INC_WORD[inc.stat]||inc.stat)});
+      (S.saveNotices=S.saveNotices||[]).push("CONTRACT CLAUSE EARNED: he hit "+inc.at.toLocaleString()+" "+(INC_WORD[inc.stat]||inc.stat)+" this season and the "+incWord(inc).replace(/ per season.*$/,"")+" performance clause paid out");
+      try{ if (!selfRepped()){ const th=S.world.texts.find(x=>x.id==="agent"); if (th){ th.msgs.push(["them", deDash("That clause just hit. "+inc.at.toLocaleString()+" "+(INC_WORD[inc.stat]||inc.stat)+" is in the book, so "+fm(amt)+" lands with the next check. Told you the line was worth writing."), Date.now()]); th.last=Date.now(); delete S.reads["t:agent"]; } } }catch(e){}
+      paid++;
+    }
+  }
+  return paid;
+}
+/* ---------------- v1.22.15 THE LIFELINE: the agent's brief + a number texted in goes to the table ---------------- */
+function negParseAsk(msg){
+  const m=String(msg||"").toLowerCase().replace(/,/g,"");
+  const yrs=/(\d)\s*(?:-\s*)?(?:yr|yrs|year|years)\b/.exec(m);
+  const val=(v,u)=> /^(k|thousand)$/.test(u)? Math.round(+v)/1000 : +v;
+  const money=[...m.matchAll(/\$?\s*(\d+(?:\.\d+)?)\s*(m\b|mil\b|million|mm\b|k\b|thousand)/g)].map(x=>({v:val(x[1],x[2]), i:x.index, e:x.index+x[0].length, used:false}));
+  const bm=/(\d+(?:\.\d+)?)\s*(m\b|mil\b|million|mm\b|k\b|thousand)?\s*(?:up front|upfront|guaranteed|bonus|signing|to sign)/.exec(m);
+  const statRe=/(\d{1,5})\s*(?:\+\s*)?(passing yards|rushing yards|receiving yards|yards|yds|passing tds|rushing tds|receiving tds|tds|touchdowns|sacks|ints|interceptions|picks|tackles)/;
+  const sm=statRe.exec(m);
+  const accept=/\b(take|accept|sign)\b[^.]{0,30}\b(offer|deal|it|that)\b/.test(m) && !yrs && !money.length;
+  if (!yrs && !money.length && !sm && !accept) return null;
+  const pos=S.blob.player.pos; const stats=incStatsFor(pos);
+  let bonusM=0;
+  if (bm){ bonusM=val(bm[1], bm[2]||"m"); const hit=money.find(x=>x.i<=bm.index+2 && x.e>=bm.index+bm[1].length); if (hit) hit.used=true; }
+  let inc=null;
+  if (sm){
+    const w=sm[2]; let stat=null;
+    if (/passing yards|yards|yds/.test(w)) stat = pos==="QB"? "PASSYARDS" : (pos==="HB"||pos==="FB")? "RUSHYARDS" : "RECEIVEYARDS";
+    if (/rushing yards/.test(w)) stat="RUSHYARDS"; if (/receiving yards/.test(w)) stat="RECEIVEYARDS";
+    if (/tds|touchdowns/.test(w)) stat = /passing/.test(w)? "PASSTDS" : /rushing/.test(w)? "RUSHTDS" : /receiving/.test(w)? "RECEIVETDS" : pos==="QB"? "PASSTDS" : (pos==="HB"||pos==="FB")? "RUSHTDS" : "RECEIVETDS";
+    if (/sacks/.test(w)) stat="DLINESACKS"; if (/ints|interceptions|picks/.test(w)) stat="DSECINTS"; if (/tackles/.test(w)) stat="DEFTACKLES";
+    if (stat && stats.includes(stat)){
+      const free=money.filter(x=>!x.used); const after=free.filter(x=>x.i>sm.index); const before=free.filter(x=>x.i<sm.index);
+      const pay = after.length? after[0] : (before.length>1? before[before.length-1] : (before.length===1 && !yrs? before[0] : null));
+      if (pay) pay.used=true;
+      inc={stat, at:+sm[1], payoutM: pay? Math.max(0.25, Math.round(pay.v*4)/4) : Math.max(0.25, Math.round(negFair()*0.3/250000)*0.25)};
+    }
+  }
+  const base=money.filter(x=>!x.used);
+  const totalM = base.length? base[0].v : null;
+  return {years: yrs? +yrs[1] : null, totalM, bonusM, inc, accept, said:m.slice(0,140)};
+}
+function negDelegate(userMsg){
+  const ask=negParseAsk(userMsg); if (!ask) return null;
+  if (selfRepped() || !S.agent) return {closed:"He represents himself \u2014 the table is his own, in Apex"};
+  const g=negOpenGate(); if (g.no) return {closed:g.no, ask};
+  const st=negState(); const wk=wkKey(S.blob.clock);
+  if (st.wk!==wk){ st.wk=wk; st.round=0; st.patience=(()=>{ const r=negTruthMine(); const p=r&&r.pat; const base=(typeof p==="number"&&p>0)? Math.min(95,p) : 30+Math.round(pullScore()/2); return Math.max(8, base-negFuture().patDown); })(); st.log=[]; }
+  const o=negOfferAt(st.round);
+  if (ask.accept){ negAgree({years:o.years,totalM:o.totalM,bonusM:o.bonusM,inc:o.inc||null}); return {agreed:true, line:"He told the agent to take their offer: "+o.years+"yr / $"+o.totalM+"M"+(o.bonusM?" with $"+o.bonusM+"M to sign":"")+(o.inc?" plus "+incWord(o.inc):""), ask}; }
+  if (ask.inc && !ask.totalM && !ask.years){
+    /* a clause alone: add it to their offer and take it in */
+    const r=negCounterWith({years:o.years, totalM:o.totalM, bonusM:o.bonusM, inc:ask.inc}, "text");
+    return Object.assign({ask, took:"their offer plus his clause ("+incWord(ask.inc)+")"}, r);
+  }
+  const c={years: ask.years||o.years, totalM: ask.totalM||o.totalM, bonusM: ask.bonusM||0, inc: ask.inc||null};
+  const r=negCounterWith(c, "text");
+  return Object.assign({ask, took: c.years+"yr / $"+c.totalM+"M"+(c.bonusM?" with $"+c.bonusM+"M to sign":"")+(c.inc?" plus "+incWord(c.inc):"")}, r);
+}
+function agentBrief(tbl){
+  try{
+    const p=S.blob.player; const me=p.first+" "+p.last; const c=p.contract||{};
+    const ps=p.status==="PracticeSquad";
+    const yrsLeft=(Array.isArray(c.salary)&&c.salary.length)? Math.max(0, c.salary.length-(+c.currentYear||0)) : null;
+    const salList=(Array.isArray(c.salary)&&c.salary.length)? c.salary.map((x,i)=>"yr"+(i+1)+" "+fm(+x||0)).join(", ") : "";
+    const paper = ps
+      ? "HIS PAPER: practice squad, "+fm(psWeekly())+" a week ("+fm(psWeekly()*18)+" over a season), NOTHING guaranteed; the club can release him any day and can elevate him to the 53 any week; any other club can sign him straight to its active roster at any time (a practice-squad man is free to leave for a 53-man offer, and the club that has him can only match by elevating him)."
+      : "HIS PAPER: active roster, "+(c.length? c.length+"-year deal, year "+((+c.currentYear||0)+1)+", "+(yrsLeft!=null? yrsLeft+" left, " : "")+"schedule "+salList+", cap hit "+fm(c.capSalary||p.capSalary||0) : "cap hit "+fm(p.capSalary||0))+", "+fm(activeWeekly(p))+" a game check (18 checks a season)"+(p.ghostContract? "; NOTE the league office holds no paper on him yet (the Sync screen fixes it)" : "")+".";
+    const F=(function(){ try{ return faStatus(); }catch(e){ return null; } })();
+    const fa = F&&F.kind? " WHEN THIS DEAL ENDS he is "+(F.kind==="ERFA"? "an exclusive-rights free agent (the club tenders him at the minimum; no market)" : F.kind==="RFA"? "a restricted free agent (the club can match any sheet)" : "an unrestricted free agent (open market)")+"." : "";
+    const room=(function(){ try{ const a=(S.blob.depth||{})[p.pos]||[]; const rows=S.blob.roster||[]; const ovr=n=>{ const r=rows.find(x=>(x[0]+" "+x[1])===n); return r? r[3]+" OVR"+(r[5]==="PracticeSquad"?", PS":"") : "?"; };
+      const list=a.slice(0,5).map((n,i)=>p.pos+(i+1)+" "+n+" ("+ovr(n)+")").join(", "); const i=a.indexOf(me);
+      const psMates=rows.filter(r=>r[2]===p.pos && r[5]==="PracticeSquad" && (r[0]+" "+r[1])!==me).map(r=>r[0]+" "+r[1]+" ("+r[3]+")");
+      return " HIS ROOM (this team's depth chart, save truth): "+(list||"no chart")+"; he is "+(i>=0? p.pos+(i+1)+" of "+a.length : "NOT on the "+p.pos+" chart")+" at "+(p.ovr||"?")+" OVR"+(psMates.length? "; other "+p.pos+"s on the practice squad: "+psMates.join(", ") : "")+"."; }catch(e){ return ""; } })();
+    const t=pullTier(); const yp=+p.yearsPro||0; const M=mergedSS(S.blob)||{}; const played=prodOf(M)>0;
+    const standing=" HIS STANDING (what the building owes him): "+t.word+" \u2014 "+(yp===0? "a rookie" : yp+" years in")+", "+(played? "has real snaps this season" : "no real snaps this season")+", "+(ps? "on the practice squad" : "on the 53")+"; asks reach "+t.who+".";
+    const st=negState(); const g=negOpenGate();
+    let table="";
+    if (g.no) table=" THE TABLE: closed this week \u2014 "+g.no;
+    else { const o=negOfferAt(st.round||0); const cl=negCeilFor(o.years); const cl3=negCeilFor(Math.min(3, negAge().maxYears));
+      table=" THE TABLE (real numbers, the phone's own math): their offer right now is "+o.years+"yr / $"+o.totalM+"M"+(o.bonusM?" with $"+o.bonusM+"M to sign":"")+(o.inc? " plus a clause of "+incWord(o.inc)+" (a long shot from his seat, about "+Math.round(incProb(o.inc.stat,o.inc.at)*100)+"%)" : "")+"; fair money for him reads about "+fm(o.fair)+" a year; the realistic ceiling this week is about $"+cl.maxTotal+"M over "+o.years+" ("+(cl3.maxTotal)+"M over "+Math.min(3, negAge().maxYears)+"), guaranteed money up to about "+Math.round(cl.bonusEase*100)+"% of total, term up to "+cl.maxYears+"; the room across the table is "+negPatWord(st.patience||30)+"."
+        +(st.log&&st.log.length? " Rounds so far: "+st.log.slice(-2).join(" / ") : "")
+        +" HOW A CLAUSE PRICES: the building counts an incentive at its likely value from his seat "+(incStatsFor(p.pos).length? "(his tracked stats: "+incStatsFor(p.pos).map(k=>INC_WORD[k]).join(", ")+"; a starter's norm is "+incStatsFor(p.pos).map(k=>INC_NORM[k]+" "+INC_WORD[k]).join(", ")+")" : "")+" \u2014 a wild line costs them nothing and pays him only if he gets there; a likely line is real money and comes out of the base. Risk for reward, and say so plainly."; }
+    const money=(function(){ try{ const bills=(S.bills||[]).reduce((a,b)=>a+(+b.amt||0),0); const deals=(S.deals||[]).filter(d=>d.left>0); const loans=(S.loans||[]).reduce((a,l)=>a+(+l.bal||+l.balance||0),0);
+      return " HIS MONEY: checking "+fm(S.cash.checking||0)+", savings "+fm(S.cash.savings||0)+", monthly bills about "+fm(bills)+(deals.length? ", "+deals.length+" endorsement deal"+(deals.length===1?"":"s")+" worth "+fm(dealAnnual())+" a year" : ", no endorsement money")+(loans? ", debt "+fm(loans) : "")+"."; }catch(e){ return ""; } })();
+    const staff=(function(){ try{ const l=(staffState().log||[]).filter(x=>Date.now()-x.ts<28*24*3600*1000).slice(0,3); return l.length? " STAFF RULINGS ON HIM lately: "+l.map(x=>x.kind+" ("+x.why+")").join("; ")+"." : ""; }catch(e){ return ""; } })();
+    const depth=(S.depthNews&&S.depthNews.wk===wkKey(S.blob.clock)&&S.depthNews.lines.length)? " DEPTH-CHART NEWS THIS WEEK (save truth): "+S.depthNews.lines.join("; ")+"." : "";
+    const incs=(S.incentives||[]).filter(i=>i.team===p.team).map(i=>incWord(i)+(Object.keys(i.paid||{}).length? " (paid "+Object.keys(i.paid).join(", ")+")" : "")+", through "+i.until);
+    const incLine=incs.length? " HIS LIVE CLAUSES: "+incs.join("; ")+"; this season so far he has "+incStatsFor(p.pos).map(k=>(M[k]||0)+" "+INC_WORD[k]).join(", ")+"." : "";
+    const app=" HOW HIS WORLD WORKS (the agent knows the machinery): contract talks live in the Apex app under The table (their offer, a counter of years / total / signing bonus / one performance clause, take it or leave it); he can also TEXT the agent a number and the agent takes it to the table for real (\"3 years 9 million, 2 up front, plus 500k if I hit 800 yards\", or \"take the offer\"); an agreed deal rides the order code on the Sync screen, the desktop exe applies it, and the paper is real only when the save shows it. Formal asks (snaps, position, number, move a teammate, trade, leaving) go through Apex requests and route as far as his standing reaches. Practice effort is logged on the practice sheet each week and the coach rules on it at the sync; elevation from the practice squad is the coach's call, opened by a rival's failure and his readiness. The League market page shows every club's cap room and the free-agent street.";
+    const limit=" WHAT THE PHONE CANNOT SEE: only THIS team's depth chart is on file; other clubs are read from records, league leaders, cap room and the free-agent street (the HONEST INTEREST READ). Asked where he could start elsewhere, name those clubs and the reasoning, say the specific depth charts are a call the agent makes on the road, and never invent a name on another team's chart.";
+    const now = tbl? (tbl.closed? " THE TABLE JUST NOW: he sent a number by text and the table was closed \u2014 "+tbl.closed+". Tell him that, and what opens it."
+      : tbl.agreed? " THE TABLE JUST NOW (it really happened): "+tbl.line+". Terms agreed; the paper rides the Sync order code. Tell him plainly and tell him not to spend it yet."
+      : " THE TABLE JUST NOW (it really happened; report EXACTLY this, nothing more): you took in "+tbl.took+". "+tbl.line+(tbl.outcome==="walked"? " Talks are paused until the next sync." : " He can send another number or take theirs.")) : "";
+    const law=" THE LIFELINE LAW: he can ask the agent anything \u2014 his deal, a term he does not understand, whether to stay or go, where he could actually play, what a number is worth, what to do with money, how any part of this world works \u2014 and gets a full, specific, honest answer with the numbers above and a clear recommendation and the why. Never a deflection, never \"we'll see\", never a question back instead of an answer. Long questions get long answers.";
+    return "\nTHE AGENT'S BRIEF (save truth and the phone's own math):"+paper+fa+room+standing+table+money+incLine+staff+depth+app+limit+now+law;
+  }catch(e){ return ""; }
 }
 function marketSheet(){
   const M=S.blob.market;
@@ -7569,14 +7769,17 @@ function doRefreshTruth(){
   const x=_pending; _pending=null; if(!x) return;
   const blob=x.blob;
   const oldP=Object.assign({}, S.blob.player, {contract:S.blob.player.contract});
+  const oldDepthR=(S.blob&&S.blob.depth)? S.blob.depth : null;   /* v1.22.15 */
   S.blob=blob; recomputeTitles(blob);
   applySaveNotices(oldP, blob.player, blob.clock);
+  try{ depthNewsApply(oldDepthR, blob.depth, blob.clock); }catch(e){}   /* v1.22.15: a same-week refresh catches a manual chart move too */
+  try{ incentiveTick(blob.clock); }catch(e){}
   lifeEventReact();   /* v1.13.5: a same-week refresh can carry an injury too — the people who love him hear it either door */
   homeFillPerception(S.perception, blob.player);                             // v1.12.3: geography backfills on same-week refreshes too (blank-only, typed wins)
   S.lastSyncAt={when:Date.now(), wk:wkLabel(blob.clock), kind:"refresh"};   // v1.7.9: same-week truth refreshes stamp too
   mailMarkSyncApplied();                                                     // v1.8.0: mailbox handshake (no-op unless this code came from the box)
   persist(); closeSheet(); toast("Save truth refreshed for "+wkLabel(blob.clock)+". No time passed.");
-  renderHome(); if(curApp) renderApp(curApp);
+  renderHome(); rerenderApp();   /* v1.22.13 */
 }
 function adoptSheet(blob, oldId){
   _pending={blob, oldId};
@@ -7671,7 +7874,7 @@ async function doRewind(blobOrJson){
   const per=S.perception; const st=newCareerState(blob); st.perception=per;
   S=st; mailSessionReset(); await idb.set("career/"+S.careerId, S);   /* v1.16.3 */
   const c=META.careers.find(x=>x.id===S.careerId); if(c) c.sub=blob.player.pos+" · "+blob.player.team+" · "+wkLabel(blob.clock);
-  persist(); closeSheet(); toast("Rewound to "+wkLabel(blob.clock)); renderHome(); if(curApp) renderApp(curApp);
+  persist(); closeSheet(); toast("Rewound to "+wkLabel(blob.clock)); renderHome(); rerenderApp();   /* v1.22.13 */
 }
 function restoreSheet(data){
   const st = data.__v===2? data.S : data;
@@ -7767,6 +7970,45 @@ function applySaveNotices(oldP, newP, newC){
   }catch(e){}
   S.saveNotices = notices; // this sync's truth only; overwritten every sync
   return notices.length;
+}
+/* v1.22.15 DEPTH-CHART NEWS (Ty: "I made a depth chart switch for my quarterback... the app should still catch the difference"):
+   the chart is compared whole at both sync doors. His own room (top four, other men) and every NEW STARTER on the team are
+   announced as save truth — a QB1 change is a story whether or not he is the QB. His own row keeps the v1.14.0 rise/fall line. */
+const DEPTH_NEWS_POS=["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","LOLB","MLB","ROLB","CB","FS","SS","K","P"];
+function depthChartNews(oldD, newD, pos, me){
+  const out=[]; if (!oldD || !newD || typeof oldD!=="object" || typeof newD!=="object") return out;
+  const nm=x=>String(x||"").trim();
+  for (const key of DEPTH_NEWS_POS){
+    const o=Array.isArray(oldD[key])? oldD[key].map(nm) : null, n=Array.isArray(newD[key])? newD[key].map(nm) : null;
+    if (!o || !n || !o.length || !n.length) continue;
+    if (key===pos){
+      const bits=[];
+      for (let i=0;i<Math.min(4, Math.max(o.length, n.length)); i++){
+        const was=o[i]||"", now=n[i]||"";
+        if (was===now || now===me || was===me) continue;
+        if (now) bits.push(key+(i+1)+" is now "+now+(was? " (was "+was+")" : ""));
+      }
+      if (bits.length) out.push("DEPTH CHART CHANGE IN HIS ROOM ("+key+"): "+bits.join("; ")+(n.includes(me)? "" : " \u2014 he is not on the "+key+" chart (practice squad)"));
+    } else if (o[0]!==n[0] && n[0]){
+      out.push("NEW STARTER at "+key+": "+n[0]+" takes "+key+"1 (was "+(o[0]||"open")+")");
+    }
+  }
+  return out;
+}
+function depthNewsApply(oldD, newD, clock){
+  try{
+    const p=S.blob.player; const me=p.first+" "+p.last;
+    const lines=depthChartNews(oldD, newD, p.pos, me);
+    if (!lines.length) return 0;
+    S.saveNotices=S.saveNotices||[]; for (const l of lines) if (!S.saveNotices.includes(l)) S.saveNotices.push(l);
+    S.depthNews={wk:wkKey(clock), lines};
+    S.world.notifs=S.world.notifs||[];
+    const mine=lines.find(l=>l.startsWith("DEPTH CHART CHANGE IN HIS ROOM"));
+    const stars=lines.filter(l=>l.startsWith("NEW STARTER"));
+    if (mine) S.world.notifs.push({app:"sync", t:"Depth chart", p:mine.replace(/^DEPTH CHART CHANGE IN HIS ROOM \(([A-Z]+)\): /,"$1 room: ").replace(/ \u2014 he is not on the.*$/,"").slice(0,120)});
+    if (stars.length) S.world.notifs.push({app:"sync", t:"Depth chart", p:stars.map(l=>l.replace(/^NEW STARTER at /,"")).join("; ").slice(0,120)});
+    return lines.length;
+  }catch(e){ return 0; }
 }
 function saveNoticesLine(){
   const n=S.saveNotices||[];
@@ -7937,6 +8179,8 @@ async function advanceTo(blob){
   }catch(e){ window.__depthMoveNotice=null; }
   applySaveNotices(oldP, blob.player, newC);                          // v1.7.2: the save's truth gets announced
   if (window.__depthMoveNotice){ (S.saveNotices=S.saveNotices||[]).push(window.__depthMoveNotice); window.__depthMoveNotice=null; }
+  try{ depthNewsApply(oldDepth, blob.depth, newC); }catch(e){}   /* v1.22.15 DEPTH-CHART NEWS */
+  try{ incentiveTick(newC); }catch(e){}   /* v1.22.15 INCENTIVES: an earned clause pays on the sync that shows the stat */
   lifeEventReact();                                                   // v1.13.5: the people who love him react to the sync's truth (injury, awards, moves) — model-scaled, get-well texts and all
   homeFillPerception(S.perception, blob.player);                      // v1.12.2: save geography backfills BLANK perception fields (typed values never touched; no-op once filled)
   resolveRequests();                                                  // v1.7.4: the building answers formal asks
@@ -7954,7 +8198,7 @@ async function advanceTo(blob){
   mailMarkSyncApplied();                                              // v1.8.0: if this code came from the online mailbox, tell the box (fire-and-forget)
   persist();
   toast("Synced to "+wkLabel(newC));
-  closeSheet(); renderHome(); if(curApp) renderApp(curApp);
+  closeSheet(); renderHome(); rerenderApp();   /* v1.22.13 */
   // eager generation
   /* v1.7.8 (Ty's streamline): a failed weekly world used to vanish into a toast — the notification
      and the Sync status line now say it plainly, and Refresh world retries it. */
@@ -8545,11 +8789,19 @@ function coachEvaluate(trigger){
   const key=k=>wk+"|"+k;
   let ruling=null;
   const sev=conductSevere();
+  /* v1.22.15 PRACTICE-SQUAD RULINGS (Ty: "I got a demotion for poor practice, even though I was already on the practice
+     squad"): a practice-squad man is on no depth chart and dresses for nothing — there is nothing to demote him from and no
+     game to bench him for. Bad scout-team effort draws a WRITTEN WARNING; a second one inside three weeks, or a bare-minimum
+     week, is a FINAL warning (the club can release a practice-squad player any day). No depth order is filed. */
+  const onPS = S.blob.player.status==="PracticeSquad";
+  const warnedLately = st.log.some(l=>(l.kind==="warn"||l.kind==="final") && Date.now()-l.ts < 21*24*3600*1000);
   if (sev && !st.ruled[key("conduct")])
     ruling={kind:"conduct", why:"a public refusal to play", post:sev};
-  else if ((b.practice<=1 || (b.practice<=2 && hot)) && !st.ruled[key("bench")])
+  else if (onPS && b.practice<=2 && !st.ruled[key("warn")] && !st.ruled[key("final")])
+    ruling={kind:(b.practice<=1 || warnedLately)? "final" : "warn", why:"scout-team effort was "+effortWord(b.practice)+" all week"+(hot? ", with the public noise on top" : "")};
+  else if (!onPS && (b.practice<=1 || (b.practice<=2 && hot)) && !st.ruled[key("bench")])
     ruling={kind:"bench", why: b.practice<=1? "practice effort was "+effortWord(b.practice) : "practice effort was "+effortWord(b.practice)+", with the public noise on top"};
-  else if (b.practice<=2 && !st.ruled[key("demote")])
+  else if (!onPS && b.practice<=2 && !st.ruled[key("demote")])
     ruling={kind:"demote", why:"practice effort was "+effortWord(b.practice)+" all week"};
   else if (conductBlast() && !st.ruled[key("fine")])
     ruling={kind:"fine", why:"publicly calling out the head coach", post:conductBlast()};
@@ -8574,6 +8826,17 @@ function coachEvaluate(trigger){
       'This is formal notice from the club. Regarding your public post ("'+String(ruling.post).slice(0,120)+'"), '+coachName()+' has ruled it conduct detrimental to the club. A fine of '+fm(amt)+' has been assessed against your account, and you have been removed from this week\'s lineup by staff decision. The fine stands whether or not the post is deleted. This notice is one-way; direct any response through your representation.');
     S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"tmail", t:"Football Operations", p:"Club notice: "+fm(amt)+" fine + benched \u2014 order waiting in Sync"});
     odNotice();
+    persist();
+    return ruling;
+  }
+  if (ruling.kind==="warn" || ruling.kind==="final"){   /* v1.22.15: paper, not a depth order */
+    st.log.unshift({wk, kind:ruling.kind, why:ruling.why, ts:Date.now()});
+    clubMail(ruling.kind==="final"? "Final Notice \u2014 Practice Squad Standard" : "Written Warning \u2014 Practice Squad Standard",
+      (ruling.kind==="final"
+        ? 'This is formal notice from the club. '+coachName()+' has reviewed your week on the scout team ('+ruling.why+'). This is a final warning: the club does not carry a practice-squad player who does not give the starters a real look, and your spot will be re-evaluated week to week from here.'
+        : 'This is formal notice from the club. '+coachName()+' has reviewed your week on the scout team ('+ruling.why+'). A practice-squad spot is earned every week on effort; consider this a written warning.')
+      +' This notice is one-way; direct any response through your representation.');
+    S.world.notifs=S.world.notifs||[]; S.world.notifs.push({app:"tmail", t:"Football Operations", p:(ruling.kind==="final"? "Final notice: practice-squad standard" : "Written warning: practice-squad standard")});
     persist();
     return ruling;
   }
@@ -8616,7 +8879,7 @@ function coachPromotionScan(){
   try{
     if (!staffAutoOn() || !S.blob || !S.blob.depth) return null;
     const st=staffState(); const wk=wkKey(S.blob.clock); const key=k=>wk+"|"+k;
-    if (st.ruled[key("promote")] || st.ruled[key("bench")] || st.ruled[key("demote")] || st.ruled[key("conduct")]) return null;
+    if (st.ruled[key("promote")] || st.ruled[key("bench")] || st.ruled[key("demote")] || st.ruled[key("conduct")] || st.ruled[key("warn")] || st.ruled[key("final")]) return null;   /* v1.22.15: no elevation in a warned week */
     const p=S.blob.player; const me=p.first+" "+p.last;
     const list=(S.blob.depth[p.pos]||[]).slice();
     const myIdx=list.indexOf(me);
@@ -8718,14 +8981,15 @@ function staffLine(){
   const recent=st.log.filter(l=>Date.now()-l.ts < 21*24*3600*1000).slice(0,4);
   if (!recent.length) return "";
   return "\nSTAFF RULINGS (the coach's real decisions, treat as announced fact): "+recent.map(l=>
-    (l.kind==="fine"? "fined "+fm(l.amt) : l.kind==="bench"? "benched" : l.kind==="promote"? "ELEVATED on the depth chart" : "demoted on the depth chart")+" ("+l.wk.split("/").slice(1).join(" wk ")+"; "+l.why+")").join("; ")+
+    (l.kind==="fine"? "fined "+fm(l.amt) : l.kind==="bench"? "benched" : l.kind==="promote"? "ELEVATED on the depth chart" : l.kind==="warn"? "given a WRITTEN WARNING on the practice-squad standard" : l.kind==="final"? "given a FINAL warning on the practice-squad standard (his spot is week to week)" : "demoted on the depth chart")+" ("+l.wk.split("/").slice(1).join(" wk ")+"; "+l.why+")").join("; ")+
     ". These are made and announced; the depth chart itself updates when the week processes. NEVER invent additional moves beyond these.";
 }
 function disciplineLine(){
   const b=betaDials();
   const eff=b.practice!=null? b.practice : 5;
   const heat=[];
-  if (eff<=2) heat.push("his practice effort has been genuinely bad ("+eff+"/10) \u2014 the staff is visibly losing patience; coaches and beat writers may openly float demotion or benching AS TALK");
+  if (eff<=2 && S.blob.player.status==="PracticeSquad") heat.push("his scout-team effort has been genuinely bad ("+eff+"/10) \u2014 on the practice squad there is no depth chart to fall down; the talk is whether the club keeps carrying him at all (a practice-squad release, a workout body brought in) AS TALK");   /* v1.22.15 */
+  else if (eff<=2) heat.push("his practice effort has been genuinely bad ("+eff+"/10) \u2014 the staff is visibly losing patience; coaches and beat writers may openly float demotion or benching AS TALK");
   else if (eff<=4) heat.push("practice effort is below standard ("+eff+"/10) \u2014 pointed comments from the staff are fair game");
   const recent=(S.chirp&&S.chirp.posts||[]).slice(-3).map(p=>p.t||"").join(" ").toLowerCase();
   if (/trash|garbage|clown|terrible|hate|fire (him|the)|refs|cheated/.test(recent)) heat.push("his recent public posts ran hot \u2014 the locker room and front office noticed, and consequences can be THREATENED in texts, pressers, and articles");
@@ -9987,7 +10251,7 @@ function intakeWorld(j, wkLbl, gk, opts){
   S.world.notifs.unshift({app:"huddle", t:hudSub(), p:j.huddle?.[0]?.h||"New threads"});
   S.lastRefresh = { when: Date.now(), wk: wkLbl, ok: true, kind: opts.noArticle? "refresh":"weekly",
     counts: { chirps:(j.chirps||[]).length, threads:(j.huddle||[]).length, texts:(j.texts||[]).reduce((a,t)=>a+t.msgs.length,0), emails:(j.emails||[]).length, article: (j.article&&!opts.noArticle)?1:0 } };
-  persist(); toast("The world caught up."); if(curApp) renderApp(curApp);
+  persist(); toast("The world caught up."); rerenderApp();   /* v1.22.13: the week lands under him, never on top of him */
 }
 /* ==================== v1.9.0 THE CONVERSATION UPDATE — ROUND 1: THE CONTEXT LEDGER ====================
    One shared memory consulted by every conversational surface. Round 1 (Ty's spec): the Ledger
@@ -10652,6 +10916,36 @@ function convoInfo(tid){
 function nameTruthLine(){
   try{ const p=S.blob.player; return " NAME TRUTH: his full legal name is EXACTLY \""+p.first+" "+p.last+"\" — he has NO middle name on record; NEVER invent or use a middle name, middle initial, or any name variant for him or anyone else."; }catch(e){ return ""; }
 }
+/* v1.22.13 THE GROUP ANSWERS (Ty: "if i message in a group chat it shouldnt always be one person responding.
+   maybe sometimes but not always"): how many of the group answer is a seeded roll — sized by the group (a pair is
+   mostly one voice; five teammates pile on more) and by the message (a question to the room, a plan, a name-check
+   or a big one pulls more voices; a "k" / "lol" pulls one). One, two or three; never the same member twice. The pen
+   is told the number and writes each on its own line; deliverReply lands them as separate bubbles with a human
+   gap between them. Silence from a group is still the ledger's call (ledgerSilent). */
+function groupAnswerCount(thread, userMsg, members){
+  /* v1.22.14 LEFT ON READ (Ty: "fill in the realism gap with the lol thing"): the roll now has a ZERO — a tiny message
+     ("k", "lol", an emoji) is left on read about half the time, a plain statement now and then (~15%), a question to the
+     room / a plan / a name-check / a big one never. Zero is no pen call and no reply — the nothing a real group gives a
+     "lol". Weights are [none, one, two, three]. */
+  const n=(members||[]).length; if (n<=1) return 1;
+  const r=seedRng("grp|"+thread.id+"|"+(thread.msgs||[]).length+"|"+String(userMsg||"").length)();
+  const m=String(userMsg||"").trim(); const low=m.toLowerCase();
+  const asks=/\?|\b(who|anyone|everyone|y'?all|yall|all of you|whos|who's|we |lets|let's|tonight|tomorrow|dinner|ride|bet)\b/i.test(m);
+  const big=m.length>90 || /\b(trade|cut|released|fined|suspend|signed|contract|money|\$\d)/i.test(low);
+  const tiny=m.length<=4 || /^(k|ok|okay|lol|lmao|haha|yep|yup|nah|nope|bet|word|👍|🙏|💀|😂)+[.!]*$/i.test(low);
+  let w;
+  if (tiny) w = n===2? [0.5,0.45,0.05,0] : [0.45,0.48,0.07,0];
+  else if (asks || big){
+    w = n===2? [0, 0.8-(asks?0.12:0)-(big?0.06:0), 0, 0] : n<=4? [0,0.52,0.33,0.15] : [0,0.42,0.35,0.23];
+    if (n===2) w[2]=1-w[1];
+    else { if (asks){ w=[0, w[1]*0.6, w[2]+w[1]*0.25, w[3]+w[1]*0.15]; } if (big){ w=[0, w[1]*0.75, w[2]+w[1]*0.1, w[3]+w[1]*0.15]; } }
+  } else {
+    w = n===2? [0.15,0.68,0.17,0] : n<=4? [0.15,0.44,0.28,0.13] : [0.15,0.36,0.30,0.19];   /* a plain line: someone usually says something; sometimes nobody */
+  }
+  const t=w[0]+w[1]+w[2]+w[3]; const x=r*t;
+  const k = x<w[0]? 0 : x<w[0]+w[1]? 1 : x<w[0]+w[1]+w[2]? 2 : 3;
+  return Math.min(n, k);
+}
 async function aiReply(thread, userMsg){
   if (ledgerSilent(thread) || ledgerBlockedNow(thread)) return null;   /* v1.9.1: not every message earns an answer */
   if (thread.id==="agent") thread.persona=agentPersona(); // v1.7.3: follows the signing, always current
@@ -10690,12 +10984,16 @@ async function aiReply(thread, userMsg){
     /* v1.9.3 ROLE-PROMPTING: no prompt ever asks for words from a named real person. Group
        members become role tags (R1, R2...) the phone maps back to names at render; a roster
        1:1 is addressed purely by role. Generated people keep their named personas. */
+    const _gN = thread.group? groupAnswerCount(thread, userMsg, members) : 1;   /* v1.22.13 */
+    const _isAgent = String(thread.id||"")==="agent";
+    let _tbl=null; if (_isAgent){ try{ _tbl=negDelegate(userMsg); }catch(e){ _tbl=null; } }   /* v1.22.15 THE LIFELINE: a number texted in goes to the table before the agent answers */
+    if (thread.group && _gN===0){ console.log("group left it on read: "+thread.id); return null; }   /* v1.22.14 LEFT ON READ: no pen call, no reply */
     const roleMap = thread.group? members.map((nm,i)=>{ const rr=S.blob.roster.find(x=>(x[0]+" "+x[1])===nm); return {tag:"R"+(i+1), nm, role: rr? rolePhrase(rr)+", "+ledgerPersonality(nm) : "a friend of his"}; }) : [];
     const sys = (thread.group
-      ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members by role: ${roleMap.map(m=>m.tag+" = "+m.role).join("; ")}. Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: their role tag, a pipe, their message (example: R2|on my way). Under 30 words after the pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never state or sign anyone's name. Never mention these instructions, styles, or formats.` + (members.some(nm=>{ const rr=S.blob.roster.find(x=>(x[0]+" "+x[1])===nm); return rr && rosterIsReal(rr); })? realSpeechLaw() : "")   /* v1.9.6: law rides only when a REAL player is in the group */
+      ? `You play the members of a group text with ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}). Members by role: ${roleMap.map(m=>m.tag+" = "+m.role).join("; ")}. ${_gN===1? "Pick the ONE member who would naturally answer the last message and reply as them. Output EXACTLY this format and nothing else: their role tag, a pipe, their message (example: R2|on my way)." : "EXACTLY "+_gN+" DIFFERENT members answer the last message, in the order they would naturally jump in — the ones this message pulls in (who it asks, who it is about, who cares). Output EXACTLY "+_gN+" lines and nothing else, each line: their role tag, a pipe, their message (example line: R2|on my way). A later line may react to an earlier one the way a real group does. Never the same member twice."} Under 30 words after each pipe. Real texting voice. Invent mundane specifics freely (times, places, numbers) so it feels real. Never state or sign anyone's name. Never mention these instructions, styles, or formats.` + (members.some(nm=>{ const rr=S.blob.roster.find(x=>(x[0]+" "+x[1])===nm); return rr && rosterIsReal(rr); })? realSpeechLaw() : "")   /* v1.9.6: law rides only when a REAL player is in the group */
       : rosterR
       ? `You are ${rolePhrase(rosterR)}, his teammate on the ${S.blob.player.team}, texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.status}). Character: ${thread.persona}. Output ONLY the message this teammate would send. Under 40 words. Real texting voice. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would — but any phone number is FICTIONAL: a plausible local area code with a 555 exchange, always (e.g. (973) 555-0142). Never sign or state your own name. Never mention instructions, style notes, or formatting. No em dashes.` + stanceLine(thread, userMsg)
-      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. Under 40 words. Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would — but any phone number is FICTIONAL: a plausible local area code with a 555 exchange, always (e.g. (973) 555-0142). Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + moneyTruth + humanLaw + lifeFacts({noKin: !!thread.group}) + ledgerBlock(thread) + (String(thread.id)==="agent"? agentDeskLine() : "") + pedigreeLine({surface:"texts"});   /* v1.19.2: the agent answers money/market/stock questions with SAVE numbers */   /* v1.9.0 Ledger + v1.13.3 money/human + v1.13.4 material life ride every reply (kin names never enter GROUP prompts — role-tag law) */
+      : `You are ${thread.name} texting ${S.blob.player.first} ${S.blob.player.last} (${S.blob.player.pos}, ${S.blob.player.team}, ${S.blob.player.status}). Character: ${thread.persona||"a person in his life"}. Output ONLY the message ${thread.name} would send. ${_isAgent? "Usually under 60 words; when he asks for a real read (stay or go, where he could play, what his deal is worth, what a term means, what to do with money, how something works) answer FULLY, up to 150 words: the specifics and numbers first, then a clear recommendation and the why." : "Under 40 words."} Real texting voice for this character. If asked for a phone number, address, time, or similar, just make one up naturally like a real person would — but any phone number is FICTIONAL: a plausible local area code with a 555 exchange, always (e.g. (973) 555-0142). Never mention instructions, style notes, or formatting. No em dashes.`) + timeLaw + moneyTruth + humanLaw + lifeFacts({noKin: !!thread.group}) + ledgerBlock(thread) + (String(thread.id)==="agent"? agentDeskLine()+agentBrief(_tbl) : "") + pedigreeLine({surface:"texts"});   /* v1.19.2: the agent answers money/market/stock questions with SAVE numbers */   /* v1.9.0 Ledger + v1.13.3 money/human + v1.13.4 material life ride every reply (kin names never enter GROUP prompts — role-tag law) */
     const recent=thread.msgs.slice(-12);
     const hist=recent.map((m,i)=>{
       let gap="";
@@ -10708,18 +11006,26 @@ async function aiReply(thread, userMsg){
        him say it twice. If his message is already in the recent lines, the tail is history-
        only; pendingReplies (his message deep in the thread by flush time) ride the same door. */
     const _said = recent.some((m,i)=> i>=recent.length-4 && m[0]==="me" && String(m[1]).trim()===String(userMsg).trim());
-    let out = await callAI(sys, hist+(_said? "" : "\n"+S.blob.player.first.toUpperCase()+": "+userMsg)+"\nReply now.", 200);
+    let out = await callAI(sys, hist+(_said? "" : "\n"+S.blob.player.first.toUpperCase()+": "+userMsg)+"\nReply now.", (_isAgent? 480 : 200)+90*(_gN-1));   /* v1.22.15: the lifeline gets room */
     out = out.trim().replace(/^["']|["']$/g,"");
     if (thread.group){
-      out = out.replace(/^R(\d+)\s*\|/, (m,i)=> (members[+i-1]||members[0])+"|");   /* v1.9.3: the phone puts the real name back */
-      if (!out.includes("|") && members.length) out = members[0]+"|"+out;
+      /* v1.22.13: one line per voice, the phone puts the real names back, never the same member twice, at most _gN */
+      const seen=new Set(); const lines=[];
+      for (let ln of out.split(/\n+/)){
+        ln=ln.trim().replace(/^["']|["']$/g,""); if (!ln) continue;
+        ln = ln.replace(/^R(\d+)\s*\|/, (m,i)=> (members[+i-1]||members[0])+"|");   /* v1.9.3: the phone puts the real name back */
+        if (!ln.includes("|") && members.length){ if (lines.length) continue; ln = members[0]+"|"+ln; }
+        const who=ln.slice(0, ln.indexOf("|")); if (seen.has(who)) continue; seen.add(who);
+        lines.push(ln); if (lines.length>=_gN) break;
+      }
+      out = lines.join("\n");
     }
     return out;
   }catch(e){ toast("Reply failed: "+e.message); return null; }
 }
 
 /* ---- service worker + boot ---- */
-const VER="v1.22.12";
+const VER="v1.22.15";
 { const lv=$("#lk-ver"); if (lv) lv.textContent="TyPhone "+VER; }
 if ("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").then(reg=>{
