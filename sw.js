@@ -1,5 +1,5 @@
-/* TyPhone sw.js — v1.24.2 (Sep 7 2026) — THE WORLD + THE PRESEASON PLAN + WHO DECIDES (cache-buster) */
-const VER = "typhone-v1.24.2";
+/* TyPhone sw.js — v1.24.3 (Sep 7 2026) — THE WORLD + THE CATCH-UP (cache-buster) */
+const VER = "typhone-v1.24.3";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./data.js","./manifest.webmanifest","./icon-180.png","./icon-512.png"];
 const EXTRAS = []; // scanner retired v1.4 (copy-paste is THE sync path); jsqr.min.js no longer cached
 const RUNTIME_OK = u => u.includes("cdnjs.cloudflare.com/ajax/libs/jsQR"); // legacy fallback: cached on first use
